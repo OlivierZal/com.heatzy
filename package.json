@@ -1,0 +1,14 @@
+{
+  "name": "com.heatzy",
+  "version": "1.0.0",
+  "main": "app.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@tsconfig/node12": "^1.0.11",
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.3",
+    "@types/node": "^18.13.0",
+    "typescript": "^4.9.5"
+  }
+}

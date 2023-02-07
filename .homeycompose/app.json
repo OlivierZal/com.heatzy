@@ -1,0 +1,28 @@
+{
+  "id": "com.heatzy",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Heatzy"
+  },
+  "description": {
+    "en": "Take control of Heatzy devices"
+  },
+  "category": [
+    "climate"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Olivier Zalmanski",
+    "email": "olivier.zalmanski@me.com"
+  }
+}
