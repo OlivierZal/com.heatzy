@@ -1,28 +1,40 @@
 {
   "id": "com.heatzy",
-  "version": "1.0.0",
-  "compatibility": ">=5.0.0",
   "sdk": 3,
-  "platforms": [
-    "local"
-  ],
+  "brandColor": "#ed0c13",
   "name": {
     "en": "Heatzy"
   },
   "description": {
     "en": "Take control of Heatzy devices"
   },
-  "category": [
-    "climate"
-  ],
-  "permissions": [],
+  "category": ["climate"],
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "tags": {
+    "en": ["acova", "heater", "heatzy"]
+  },
   "images": {
-    "small": "/assets/images/small.png",
-    "large": "/assets/images/large.png",
-    "xlarge": "/assets/images/xlarge.png"
+    "small": "/assets/images/small.jpg",
+    "large": "/assets/images/large.jpg",
+    "xlarge": "/assets/images/xlarge.jpg"
   },
   "author": {
     "name": "Olivier Zalmanski",
     "email": "olivier.zalmanski@me.com"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/OlivierZal/com.heatzy/issues"
+  },
+  "source": "https://github.com/OlivierZal/com.heatzy",
+  "support": "https://github.com/OlivierZal/com.heatzy/issues",
+  "homeyCommunityTopicId": 73094,
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "OlivierZalmanski"
+      }
+    }
+  },
+  "platforms": ["local"]
 }
