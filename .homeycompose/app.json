@@ -12,7 +12,7 @@
   "version": "1.0.0",
   "compatibility": ">=5.0.0",
   "tags": {
-    "en": ["acova", "heater", "heatzy"]
+    "en": ["acova", "dryer", "heater", "heatzy", "radiator", "towel warmer"]
   },
   "images": {
     "small": "/assets/images/small.jpg",
