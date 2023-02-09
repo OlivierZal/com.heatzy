@@ -1,0 +1,31 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Mode"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "uiQuickAction": false,
+  "insights": true,
+  "values": [
+    {
+      "id": "comfort",
+      "title": {
+        "en": "Comfort"
+      }
+    },
+    {
+      "id": "eco",
+      "title": {
+        "en": "Eco"
+      }
+    },
+    {
+      "id": "antifrost",
+      "title": {
+        "en": "Anti-Frost"
+      }
+    }
+  ]
+}

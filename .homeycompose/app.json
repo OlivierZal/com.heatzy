@@ -1,7 +1,7 @@
 {
   "id": "com.heatzy",
   "sdk": 3,
-  "brandColor": "#ed0c13",
+  "brandColor": "#153f35",
   "name": {
     "en": "Heatzy"
   },
@@ -28,7 +28,6 @@
   },
   "source": "https://github.com/OlivierZal/com.heatzy",
   "support": "https://github.com/OlivierZal/com.heatzy/issues",
-  "homeyCommunityTopicId": 73094,
   "contributing": {
     "donate": {
       "paypal": {
