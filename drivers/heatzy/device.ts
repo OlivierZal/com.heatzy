@@ -57,6 +57,7 @@ export default class HeatzyDevice extends Device {
     const { id, productKey } = this.getData()
     this.id = id
     this.productKey = productKey
+    this.previousMode = 'eco'
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -124,8 +125,10 @@ export default class HeatzyDevice extends Device {
   }
 
   async updateCapabilities(mode: Mode = this.mode): Promise<void> {
-    this.previousMode = mode !== 'stop' ? mode : 'eco'
-    await this.setCapabilityValue('onoff', mode === 'stop')
+    if (mode !== 'stop') {
+      this.previousMode = mode
+    }
+    await this.setCapabilityValue('onoff', mode !== 'stop')
     await this.setCapabilityValue('mode', mode)
   }
 
