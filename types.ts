@@ -1,7 +1,28 @@
+import type HeatzyDevice from './drivers/heatzy/device'
+
 export type Settings = Record<string, any>
 
+export type ModeNumber = 0 | 1 | 2 | 3
+
+export type ModeString =
+  | 'cft'
+  | 'eco'
+  | 'fro'
+  | 'stop'
+  | 'cft1'
+  | 'cft2'
+  | '舒适' // 'cft'
+  | '经济' // 'eco'
+  | '解冻' // 'fro'
+  | '停止' // 'stop'
+
 export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
+
 export type CapabilityValue = boolean | Mode
+
+export interface DataError {
+  error_message: string
+}
 
 export interface LoginPostData {
   username: string
@@ -11,10 +32,6 @@ export interface LoginPostData {
 export interface LoginDataSuccess {
   token: string
   expire_at: number
-}
-
-export interface DataError {
-  error_message: string
 }
 
 export interface Device {
@@ -35,8 +52,6 @@ export interface DeviceDetails {
   }
 }
 
-export type ModeNumber = 0 | 1 | 2 | 3
-
 export type DevicePostData =
   | { raw: [1, 1, ModeNumber] }
   | {
@@ -45,20 +60,13 @@ export type DevicePostData =
       }
     }
 
-export type ModeString =
-  | 'cft'
-  | 'eco'
-  | 'fro'
-  | 'stop'
-  | 'cft1'
-  | 'cft2'
-  | '舒适' // 'cft'
-  | '经济' // 'eco'
-  | '解冻' // 'fro'
-  | '停止' // 'stop'
-
 export interface DeviceData {
   attr: {
     mode: ModeString
   }
+}
+
+export interface FlowArgs {
+  readonly device: HeatzyDevice
+  readonly mode: Mode
 }

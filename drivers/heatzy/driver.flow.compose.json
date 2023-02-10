@@ -1,0 +1,108 @@
+{
+  "triggers": [
+    {
+      "id": "mode_changed",
+      "title": {
+        "en": "Mode changed"
+      },
+      "tokens": [
+        {
+          "name": "mode",
+          "type": "string",
+          "title": {
+            "en": "Mode"
+          },
+          "example": {
+            "en": "Eco"
+          }
+        }
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "mode_condition",
+      "title": {
+        "en": "Mode !{{is|isn't}}..."
+      },
+      "titleFormatted": {
+        "en": "Mode !{{is|isn't}} [[mode]]"
+      },
+      "args": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "values": [
+            {
+              "id": "cft",
+              "title": {
+                "en": "Comfort"
+              }
+            },
+            {
+              "id": "eco",
+              "title": {
+                "en": "Eco"
+              }
+            },
+            {
+              "id": "fro",
+              "title": {
+                "en": "Anti-Frost"
+              }
+            },
+            {
+              "id": "stop",
+              "title": {
+                "en": "Off"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "mode_action",
+      "title": {
+        "en": "Set Mode to..."
+      },
+      "titleFormatted": {
+        "en": "Set Mode to [[mode]]"
+      },
+      "args": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "values": [
+            {
+              "id": "cft",
+              "title": {
+                "en": "Comfort"
+              }
+            },
+            {
+              "id": "eco",
+              "title": {
+                "en": "Eco"
+              }
+            },
+            {
+              "id": "fro",
+              "title": {
+                "en": "Anti-Frost"
+              }
+            },
+            {
+              "id": "stop",
+              "title": {
+                "en": "Off"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

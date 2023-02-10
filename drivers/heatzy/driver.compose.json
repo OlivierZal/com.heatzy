@@ -1,0 +1,11 @@
+{
+  "name": {
+    "en": "Heatzy"
+  },
+  "capabilities": ["onoff", "mode"],
+  "class": "thermostat",
+  "images": {
+    "large": "/drivers/heatzy/assets/images/large.png",
+    "small": "/drivers/heatzy/assets/images/small.png"
+  }
+}
