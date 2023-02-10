@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Heatzy Settings</title>
+    <script
+      type="text/javascript"
+      src="/homey.js"
+      data-origin="settings"
+    ></script>
+    <script src="index.js" async></script>
+  </head>
+  <body>
+    <header class="homey-header">
+      <h1 class="homey-title" data-i18n="settings.title" />
+    </header>
+    <div id="is-not-authenticated" style="display: none">
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend">Credentials</legend>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="username">Username</label>
+          <input class="homey-form-input" id="username" type="text" value="" />
+        </div>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="password">Password</label>
+          <input
+            class="homey-form-input"
+            id="password"
+            type="password"
+            value=""
+          />
+        </div>
+        <button id="authenticate" class="homey-button-primary-full">
+          Authenticate
+        </button>
+      </fieldset>
+    </div>
+    <div id="is-authenticated">
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend" id="error-log">Error Log</legend>
+        <div class="homey-form-group">
+          <label class="homey-form-label" id="period"></label>
+          <table aria-describedby="error-log"></table>
+        </div>
+        <button id="see" class="homey-button-secondary">
+          See all Errors since
+        </button>
+        <input id="from" type="date" value="" />
+      </fieldset>
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend">Device Settings</legend>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="interval"
+            ><strong>Device Update Frequency</strong> (minutes)</label
+          >
+          <input
+            class="homey-form-input"
+            name="Interval"
+            id="interval"
+            type="number"
+            inputmode="numeric"
+            value=""
+          />
+        </div>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="always_on"
+            >Disable <strong>Power Off from Homey</strong></label
+          >
+          <select class="homey-form-select" id="always_on">
+            <option value=""></option>
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+        <button id="apply-settings" class="homey-button-primary-full">
+          Apply to all Devices
+        </button>
+      </fieldset>
+    </div>
+  </body>
+</html>

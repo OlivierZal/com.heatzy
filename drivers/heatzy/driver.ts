@@ -4,7 +4,7 @@ import type HeatzyApp from '../../app'
 import {
   type DeviceDetails,
   type FlowArgs,
-  type LoginPostData
+  type LoginCredentials
 } from '../../types'
 
 export default class HeatzyDriver extends Driver {
@@ -31,7 +31,7 @@ export default class HeatzyDriver extends Driver {
   onPair(session: PairSession): void {
     session.setHandler(
       'login',
-      async (data: LoginPostData): Promise<boolean> =>
+      async (data: LoginCredentials): Promise<boolean> =>
         await this.app.login(data)
     )
     session.setHandler(
@@ -43,7 +43,7 @@ export default class HeatzyDriver extends Driver {
   onRepair(session: PairSession): void {
     session.setHandler(
       'login',
-      async (data: LoginPostData): Promise<boolean> =>
+      async (data: LoginCredentials): Promise<boolean> =>
         await this.app.login(data)
     )
   }

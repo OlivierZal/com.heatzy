@@ -8,8 +8,8 @@ import {
   type Device,
   type DeviceDetails,
   type DevicePostData,
+  type LoginCredentials,
   type LoginDataSuccess,
-  type LoginPostData,
   type ModeNumber,
   type ModeString,
   type Settings
@@ -44,7 +44,7 @@ export default class HeatzyApp extends App {
 
   async refreshLogin(): Promise<void> {
     this.clearLoginRefresh()
-    const loginCredentials: LoginPostData = {
+    const loginCredentials: LoginCredentials = {
       username: this.homey.settings.get('username') ?? '',
       password: this.homey.settings.get('password') ?? ''
     }
@@ -70,7 +70,7 @@ export default class HeatzyApp extends App {
     this.log('Login refresh has been stopped')
   }
 
-  async login(postData: LoginPostData): Promise<boolean> {
+  async login(postData: LoginCredentials): Promise<boolean> {
     try {
       const { username, password } = postData
       if (username === '' && password === '') {
@@ -164,6 +164,21 @@ export default class HeatzyApp extends App {
         error instanceof Error ? error.message : error
       )
     }
+  }
+
+  async setDeviceSettings(settings: Settings): Promise<boolean> {
+    const changedKeys: string[] = Object.keys(settings)
+    if (changedKeys.length === 0) {
+      return false
+    }
+    for (const device of this.homey.drivers.getDriver('heatzy').getDevices()) {
+      await device.setSettings(settings)
+      await (device as HeatzyDevice).onSettings({
+        newSettings: device.getSettings(),
+        changedKeys
+      })
+    }
+    return true
   }
 
   setSettings(settings: Settings): void {

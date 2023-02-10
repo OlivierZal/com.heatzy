@@ -24,7 +24,7 @@ export interface DataError {
   error_message: string
 }
 
-export interface LoginPostData {
+export interface LoginCredentials {
   username: string
   password: string
 }
