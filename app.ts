@@ -59,6 +59,7 @@ export default class HeatzyApp extends App {
         async (): Promise<boolean> => await this.login(loginCredentials),
         interval
       )
+      this.log('Login refresh has been scheduled')
     } else {
       await this.login(loginCredentials)
     }
