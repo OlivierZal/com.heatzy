@@ -25,9 +25,9 @@
     ]
   },
   "images": {
-    "small": "/assets/images/small.jpg",
-    "large": "/assets/images/large.jpg",
-    "xlarge": "/assets/images/xlarge.jpg"
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
   },
   "author": {
     "name": "Olivier Zalmanski",
