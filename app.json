@@ -48,6 +48,16 @@
   "platforms": [
     "local"
   ],
+  "api": {
+    "login": {
+      "method": "POST",
+      "path": "/login"
+    },
+    "setDeviceSettings": {
+      "method": "POST",
+      "path": "/settings"
+    }
+  },
   "flow": {
     "triggers": [
       {
