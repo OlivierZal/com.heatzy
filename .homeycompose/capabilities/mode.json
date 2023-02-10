@@ -10,7 +10,7 @@
   "insights": true,
   "values": [
     {
-      "id": "comfort",
+      "id": "cft",
       "title": {
         "en": "Comfort"
       }
@@ -22,9 +22,15 @@
       }
     },
     {
-      "id": "antifrost",
+      "id": "fro",
       "title": {
         "en": "Anti-Frost"
+      }
+    },
+    {
+      "id": "stop",
+      "title": {
+        "en": "Off"
       }
     }
   ]
