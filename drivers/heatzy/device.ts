@@ -80,7 +80,7 @@ export default class HeatzyDevice extends Device {
     this.clearSyncPlan()
     const alwaysOn: boolean = this.getSetting('always_on') === true
     if (capability === 'onoff') {
-      this.mode = (value as boolean) ? this.previousMode : 'stop'
+      this.mode = value === true ? this.previousMode : 'stop'
     } else {
       this.mode = value as Mode
     }
