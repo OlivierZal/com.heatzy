@@ -3,7 +3,7 @@
     "en": "Heatzy"
   },
   "capabilities": ["onoff", "mode"],
-  "class": "thermostat",
+  "class": "fan",
   "images": {
     "large": "/drivers/heatzy/assets/images/large.png",
     "small": "/drivers/heatzy/assets/images/small.png"

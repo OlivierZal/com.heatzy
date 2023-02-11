@@ -77,6 +77,7 @@ export default class HeatzyDevice extends Device {
     capability: string,
     value: CapabilityValue
   ): Promise<void> {
+    this.clearSyncPlan()
     const alwaysOn: boolean = this.getSetting('always_on') === true
     this.mode =
       capability === 'onoff'
@@ -85,17 +86,14 @@ export default class HeatzyDevice extends Device {
           : 'stop'
         : (value as Mode)
     if (alwaysOn && this.mode === 'stop') {
-      this.mode = this.previousMode
-      await this.updateCapabilities()
       await this.setWarning('"Power Off" is disabled.')
       await this.setWarning(null)
-      return
+      this.mode = this.previousMode
     }
     this.applySyncToDevice()
   }
 
   applySyncToDevice(): void {
-    this.clearSyncPlan()
     this.syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncToDevice()
     }, 1000)

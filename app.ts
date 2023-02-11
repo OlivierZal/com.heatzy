@@ -76,12 +76,12 @@ export default class HeatzyApp extends App {
       if (username === '' && password === '') {
         return false
       }
-      this.log('Login to MELCloud...\n', postData)
+      this.log('Login...\n', postData)
       const { data } = await axios.post<LoginDataSuccess | DataError>(
         '/login',
         postData
       )
-      this.log('Login to MELCloud:\n', data)
+      this.log('Login:\n', data)
       if ('error_message' in data) {
         throw new Error(data.error_message)
       }
@@ -95,10 +95,7 @@ export default class HeatzyApp extends App {
       await this.refreshLogin()
       return true
     } catch (error: unknown) {
-      this.error(
-        'Login to Heatzy:',
-        error instanceof Error ? error.message : error
-      )
+      this.error('Login:', error instanceof Error ? error.message : error)
     }
     return false
   }
