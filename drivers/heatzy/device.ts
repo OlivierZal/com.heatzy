@@ -79,12 +79,11 @@ export default class HeatzyDevice extends Device {
   ): Promise<void> {
     this.clearSyncPlan()
     const alwaysOn: boolean = this.getSetting('always_on') === true
-    this.mode =
-      capability === 'onoff'
-        ? value === true
-          ? this.previousMode
-          : 'stop'
-        : (value as Mode)
+    if (capability === 'onoff') {
+      this.mode = (value as boolean) ? this.previousMode : 'stop'
+    } else {
+      this.mode = value as Mode
+    }
     if (alwaysOn && this.mode === 'stop') {
       await this.setWarning('"Power Off" is disabled.')
       await this.setWarning(null)
