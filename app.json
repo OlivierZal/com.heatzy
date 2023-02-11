@@ -7,7 +7,7 @@
     "en": "Heatzy"
   },
   "description": {
-    "en": "Take control of Heatzy devices"
+    "en": "Take control of your heating and towel warmers"
   },
   "category": [
     "climate"
@@ -192,7 +192,7 @@
         "onoff",
         "mode"
       ],
-      "class": "thermostat",
+      "class": "fan",
       "images": {
         "large": "/drivers/heatzy/assets/images/large.png",
         "small": "/drivers/heatzy/assets/images/small.png"
