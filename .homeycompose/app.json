@@ -9,7 +9,7 @@
     "en": "Take control of your heating and towel warmers"
   },
   "category": ["climate"],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": ">=5.0.0",
   "tags": {
     "en": ["acova", "dryer", "heater", "heatzy", "radiator", "towel warmer"]
@@ -28,6 +28,7 @@
   },
   "source": "https://github.com/OlivierZal/com.heatzy",
   "support": "https://github.com/OlivierZal/com.heatzy/issues",
+  "homeyCommunityTopicId": 76406,
   "contributing": {
     "donate": {
       "paypal": {

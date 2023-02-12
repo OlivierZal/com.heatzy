@@ -12,7 +12,7 @@
   "category": [
     "climate"
   ],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": ">=5.0.0",
   "tags": {
     "en": [
@@ -38,6 +38,7 @@
   },
   "source": "https://github.com/OlivierZal/com.heatzy",
   "support": "https://github.com/OlivierZal/com.heatzy/issues",
+  "homeyCommunityTopicId": 76406,
   "contributing": {
     "donate": {
       "paypal": {
