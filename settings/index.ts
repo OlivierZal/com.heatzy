@@ -32,6 +32,9 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   const alwaysOnElement: HTMLSelectElement = document.getElementById(
     'always_on'
   ) as HTMLSelectElement
+  const onModeElement: HTMLSelectElement = document.getElementById(
+    'on_mode'
+  ) as HTMLSelectElement
 
   function getHomeySetting(
     element: HTMLInputElement | HTMLSelectElement,
@@ -136,7 +139,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   applySettingsElement.addEventListener('click', (): void => {
     let body: Settings = {}
     try {
-      body = buildSettingsBody([intervalElement, alwaysOnElement])
+      body = buildSettingsBody([
+        intervalElement,
+        alwaysOnElement,
+        onModeElement
+      ])
     } catch (error: unknown) {
       // @ts-expect-error bug
       Homey.alert(error.message)

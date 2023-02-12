@@ -31,7 +31,7 @@
         "id": "on_mode",
         "type": "dropdown",
         "label": {
-          "en": "Behavior when switching on"
+          "en": "Behavior when switching On"
         },
         "value": "",
         "values": [
@@ -44,7 +44,7 @@
             "label": { "en": "Eco" }
           },
           {
-            "id": "",
+            "id": "previous",
             "label": { "en": "Previous Mode" }
           }
         ]

@@ -58,8 +58,9 @@ export default class HeatzyDevice extends Device {
     this.id = id
     this.productKey = productKey
 
-    const onMode: Exclude<Mode, 'stop'> | '' = this.getSetting('on_mode')
-    this.previousMode = onMode !== '' ? onMode : 'eco'
+    const onMode: Exclude<Mode, 'stop'> | 'previous' =
+      this.getSetting('on_mode')
+    this.previousMode = onMode !== 'previous' ? onMode : 'eco'
 
     this.registerCapabilityListeners()
     await this.syncFromDevice()
@@ -87,7 +88,7 @@ export default class HeatzyDevice extends Device {
     } else {
       this.mode = value as Mode
     }
-    if (alwaysOn && this.mode === 'stop') {
+    if (this.mode === 'stop' && alwaysOn) {
       await this.setWarning('"Power Off" is disabled.')
       await this.setWarning(null)
       this.mode = this.previousMode
@@ -131,8 +132,9 @@ export default class HeatzyDevice extends Device {
   }
 
   updatePreviousMode(mode: Mode): void {
-    const onMode: Exclude<Mode, 'stop'> | '' = this.getSetting('on_mode')
-    if (onMode === '' && mode !== 'stop') {
+    const onMode: Exclude<Mode, 'stop'> | 'previous' =
+      this.getSetting('on_mode')
+    if (onMode === 'previous' && mode !== 'stop') {
       this.previousMode = mode
     }
   }
@@ -152,7 +154,7 @@ export default class HeatzyDevice extends Device {
     newSettings: Settings
     changedKeys: string[]
   }): Promise<void> {
-    if (changedKeys.includes('on_mode') && newSettings.on_mode !== '') {
+    if (changedKeys.includes('on_mode') && newSettings.on_mode !== 'previous') {
       this.previousMode = newSettings.on_mode
     }
     if (
