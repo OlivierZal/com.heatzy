@@ -57,7 +57,10 @@ export default class HeatzyDevice extends Device {
     const { id, productKey } = this.getData()
     this.id = id
     this.productKey = productKey
-    this.previousMode = 'eco'
+
+    const onMode: Exclude<Mode, 'stop'> | '' = this.getSetting('on_mode')
+    this.previousMode = onMode !== '' ? onMode : 'eco'
+
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -122,11 +125,16 @@ export default class HeatzyDevice extends Device {
   }
 
   async updateCapabilities(mode: Mode = this.mode): Promise<void> {
-    if (mode !== 'stop') {
-      this.previousMode = mode
-    }
+    this.updatePreviousMode(mode)
     await this.setCapabilityValue('onoff', mode !== 'stop')
     await this.setCapabilityValue('mode', mode)
+  }
+
+  updatePreviousMode(mode: Mode): void {
+    const onMode: Exclude<Mode, 'stop'> | '' = this.getSetting('on_mode')
+    if (onMode === '' && mode !== 'stop') {
+      this.previousMode = mode
+    }
   }
 
   planSyncFromDevice(ms: number): void {
@@ -144,6 +152,9 @@ export default class HeatzyDevice extends Device {
     newSettings: Settings
     changedKeys: string[]
   }): Promise<void> {
+    if (changedKeys.includes('on_mode') && newSettings.on_mode !== '') {
+      this.previousMode = newSettings.on_mode
+    }
     if (
       changedKeys.includes('always_on') &&
       newSettings.always_on === true &&
@@ -151,7 +162,10 @@ export default class HeatzyDevice extends Device {
     ) {
       await this.onCapability('onoff', true)
     } else if (
-      changedKeys.some((setting: string): boolean => setting !== 'always_on')
+      changedKeys.some(
+        (setting: string): boolean =>
+          !['always_on', 'on_mode'].includes(setting)
+      )
     ) {
       this.planSyncFromDevice(1000)
     }
