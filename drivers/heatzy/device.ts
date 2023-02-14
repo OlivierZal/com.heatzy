@@ -45,9 +45,12 @@ export default class HeatzyDevice extends Device {
 
   id!: string
   productKey!: string
+
   mode!: Mode
+  isOn!: boolean
   onMode!: Exclude<Mode, 'stop'> | null
   previousMode!: Exclude<Mode, 'stop'>
+
   syncTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
@@ -90,6 +93,9 @@ export default class HeatzyDevice extends Device {
     capability: string,
     value: CapabilityValue
   ): Promise<void> {
+    if (capability === 'onoff' && value === true && this.isOn) {
+      return
+    }
     this.clearSyncPlan()
     const alwaysOn: boolean = this.getSetting('always_on') === true
     if (capability === 'onoff') {
@@ -137,7 +143,8 @@ export default class HeatzyDevice extends Device {
   }
 
   async updateCapabilities(): Promise<void> {
-    await this.setCapabilityValue('onoff', this.mode !== 'stop')
+    this.isOn = this.mode !== 'stop'
+    await this.setCapabilityValue('onoff', this.isOn)
     await this.setCapabilityValue('mode', this.mode)
     this.setPreviousMode()
   }
