@@ -140,7 +140,10 @@ export default class HeatzyApp extends App {
     return null
   }
 
-  async setDeviceMode(device: HeatzyDevice, mode: ModeNumber): Promise<void> {
+  async setDeviceMode(
+    device: HeatzyDevice,
+    mode: ModeNumber
+  ): Promise<boolean> {
     try {
       const postData: DevicePostData = formatDevicePostData(
         mode,
@@ -155,12 +158,14 @@ export default class HeatzyApp extends App {
       if ('error_message' in data) {
         throw new Error(data.error_message)
       }
+      return true
     } catch (error: unknown) {
       device.error(
         'Syncing with device:',
         error instanceof Error ? error.message : error
       )
     }
+    return false
   }
 
   async setDeviceSettings(settings: Settings): Promise<boolean> {

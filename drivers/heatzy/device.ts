@@ -9,14 +9,12 @@ import {
   type Settings
 } from '../../types'
 
-function reverse(
-  mapping: Record<ModeNumber, Mode>
-): Partial<Record<Mode, ModeNumber>> {
+function reverse(mapping: Record<ModeNumber, Mode>): Record<Mode, ModeNumber> {
   const reversedMapping: Partial<Record<Mode, ModeNumber>> = {}
   for (const [capabilityValue, deviceValue] of Object.entries(mapping)) {
     reversedMapping[deviceValue] = Number(capabilityValue) as ModeNumber
   }
-  return reversedMapping
+  return reversedMapping as Record<Mode, ModeNumber>
 }
 
 const modeFromNumber: Record<ModeNumber, Mode> = {
@@ -26,7 +24,7 @@ const modeFromNumber: Record<ModeNumber, Mode> = {
   3: 'stop'
 } as const
 
-const modeToNumber: Partial<Record<Mode, ModeNumber>> = reverse(modeFromNumber)
+const modeToNumber: Record<Mode, ModeNumber> = reverse(modeFromNumber)
 
 const modeFromString: Record<ModeString, Mode> = {
   cft: 'cft',
@@ -48,6 +46,7 @@ export default class HeatzyDevice extends Device {
   id!: string
   productKey!: string
   mode!: Mode
+  onMode!: Exclude<Mode, 'stop'> | null
   previousMode!: Exclude<Mode, 'stop'>
   syncTimeout!: NodeJS.Timeout
 
@@ -58,12 +57,22 @@ export default class HeatzyDevice extends Device {
     this.id = id
     this.productKey = productKey
 
-    const onMode: Exclude<Mode, 'stop'> | 'previous' =
-      this.getSetting('on_mode')
-    this.previousMode = onMode !== 'previous' ? onMode : 'eco'
-
+    this.setOnMode()
+    this.previousMode = this.getOnMode()
     this.registerCapabilityListeners()
     await this.syncFromDevice()
+  }
+
+  setOnMode(
+    onModeSetting: Exclude<Mode, 'stop'> | 'previous' = this.getSetting(
+      'on_mode'
+    )
+  ): void {
+    this.onMode = onModeSetting !== 'previous' ? onModeSetting : null
+  }
+
+  getOnMode(): Exclude<Mode, 'stop'> {
+    return this.onMode ?? this.previousMode ?? 'eco'
   }
 
   registerCapabilityListeners(): void {
@@ -84,7 +93,7 @@ export default class HeatzyDevice extends Device {
     this.clearSyncPlan()
     const alwaysOn: boolean = this.getSetting('always_on') === true
     if (capability === 'onoff') {
-      this.mode = value === true ? this.previousMode : 'stop'
+      this.mode = value === true ? this.getOnMode() : 'stop'
     } else {
       this.mode = value as Mode
     }
@@ -108,34 +117,34 @@ export default class HeatzyDevice extends Device {
   }
 
   async syncToDevice(): Promise<void> {
-    const modeNumber: ModeNumber | undefined = modeToNumber[this.mode]
-    if (modeNumber !== undefined) {
-      await this.app.setDeviceMode(this, modeNumber)
+    const modeNumber: ModeNumber = modeToNumber[this.mode]
+    const success: boolean = await this.app.setDeviceMode(this, modeNumber)
+    if (!success) {
+      this.mode = this.previousMode
     }
     await this.sync()
   }
 
   async syncFromDevice(): Promise<void> {
     const modeString: ModeString | null = await this.app.getDeviceMode(this)
-    await this.sync(modeFromString[modeString ?? 'stop'])
+    this.mode = modeString !== null ? modeFromString[modeString] : 'stop'
+    await this.sync()
   }
 
-  async sync(mode?: Mode): Promise<void> {
-    await this.updateCapabilities(mode)
+  async sync(): Promise<void> {
+    await this.updateCapabilities()
     this.planSyncFromDevice(this.getSetting('interval') * 60000)
   }
 
-  async updateCapabilities(mode: Mode = this.mode): Promise<void> {
-    this.updatePreviousMode(mode)
-    await this.setCapabilityValue('onoff', mode !== 'stop')
-    await this.setCapabilityValue('mode', mode)
+  async updateCapabilities(): Promise<void> {
+    await this.setCapabilityValue('onoff', this.mode !== 'stop')
+    await this.setCapabilityValue('mode', this.mode)
+    this.setPreviousMode()
   }
 
-  updatePreviousMode(mode: Mode): void {
-    const onMode: Exclude<Mode, 'stop'> | 'previous' =
-      this.getSetting('on_mode')
-    if (onMode === 'previous' && mode !== 'stop') {
-      this.previousMode = mode
+  setPreviousMode(): void {
+    if (this.mode !== 'stop') {
+      this.previousMode = this.mode
     }
   }
 
@@ -154,8 +163,8 @@ export default class HeatzyDevice extends Device {
     newSettings: Settings
     changedKeys: string[]
   }): Promise<void> {
-    if (changedKeys.includes('on_mode') && newSettings.on_mode !== 'previous') {
-      this.previousMode = newSettings.on_mode
+    if (changedKeys.includes('on_mode')) {
+      this.setOnMode(newSettings.on_mode)
     }
     if (
       changedKeys.includes('always_on') &&
