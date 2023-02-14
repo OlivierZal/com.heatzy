@@ -93,7 +93,7 @@ export default class HeatzyDevice extends Device {
     capability: string,
     value: CapabilityValue
   ): Promise<void> {
-    if (capability === 'onoff' && value === true && this.isOn) {
+    if (capability === 'onoff' && value === this.isOn) {
       return
     }
     this.clearSyncPlan()
