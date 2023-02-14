@@ -8,11 +8,20 @@
   "description": {
     "en": "Take control of your heating and towel warmers"
   },
-  "category": ["climate"],
-  "version": "1.0.3",
+  "category": [
+    "climate"
+  ],
+  "version": "1.0.4",
   "compatibility": ">=5.0.0",
   "tags": {
-    "en": ["acova", "dryer", "heater", "heatzy", "radiator", "towel warmer"]
+    "en": [
+      "acova",
+      "dryer",
+      "heater",
+      "heatzy",
+      "radiator",
+      "towel warmer"
+    ]
   },
   "images": {
     "small": "/assets/images/small.png",
@@ -36,7 +45,9 @@
       }
     }
   },
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "api": {
     "login": {
       "method": "POST",

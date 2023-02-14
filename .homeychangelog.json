@@ -1,5 +1,8 @@
 {
   "1.0.0": {
     "en": "Creating an app to control Heatzy via Homey!"
+  },
+  "1.0.4": {
+    "en": "Improved workflow."
   }
 }
