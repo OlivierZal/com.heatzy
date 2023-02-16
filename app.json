@@ -8,8 +8,8 @@
     "fr": "Heatzy"
   },
   "description": {
-    "en": "Take control of your heating and towel warmers",
-    "fr": "Prenez le contrôle de vos radiateurs et sèche-serviettes"
+    "en": "Control your electric radiators",
+    "fr": "Pilotez vos radiateurs électriques"
   },
   "category": [
     "climate"
@@ -19,17 +19,21 @@
   "tags": {
     "en": [
       "acova",
-      "dryer",
+      "electric",
       "heater",
       "heatzy",
       "radiator",
-      "towel warmer"
+      "towel warmer",
+      "underfloor heating"
     ],
     "fr": [
       "acova",
-      "sèche-serviette",
+      "électrique",
+      "chauffage",
+      "heatzy",
       "radiateur",
-      "heatzy"
+      "sèche-serviette",
+      "plancher chauffant"
     ]
   },
   "images": {
@@ -210,8 +214,8 @@
   "drivers": [
     {
       "name": {
-        "en": "Heatzy",
-        "fr": "Heatzy"
+        "en": "Heatzy Pilote",
+        "fr": "Heatzy Pilote"
       },
       "capabilities": [
         "onoff",

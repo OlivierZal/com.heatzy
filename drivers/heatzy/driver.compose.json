@@ -1,7 +1,7 @@
 {
   "name": {
-    "en": "Heatzy",
-    "fr": "Heatzy"
+    "en": "Heatzy Pilote",
+    "fr": "Heatzy Pilote"
   },
   "capabilities": ["onoff", "mode"],
   "class": "fan",
