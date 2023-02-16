@@ -4,15 +4,17 @@
   "sdk": 3,
   "brandColor": "#153f35",
   "name": {
-    "en": "Heatzy"
+    "en": "Heatzy",
+    "fr": "Heatzy"
   },
   "description": {
-    "en": "Take control of your heating and towel warmers"
+    "en": "Take control of your heating and towel warmers",
+    "fr": "Prenez le contrôle de vos radiateurs et sèche-serviettes"
   },
   "category": [
     "climate"
   ],
-  "version": "1.0.4",
+  "version": "1.1.0",
   "compatibility": ">=5.0.0",
   "tags": {
     "en": [
@@ -22,6 +24,12 @@
       "heatzy",
       "radiator",
       "towel warmer"
+    ],
+    "fr": [
+      "acova",
+      "sèche-serviette",
+      "radiateur",
+      "heatzy"
     ]
   },
   "images": {
@@ -64,17 +72,20 @@
       {
         "id": "mode_changed",
         "title": {
-          "en": "Mode changed"
+          "en": "Mode changed",
+          "fr": "Le mode a changé"
         },
         "tokens": [
           {
             "name": "mode",
             "type": "string",
             "title": {
-              "en": "Mode"
+              "en": "Mode",
+              "fr": "Mode"
             },
             "example": {
-              "en": "Eco"
+              "en": "Eco",
+              "fr": "Eco"
             }
           }
         ],
@@ -91,10 +102,12 @@
       {
         "id": "mode_condition",
         "title": {
-          "en": "Mode !{{is|isn't}}..."
+          "en": "Mode !{{is|isn't}}...",
+          "fr": "Le mode !{{est|n'est pas}}..."
         },
         "titleFormatted": {
-          "en": "Mode !{{is|isn't}} [[mode]]"
+          "en": "Mode !{{is|isn't}} [[mode]]",
+          "fr": "Le mode !{{est|n'est pas}} [[mode]]"
         },
         "args": [
           {
@@ -109,25 +122,29 @@
               {
                 "id": "cft",
                 "title": {
-                  "en": "Comfort"
+                  "en": "Comfort",
+                  "fr": "Confort"
                 }
               },
               {
                 "id": "eco",
                 "title": {
-                  "en": "Eco"
+                  "en": "Eco",
+                  "fr": "Eco"
                 }
               },
               {
                 "id": "fro",
                 "title": {
-                  "en": "Anti-Frost"
+                  "en": "Anti-Frost",
+                  "fr": "Anti-Gel"
                 }
               },
               {
                 "id": "stop",
                 "title": {
-                  "en": "Off"
+                  "en": "Off",
+                  "fr": "Arrêt"
                 }
               }
             ]
@@ -139,10 +156,12 @@
       {
         "id": "mode_action",
         "title": {
-          "en": "Set Mode to..."
+          "en": "Set Mode to...",
+          "fr": "Définir le mode à..."
         },
         "titleFormatted": {
-          "en": "Set Mode to [[mode]]"
+          "en": "Set Mode to [[mode]]",
+          "fr": "Définir le mode à [[mode]]"
         },
         "args": [
           {
@@ -157,25 +176,29 @@
               {
                 "id": "cft",
                 "title": {
-                  "en": "Comfort"
+                  "en": "Comfort",
+                  "fr": "Confort"
                 }
               },
               {
                 "id": "eco",
                 "title": {
-                  "en": "Eco"
+                  "en": "Eco",
+                  "fr": "Eco"
                 }
               },
               {
                 "id": "fro",
                 "title": {
-                  "en": "Anti-Frost"
+                  "en": "Anti-Frost",
+                  "fr": "Anti-Gel"
                 }
               },
               {
                 "id": "stop",
                 "title": {
-                  "en": "Off"
+                  "en": "Off",
+                  "fr": "Arrêt"
                 }
               }
             ]
@@ -187,7 +210,8 @@
   "drivers": [
     {
       "name": {
-        "en": "Heatzy"
+        "en": "Heatzy",
+        "fr": "Heatzy"
       },
       "capabilities": [
         "onoff",
@@ -208,16 +232,20 @@
           "options": {
             "logo": "logo.png",
             "usernameLabel": {
-              "en": "Username"
+              "en": "Username",
+              "fr": "Nom d'utilisateur"
             },
             "usernamePlaceholder": {
-              "en": "user@domain.com"
+              "en": "user@domain.com",
+              "fr": "utilisateur@domain.fr"
             },
             "passwordLabel": {
-              "en": "Password"
+              "en": "Password",
+              "fr": "Mot de passe"
             },
             "passwordPlaceholder": {
-              "en": "P4ssw0rd"
+              "en": "P4ssw0rd",
+              "fr": "P4ssw0rd"
             }
           }
         },
@@ -240,16 +268,20 @@
           "options": {
             "logo": "logo.png",
             "usernameLabel": {
-              "en": "Username"
+              "en": "Username",
+              "fr": "Nom d'utilisateur"
             },
             "usernamePlaceholder": {
-              "en": "user@domain.com"
+              "en": "user@domain.com",
+              "fr": "utilisateur@domain.fr"
             },
             "passwordLabel": {
-              "en": "Password"
+              "en": "Password",
+              "fr": "Mot de passe"
             },
             "passwordPlaceholder": {
-              "en": "P4ssw0rd"
+              "en": "P4ssw0rd",
+              "fr": "P4ssw0rd"
             }
           }
         }
@@ -259,55 +291,75 @@
         {
           "type": "group",
           "label": {
-            "en": "Device Options"
+            "en": "Configuration",
+            "fr": "Configuration"
           },
           "children": [
             {
               "id": "interval",
               "type": "number",
               "label": {
-                "en": "Device Update Frequency"
+                "en": "Refresh Frequency",
+                "fr": "Fréquence de rafraîchissement"
               },
               "units": {
-                "en": "minutes"
+                "en": "minutes",
+                "fr": "minutes"
               },
               "value": 5,
               "min": 1,
               "max": 60
-            },
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Options",
+            "fr": "Options"
+          },
+          "children": [
             {
               "id": "always_on",
               "type": "checkbox",
               "label": {
-                "en": "Disable Power Off from Homey"
+                "en": "Disable shutdown from Homey",
+                "fr": "Désactiver l'extinction depuis Homey"
               },
               "value": false,
-              "hint": "This setting prevents the device from being turned off from Homey, the device can still be turned off manually (from a remote control or directly from the physical device)"
+              "hint": {
+                "en": "This setting prevents the device from being switched off from Homey, it can still be switched off manually (from a remote control or from the physical device)",
+                "fr": "Ce paramètre empêche l'appareil d'être éteint depuis Homey, il peut toujours être éteint manuellement (à partir d'une télécommande ou depuis l'appareil physique)"
+              }
             },
             {
               "id": "on_mode",
               "type": "dropdown",
               "label": {
-                "en": "Behavior when switching On"
+                "en": "Behavior when switching on",
+                "fr": "Comportement à l'allumage"
               },
-              "value": "",
+              "value": "previous",
               "values": [
                 {
                   "id": "cft",
                   "label": {
-                    "en": "Comfort"
+                    "en": "Comfort",
+                    "fr": "Confort"
                   }
                 },
                 {
                   "id": "eco",
                   "label": {
-                    "en": "Eco"
+                    "en": "Eco",
+                    "fr": "Eco"
                   }
                 },
                 {
                   "id": "previous",
                   "label": {
-                    "en": "Previous Mode"
+                    "en": "Previous Mode",
+                    "fr": "Mode précédent"
                   }
                 }
               ]
@@ -321,7 +373,8 @@
     "mode": {
       "type": "enum",
       "title": {
-        "en": "Mode"
+        "en": "Mode",
+        "fr": "Mode"
       },
       "getable": true,
       "setable": true,
@@ -332,25 +385,29 @@
         {
           "id": "cft",
           "title": {
-            "en": "Comfort"
+            "en": "Comfort",
+            "fr": "Confort"
           }
         },
         {
           "id": "eco",
           "title": {
-            "en": "Eco"
+            "en": "Eco",
+            "fr": "Eco"
           }
         },
         {
           "id": "fro",
           "title": {
-            "en": "Anti-Frost"
+            "en": "Anti-Frost",
+            "fr": "Anti-Gel"
           }
         },
         {
           "id": "stop",
           "title": {
-            "en": "Off"
+            "en": "Off",
+            "fr": "Arrêt"
           }
         }
       ]

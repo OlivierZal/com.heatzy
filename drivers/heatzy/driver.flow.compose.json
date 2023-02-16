@@ -3,17 +3,20 @@
     {
       "id": "mode_changed",
       "title": {
-        "en": "Mode changed"
+        "en": "Mode changed",
+        "fr": "Le mode a changé"
       },
       "tokens": [
         {
           "name": "mode",
           "type": "string",
           "title": {
-            "en": "Mode"
+            "en": "Mode",
+            "fr": "Mode"
           },
           "example": {
-            "en": "Eco"
+            "en": "Eco",
+            "fr": "Eco"
           }
         }
       ]
@@ -23,10 +26,12 @@
     {
       "id": "mode_condition",
       "title": {
-        "en": "Mode !{{is|isn't}}..."
+        "en": "Mode !{{is|isn't}}...",
+        "fr": "Le mode !{{est|n'est pas}}..."
       },
       "titleFormatted": {
-        "en": "Mode !{{is|isn't}} [[mode]]"
+        "en": "Mode !{{is|isn't}} [[mode]]",
+        "fr": "Le mode !{{est|n'est pas}} [[mode]]"
       },
       "args": [
         {
@@ -36,25 +41,29 @@
             {
               "id": "cft",
               "title": {
-                "en": "Comfort"
+                "en": "Comfort",
+                "fr": "Confort"
               }
             },
             {
               "id": "eco",
               "title": {
-                "en": "Eco"
+                "en": "Eco",
+                "fr": "Eco"
               }
             },
             {
               "id": "fro",
               "title": {
-                "en": "Anti-Frost"
+                "en": "Anti-Frost",
+                "fr": "Anti-Gel"
               }
             },
             {
               "id": "stop",
               "title": {
-                "en": "Off"
+                "en": "Off",
+                "fr": "Arrêt"
               }
             }
           ]
@@ -66,10 +75,12 @@
     {
       "id": "mode_action",
       "title": {
-        "en": "Set Mode to..."
+        "en": "Set Mode to...",
+        "fr": "Définir le mode à..."
       },
       "titleFormatted": {
-        "en": "Set Mode to [[mode]]"
+        "en": "Set Mode to [[mode]]",
+        "fr": "Définir le mode à [[mode]]"
       },
       "args": [
         {
@@ -79,25 +90,29 @@
             {
               "id": "cft",
               "title": {
-                "en": "Comfort"
+                "en": "Comfort",
+                "fr": "Confort"
               }
             },
             {
               "id": "eco",
               "title": {
-                "en": "Eco"
+                "en": "Eco",
+                "fr": "Eco"
               }
             },
             {
               "id": "fro",
               "title": {
-                "en": "Anti-Frost"
+                "en": "Anti-Frost",
+                "fr": "Anti-Gel"
               }
             },
             {
               "id": "stop",
               "title": {
-                "en": "Off"
+                "en": "Off",
+                "fr": "Arrêt"
               }
             }
           ]

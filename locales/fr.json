@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "title": "Paramètres Heatzy",
+    "credentials": "Identifiants",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "device": "Paramètres des appareils",
+    "interval": "Intervalle de rafraîchissement (en minutes)",
+    "authenticate": "S'authentifier",
+    "always_on": "Désactiver l'extinction depuis Homey",
+    "no": "Non",
+    "yes": "Oui",
+    "on_mode": "Comportement à l'allumage",
+    "cft": "Confort",
+    "eco": "Eco",
+    "previous": "Mode précédent",
+    "apply": "Appliquer à tous les appareils"
+  }
+}

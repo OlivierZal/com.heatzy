@@ -1,5 +1,19 @@
 {
   "settings": {
-    "title": "Heatzy Settings"
+    "title": "Heatzy Settings",
+    "credentials": "Credentials",
+    "username": "Username",
+    "password": "Password",
+    "device": "Device Settings",
+    "interval": "Refresh Frequency (minutes)",
+    "authenticate": "Authenticate",
+    "always_on": "Disable shutdown from Homey",
+    "no": "No",
+    "yes": "Yes",
+    "on_mode": "Behavior when switching on",
+    "cft": "Comfort",
+    "eco": "Eco",
+    "previous": "Previous mode",
+    "apply": "Apply to all Devices"
   }
 }

@@ -1,7 +1,8 @@
 {
   "type": "enum",
   "title": {
-    "en": "Mode"
+    "en": "Mode",
+    "fr": "Mode"
   },
   "getable": true,
   "setable": true,
@@ -12,25 +13,29 @@
     {
       "id": "cft",
       "title": {
-        "en": "Comfort"
+        "en": "Comfort",
+        "fr": "Confort"
       }
     },
     {
       "id": "eco",
       "title": {
-        "en": "Eco"
+        "en": "Eco",
+        "fr": "Eco"
       }
     },
     {
       "id": "fro",
       "title": {
-        "en": "Anti-Frost"
+        "en": "Anti-Frost",
+        "fr": "Anti-Gel"
       }
     },
     {
       "id": "stop",
       "title": {
-        "en": "Off"
+        "en": "Off",
+        "fr": "Arrêt"
       }
     }
   ]

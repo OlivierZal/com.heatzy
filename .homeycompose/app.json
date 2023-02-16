@@ -3,25 +3,19 @@
   "sdk": 3,
   "brandColor": "#153f35",
   "name": {
-    "en": "Heatzy"
+    "en": "Heatzy",
+    "fr": "Heatzy"
   },
   "description": {
-    "en": "Take control of your heating and towel warmers"
+    "en": "Take control of your heating and towel warmers",
+    "fr": "Prenez le contrôle de vos radiateurs et sèche-serviettes"
   },
-  "category": [
-    "climate"
-  ],
-  "version": "1.0.4",
+  "category": ["climate"],
+  "version": "1.1.0",
   "compatibility": ">=5.0.0",
   "tags": {
-    "en": [
-      "acova",
-      "dryer",
-      "heater",
-      "heatzy",
-      "radiator",
-      "towel warmer"
-    ]
+    "en": ["acova", "dryer", "heater", "heatzy", "radiator", "towel warmer"],
+    "fr": ["acova", "sèche-serviette", "radiateur", "heatzy"]
   },
   "images": {
     "small": "/assets/images/small.png",
@@ -45,9 +39,7 @@
       }
     }
   },
-  "platforms": [
-    "local"
-  ],
+  "platforms": ["local"],
   "api": {
     "login": {
       "method": "POST",

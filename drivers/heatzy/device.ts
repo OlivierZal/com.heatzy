@@ -60,6 +60,12 @@ export default class HeatzyDevice extends Device {
     this.id = id
     this.productKey = productKey
 
+    const onModeSetting: Exclude<Mode, 'stop'> | 'previous' | '' =
+      this.getSetting('on_mode')
+    if (onModeSetting === '') {
+      await this.setSettings({ on_mode: 'previous' })
+    }
+
     this.setOnMode()
     this.previousMode = this.getOnMode()
     this.registerCapabilityListeners()
