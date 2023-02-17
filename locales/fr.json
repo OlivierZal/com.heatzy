@@ -14,6 +14,10 @@
     "cft": "Confort",
     "eco": "Eco",
     "previous": "Mode précédent",
-    "apply": "Appliquer à tous les appareils"
-  }
+    "apply": "Appliquer à tous les appareils",
+    "no_change": "Aucun changement à appliquer.",
+    "apply_failure": "Le changement n'a pas été appliqué.",
+    "apply_success": "Le changement a été appliqué à tous les appareils."
+  },
+  "always_on_warning": "L'extinction depuis Homey a été désactivée."
 }

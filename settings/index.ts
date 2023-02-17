@@ -151,12 +151,12 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     }
     if (Object.keys(body).length === 0) {
       // @ts-expect-error bug
-      Homey.alert('No change to apply.')
+      Homey.alert(Homey.__('settings.apply_nothing'))
       return
     }
     // @ts-expect-error bug
     Homey.confirm(
-      'Are you sure you want to override these settings on all devices?',
+      Homey.__('settings.apply_confirm'),
       null,
       async (error: Error, ok: boolean): Promise<void> => {
         if (error !== null) {
@@ -166,7 +166,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         }
         if (!ok) {
           // @ts-expect-error bug
-          await Homey.alert('Change has not been applied.')
+          await Homey.alert(Homey.__('settings.apply_failure'))
           return
         }
         // @ts-expect-error bug
@@ -182,11 +182,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
             }
             if (!success) {
               // @ts-expect-error bug
-              await Homey.alert('No change to apply.')
+              await Homey.alert(Homey.__('settings.apply_failure'))
               return
             }
             // @ts-expect-error bug
-            await Homey.alert('Change has been applied to all devices.')
+            await Homey.alert(Homey.__('settings.apply_success'))
           }
         )
       }
