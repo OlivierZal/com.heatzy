@@ -5,7 +5,7 @@
     "username": "Username",
     "password": "Password",
     "device": "Device Settings",
-    "interval": "Refresh Frequency (minutes)",
+    "interval": "Refresh frequency (minutes)",
     "authenticate": "Authenticate",
     "always_on": "Disable shutdown from Homey",
     "no": "No",
@@ -14,6 +14,6 @@
     "cft": "Comfort",
     "eco": "Eco",
     "previous": "Previous mode",
-    "apply": "Apply to all Devices"
+    "apply": "Apply to all devices"
   }
 }

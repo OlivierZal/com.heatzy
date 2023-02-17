@@ -3,7 +3,7 @@
     {
       "id": "mode_changed",
       "title": {
-        "en": "The mode has changed",
+        "en": "Mode has changed",
         "fr": "Le mode a changé"
       },
       "tokens": [
@@ -26,11 +26,11 @@
     {
       "id": "mode_condition",
       "title": {
-        "en": "The mode !{{is|is not}}...",
+        "en": "Mode !{{is|is not}}...",
         "fr": "Le mode !{{est|n'est pas}}..."
       },
       "titleFormatted": {
-        "en": "The mode !{{is|is not}} [[mode]]",
+        "en": "Mode !{{is|is not}} [[mode]]",
         "fr": "Le mode !{{est|n'est pas}} [[mode]]"
       },
       "args": [
@@ -75,11 +75,11 @@
     {
       "id": "mode_action",
       "title": {
-        "en": "Set the mode to...",
+        "en": "Set mode to...",
         "fr": "Définir le mode à..."
       },
       "titleFormatted": {
-        "en": "Set the mode to [[mode]]",
+        "en": "Set mode to [[mode]]",
         "fr": "Définir le mode à [[mode]]"
       },
       "args": [

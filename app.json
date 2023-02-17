@@ -76,7 +76,7 @@
       {
         "id": "mode_changed",
         "title": {
-          "en": "Mode changed",
+          "en": "Mode has changed",
           "fr": "Le mode a changé"
         },
         "tokens": [
@@ -106,11 +106,11 @@
       {
         "id": "mode_condition",
         "title": {
-          "en": "Mode !{{is|isn't}}...",
+          "en": "Mode !{{is|is not}}...",
           "fr": "Le mode !{{est|n'est pas}}..."
         },
         "titleFormatted": {
-          "en": "Mode !{{is|isn't}} [[mode]]",
+          "en": "Mode !{{is|is not}} [[mode]]",
           "fr": "Le mode !{{est|n'est pas}} [[mode]]"
         },
         "args": [
@@ -140,15 +140,15 @@
               {
                 "id": "fro",
                 "title": {
-                  "en": "Anti-Frost",
-                  "fr": "Anti-Gel"
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
                 }
               },
               {
                 "id": "stop",
                 "title": {
                   "en": "Off",
-                  "fr": "Arrêt"
+                  "fr": "Désactivé"
                 }
               }
             ]
@@ -160,11 +160,11 @@
       {
         "id": "mode_action",
         "title": {
-          "en": "Set Mode to...",
+          "en": "Set mode to...",
           "fr": "Définir le mode à..."
         },
         "titleFormatted": {
-          "en": "Set Mode to [[mode]]",
+          "en": "Set mode to [[mode]]",
           "fr": "Définir le mode à [[mode]]"
         },
         "args": [
@@ -194,15 +194,15 @@
               {
                 "id": "fro",
                 "title": {
-                  "en": "Anti-Frost",
-                  "fr": "Anti-Gel"
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
                 }
               },
               {
                 "id": "stop",
                 "title": {
                   "en": "Off",
-                  "fr": "Arrêt"
+                  "fr": "Désactivé"
                 }
               }
             ]
@@ -303,7 +303,7 @@
               "id": "interval",
               "type": "number",
               "label": {
-                "en": "Refresh Frequency",
+                "en": "Refresh frequency",
                 "fr": "Fréquence de rafraîchissement"
               },
               "units": {
@@ -362,7 +362,7 @@
                 {
                   "id": "previous",
                   "label": {
-                    "en": "Previous Mode",
+                    "en": "Previous mode",
                     "fr": "Mode précédent"
                   }
                 }
@@ -403,15 +403,15 @@
         {
           "id": "fro",
           "title": {
-            "en": "Anti-Frost",
-            "fr": "Anti-Gel"
+            "en": "Anti-frost",
+            "fr": "Anti-gel"
           }
         },
         {
           "id": "stop",
           "title": {
             "en": "Off",
-            "fr": "Arrêt"
+            "fr": "Désactivé"
           }
         }
       ]
