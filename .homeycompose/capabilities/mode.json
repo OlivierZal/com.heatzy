@@ -27,15 +27,15 @@
     {
       "id": "fro",
       "title": {
-        "en": "Anti-Frost",
-        "fr": "Anti-Gel"
+        "en": "Anti-frost",
+        "fr": "Anti-gel"
       }
     },
     {
       "id": "stop",
       "title": {
         "en": "Off",
-        "fr": "Arrêt"
+        "fr": "Désactivé"
       }
     }
   ]

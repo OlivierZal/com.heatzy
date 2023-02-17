@@ -10,7 +10,7 @@
         "id": "interval",
         "type": "number",
         "label": {
-          "en": "Refresh Frequency",
+          "en": "Refresh frequency",
           "fr": "Fréquence de rafraîchissement"
         },
         "units": {
@@ -62,7 +62,7 @@
           },
           {
             "id": "previous",
-            "label": { "en": "Previous Mode", "fr": "Mode précédent" }
+            "label": { "en": "Previous mode", "fr": "Mode précédent" }
           }
         ]
       }
