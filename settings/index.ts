@@ -126,11 +126,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         }
         if (!login) {
           // @ts-expect-error bug
-          await Homey.alert('Authentication failed.')
+          await Homey.alert(Homey.__('settings.authenticate_failure'))
           return
         }
         // @ts-expect-error bug
-        await Homey.alert('Authentication succeeded.')
+        await Homey.alert(Homey.__('settings.authenticate_success'))
         load()
       }
     )
