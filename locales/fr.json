@@ -21,7 +21,9 @@
     "authenticate_success": "Authentification réussie",
     "authenticate_failure": "Échec d'authentification",
     "apply_confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
-    "apply_nothing": "Aucun changement à appliquer."
+    "apply_nothing": "Aucun changement à appliquer.",
+    "devices": "Paramètres des appareils",
+    "int_error": "__name__ must be an integer between __min__ and __max__."
   },
   "always_on_warning": "L'extinction depuis Homey a été désactivée."
 }
