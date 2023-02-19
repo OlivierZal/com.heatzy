@@ -7,7 +7,7 @@
     "authenticate": "S'authentifier",
     "authenticate_success": "Authentification réussie",
     "authenticate_failure": "Échec d'authentification",
-    "device": "Paramètres des appareils",
+    "devices": "Paramètres des appareils",
     "interval": "Intervalle de rafraîchissement (en minutes)",
     "always_on": "Désactiver l'extinction depuis Homey",
     "no": "Non",
@@ -20,7 +20,8 @@
     "apply_confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
     "apply_nothing": "Aucun changement à appliquer.",
     "apply_success": "Le changement a été appliqué à tous les appareils.",
-    "apply_failure": "Le changement n'a pas été appliqué."
+    "apply_failure": "Le changement n'a pas été appliqué.",
+    "int_error": "__name__ must be an integer between __min__ and __max__."
   },
   "always_on_warning": "L'extinction depuis Homey a été désactivée."
 }

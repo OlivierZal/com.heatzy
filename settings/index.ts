@@ -69,7 +69,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     ) {
       element.value = ''
       throw new Error(
-        `${element.name} must be an integer between ${element.min} and ${element.max}.`
+        Homey.__('settings.int_error', {
+          name: element.name,
+          min: element.min,
+          max: element.max
+        })
       )
     }
     return value

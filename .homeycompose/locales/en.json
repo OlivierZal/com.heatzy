@@ -7,7 +7,7 @@
     "authenticate": "Authenticate",
     "authenticate_success": "Authentication succeeded.",
     "authenticate_failure": "Authentication failed.",
-    "device": "Device Settings",
+    "devices": "Device Settings",
     "interval": "Refresh frequency (minutes)",
     "always_on": "Disable shutdown from Homey",
     "no": "No",
@@ -20,7 +20,8 @@
     "apply_confirm": "Are you sure you want to apply these settings to all devices?",
     "apply_nothing": "No change to apply.",
     "apply_success": "Change has been applied to all devices.",
-    "apply_failure": "Change has not been applied."
+    "apply_failure": "Change has not been applied.",
+    "int_error": "__name__ doit être un entier compris entre __min__ et __max__."
   },
   "always_on_warning": "Shutdown from Homey has been disabled."
 }
