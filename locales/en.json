@@ -1,32 +1,23 @@
 {
   "settings": {
-    "title": "Heatzy Settings",
-    "credentials": "Credentials",
-    "username": "Username",
-    "password": "Password",
-    "device": "Device Settings",
-    "interval": "The refresh frequency",
+    "alert": {
+      "actions": {
+        "authenticate": "Authentication",
+        "update": "Update"
+      },
+      "failure": "__action__ failed.",
+      "success": "__action__ succeeded."
+    },
     "authenticate": {
       "button": "Authenticate",
       "label": "Credentials",
       "password": "Password",
       "username": "Username"
     },
-    "always_on": "Disable shutdown from Homey",
-    "no": "No",
-    "yes": "Yes",
-    "on_mode": "Behavior when switching on",
-    "cft": "Comfort",
-    "eco": "Eco",
-    "previous": "Previous mode",
-    "apply": "Apply to all devices",
-    "no_change": "No change to apply.",
-    "apply_failure": "Change has not been applied.",
-    "apply_success": "Change has been applied to all devices.",
-    "authenticate_success": "Authentication succeeded.",
-    "authenticate_failure": "Authentication failed.",
-    "apply_confirm": "Are you sure you want to apply these settings to all devices?",
-    "apply_nothing": "No change to apply.",
+    "boolean": {
+      "false": "No",
+      "true": "Yes"
+    },
     "devices": {
       "always_on": "Disable shutdown from Homey",
       "apply": {
@@ -51,21 +42,8 @@
         "interval": "The refresh frequency"
       }
     },
-    "interval_label": "Refresh frequency (minutes)",
-    "alert": {
-      "actions": {
-        "authenticate": "Authentication",
-        "apply": "Modification"
-      },
-      "failure": "__action__ failed.",
-      "success": "__action__ succeeded."
-    },
-    "boolean": {
-      "false": "No",
-      "true": "Yes"
-    }
+    "title": "Heatzy Settings"
   },
-  "always_on_warning": "Shutdown from Homey has been disabled.",
   "warnings": {
     "always_on": "Shutdown from Homey has been disabled."
   }

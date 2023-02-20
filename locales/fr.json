@@ -1,32 +1,23 @@
 {
   "settings": {
-    "title": "Paramètres Heatzy",
-    "credentials": "Identifiants",
-    "username": "Nom d'utilisateur",
-    "password": "Mot de passe",
-    "device": "Paramètres des appareils",
-    "interval": "La fréquence de rafraîchissement",
+    "alert": {
+      "actions": {
+        "authenticate": "Authentification",
+        "update": "Mise à jour"
+      },
+      "failure": "__action__ échouée.",
+      "success": "__action__ réussie."
+    },
     "authenticate": {
       "button": "S'authentifier",
       "password": "Mot de passe",
       "label": "Identifiants",
       "username": "Nom d'utilisateur"
     },
-    "always_on": "Désactiver l'extinction depuis Homey",
-    "no": "Non",
-    "yes": "Oui",
-    "on_mode": "Comportement à l'allumage",
-    "cft": "Confort",
-    "eco": "Eco",
-    "previous": "Mode précédent",
-    "apply": "Appliquer à tous les appareils",
-    "no_change": "Aucun changement à appliquer.",
-    "apply_failure": "Le changement n'a pas été appliqué.",
-    "apply_success": "Le changement a été appliqué à tous les appareils.",
-    "authenticate_success": "Authentification réussie",
-    "authenticate_failure": "Échec d'authentification",
-    "apply_confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
-    "apply_nothing": "Aucun changement à appliquer.",
+    "boolean": {
+      "false": "Non",
+      "true": "Oui"
+    },
     "devices": {
       "always_on": "Désactiver l'extinction depuis Homey",
       "apply": {
@@ -51,21 +42,8 @@
         "interval": "La fréquence de rafraîchissement"
       }
     },
-    "interval_label": "Fréquence de rafraîchissement (en minutes)",
-    "alert": {
-      "actions": {
-        "authenticate": "Authentification",
-        "apply": "Modification"
-      },
-      "failure": "__action__ échouée.",
-      "success": "__action__ réussie."
-    },
-    "boolean": {
-      "false": "Non",
-      "true": "Oui"
-    }
+    "title": "Paramètres Heatzy"
   },
-  "always_on_warning": "L'extinction depuis Homey a été désactivée.",
   "warnings": {
     "always_on": "L'extinction depuis Homey a été désactivée."
   }

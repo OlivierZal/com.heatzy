@@ -180,7 +180,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           // @ts-expect-error bug
           await Homey.alert(
             Homey.__('settings.alert.failure', {
-              action: Homey.__('settings.alert.actions.apply')
+              action: Homey.__('settings.alert.actions.update')
             })
           )
           return
@@ -200,7 +200,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
               // @ts-expect-error bug
               await Homey.alert(
                 Homey.__('settings.alert.failure', {
-                  action: Homey.__('settings.alert.actions.apply')
+                  action: Homey.__('settings.alert.actions.update')
                 })
               )
               return
@@ -208,7 +208,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
             // @ts-expect-error bug
             await Homey.alert(
               Homey.__('settings.alert.success', {
-                action: Homey.__('settings.alert.actions.apply')
+                action: Homey.__('settings.alert.actions.update')
               })
             )
           }
