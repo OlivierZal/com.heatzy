@@ -5,7 +5,7 @@
     "username": "Username",
     "password": "Password",
     "device": "Device Settings",
-    "interval": "Refresh frequency (minutes)",
+    "interval": "The refresh frequency",
     "authenticate": "Authenticate",
     "always_on": "Disable shutdown from Homey",
     "no": "No",
@@ -23,7 +23,8 @@
     "apply_confirm": "Are you sure you want to apply these settings to all devices?",
     "apply_nothing": "No change to apply.",
     "devices": "Device Settings",
-    "int_error": "__name__ doit être un entier compris entre __min__ et __max__."
+    "int_error": "__name__ must be an integer between __min__ and __max__.",
+    "interval_label": "Refresh frequency (minutes)"
   },
   "always_on_warning": "Shutdown from Homey has been disabled."
 }

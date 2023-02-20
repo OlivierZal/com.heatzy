@@ -5,7 +5,7 @@
     "username": "Nom d'utilisateur",
     "password": "Mot de passe",
     "device": "Paramètres des appareils",
-    "interval": "Fréquence de rafraîchissement (en minutes)",
+    "interval": "La fréquence de rafraîchissement",
     "authenticate": "S'authentifier",
     "always_on": "Désactiver l'extinction depuis Homey",
     "no": "Non",
@@ -23,7 +23,8 @@
     "apply_confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
     "apply_nothing": "Aucun changement à appliquer.",
     "devices": "Paramètres des appareils",
-    "int_error": "__name__ must be an integer between __min__ and __max__."
+    "int_error": "__name__ doit être un entier compris entre __min__ et __max__.",
+    "interval_label": "Fréquence de rafraîchissement (en minutes)"
   },
   "always_on_warning": "L'extinction depuis Homey a été désactivée."
 }
