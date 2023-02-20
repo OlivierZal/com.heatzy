@@ -70,7 +70,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       element.value = ''
       throw new Error(
         Homey.__('settings.int_error', {
-          name: element.name,
+          name: Homey.__(`settings.${element.id}`),
           min: element.min,
           max: element.max
         })

@@ -5,7 +5,7 @@
     "username": "Nom d'utilisateur",
     "password": "Mot de passe",
     "device": "Paramètres des appareils",
-    "interval": "Intervalle de rafraîchissement (en minutes)",
+    "interval": "Fréquence de rafraîchissement (en minutes)",
     "authenticate": "S'authentifier",
     "always_on": "Désactiver l'extinction depuis Homey",
     "no": "Non",

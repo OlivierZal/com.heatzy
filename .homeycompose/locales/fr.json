@@ -8,7 +8,7 @@
     "authenticate_success": "Authentification réussie",
     "authenticate_failure": "Échec d'authentification",
     "devices": "Paramètres des appareils",
-    "interval": "Intervalle de rafraîchissement (en minutes)",
+    "interval_label": "Fréquence de rafraîchissement (en minutes)",
     "always_on": "Désactiver l'extinction depuis Homey",
     "no": "Non",
     "yes": "Oui",
@@ -21,7 +21,8 @@
     "apply_nothing": "Aucun changement à appliquer.",
     "apply_success": "Le changement a été appliqué à tous les appareils.",
     "apply_failure": "Le changement n'a pas été appliqué.",
-    "int_error": "__name__ must be an integer between __min__ and __max__."
+    "int_error": "__name__ doit être un entier compris entre __min__ et __max__.",
+    "interval": "La fréquence de rafraîchissement"
   },
   "always_on_warning": "L'extinction depuis Homey a été désactivée."
 }
