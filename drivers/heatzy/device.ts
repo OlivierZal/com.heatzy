@@ -104,7 +104,7 @@ export default class HeatzyDevice extends Device {
       this.mode = value as Mode
     }
     if (this.mode === 'stop' && alwaysOn) {
-      await this.setWarning(this.homey.__('always_on_warning'))
+      await this.setWarning(this.homey.__('warnings.always_on'))
       await this.setWarning(null)
       this.mode = this.previousMode
     }

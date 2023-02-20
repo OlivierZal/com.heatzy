@@ -6,7 +6,12 @@
     "password": "Password",
     "device": "Device Settings",
     "interval": "The refresh frequency",
-    "authenticate": "Authenticate",
+    "authenticate": {
+      "button": "Authenticate",
+      "label": "Credentials",
+      "password": "Password",
+      "username": "Username"
+    },
     "always_on": "Disable shutdown from Homey",
     "no": "No",
     "yes": "Yes",
@@ -22,9 +27,46 @@
     "authenticate_failure": "Authentication failed.",
     "apply_confirm": "Are you sure you want to apply these settings to all devices?",
     "apply_nothing": "No change to apply.",
-    "devices": "Device Settings",
-    "int_error": "__name__ must be an integer between __min__ and __max__.",
-    "interval_label": "Refresh frequency (minutes)"
+    "devices": {
+      "always_on": "Disable shutdown from Homey",
+      "apply": {
+        "button": "Apply to all devices",
+        "confirm": "Are you sure you want to apply these settings to all devices?",
+        "nothing": "No change to apply."
+      },
+      "interval": "Refresh frequency (minutes)",
+      "label": "Device Settings",
+      "on_mode": {
+        "label": "Behavior when switching on",
+        "values": {
+          "cft": "Comfort",
+          "eco": "Eco",
+          "previous": "Previous mode"
+        }
+      }
+    },
+    "int_error": {
+      "message": "__name__ must be an integer between __min__ and __max__.",
+      "values": {
+        "interval": "The refresh frequency"
+      }
+    },
+    "interval_label": "Refresh frequency (minutes)",
+    "alert": {
+      "actions": {
+        "authenticate": "Authentication",
+        "apply": "Modification"
+      },
+      "failure": "__action__ failed.",
+      "success": "__action__ succeeded."
+    },
+    "boolean": {
+      "false": "No",
+      "true": "Yes"
+    }
   },
-  "always_on_warning": "Shutdown from Homey has been disabled."
+  "always_on_warning": "Shutdown from Homey has been disabled.",
+  "warnings": {
+    "always_on": "Shutdown from Homey has been disabled."
+  }
 }

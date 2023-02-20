@@ -17,13 +17,13 @@
       <fieldset class="homey-form-fieldset">
         <legend
           class="homey-form-legend"
-          data-i18n="settings.credentials"
+          data-i18n="settings.authenticate.label"
         ></legend>
         <div class="homey-form-group">
           <label
             class="homey-form-label"
             for="username"
-            data-i18n="settings.username"
+            data-i18n="settings.authenticate.username"
           ></label>
           <input class="homey-form-input" id="username" type="text" value="" />
         </div>
@@ -31,7 +31,7 @@
           <label
             class="homey-form-label"
             for="password"
-            data-i18n="settings.password"
+            data-i18n="settings.authenticate.password"
           ></label>
           <input
             class="homey-form-input"
@@ -43,7 +43,7 @@
         <button
           id="authenticate"
           class="homey-button-primary-full"
-          data-i18n="settings.authenticate"
+          data-i18n="settings.authenticate.button"
         ></button>
       </fieldset>
     </div>
@@ -54,7 +54,7 @@
           <label
             class="homey-form-label"
             for="interval"
-            data-i18n="settings.interval_label"
+            data-i18n="settings.devices.interval"
           ></label>
           <input
             class="homey-form-input"
@@ -68,31 +68,40 @@
           <label
             class="homey-form-label"
             for="always_on"
-            data-i18n="settings.always_on"
+            data-i18n="settings.devices.always_on"
           ></label>
           <select class="homey-form-select" id="always_on">
             <option value=""></option>
-            <option value="false" data-i18n="settings.no"></option>
-            <option value="true" data-i18n="settings.yes"></option>
+            <option value="false" data-i18n="settings.boolean.false"></option>
+            <option value="true" data-i18n="settings.boolean.true"></option>
           </select>
         </div>
         <div class="homey-form-group">
           <label
             class="homey-form-label"
             for="on_mode"
-            data-i18n="settings.on_mode"
+            data-i18n="settings.devices.on_mode.label"
           ></label>
           <select class="homey-form-select" id="on_mode">
             <option value=""></option>
-            <option value="cft" data-i18n="settings.cft"></option>
-            <option value="eco" data-i18n="settings.eco"></option>
-            <option value="previous" data-i18n="settings.previous"></option>
+            <option
+              value="cft"
+              data-i18n="settings.devices.on_mode.values.cft"
+            ></option>
+            <option
+              value="eco"
+              data-i18n="settings.devices.on_mode.values.eco"
+            ></option>
+            <option
+              value="previous"
+              data-i18n="settings.devices.on_mode.values.previous"
+            ></option>
           </select>
         </div>
         <button
           id="apply-settings"
           class="homey-button-primary-full"
-          data-i18n="settings.apply"
+          data-i18n="settings.devices.apply.button"
         ></button>
       </fieldset>
     </div>

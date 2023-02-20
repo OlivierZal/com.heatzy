@@ -69,8 +69,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     ) {
       element.value = ''
       throw new Error(
-        Homey.__('settings.int_error', {
-          name: Homey.__(`settings.${element.id}`),
+        Homey.__('settings.int_error.message', {
+          name: Homey.__(`settings.int_error.values.${element.id}`),
           min: element.min,
           max: element.max
         })
@@ -130,11 +130,19 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         }
         if (!login) {
           // @ts-expect-error bug
-          await Homey.alert(Homey.__('settings.authenticate_failure'))
+          await Homey.alert(
+            Homey.__('settings.alert.failure', {
+              action: Homey.__('settings.actions.authenticate')
+            })
+          )
           return
         }
         // @ts-expect-error bug
-        await Homey.alert(Homey.__('settings.authenticate_success'))
+        await Homey.alert(
+          Homey.__('settings.alert.success', {
+            action: Homey.__('settings.actions.authenticate')
+          })
+        )
         load()
       }
     )
@@ -155,12 +163,12 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     }
     if (Object.keys(body).length === 0) {
       // @ts-expect-error bug
-      Homey.alert(Homey.__('settings.apply_nothing'))
+      Homey.alert(Homey.__('settings.devices.apply.nothing'))
       return
     }
     // @ts-expect-error bug
     Homey.confirm(
-      Homey.__('settings.apply_confirm'),
+      Homey.__('settings.devices.apply.confirm'),
       null,
       async (error: Error, ok: boolean): Promise<void> => {
         if (error !== null) {
@@ -170,7 +178,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         }
         if (!ok) {
           // @ts-expect-error bug
-          await Homey.alert(Homey.__('settings.apply_failure'))
+          await Homey.alert(
+            Homey.__('settings.alert.failure', {
+              action: Homey.__('settings.actions.apply')
+            })
+          )
           return
         }
         // @ts-expect-error bug
@@ -186,11 +198,19 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
             }
             if (!success) {
               // @ts-expect-error bug
-              await Homey.alert(Homey.__('settings.apply_failure'))
+              await Homey.alert(
+                Homey.__('settings.alert.failure', {
+                  action: Homey.__('settings.actions.apply')
+                })
+              )
               return
             }
             // @ts-expect-error bug
-            await Homey.alert(Homey.__('settings.apply_success'))
+            await Homey.alert(
+              Homey.__('settings.alert.success', {
+                action: Homey.__('settings.actions.apply')
+              })
+            )
           }
         )
       }

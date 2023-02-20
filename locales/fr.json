@@ -6,7 +6,12 @@
     "password": "Mot de passe",
     "device": "Paramètres des appareils",
     "interval": "La fréquence de rafraîchissement",
-    "authenticate": "S'authentifier",
+    "authenticate": {
+      "button": "S'authentifier",
+      "password": "Mot de passe",
+      "label": "Identifiants",
+      "username": "Nom d'utilisateur"
+    },
     "always_on": "Désactiver l'extinction depuis Homey",
     "no": "Non",
     "yes": "Oui",
@@ -22,9 +27,46 @@
     "authenticate_failure": "Échec d'authentification",
     "apply_confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
     "apply_nothing": "Aucun changement à appliquer.",
-    "devices": "Paramètres des appareils",
-    "int_error": "__name__ doit être un entier compris entre __min__ et __max__.",
-    "interval_label": "Fréquence de rafraîchissement (en minutes)"
+    "devices": {
+      "always_on": "Désactiver l'extinction depuis Homey",
+      "apply": {
+        "button": "Appliquer à tous les appareils",
+        "confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
+        "nothing": "Aucun changement à appliquer."
+      },
+      "interval": "Fréquence de rafraîchissement (en minutes)",
+      "label": "Paramètres des appareils",
+      "on_mode": {
+        "label": "Comportement à l'allumage",
+        "values": {
+          "cft": "Confort",
+          "eco": "Eco",
+          "previous": "Mode précédent"
+        }
+      }
+    },
+    "int_error": {
+      "message": "__name__ doit être un entier compris entre __min__ et __max__.",
+      "values": {
+        "interval": "La fréquence de rafraîchissement"
+      }
+    },
+    "interval_label": "Fréquence de rafraîchissement (en minutes)",
+    "alert": {
+      "actions": {
+        "authenticate": "Authentification",
+        "apply": "Modification"
+      },
+      "failure": "__action__ échouée.",
+      "success": "__action__ réussie."
+    },
+    "boolean": {
+      "false": "Non",
+      "true": "Oui"
+    }
   },
-  "always_on_warning": "L'extinction depuis Homey a été désactivée."
+  "always_on_warning": "L'extinction depuis Homey a été désactivée.",
+  "warnings": {
+    "always_on": "L'extinction depuis Homey a été désactivée."
+  }
 }
