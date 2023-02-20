@@ -132,7 +132,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           // @ts-expect-error bug
           await Homey.alert(
             Homey.__('settings.alert.failure', {
-              action: Homey.__('settings.actions.authenticate')
+              action: Homey.__('settings.alert.actions.authenticate')
             })
           )
           return
@@ -140,7 +140,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         // @ts-expect-error bug
         await Homey.alert(
           Homey.__('settings.alert.success', {
-            action: Homey.__('settings.actions.authenticate')
+            action: Homey.__('settings.alert.actions.authenticate')
           })
         )
         load()
@@ -180,7 +180,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           // @ts-expect-error bug
           await Homey.alert(
             Homey.__('settings.alert.failure', {
-              action: Homey.__('settings.actions.apply')
+              action: Homey.__('settings.alert.actions.apply')
             })
           )
           return
@@ -200,7 +200,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
               // @ts-expect-error bug
               await Homey.alert(
                 Homey.__('settings.alert.failure', {
-                  action: Homey.__('settings.actions.apply')
+                  action: Homey.__('settings.alert.actions.apply')
                 })
               )
               return
@@ -208,7 +208,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
             // @ts-expect-error bug
             await Homey.alert(
               Homey.__('settings.alert.success', {
-                action: Homey.__('settings.actions.apply')
+                action: Homey.__('settings.alert.actions.apply')
               })
             )
           }
