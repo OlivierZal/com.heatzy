@@ -14,7 +14,7 @@
   "category": [
     "climate"
   ],
-  "version": "2.0.0",
+  "version": "2.0.1",
   "compatibility": ">=5.0.0",
   "tags": {
     "en": [
@@ -28,12 +28,12 @@
     ],
     "fr": [
       "acova",
-      "électrique",
       "chauffage",
+      "électrique",
       "heatzy",
+      "plancher chauffant",
       "radiateur",
-      "sèche-serviette",
-      "plancher chauffant"
+      "sèche serviette"
     ]
   },
   "images": {
