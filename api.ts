@@ -3,6 +3,10 @@ import type HeatzyApp from './app'
 import { type LoginCredentials, type Settings } from './types'
 
 module.exports = {
+  async getLocale({ homey }: { homey: Homey }): Promise<string> {
+    return homey.i18n.getLanguage()
+  },
+
   async login({
     homey,
     body
