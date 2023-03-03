@@ -62,6 +62,10 @@
     "local"
   ],
   "api": {
+    "getLocale": {
+      "method": "GET",
+      "path": "/locale"
+    },
     "login": {
       "method": "POST",
       "path": "/login"
