@@ -16,7 +16,7 @@
           },
           "example": {
             "en": "Eco",
-            "fr": "Eco"
+            "fr": "Éco"
           }
         }
       ]
@@ -49,7 +49,7 @@
               "id": "eco",
               "title": {
                 "en": "Eco",
-                "fr": "Eco"
+                "fr": "Éco"
               }
             },
             {
@@ -98,7 +98,7 @@
               "id": "eco",
               "title": {
                 "en": "Eco",
-                "fr": "Eco"
+                "fr": "Éco"
               }
             },
             {
