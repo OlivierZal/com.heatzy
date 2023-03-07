@@ -31,7 +31,7 @@
         "label": "Comportement à l'allumage",
         "values": {
           "cft": "Confort",
-          "eco": "Eco",
+          "eco": "Éco",
           "previous": "Mode précédent"
         }
       }
