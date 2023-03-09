@@ -25,7 +25,7 @@
         "confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
         "nothing": "Aucun changement à appliquer."
       },
-      "interval": "Fréquence de mise à jour (en minutes)",
+      "interval": "Fréquence de mise à jour (minutes)",
       "label": "Paramètres des appareils",
       "on_mode": {
         "label": "Comportement à l'allumage",
