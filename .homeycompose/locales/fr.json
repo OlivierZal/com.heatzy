@@ -25,7 +25,7 @@
         "confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
         "nothing": "Aucun changement à appliquer."
       },
-      "interval": "Fréquence de rafraîchissement (en minutes)",
+      "interval": "Fréquence de mise à jour (en minutes)",
       "label": "Paramètres des appareils",
       "on_mode": {
         "label": "Comportement à l'allumage",
@@ -39,7 +39,7 @@
     "int_error": {
       "message": "__name__ doit être un entier compris entre __min__ et __max__.",
       "values": {
-        "interval": "La fréquence de rafraîchissement"
+        "interval": "La fréquence de mise à jour"
       }
     },
     "title": "Paramètres Heatzy"

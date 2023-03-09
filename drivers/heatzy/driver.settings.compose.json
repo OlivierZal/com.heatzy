@@ -10,8 +10,8 @@
         "id": "interval",
         "type": "number",
         "label": {
-          "en": "Refresh frequency",
-          "fr": "Fréquence de rafraîchissement"
+          "en": "Device update frequency",
+          "fr": "Fréquence de mise à jour de l'appareil"
         },
         "units": {
           "en": "minutes",
