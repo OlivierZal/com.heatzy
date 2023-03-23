@@ -9,7 +9,7 @@
       "success": "__action__ succeeded."
     },
     "authenticate": {
-      "button": "Authenticate",
+      "button": "Log in",
       "label": "Credentials",
       "password": "Password",
       "username": "Username"
