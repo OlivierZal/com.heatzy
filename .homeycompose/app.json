@@ -11,7 +11,7 @@
     "fr": "Pilotez vos radiateurs électriques"
   },
   "category": ["climate"],
-  "version": "2.0.14",
+  "version": "2.0.15",
   "compatibility": ">=5.0.0",
   "tags": {
     "en": [
