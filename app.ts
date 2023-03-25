@@ -171,16 +171,23 @@ export default class HeatzyApp extends App {
   async setDeviceSettings(settings: Settings): Promise<boolean> {
     const changedKeys: string[] = Object.keys(settings)
     if (changedKeys.length === 0) {
-      return false
+      return true
     }
-    for (const device of this.homey.drivers.getDriver('heatzy').getDevices()) {
-      await device.setSettings(settings)
-      await (device as HeatzyDevice).onSettings({
-        newSettings: device.getSettings(),
-        changedKeys
-      })
+    try {
+      for (const device of this.homey.drivers
+        .getDriver('heatzy')
+        .getDevices()) {
+        await device.setSettings(settings)
+        await (device as HeatzyDevice).onSettings({
+          newSettings: device.getSettings(),
+          changedKeys
+        })
+      }
+      return true
+    } catch (error: unknown) {
+      this.error(error instanceof Error ? error.message : error)
     }
-    return true
+    return false
   }
 
   setSettings(settings: Settings): void {

@@ -1,6 +1,6 @@
 {
   "name": "com.heatzy",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "main": "app.ts",
   "scripts": {
     "build": "tsc"
