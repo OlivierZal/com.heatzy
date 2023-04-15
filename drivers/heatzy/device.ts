@@ -9,12 +9,16 @@ import {
   type Settings
 } from '../../types'
 
-function reverse(mapping: Record<ModeNumber, Mode>): Record<Mode, ModeNumber> {
-  const reversedMapping: Partial<Record<Mode, ModeNumber>> = {}
-  for (const [capabilityValue, deviceValue] of Object.entries(mapping)) {
-    reversedMapping[deviceValue] = Number(capabilityValue) as ModeNumber
-  }
-  return reversedMapping as Record<Mode, ModeNumber>
+function reverseMapping(
+  mapping: Record<number, string>
+): Record<string, number> {
+  return Object.entries(mapping).reduce<Record<string, number>>(
+    (reversedMapping, [deviceValue, capabilityValue]: [string, string]) => {
+      reversedMapping[capabilityValue] = Number(deviceValue)
+      return reversedMapping
+    },
+    {}
+  )
 }
 
 const modeFromNumber: Record<ModeNumber, Mode> = {
@@ -24,7 +28,9 @@ const modeFromNumber: Record<ModeNumber, Mode> = {
   3: 'stop'
 } as const
 
-const modeToNumber: Record<Mode, ModeNumber> = reverse(modeFromNumber)
+const modeToNumber: Record<Mode, ModeNumber> = reverseMapping(
+  modeFromNumber
+) as Record<Mode, ModeNumber>
 
 const modeFromString: Record<ModeString, Mode> = {
   cft: 'cft',
@@ -79,14 +85,14 @@ export default class HeatzyDevice extends Device {
   }
 
   registerCapabilityListeners(): void {
-    for (const capability of this.driver.manifest.capabilities) {
+    this.driver.manifest.capabilities.forEach((capability: string): void => {
       this.registerCapabilityListener(
         capability,
         async (value: CapabilityValue): Promise<void> => {
           await this.onCapability(capability, value)
         }
       )
-    }
+    })
   }
 
   async onCapability(
@@ -139,7 +145,7 @@ export default class HeatzyDevice extends Device {
 
   async sync(): Promise<void> {
     await this.updateCapabilities()
-    this.planSyncFromDevice(this.getSetting('interval') * 60000)
+    this.planSyncFromDevice()
   }
 
   async updateCapabilities(): Promise<void> {
@@ -155,12 +161,12 @@ export default class HeatzyDevice extends Device {
     }
   }
 
-  planSyncFromDevice(ms: number): void {
+  planSyncFromDevice(): void {
     this.clearSyncPlan()
     this.syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncFromDevice()
-    }, ms)
-    this.log('Next sync in', ms / 1000, 'seconds')
+    }, 60000)
+    this.log('Next sync in 1 second')
   }
 
   async onSettings({
@@ -185,7 +191,7 @@ export default class HeatzyDevice extends Device {
           !['always_on', 'on_mode'].includes(setting)
       )
     ) {
-      this.planSyncFromDevice(1000)
+      this.planSyncFromDevice()
     }
   }
 

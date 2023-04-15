@@ -30,9 +30,11 @@ function formatDevicePostData(
 }
 
 export default class HeatzyApp extends App {
+  locale!: string
   loginTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
+    this.locale = this.homey.i18n.getLanguage()
     axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
     axios.defaults.headers.common['X-Gizwits-Application-Id'] =
       'c70a66ff039d41b4a220e198b0fcc8b3'
@@ -53,21 +55,23 @@ export default class HeatzyApp extends App {
       const expireAtDate: Date = new Date(expireAt)
       expireAtDate.setDate(expireAtDate.getDate() - 1)
       const ms: number = expireAtDate.getTime() - new Date().getTime()
-      const maxTimeout: number = Math.pow(2, 31) - 1
-      const interval: number = Math.min(ms, maxTimeout)
-      this.loginTimeout = this.homey.setTimeout(
-        async (): Promise<boolean> => await this.login(loginCredentials),
-        interval
-      )
-      this.log('Login refresh has been scheduled')
-    } else {
-      await this.login(loginCredentials)
+      if (ms > 0) {
+        const maxTimeout: number = Math.pow(2, 31) - 1
+        const interval: number = Math.min(ms, maxTimeout)
+        this.loginTimeout = this.homey.setTimeout(
+          async (): Promise<boolean> => await this.login(loginCredentials),
+          interval
+        )
+        this.log('Login refresh has been scheduled')
+        return
+      }
     }
+    await this.login(loginCredentials)
   }
 
   clearLoginRefresh(): void {
     this.homey.clearTimeout(this.loginTimeout)
-    this.log('Login refresh has been stopped')
+    this.log('Login refresh has been paused')
   }
 
   async login(postData: LoginCredentials): Promise<boolean> {
@@ -174,15 +178,17 @@ export default class HeatzyApp extends App {
       return true
     }
     try {
-      for (const device of this.homey.drivers
-        .getDriver('heatzy')
-        .getDevices()) {
-        await device.setSettings(settings)
-        await (device as HeatzyDevice).onSettings({
-          newSettings: device.getSettings(),
-          changedKeys
+      await Promise.all(
+        (
+          this.homey.drivers.getDriver('heatzy').getDevices() as HeatzyDevice[]
+        ).map(async (device: HeatzyDevice): Promise<void> => {
+          await device.setSettings(settings)
+          await device.onSettings({
+            newSettings: device.getSettings(),
+            changedKeys
+          })
         })
-      }
+      )
       return true
     } catch (error: unknown) {
       this.error(error instanceof Error ? error.message : error)
@@ -191,11 +197,13 @@ export default class HeatzyApp extends App {
   }
 
   setSettings(settings: Settings): void {
-    for (const [setting, value] of Object.entries(settings)) {
-      if (value !== this.homey.settings.get(setting)) {
-        this.homey.settings.set(setting, value)
+    Object.entries(settings).forEach(
+      ([setting, value]: [string, any]): void => {
+        if (value !== this.homey.settings.get(setting)) {
+          this.homey.settings.set(setting, value)
+        }
       }
-    }
+    )
   }
 }
 

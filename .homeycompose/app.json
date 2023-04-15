@@ -61,13 +61,17 @@
       "method": "GET",
       "path": "/locale"
     },
+    "getDeviceSettings": {
+      "method": "GET",
+      "path": "/devices/settings"
+    },
     "login": {
       "method": "POST",
       "path": "/login"
     },
     "setDeviceSettings": {
       "method": "POST",
-      "path": "/settings"
+      "path": "/devices/settings"
     }
   }
 }

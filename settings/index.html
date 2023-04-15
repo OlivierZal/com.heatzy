@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <title>Heatzy Settings</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
     <script
       type="text/javascript"
       src="/homey.js"
@@ -13,7 +14,7 @@
     <header class="homey-header">
       <h1 class="homey-title" data-i18n="settings.title" />
     </header>
-    <div id="is-not-authenticated">
+    <div id="authenticating" class="hidden">
       <fieldset class="homey-form-fieldset">
         <legend
           class="homey-form-legend"
@@ -47,7 +48,7 @@
         ></button>
       </fieldset>
     </div>
-    <div id="is-authenticated" style="display: none">
+    <div id="authenticated" class="hidden">
       <fieldset class="homey-form-fieldset">
         <legend
           class="homey-form-legend"
@@ -56,22 +57,8 @@
         <div class="homey-form-group">
           <label
             class="homey-form-label"
-            for="interval"
-            data-i18n="settings.devices.interval"
-          ></label>
-          <input
-            class="homey-form-input"
-            id="interval"
-            type="number"
-            inputmode="numeric"
-            value=""
-          />
-        </div>
-        <div class="homey-form-group">
-          <label
-            class="homey-form-label"
             for="always_on"
-            data-i18n="settings.devices.always_on"
+            id="settings-always_on"
           ></label>
           <select class="homey-form-select" id="always_on">
             <option value=""></option>
@@ -83,7 +70,7 @@
           <label
             class="homey-form-label"
             for="on_mode"
-            data-i18n="settings.devices.on_mode.label"
+            id="settings-on_mode"
           ></label>
           <select class="homey-form-select" id="on_mode">
             <option value=""></option>
@@ -103,7 +90,7 @@
         </div>
         <button
           id="apply-settings"
-          class="homey-button-primary-full"
+          class="homey-button-danger-shadow-full"
           data-i18n="settings.devices.apply.button"
         ></button>
       </fieldset>
