@@ -306,6 +306,19 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   alwaysOnLabelElement.innerText = alwaysOnSetting?.title[locale] ?? ''
   const onModeSetting = getDeviceSetting(settings, 'on_mode')
   onModeLabelElement.innerText = onModeSetting?.title[locale] ?? ''
+  if (onModeSetting?.values !== undefined) {
+    for (const value of [
+      { id: '', label: undefined },
+      ...onModeSetting.values
+    ]) {
+      const { id, label } = value
+      const option: HTMLOptionElement = document.createElement('option')
+      option.setAttribute('value', id)
+      const optionText: Text = document.createTextNode(label?.[locale] ?? '')
+      option.appendChild(optionText)
+      onModeElement.appendChild(option)
+    }
+  }
 
   await getHomeySetting(usernameElement)
   await getHomeySetting(passwordElement)

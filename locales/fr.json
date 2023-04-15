@@ -19,28 +19,16 @@
       "true": "Oui"
     },
     "devices": {
-      "always_on": "Désactiver l'extinction depuis Homey",
       "apply": {
         "button": "Appliquer à tous les appareils",
         "confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
         "nothing": "Aucun changement à appliquer."
       },
-      "interval": "Fréquence de mise à jour (minutes)",
-      "label": "Paramètres des appareils",
-      "on_mode": {
-        "label": "Comportement à l'allumage",
-        "values": {
-          "cft": "Confort",
-          "eco": "Éco",
-          "previous": "Mode précédent"
-        }
-      }
+      "label": "Paramètres des appareils"
     },
     "int_error": {
       "message": "__name__ doit être un entier compris entre __min__ et __max__.",
-      "values": {
-        "interval": "La fréquence de mise à jour"
-      }
+      "values": {}
     },
     "title": "Paramètres Heatzy"
   },

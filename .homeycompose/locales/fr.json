@@ -24,14 +24,7 @@
         "confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
         "nothing": "Aucun changement à appliquer."
       },
-      "label": "Paramètres des appareils",
-      "on_mode": {
-        "values": {
-          "cft": "Confort",
-          "eco": "Éco",
-          "previous": "Mode précédent"
-        }
-      }
+      "label": "Paramètres des appareils"
     },
     "int_error": {
       "message": "__name__ doit être un entier compris entre __min__ et __max__.",

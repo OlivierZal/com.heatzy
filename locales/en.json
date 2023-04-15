@@ -19,28 +19,16 @@
       "true": "Yes"
     },
     "devices": {
-      "always_on": "Disable shutdown from Homey",
       "apply": {
         "button": "Apply to all devices",
         "confirm": "Are you sure you want to apply these settings to all devices?",
         "nothing": "No change to apply."
       },
-      "interval": "Update frequency (minutes)",
-      "label": "Device Settings",
-      "on_mode": {
-        "label": "Behavior when switching on",
-        "values": {
-          "cft": "Comfort",
-          "eco": "Eco",
-          "previous": "Previous mode"
-        }
-      }
+      "label": "Device Settings"
     },
     "int_error": {
       "message": "__name__ must be an integer between __min__ and __max__.",
-      "values": {
-        "interval": "The update frequency"
-      }
+      "values": {}
     },
     "title": "Heatzy Settings"
   },
