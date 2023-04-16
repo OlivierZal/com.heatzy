@@ -77,20 +77,6 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     'password'
   ) as HTMLInputElement
 
-  const alwaysOnLabelElement: HTMLLabelElement = document.getElementById(
-    'settings-always_on'
-  ) as HTMLLabelElement
-  const onModeLabelElement: HTMLLabelElement = document.getElementById(
-    'settings-on_mode'
-  ) as HTMLLabelElement
-
-  const alwaysOnElement: HTMLSelectElement = document.getElementById(
-    'always_on'
-  ) as HTMLSelectElement
-  const onModeElement: HTMLSelectElement = document.getElementById(
-    'on_mode'
-  ) as HTMLSelectElement
-
   function unhide(element: HTMLDivElement, value: boolean = true): void {
     if (value) {
       if (element.classList.contains('hidden')) {
@@ -173,15 +159,95 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   function hasAuthenticated(): void {
+    generateSettingsChildrenElements()
     hide(authenticatingElement)
     unhide(authenticatedElement)
   }
 
-  function getDeviceSetting(
-    settings: SettingsData[],
-    id: string
-  ): SettingsData | undefined {
-    return settings.find((setting: SettingsData): boolean => setting.id === id)
+  function addSettingsEventListener(
+    buttonElement: HTMLButtonElement,
+    elements: Array<HTMLInputElement | HTMLSelectElement>
+  ): void {
+    buttonElement.addEventListener('click', (): void => {
+      let body: Settings = {}
+      try {
+        body = buildSettingsBody(elements)
+      } catch (error: unknown) {
+        // @ts-expect-error bug
+        Homey.alert(error instanceof Error ? error.message : String(error))
+        return
+      }
+      if (Object.keys(body).length === 0) {
+        // @ts-expect-error bug
+        Homey.alert(Homey.__('settings.devices.apply.nothing'))
+        return
+      }
+      // @ts-expect-error bug
+      Homey.confirm(
+        Homey.__('settings.devices.apply.confirm'),
+        null,
+        async (error: Error, ok: boolean): Promise<void> => {
+          if (error !== null) {
+            // @ts-expect-error bug
+            await Homey.alert(error.message)
+            return
+          }
+          if (!ok) {
+            // @ts-expect-error bug
+            await Homey.alert(
+              Homey.__('settings.alert.failure', {
+                action: Homey.__('settings.alert.actions.update')
+              })
+            )
+            return
+          }
+          buttonElement.classList.add('is-disabled')
+          setDeviceSettings(buttonElement, body)
+        }
+      )
+    })
+  }
+
+  function generateSettingsChildrenElements(): void {
+    const settingsElement: HTMLDivElement = document.getElementById(
+      'settings'
+    ) as HTMLDivElement
+    settings.forEach((setting: SettingsData): void => {
+      const divElement: HTMLDivElement = document.createElement('div')
+      const labelElement = document.createElement('label')
+      divElement.className = 'homey-form-group'
+      labelElement.className = 'homey-form-checkbox'
+      labelElement.setAttribute('for', setting.id)
+      labelElement.id = `setting-${setting.id}`
+      labelElement.innerText = setting.title[locale]
+      divElement.appendChild(labelElement)
+      const selectElement = document.createElement('select')
+      selectElement.className = 'homey-form-select'
+      ;[
+        { id: '' },
+        ...(setting.type === 'checkbox'
+          ? [{ id: 'false' }, { id: 'true' }]
+          : setting.values ?? [])
+      ].forEach((value: { id: string; label?: Record<string, string> }) => {
+        const { id, label } = value
+        const optionElement: HTMLOptionElement =
+          document.createElement('option')
+        optionElement.value = id
+        if (id !== '') {
+          optionElement.innerText =
+            label !== undefined
+              ? label[locale]
+              : Homey.__(`settings.boolean.${id}`)
+        }
+        selectElement.appendChild(optionElement)
+      })
+      divElement.appendChild(selectElement)
+      settingsElement.appendChild(divElement)
+    })
+    addSettingsEventListener(
+      applySettingsElement,
+      Array.from(settingsElement.querySelectorAll('select'))
+    )
   }
 
   function login(): void {
@@ -258,68 +324,6 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     )
   }
 
-  function addSettingsEventListener(
-    buttonElement: HTMLButtonElement,
-    elements: Array<HTMLInputElement | HTMLSelectElement>,
-    driverId?: string
-  ): void {
-    buttonElement.addEventListener('click', (): void => {
-      let body: Settings = {}
-      try {
-        body = buildSettingsBody(elements)
-      } catch (error: unknown) {
-        // @ts-expect-error bug
-        Homey.alert(error instanceof Error ? error.message : String(error))
-        return
-      }
-      if (Object.keys(body).length === 0) {
-        // @ts-expect-error bug
-        Homey.alert(Homey.__('settings.devices.apply.nothing'))
-        return
-      }
-      // @ts-expect-error bug
-      Homey.confirm(
-        Homey.__('settings.devices.apply.confirm'),
-        null,
-        async (error: Error, ok: boolean): Promise<void> => {
-          if (error !== null) {
-            // @ts-expect-error bug
-            await Homey.alert(error.message)
-            return
-          }
-          if (!ok) {
-            // @ts-expect-error bug
-            await Homey.alert(
-              Homey.__('settings.alert.failure', {
-                action: Homey.__('settings.alert.actions.update')
-              })
-            )
-            return
-          }
-          buttonElement.classList.add('is-disabled')
-          setDeviceSettings(buttonElement, body, driverId)
-        }
-      )
-    })
-  }
-  const alwaysOnSetting = getDeviceSetting(settings, 'always_on')
-  alwaysOnLabelElement.innerText = alwaysOnSetting?.title[locale] ?? ''
-  const onModeSetting = getDeviceSetting(settings, 'on_mode')
-  onModeLabelElement.innerText = onModeSetting?.title[locale] ?? ''
-  if (onModeSetting?.values !== undefined) {
-    for (const value of [
-      { id: '', label: undefined },
-      ...onModeSetting.values
-    ]) {
-      const { id, label } = value
-      const option: HTMLOptionElement = document.createElement('option')
-      option.setAttribute('value', id)
-      const optionText: Text = document.createTextNode(label?.[locale] ?? '')
-      option.appendChild(optionText)
-      onModeElement.appendChild(option)
-    }
-  }
-
   await getHomeySetting(usernameElement)
   await getHomeySetting(passwordElement)
   login()
@@ -328,9 +332,4 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     authenticateElement.classList.add('is-disabled')
     login()
   })
-
-  addSettingsEventListener(applySettingsElement, [
-    alwaysOnElement,
-    onModeElement
-  ])
 }
