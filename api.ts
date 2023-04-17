@@ -33,7 +33,7 @@ module.exports = {
               max: child.max,
               type: child.type,
               units: child.units,
-              values: child.values.map(
+              values: (child.values ?? []).map(
                 (value: {
                   id: string
                   label: Record<string, string>
