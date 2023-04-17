@@ -1,6 +1,6 @@
 import type Homey from 'homey/lib/Homey'
 import {
-  type DriverSetting,
+  type DeviceSetting,
   type LoginCredentials,
   type Settings
 } from '../types'
@@ -25,22 +25,13 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     )
   })
 
-  async function getDeviceSettings(
-    driverId?: string
-  ): Promise<DriverSetting[]> {
-    return await new Promise<DriverSetting[]>((resolve, reject) => {
-      let endPoint: string = '/devices/settings'
-      if (driverId !== undefined) {
-        const queryString: string = new URLSearchParams({
-          driverId
-        }).toString()
-        endPoint += `?${queryString}`
-      }
+  const settings: DeviceSetting[] = await new Promise<DeviceSetting[]>(
+    (resolve, reject) => {
       // @ts-expect-error bug
       Homey.api(
         'GET',
-        endPoint,
-        async (error: Error, settings: DriverSetting[]): Promise<void> => {
+        '/devices/settings',
+        async (error: Error, settings: DeviceSetting[]): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error bug
             await Homey.alert(error.message)
@@ -50,10 +41,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           resolve(settings)
         }
       )
-    })
-  }
-
-  const settings: DriverSetting[] = await getDeviceSettings()
+    }
+  )
 
   const applySettingsElement: HTMLButtonElement = document.getElementById(
     'apply-settings'
@@ -211,7 +200,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     const settingsElement: HTMLDivElement = document.getElementById(
       'settings'
     ) as HTMLDivElement
-    settings.forEach((setting: DriverSetting): void => {
+    settings.forEach((setting: DeviceSetting): void => {
       const divElement: HTMLDivElement = document.createElement('div')
       const labelElement = document.createElement('label')
       divElement.className = 'homey-form-group'

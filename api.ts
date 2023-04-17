@@ -1,9 +1,10 @@
 import type Homey from 'homey/lib/Homey'
 import type HeatzyApp from './app'
 import {
-  type DriverSetting,
+  type DeviceSetting,
   type LoginCredentials,
-  type ManifestDriverSetting,
+  type ManifestDevice,
+  type ManifestDeviceSetting,
   type Settings
 } from './types'
 
@@ -14,19 +15,19 @@ module.exports = {
   }: {
     homey: Homey
     query: { id?: string }
-  }): Promise<DriverSetting[]> {
+  }): Promise<DeviceSetting[]> {
     const app: HeatzyApp = homey.app as HeatzyApp
     const language: string = app.getLanguage()
-    let settings: DriverSetting[] = app.manifest.drivers.flatMap(
-      (driver: any): DriverSetting[] =>
-        driver.settings.flatMap(
-          (setting: ManifestDriverSetting): DriverSetting[] =>
+    let settings: DeviceSetting[] = app.manifest.drivers.flatMap(
+      (driver: ManifestDevice): DeviceSetting[] =>
+        (driver.settings ?? []).flatMap(
+          (setting: ManifestDeviceSetting): DeviceSetting[] =>
             setting.children.map((child: any): any => ({
               id: child.id,
               driverId: driver.id,
               group: setting.label.en.toLowerCase(),
               groupLabel: setting.label[language],
-              title: (driver?.capabilitiesOptions?.[child.id]?.title ??
+              title: (driver.capabilitiesOptions?.[child.id]?.title ??
                 child.label)[language],
               min: child.min,
               max: child.max,
@@ -46,7 +47,7 @@ module.exports = {
     )
     if (query.id !== undefined) {
       settings = settings.filter(
-        (setting: DriverSetting): boolean => setting.id === query.id
+        (setting: DeviceSetting): boolean => setting.id === query.id
       )
     }
     return settings

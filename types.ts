@@ -2,7 +2,13 @@ import type HeatzyDevice from './drivers/heatzy/device'
 
 export type Settings = Record<string, any>
 
-export interface ManifestDriverSetting {
+export interface ManifestDevice {
+  id: string
+  capabilitiesOptions?: Record<string, { title?: Record<string, string> }>
+  settings?: ManifestDeviceSetting[]
+}
+
+export interface ManifestDeviceSetting {
   label: Record<string, string>
   children: Array<{
     id: string
@@ -15,7 +21,7 @@ export interface ManifestDriverSetting {
   }>
 }
 
-export interface DriverSetting {
+export interface DeviceSetting {
   id: string
   driverId: string
   group: string
