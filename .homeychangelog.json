@@ -4,5 +4,8 @@
   },
   "2.0.0": {
     "en": "Translated into French."
+  },
+  "3.0.0": {
+    "en": "Optimized loops and reshaped app settings."
   }
 }
