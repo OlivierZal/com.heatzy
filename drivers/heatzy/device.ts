@@ -166,7 +166,7 @@ export default class HeatzyDevice extends Device {
     this.syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncFromDevice()
     }, 60000)
-    this.log('Next sync in 1 second')
+    this.log('Next sync in 1 minute')
   }
 
   async onSettings({
