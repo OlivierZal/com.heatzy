@@ -2,16 +2,30 @@ import type HeatzyDevice from './drivers/heatzy/device'
 
 export type Settings = Record<string, any>
 
-export interface SettingsData {
+export interface ManifestDriverSetting {
+  label: Record<string, string>
+  children: Array<{
+    id: string
+    label: Record<string, string>
+    min?: number
+    max?: number
+    type: string
+    units?: string
+    values?: Array<{ id: string; label: Record<string, string> }>
+  }>
+}
+
+export interface DriverSetting {
   id: string
   driverId: string
-  label: Record<string, string>
-  title: Record<string, string>
+  group: string
+  groupLabel: string
+  title: string
   type: string
   min?: number
   max?: number
-  units?: Record<string, string>
-  values?: Array<{ id: string; label: Record<string, string> }>
+  units?: string
+  values?: Array<{ id: string; label: string }>
 }
 
 export type ModeNumber = 0 | 1 | 2 | 3

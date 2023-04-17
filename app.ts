@@ -30,11 +30,9 @@ function formatDevicePostData(
 }
 
 export default class HeatzyApp extends App {
-  locale!: string
   loginTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
-    this.locale = this.homey.i18n.getLanguage()
     axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
     axios.defaults.headers.common['X-Gizwits-Application-Id'] =
       'c70a66ff039d41b4a220e198b0fcc8b3'
@@ -204,6 +202,10 @@ export default class HeatzyApp extends App {
         }
       }
     )
+  }
+
+  getLanguage(): string {
+    return this.homey.i18n.getLanguage()
   }
 }
 
