@@ -11,15 +11,13 @@ import {
 
 module.exports = {
   async getDeviceSettings({
-    homey,
-    query
+    homey
   }: {
     homey: Homey
-    query: { id?: string }
   }): Promise<DeviceSetting[]> {
     const app: HeatzyApp = homey.app as HeatzyApp
     const language: string = app.getLanguage()
-    let settings: DeviceSetting[] = app.manifest.drivers.flatMap(
+    return app.manifest.drivers.flatMap(
       (driver: ManifestDevice): DeviceSetting[] =>
         (driver.settings ?? []).flatMap(
           (setting: ManifestDeviceSetting): DeviceSetting[] =>
@@ -47,12 +45,6 @@ module.exports = {
             )
         )
     )
-    if (query.id !== undefined) {
-      settings = settings.filter(
-        (setting: DeviceSetting): boolean => setting.id === query.id
-      )
-    }
-    return settings
   },
 
   async getLanguage({ homey }: { homey: Homey }): Promise<string> {
