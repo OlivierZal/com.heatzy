@@ -13,8 +13,9 @@ export interface ManifestDeviceSettingData {
 }
 
 export interface ManifestDeviceSetting {
+  id?: string
   label: Record<string, string>
-  children: ManifestDeviceSettingData[]
+  children?: ManifestDeviceSettingData[]
 }
 
 export interface ManifestDevice {
@@ -25,7 +26,7 @@ export interface ManifestDevice {
 
 export interface DeviceSetting {
   id: string
-  group: string
+  groupId?: string
   groupLabel: string
   title: string
   type: string
