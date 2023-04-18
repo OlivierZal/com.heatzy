@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { App } from 'homey'
+import { App, type Driver } from 'homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 import {
   type DeviceData,
@@ -177,15 +177,15 @@ export default class HeatzyApp extends App {
     }
     try {
       await Promise.all(
-        (
-          this.homey.drivers.getDriver('heatzy').getDevices() as HeatzyDevice[]
-        ).map(async (device: HeatzyDevice): Promise<void> => {
-          await device.setSettings(settings)
-          await device.onSettings({
-            newSettings: device.getSettings(),
-            changedKeys
+        Object.values(this.homey.drivers.getDrivers())
+          .flatMap((driver: Driver) => driver.getDevices() as HeatzyDevice[])
+          .map(async (device: HeatzyDevice): Promise<void> => {
+            await device.setSettings(settings)
+            await device.onSettings({
+              newSettings: device.getSettings(),
+              changedKeys
+            })
           })
-        })
       )
       return true
     } catch (error: unknown) {

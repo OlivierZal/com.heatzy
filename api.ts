@@ -26,7 +26,6 @@ module.exports = {
             setting.children.map(
               (child: ManifestDeviceSettingData): DeviceSetting => ({
                 id: child.id,
-                driverId: driver.id,
                 group: setting.label.en.toLowerCase(),
                 groupLabel: setting.label[language],
                 title: (driver.capabilitiesOptions?.[child.id]?.title ??

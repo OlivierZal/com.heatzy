@@ -57,6 +57,9 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   const authenticatingElement: HTMLDivElement = document.getElementById(
     'authenticating'
   ) as HTMLDivElement
+  const settingsElement: HTMLDivElement = document.getElementById(
+    'settings'
+  ) as HTMLDivElement
 
   const usernameElement: HTMLInputElement = document.getElementById(
     'username'
@@ -146,10 +149,38 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     )
   }
 
-  function hasAuthenticated(): void {
-    generateSettingsChildrenElements()
-    hide(authenticatingElement)
-    unhide(authenticatedElement)
+  function setDeviceSettings(
+    buttonElement: HTMLButtonElement,
+    body: Settings
+  ): void {
+    // @ts-expect-error bug
+    Homey.api(
+      'POST',
+      '/devices/settings',
+      body,
+      async (error: Error, success: boolean): Promise<void> => {
+        if (error !== null) {
+          setDeviceSettings(buttonElement, body)
+          return
+        }
+        buttonElement.classList.remove('is-disabled')
+        if (!success) {
+          // @ts-expect-error bug
+          await Homey.alert(
+            Homey.__('settings.alert.failure', {
+              action: Homey.__('settings.alert.actions.update')
+            })
+          )
+          return
+        }
+        // @ts-expect-error bug
+        await Homey.alert(
+          Homey.__('settings.alert.success', {
+            action: Homey.__('settings.alert.actions.update')
+          })
+        )
+      }
+    )
   }
 
   function addSettingsEventListener(
@@ -196,43 +227,59 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     })
   }
 
-  function generateSettingsChildrenElements(): void {
-    const settingsElement: HTMLDivElement = document.getElementById(
-      'settings'
-    ) as HTMLDivElement
-    settings.forEach((setting: DeviceSetting): void => {
-      const divElement: HTMLDivElement = document.createElement('div')
-      const labelElement = document.createElement('label')
-      divElement.className = 'homey-form-group'
-      labelElement.className = 'homey-form-checkbox'
-      labelElement.setAttribute('for', setting.id)
-      labelElement.id = `setting-${setting.id}`
-      labelElement.innerText = setting.title
-      divElement.appendChild(labelElement)
-      const selectElement = document.createElement('select')
-      selectElement.className = 'homey-form-select'
-      ;[
-        { id: '' },
-        ...(setting.type === 'checkbox'
-          ? [{ id: 'false' }, { id: 'true' }]
-          : setting.values ?? [])
-      ].forEach((value: { id: string; label?: string }) => {
-        const { id, label } = value
-        const optionElement: HTMLOptionElement =
-          document.createElement('option')
-        optionElement.value = id
-        if (id !== '') {
-          optionElement.innerText = label ?? Homey.__(`settings.boolean.${id}`)
-        }
-        selectElement.appendChild(optionElement)
+  function generateSelectChildrenElements(
+    settings: DeviceSetting[],
+    settingsElement: HTMLDivElement,
+    applySettingsElement: HTMLButtonElement
+  ): void {
+    settings
+      .filter((setting: DeviceSetting): boolean =>
+        ['checkbox', 'dropdown'].includes(setting.type)
+      )
+      .forEach((setting: DeviceSetting): void => {
+        const divElement: HTMLDivElement = document.createElement('div')
+        divElement.className = 'homey-form-group'
+        const labelElement = document.createElement('label')
+        labelElement.className = 'homey-form-label'
+        labelElement.id = `setting-${setting.id}`
+        labelElement.innerText = setting.title
+        labelElement.setAttribute('for', setting.id)
+        divElement.appendChild(labelElement)
+        const selectElement = document.createElement('select')
+        selectElement.className = 'homey-form-select'
+        ;[
+          { id: '' },
+          ...(setting.type === 'checkbox'
+            ? [{ id: 'false' }, { id: 'true' }]
+            : setting.values ?? [])
+        ].forEach((value: { id: string; label?: string }) => {
+          const { id, label } = value
+          const optionElement: HTMLOptionElement =
+            document.createElement('option')
+          optionElement.value = id
+          if (id !== '') {
+            optionElement.innerText =
+              label ?? Homey.__(`settings.boolean.${id}`)
+          }
+          selectElement.appendChild(optionElement)
+        })
+        divElement.appendChild(selectElement)
+        settingsElement.appendChild(divElement)
       })
-      divElement.appendChild(selectElement)
-      settingsElement.appendChild(divElement)
-    })
     addSettingsEventListener(
       applySettingsElement,
       Array.from(settingsElement.querySelectorAll('select'))
     )
+  }
+
+  function hasAuthenticated(): void {
+    generateSelectChildrenElements(
+      settings,
+      settingsElement,
+      applySettingsElement
+    )
+    hide(authenticatingElement)
+    unhide(authenticatedElement)
   }
 
   function login(): void {
@@ -263,48 +310,6 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           return
         }
         hasAuthenticated()
-      }
-    )
-  }
-
-  function setDeviceSettings(
-    buttonElement: HTMLButtonElement,
-    body: Settings,
-    driverId?: string
-  ): void {
-    let endPoint: string = '/devices/settings'
-    if (driverId !== undefined) {
-      const queryString: string = new URLSearchParams({
-        driverId
-      }).toString()
-      endPoint += `?${queryString}`
-    }
-    // @ts-expect-error bug
-    Homey.api(
-      'POST',
-      endPoint,
-      body,
-      async (error: Error, success: boolean): Promise<void> => {
-        if (error !== null) {
-          setDeviceSettings(buttonElement, body, driverId)
-          return
-        }
-        buttonElement.classList.remove('is-disabled')
-        if (!success) {
-          // @ts-expect-error bug
-          await Homey.alert(
-            Homey.__('settings.alert.failure', {
-              action: Homey.__('settings.alert.actions.update')
-            })
-          )
-          return
-        }
-        // @ts-expect-error bug
-        await Homey.alert(
-          Homey.__('settings.alert.success', {
-            action: Homey.__('settings.alert.actions.update')
-          })
-        )
       }
     )
   }

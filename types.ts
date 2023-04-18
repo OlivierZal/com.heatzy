@@ -25,7 +25,6 @@ export interface ManifestDevice {
 
 export interface DeviceSetting {
   id: string
-  driverId: string
   group: string
   groupLabel: string
   title: string
