@@ -10,9 +10,7 @@
     },
     "authenticate": {
       "button": "Se connecter",
-      "password": "Mot de passe",
-      "label": "Identifiants",
-      "username": "Nom d'utilisateur"
+      "label": "Identifiants"
     },
     "boolean": {
       "false": "Non",

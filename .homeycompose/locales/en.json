@@ -10,9 +10,7 @@
     },
     "authenticate": {
       "button": "Log in",
-      "label": "Credentials",
-      "password": "Password",
-      "username": "Username"
+      "label": "Credentials"
     },
     "boolean": {
       "false": "No",

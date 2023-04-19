@@ -25,8 +25,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     )
   })
 
-  const settings: DeviceSetting[] = await new Promise<DeviceSetting[]>(
-    (resolve, reject) => {
+  async function getDeviceSettings(): Promise<DeviceSetting[]> {
+    return await new Promise<DeviceSetting[]>((resolve, reject) => {
       // @ts-expect-error bug
       Homey.api(
         'GET',
@@ -41,7 +41,22 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           resolve(settings)
         }
       )
-    }
+    })
+  }
+
+  const { settings, settingsLogin } = (await getDeviceSettings()).reduce<{
+    settings: DeviceSetting[]
+    settingsLogin: DeviceSetting[]
+  }>(
+    (acc, setting: DeviceSetting) => {
+      if (setting.groupId === 'login') {
+        acc.settingsLogin.push(setting)
+      } else {
+        acc.settings.push(setting)
+      }
+      return acc
+    },
+    { settings: [], settingsLogin: [] }
   )
 
   const applySettingsElement: HTMLButtonElement = document.getElementById(
@@ -57,16 +72,30 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   const authenticatingElement: HTMLDivElement = document.getElementById(
     'authenticating'
   ) as HTMLDivElement
+  const loginElement: HTMLDivElement = document.getElementById(
+    'login'
+  ) as HTMLDivElement
   const settingsElement: HTMLDivElement = document.getElementById(
     'settings'
   ) as HTMLDivElement
 
-  const usernameElement: HTMLInputElement = document.getElementById(
-    'username'
-  ) as HTMLInputElement
-  const passwordElement: HTMLInputElement = document.getElementById(
-    'password'
-  ) as HTMLInputElement
+  const [usernameElement, passwordElement]: HTMLInputElement[] =
+    settingsLogin.map((setting: DeviceSetting): HTMLInputElement => {
+      const divElement: HTMLDivElement = document.createElement('div')
+      divElement.classList.add('homey-form-group')
+      const labelElement: HTMLLabelElement = document.createElement('label')
+      labelElement.classList.add('homey-form-label')
+      labelElement.setAttribute('for', setting.id)
+      labelElement.innerText = setting.title
+      const inputElement: HTMLInputElement = document.createElement('input')
+      inputElement.classList.add('homey-form-input')
+      inputElement.id = setting.id
+      inputElement.type = setting.type
+      inputElement.placeholder = setting.placeholder ?? ''
+      loginElement.appendChild(labelElement)
+      loginElement.appendChild(inputElement)
+      return inputElement
+    }, [])
 
   function unhide(element: HTMLDivElement, value: boolean = true): void {
     if (value) {
@@ -230,11 +259,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     })
   }
 
-  function generateSelectChildrenElements(
-    settings: DeviceSetting[],
-    settingsElement: HTMLDivElement,
-    applySettingsElement: HTMLButtonElement
-  ): void {
+  function generateMixinChildrenElements(): void {
     settings
       .filter((setting: DeviceSetting): boolean =>
         ['checkbox', 'dropdown'].includes(setting.type)
@@ -276,11 +301,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   function hasAuthenticated(): void {
-    generateSelectChildrenElements(
-      settings,
-      settingsElement,
-      applySettingsElement
-    )
+    generateMixinChildrenElements()
     hide(authenticatingElement)
     unhide(authenticatedElement)
   }
