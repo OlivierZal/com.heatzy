@@ -26,10 +26,7 @@
       },
       "label": "Paramètres des appareils"
     },
-    "int_error": {
-      "message": "__name__ doit être un entier compris entre __min__ et __max__.",
-      "values": {}
-    },
+    "int_error": "__name__ : doit être un entier compris entre __min__ et __max__.",
     "title": "Paramètres Heatzy"
   },
   "warnings": {

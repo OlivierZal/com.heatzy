@@ -26,10 +26,7 @@
       },
       "label": "Device Settings"
     },
-    "int_error": {
-      "message": "__name__ must be an integer between __min__ and __max__.",
-      "values": {}
-    },
+    "int_error": "__name__: must be an integer between __min__ and __max__.",
     "title": "Heatzy Settings"
   },
   "warnings": {
