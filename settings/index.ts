@@ -44,7 +44,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     })
   }
 
-  const { settings, settingsLogin } = (await getDeviceSettings()).reduce<{
+  const allSettings: DeviceSetting[] = await getDeviceSettings()
+  const { settings, settingsLogin } = allSettings.reduce<{
     settings: DeviceSetting[]
     settingsLogin: DeviceSetting[]
   }>(
