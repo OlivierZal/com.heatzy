@@ -97,7 +97,7 @@ module.exports = {
   }: {
     homey: Homey
     body: Settings
-  }): Promise<boolean> {
-    return await (homey.app as HeatzyApp).setDeviceSettings(body)
+  }): Promise<void> {
+    await (homey.app as HeatzyApp).setDeviceSettings(body)
   }
 }

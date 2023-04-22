@@ -56,15 +56,14 @@ export default class HeatzyApp extends App {
       if (ms > 0) {
         const maxTimeout: number = Math.pow(2, 31) - 1
         const interval: number = Math.min(ms, maxTimeout)
-        this.loginTimeout = this.homey.setTimeout(
-          async (): Promise<boolean> => await this.login(loginCredentials),
-          interval
-        )
+        this.loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
+          await this.login(loginCredentials).catch(this.error)
+        }, interval)
         this.log('Login refresh has been scheduled')
         return
       }
     }
-    await this.login(loginCredentials)
+    await this.login(loginCredentials).catch(this.error)
   }
 
   clearLoginRefresh(): void {
@@ -75,7 +74,7 @@ export default class HeatzyApp extends App {
   async login(postData: LoginCredentials): Promise<boolean> {
     try {
       const { username, password } = postData
-      if (username === '' && password === '') {
+      if (username === '' || password === '') {
         return false
       }
       this.log('Login...\n', postData)
@@ -97,9 +96,11 @@ export default class HeatzyApp extends App {
       await this.refreshLogin()
       return true
     } catch (error: unknown) {
-      this.error('Login:', error instanceof Error ? error.message : error)
+      const errorMessage: string =
+        error instanceof Error ? error.message : String(error)
+      this.error('Login:', errorMessage)
+      throw new Error(errorMessage)
     }
-    return false
   }
 
   async listDevices(): Promise<DeviceDetails[]> {
@@ -170,28 +171,35 @@ export default class HeatzyApp extends App {
     return false
   }
 
-  async setDeviceSettings(settings: Settings): Promise<boolean> {
+  async setDeviceSettings(settings: Settings): Promise<void> {
     const changedKeys: string[] = Object.keys(settings)
     if (changedKeys.length === 0) {
-      return true
+      return
     }
     try {
       await Promise.all(
         Object.values(this.homey.drivers.getDrivers())
           .flatMap((driver: Driver) => driver.getDevices() as HeatzyDevice[])
           .map(async (device: HeatzyDevice): Promise<void> => {
-            await device.setSettings(settings)
-            await device.onSettings({
-              newSettings: device.getSettings(),
-              changedKeys
-            })
+            try {
+              await device.setSettings(settings).then((): void => {
+                device.log(settings)
+              })
+              await device.onSettings({
+                newSettings: device.getSettings(),
+                changedKeys
+              })
+            } catch (error: unknown) {
+              const errorMessage: string =
+                error instanceof Error ? error.message : String(error)
+              device.error(errorMessage)
+              throw new Error(errorMessage)
+            }
           })
       )
-      return true
     } catch (error: unknown) {
-      this.error(error instanceof Error ? error.message : error)
+      throw new Error(error instanceof Error ? error.message : String(error))
     }
-    return false
   }
 
   setSettings(settings: Settings): void {
