@@ -1,15 +1,8 @@
 {
   "settings": {
-    "alert": {
-      "actions": {
-        "authenticate": "L'authentification",
-        "update": "La mise à jour"
-      },
-      "failure": "__action__ a échoué.",
-      "success": "__action__ a réussi."
-    },
     "authenticate": {
       "button": "Se connecter",
+      "failure": "L'authentification a échoué.",
       "label": "Identifiants"
     },
     "boolean": {
@@ -25,6 +18,7 @@
       "label": "Paramètres des appareils"
     },
     "int_error": "__name__ : doit être un entier compris entre __min__ et __max__.",
+    "success": "La mise à jour a réussi.",
     "title": "Paramètres Heatzy"
   },
   "warnings": {

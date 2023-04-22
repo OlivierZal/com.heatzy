@@ -199,11 +199,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         }
         buttonElement.classList.remove('is-disabled')
         // @ts-expect-error bug
-        await Homey.alert(
-          Homey.__('settings.alert.success', {
-            action: Homey.__('settings.alert.actions.update')
-          })
-        )
+        await Homey.alert(Homey.__('settings.success'))
       }
     )
   }
@@ -218,12 +214,12 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         body = buildSettingsBody(elements)
       } catch (error: unknown) {
         // @ts-expect-error bug
-        Homey.alert(error instanceof Error ? error.message : String(error))
+        void Homey.alert(error instanceof Error ? error.message : String(error))
         return
       }
       if (Object.keys(body).length === 0) {
         // @ts-expect-error bug
-        Homey.alert(Homey.__('settings.devices.apply.nothing'))
+        void Homey.alert(Homey.__('settings.devices.apply.nothing'))
         return
       }
       // @ts-expect-error bug
@@ -293,10 +289,17 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     unhide(authenticatedElement)
   }
 
-  function login(): void {
+  async function login(): Promise<void> {
+    const username: string = usernameElement.value
+    const password: string = passwordElement.value
+    if (username === '' || password === '') {
+      // @ts-expect-error bug
+      await Homey.alert(Homey.__('settings.authenticate.failure'))
+      return
+    }
     const body: LoginCredentials = {
-      username: usernameElement.value,
-      password: passwordElement.value
+      username,
+      password
     }
     // @ts-expect-error bug
     Homey.api(
@@ -313,11 +316,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
             return
           }
           // @ts-expect-error bug
-          await Homey.alert(
-            Homey.__('settings.alert.failure', {
-              action: Homey.__('settings.alert.actions.authenticate')
-            })
-          )
+          await Homey.alert(Homey.__('settings.authenticate.failure'))
           return
         }
         hasAuthenticated()
@@ -325,12 +324,12 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     )
   }
 
-  await getHomeySetting(usernameElement)
-  await getHomeySetting(passwordElement)
-  login()
-
   authenticateElement.addEventListener('click', (): void => {
     authenticateElement.classList.add('is-disabled')
-    login()
+    void login()
   })
+
+  await getHomeySetting(usernameElement)
+  await getHomeySetting(passwordElement)
+  await login()
 }
