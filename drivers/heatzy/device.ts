@@ -145,7 +145,7 @@ export default class HeatzyDevice extends Device {
 
   async sync(): Promise<void> {
     await this.updateCapabilities()
-    this.planSyncFromDevice()
+    this.planSyncFromDevice(60000)
   }
 
   async updateCapabilities(): Promise<void> {
@@ -161,12 +161,12 @@ export default class HeatzyDevice extends Device {
     }
   }
 
-  planSyncFromDevice(): void {
+  planSyncFromDevice(ms: number): void {
     this.clearSyncPlan()
     this.syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncFromDevice()
-    }, 60000)
-    this.log('Next sync in 1 minute')
+    }, ms)
+    this.log('Next sync in', ms / 1000, 'second(s)')
   }
 
   async onSettings({
@@ -191,7 +191,7 @@ export default class HeatzyDevice extends Device {
           !['always_on', 'on_mode'].includes(setting)
       )
     ) {
-      this.planSyncFromDevice()
+      this.planSyncFromDevice(1000)
     }
   }
 

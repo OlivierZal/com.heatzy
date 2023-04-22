@@ -191,21 +191,13 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       'POST',
       '/devices/settings',
       body,
-      async (error: Error, success: boolean): Promise<void> => {
+      async (error: Error): Promise<void> => {
         if (error !== null) {
-          setDeviceSettings(buttonElement, body)
+          // @ts-expect-error bug
+          await Homey.alert(error.message)
           return
         }
         buttonElement.classList.remove('is-disabled')
-        if (!success) {
-          // @ts-expect-error bug
-          await Homey.alert(
-            Homey.__('settings.alert.failure', {
-              action: Homey.__('settings.alert.actions.update')
-            })
-          )
-          return
-        }
         // @ts-expect-error bug
         await Homey.alert(
           Homey.__('settings.alert.success', {
@@ -244,17 +236,10 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
             await Homey.alert(error.message)
             return
           }
-          if (!ok) {
-            // @ts-expect-error bug
-            await Homey.alert(
-              Homey.__('settings.alert.failure', {
-                action: Homey.__('settings.alert.actions.update')
-              })
-            )
-            return
+          if (ok) {
+            buttonElement.classList.add('is-disabled')
+            setDeviceSettings(buttonElement, body)
           }
-          buttonElement.classList.add('is-disabled')
-          setDeviceSettings(buttonElement, body)
         }
       )
     })
@@ -272,16 +257,17 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         labelElement.className = 'homey-form-label'
         labelElement.id = `setting-${setting.id}`
         labelElement.innerText = setting.title
-        labelElement.setAttribute('for', setting.id)
         divElement.appendChild(labelElement)
         const selectElement = document.createElement('select')
         selectElement.className = 'homey-form-select'
+        selectElement.id = setting.id
+        labelElement.setAttribute('for', selectElement.id)
         ;[
           { id: '' },
           ...(setting.type === 'checkbox'
             ? [{ id: 'false' }, { id: 'true' }]
             : setting.values ?? [])
-        ].forEach((value: { id: string; label?: string }) => {
+        ].forEach((value: { id: string; label?: string }): void => {
           const { id, label } = value
           const optionElement: HTMLOptionElement =
             document.createElement('option')
@@ -319,13 +305,13 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       body,
       async (error: Error, login: boolean): Promise<void> => {
         authenticateElement.classList.remove('is-disabled')
-        if (error !== null) {
-          // @ts-expect-error bug
-          await Homey.alert(error.message)
-          return
-        }
-        if (!login) {
+        if (error !== null || !login) {
           unhide(authenticatingElement)
+          if (error !== null) {
+            // @ts-expect-error bug
+            await Homey.alert(error.message)
+            return
+          }
           // @ts-expect-error bug
           await Homey.alert(
             Homey.__('settings.alert.failure', {
