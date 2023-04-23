@@ -185,13 +185,6 @@ export default class HeatzyDevice extends Device {
       this.getCapabilityValue('onoff') === false
     ) {
       await this.onCapability('onoff', true)
-    } else if (
-      changedKeys.some(
-        (setting: string): boolean =>
-          !['always_on', 'on_mode'].includes(setting)
-      )
-    ) {
-      this.planSyncFromDevice(1000)
     }
   }
 
