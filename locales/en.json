@@ -1,0 +1,27 @@
+{
+  "settings": {
+    "authenticate": {
+      "button": "Log in",
+      "failure": "Authentication failed.",
+      "legend": "Credentials"
+    },
+    "boolean": {
+      "false": "No",
+      "true": "Yes"
+    },
+    "devices": {
+      "apply": {
+        "button": "Apply to all devices",
+        "confirm": "Are you sure you want to apply these settings to all devices?",
+        "nothing": "No change to apply."
+      },
+      "legend": "Device Settings"
+    },
+    "int_error": "__name__: must be an integer between __min__ and __max__.",
+    "success": "Update succeeded.",
+    "title": "Heatzy Settings"
+  },
+  "warnings": {
+    "always_on": "Shutdown from Homey has been disabled."
+  }
+}
