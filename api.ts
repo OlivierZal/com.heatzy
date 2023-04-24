@@ -57,7 +57,7 @@ module.exports = {
           return []
         }
         const driverLoginSettings: DeviceSetting[] = Object.values(
-          Object.entries(driverLoginSetting.options ?? {}).reduce<
+          Object.entries(driverLoginSetting.options).reduce<
             Record<string, DeviceSetting>
           >((acc, [option, label]: [string, Record<string, string>]) => {
             const isPassword: boolean = option.startsWith('password')
