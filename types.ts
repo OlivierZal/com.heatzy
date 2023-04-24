@@ -36,7 +36,7 @@ export interface ManifestDriver {
     string,
     { readonly title?: Record<string, string> }
   >
-  readonly pair: LoginSetting & PairSetting[]
+  readonly pair?: LoginSetting & PairSetting[]
   readonly settings?: ManifestDriverSetting[]
 }
 
