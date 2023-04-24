@@ -45,19 +45,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   const allSettings: DeviceSetting[] = await getDeviceSettings()
-  const { settings, settingsLogin } = allSettings.reduce<{
-    settings: DeviceSetting[]
-    settingsLogin: DeviceSetting[]
-  }>(
-    (acc, setting: DeviceSetting) => {
-      if (setting.groupId === 'login') {
-        acc.settingsLogin.push(setting)
-      } else {
-        acc.settings.push(setting)
-      }
-      return acc
-    },
-    { settings: [], settingsLogin: [] }
+  const settings = allSettings.filter(
+    (setting: DeviceSetting): boolean => setting.groupId !== 'login'
   )
 
   async function getHomeySetting(
@@ -99,8 +88,12 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     'settings'
   ) as HTMLDivElement
 
-  const credentialElements: HTMLInputElement[] = []
-  for (const setting of settingsLogin) {
+  const credentialKeys: Array<keyof LoginCredentials> = ['username', 'password']
+  const credentialElement: Record<string, HTMLInputElement> = {}
+  for (const credentialKey of credentialKeys) {
+    const setting: DeviceSetting = allSettings.find(
+      (setting: DeviceSetting): boolean => setting.id === credentialKey
+    ) as DeviceSetting
     const divElement: HTMLDivElement = document.createElement('div')
     divElement.classList.add('homey-form-group')
     const labelElement: HTMLLabelElement = document.createElement('label')
@@ -115,10 +108,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     await getHomeySetting(inputElement)
     loginElement.appendChild(labelElement)
     loginElement.appendChild(inputElement)
-    credentialElements.push(inputElement)
+    credentialElement[setting.id] = inputElement
   }
-  const [usernameElement, passwordElement]: HTMLInputElement[] =
-    credentialElements
 
   function unhide(element: HTMLDivElement, value: boolean = true): void {
     if (value) {
@@ -290,8 +281,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   async function login(): Promise<void> {
-    const username: string = usernameElement.value
-    const password: string = passwordElement.value
+    const username: string = credentialElement.username.value
+    const password: string = credentialElement.password.value
     if (username === '' || password === '') {
       authenticateElement.classList.remove('is-disabled')
       unhide(authenticatingElement)

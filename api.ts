@@ -3,9 +3,10 @@ import type HeatzyApp from './app'
 import {
   type DeviceSetting,
   type LoginCredentials,
-  type ManifestDevice,
-  type ManifestDeviceSetting,
-  type ManifestDeviceSettingData,
+  type LoginSetting,
+  type ManifestDriver,
+  type ManifestDriverSetting,
+  type ManifestDriverSettingData,
   type PairSetting,
   type Settings
 } from './types'
@@ -19,11 +20,11 @@ module.exports = {
     const app: HeatzyApp = homey.app as HeatzyApp
     const language: string = app.getLanguage()
     const settings: DeviceSetting[] = app.manifest.drivers.flatMap(
-      (driver: ManifestDevice): DeviceSetting[] =>
+      (driver: ManifestDriver): DeviceSetting[] =>
         (driver.settings ?? []).flatMap(
-          (setting: ManifestDeviceSetting): DeviceSetting[] =>
+          (setting: ManifestDriverSetting): DeviceSetting[] =>
             (setting.children ?? []).map(
-              (child: ManifestDeviceSettingData): DeviceSetting => ({
+              (child: ManifestDriverSettingData): DeviceSetting => ({
                 id: child.id,
                 title: (driver.capabilitiesOptions?.[child.id]?.title ??
                   child.label)[language],
@@ -48,19 +49,16 @@ module.exports = {
         )
     )
     const settingsLogin: DeviceSetting[] = app.manifest.drivers.flatMap(
-      (driver: ManifestDevice): DeviceSetting[] => {
-        const driverPairSetting: PairSetting | undefined = driver.pair?.find(
+      (driver: ManifestDriver): DeviceSetting[] => {
+        const driverLoginSetting: LoginSetting = driver.pair.find(
           (pairSetting: PairSetting): boolean => pairSetting.id === 'login'
-        )
-        if (driverPairSetting === undefined) {
-          return []
-        }
+        ) as LoginSetting
         const driverLoginSettings: DeviceSetting[] = Object.values(
-          Object.entries(driverPairSetting.options ?? {}).reduce<
+          Object.entries(driverLoginSetting.options ?? {}).reduce<
             Record<string, DeviceSetting>
           >((acc, [option, label]: [string, Record<string, string>]) => {
             const isPassword: boolean = option.startsWith('password')
-            const key: 'password' | 'username' = isPassword
+            const key: keyof LoginCredentials = isPassword
               ? 'password'
               : 'username'
             if (!(key in acc)) {
