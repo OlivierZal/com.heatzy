@@ -289,8 +289,10 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   async function login(): Promise<void> {
-    const username: string = credentialElements[0]?.value ?? ''
-    const password: string = credentialElements[1]?.value ?? ''
+    const [usernameElement, passwordElement]: Array<HTMLInputElement | null> =
+      credentialElements
+    const username: string = usernameElement?.value ?? ''
+    const password: string = passwordElement?.value ?? ''
     if (username === '' || password === '') {
       authenticateElement.classList.remove('is-disabled')
       unhide(authenticatingElement)
