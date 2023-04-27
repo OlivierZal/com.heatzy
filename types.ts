@@ -76,10 +76,9 @@ export interface DataError {
   error_message: string
 }
 
-export interface LoginCredentials {
-  username: string
-  password: string
-}
+export const credentialKeys: [string, string] = ['username', 'password']
+
+export type LoginCredentials = Record<(typeof credentialKeys)[number], string>
 
 export interface LoginDataSuccess {
   token: string
