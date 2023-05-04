@@ -40,7 +40,7 @@ export interface ManifestDriver {
   readonly settings?: ManifestDriverSetting[]
 }
 
-export interface DeviceSetting {
+export interface DriverSetting {
   readonly id: string
   readonly type: string
   readonly driverId: string
@@ -53,6 +53,8 @@ export interface DeviceSetting {
   readonly values?: Array<{ id: string; label: string }>
   placeholder?: string
 }
+
+export type DeviceSettings = Record<string, Record<string, any[]>>
 
 export type ModeNumber = 0 | 1 | 2 | 3
 

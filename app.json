@@ -62,10 +62,6 @@
     "local"
   ],
   "api": {
-    "getDeviceSettings": {
-      "method": "GET",
-      "path": "/devices/settings"
-    },
     "getLanguage": {
       "method": "GET",
       "path": "/language"
@@ -74,9 +70,17 @@
       "method": "POST",
       "path": "/login"
     },
+    "getDeviceSettings": {
+      "method": "GET",
+      "path": "/devices/settings"
+    },
     "setDeviceSettings": {
       "method": "POST",
       "path": "/devices/settings"
+    },
+    "getDriverSettings": {
+      "method": "GET",
+      "path": "/drivers/settings"
     }
   },
   "flow": {

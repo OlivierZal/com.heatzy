@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { App, type Driver } from 'homey'
+import { App } from 'homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 import {
   type DeviceData,
@@ -171,37 +171,6 @@ export default class HeatzyApp extends App {
     return false
   }
 
-  async setDeviceSettings(settings: Settings): Promise<void> {
-    const changedKeys: string[] = Object.keys(settings)
-    if (changedKeys.length === 0) {
-      return
-    }
-    try {
-      await Promise.all(
-        Object.values(this.homey.drivers.getDrivers())
-          .flatMap((driver: Driver) => driver.getDevices() as HeatzyDevice[])
-          .map(async (device: HeatzyDevice): Promise<void> => {
-            try {
-              await device.setSettings(settings).then((): void => {
-                device.log(settings)
-              })
-              await device.onSettings({
-                newSettings: device.getSettings(),
-                changedKeys
-              })
-            } catch (error: unknown) {
-              const errorMessage: string =
-                error instanceof Error ? error.message : String(error)
-              device.error(errorMessage)
-              throw new Error(errorMessage)
-            }
-          })
-      )
-    } catch (error: unknown) {
-      throw new Error(error instanceof Error ? error.message : String(error))
-    }
-  }
-
   setSettings(settings: Settings): void {
     Object.entries(settings).forEach(
       ([setting, value]: [string, any]): void => {
@@ -210,10 +179,6 @@ export default class HeatzyApp extends App {
         }
       }
     )
-  }
-
-  getLanguage(): string {
-    return this.homey.i18n.getLanguage()
   }
 }
 

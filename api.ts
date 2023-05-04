@@ -1,7 +1,10 @@
 import type Homey from 'homey/lib/Homey'
+import { type Driver } from 'homey'
 import type HeatzyApp from './app'
+import type HeatzyDevice from './drivers/heatzy/device'
 import {
-  type DeviceSetting,
+  type DeviceSettings,
+  type DriverSetting,
   type LoginCredentials,
   type LoginSetting,
   type ManifestDriver,
@@ -11,20 +14,57 @@ import {
   type Settings
 } from './types'
 
+function getDevices(homey: Homey): HeatzyDevice[] {
+  return Object.values(homey.drivers.getDrivers()).flatMap(
+    (driver: Driver): HeatzyDevice[] => driver.getDevices() as HeatzyDevice[]
+  )
+}
+
+function getLanguage(homey: Homey): string {
+  return homey.i18n.getLanguage()
+}
+
 module.exports = {
   async getDeviceSettings({
     homey
   }: {
     homey: Homey
-  }): Promise<DeviceSetting[]> {
+  }): Promise<DeviceSettings> {
+    return getDevices(homey).reduce<DeviceSettings>(
+      (deviceSettings, device) => {
+        const driverId: string = device.driver.id
+        if (deviceSettings[driverId] === undefined) {
+          deviceSettings[driverId] = {}
+        }
+        Object.entries(device.getSettings()).forEach(
+          ([settingId, value]: [string, any]) => {
+            if (deviceSettings[driverId][settingId] === undefined) {
+              deviceSettings[driverId][settingId] = []
+            }
+            if (!deviceSettings[driverId][settingId].includes(value)) {
+              deviceSettings[driverId][settingId].push(value)
+            }
+          }
+        )
+        return deviceSettings
+      },
+      {}
+    )
+  },
+
+  async getDriverSettings({
+    homey
+  }: {
+    homey: Homey
+  }): Promise<DriverSetting[]> {
     const app: HeatzyApp = homey.app as HeatzyApp
-    const language: string = app.getLanguage()
-    const settings: DeviceSetting[] = app.manifest.drivers.flatMap(
-      (driver: ManifestDriver): DeviceSetting[] =>
+    const language: string = getLanguage(homey)
+    const settings: DriverSetting[] = app.manifest.drivers.flatMap(
+      (driver: ManifestDriver): DriverSetting[] =>
         (driver.settings ?? []).flatMap(
-          (setting: ManifestDriverSetting): DeviceSetting[] =>
+          (setting: ManifestDriverSetting): DriverSetting[] =>
             (setting.children ?? []).map(
-              (child: ManifestDriverSettingData): DeviceSetting => ({
+              (child: ManifestDriverSettingData): DriverSetting => ({
                 id: child.id,
                 title: (driver.capabilitiesOptions?.[child.id]?.title ??
                   child.label)[language],
@@ -48,47 +88,52 @@ module.exports = {
             )
         )
     )
-    const settingsLogin: DeviceSetting[] = app.manifest.drivers.flatMap(
-      (driver: ManifestDriver): DeviceSetting[] => {
+    const settingsLogin: DriverSetting[] = app.manifest.drivers.flatMap(
+      (driver: ManifestDriver): DriverSetting[] => {
         const driverLoginSetting: LoginSetting | undefined = driver.pair?.find(
           (pairSetting: PairSetting): boolean => pairSetting.id === 'login'
         ) as LoginSetting | undefined
         if (driverLoginSetting === undefined) {
           return []
         }
-        const driverLoginSettings: DeviceSetting[] = Object.values(
+        return Object.values(
           Object.entries(driverLoginSetting.options).reduce<
-            Record<string, DeviceSetting>
-          >((acc, [option, label]: [string, Record<string, string>]) => {
-            const isPassword: boolean = option.startsWith('password')
-            const key: keyof LoginCredentials = isPassword
-              ? 'password'
-              : 'username'
-            if (!(key in acc)) {
-              acc[key] = {
-                groupId: 'login',
-                id: key,
-                title: '',
-                type: isPassword ? 'password' : 'text',
-                driverId: driver.id
+            Record<string, DriverSetting>
+          >(
+            (
+              driverLoginSettings,
+              [option, label]: [string, Record<string, string>]
+            ) => {
+              const isPassword: boolean = option.startsWith('password')
+              const key: keyof LoginCredentials = isPassword
+                ? 'password'
+                : 'username'
+              if (driverLoginSettings[key] === undefined) {
+                driverLoginSettings[key] = {
+                  groupId: 'login',
+                  id: key,
+                  title: '',
+                  type: isPassword ? 'password' : 'text',
+                  driverId: driver.id
+                }
               }
-            }
-            if (option.endsWith('Placeholder')) {
-              acc[key].placeholder = label[language]
-            } else {
-              acc[key].title = label[language]
-            }
-            return acc
-          }, {})
+              if (option.endsWith('Placeholder')) {
+                driverLoginSettings[key].placeholder = label[language]
+              } else {
+                driverLoginSettings[key].title = label[language]
+              }
+              return driverLoginSettings
+            },
+            {}
+          )
         )
-        return driverLoginSettings
       }
     )
     return [...settings, ...settingsLogin]
   },
 
   async getLanguage({ homey }: { homey: Homey }): Promise<string> {
-    return (homey.app as HeatzyApp).getLanguage()
+    return getLanguage(homey)
   },
 
   async login({
@@ -108,6 +153,44 @@ module.exports = {
     homey: Homey
     body: Settings
   }): Promise<void> {
-    await (homey.app as HeatzyApp).setDeviceSettings(body)
+    const changedKeys: string[] = Object.keys(body)
+    if (changedKeys.length === 0) {
+      return
+    }
+    try {
+      await Promise.all(
+        getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
+          const deviceChangedKeys: string[] = changedKeys.filter(
+            (changedKey: string): boolean =>
+              body[changedKey] !== device.getSetting(changedKey)
+          )
+          if (deviceChangedKeys.length === 0) {
+            return
+          }
+          const deviceSettings: Settings = Object.keys(body)
+            .filter((key) => deviceChangedKeys.includes(key))
+            .reduce<Settings>((settings, key: string) => {
+              settings[key] = body[key]
+              return settings
+            }, {})
+          try {
+            await device.setSettings(deviceSettings).then((): void => {
+              device.log('Setting:', deviceSettings)
+            })
+            await device.onSettings({
+              newSettings: device.getSettings(),
+              changedKeys: deviceChangedKeys
+            })
+          } catch (error: unknown) {
+            const errorMessage: string =
+              error instanceof Error ? error.message : String(error)
+            device.error(errorMessage)
+            throw new Error(errorMessage)
+          }
+        })
+      )
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : String(error))
+    }
   }
 }
