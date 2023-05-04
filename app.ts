@@ -153,12 +153,12 @@ export default class HeatzyApp extends App {
         device.productKey
       )
       device.log('Syncing with device...\n', postData)
-      const { data } = await axios.post<any | DataError>(
+      const { data } = await axios.post<null | DataError>(
         `/control/${device.id}`,
         postData
       )
       device.log('Syncing with device:\n', data)
-      if ('error_message' in data) {
+      if (data !== null && 'error_message' in data) {
         throw new Error(data.error_message)
       }
       return true
