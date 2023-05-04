@@ -72,9 +72,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       (flatDeviceSettings, settings: Record<string, any[]>) =>
         Object.entries(settings).reduce<Record<string, any[]>>(
           (merged, [settingId, settingValues]: [string, any[]]) => {
-            if (merged[settingId] === undefined) {
-              merged[settingId] = []
-            }
+            merged[settingId] ??= []
             merged[settingId].push(
               ...settingValues.filter(
                 (settingValue: any): boolean =>
