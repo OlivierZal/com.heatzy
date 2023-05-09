@@ -133,7 +133,11 @@ export default class HeatzyApp extends App {
         `devdata/${device.id}/latest`
       )
       device.log('Syncing from device:\n', data)
-      return data.attr.mode
+      const { mode } = data.attr
+      if (mode === undefined) {
+        throw new Error('mode is undefined')
+      }
+      return mode
     } catch (error: unknown) {
       device.error(
         'Syncing from device:',
