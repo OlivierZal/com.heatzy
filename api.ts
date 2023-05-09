@@ -161,12 +161,13 @@ module.exports = {
           if (deviceChangedKeys.length === 0) {
             return
           }
-          const deviceSettings: Settings = Object.keys(body)
-            .filter((key) => deviceChangedKeys.includes(key))
-            .reduce<Settings>((settings, key: string) => {
+          const deviceSettings: Settings = deviceChangedKeys.reduce<Settings>(
+            (settings, key: string) => {
               settings[key] = body[key]
               return settings
-            }, {})
+            },
+            {}
+          )
           try {
             await device.setSettings(deviceSettings).then((): void => {
               device.log('Setting:', deviceSettings)

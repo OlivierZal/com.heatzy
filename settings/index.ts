@@ -203,6 +203,9 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     setting: HTMLInputElement | HTMLSelectElement
   ): any {
     const value: any = setting.value
+    if (value === '') {
+      return
+    }
     const intValue: number = Number.parseInt(value)
     if (!Number.isNaN(intValue)) {
       return setting instanceof HTMLInputElement
@@ -222,18 +225,15 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     settings: Array<HTMLInputElement | HTMLSelectElement>
   ): Settings {
     const shouldUpdate = (settingValue: any, settingId: string): boolean => {
-      if (settingValue === undefined) {
-        return false
+      if (settingValue !== undefined) {
+        const deviceSetting: any[] = flatDeviceSettings[settingId]
+        return deviceSetting.length !== 1 || settingValue !== deviceSetting[0]
       }
-      const deviceSetting: any[] = flatDeviceSettings[settingId]
-      return deviceSetting.length !== 1 || settingValue !== deviceSetting[0]
+      return false
     }
 
     return settings.reduce<Settings>(
       (body, setting: HTMLInputElement | HTMLSelectElement) => {
-        if (setting.value === '') {
-          return body
-        }
         const settingValue: any = processSettingValue(setting)
         if (shouldUpdate(settingValue, setting.id)) {
           body[setting.id] = settingValue
@@ -318,45 +318,43 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   function generateChildrenElements(): void {
-    driverSettings
-      .filter((setting: DriverSetting): boolean =>
-        ['checkbox', 'dropdown'].includes(setting.type)
-      )
-      .forEach((setting: DriverSetting): void => {
-        const divElement: HTMLDivElement = document.createElement('div')
-        divElement.className = 'homey-form-group'
-        const labelElement = document.createElement('label')
-        labelElement.className = 'homey-form-label'
-        labelElement.id = `setting-${setting.id}`
-        labelElement.innerText = setting.title
-        const selectElement = document.createElement('select')
-        selectElement.className = 'homey-form-select'
-        selectElement.id = setting.id
-        labelElement.htmlFor = selectElement.id
-        ;[
-          { id: '' },
-          ...(setting.type === 'checkbox'
-            ? [{ id: 'false' }, { id: 'true' }]
-            : setting.values ?? [])
-        ].forEach((value: { id: string; label?: string }): void => {
-          const { id, label } = value
-          const optionElement: HTMLOptionElement =
-            document.createElement('option')
-          optionElement.value = id
-          if (id !== '') {
-            optionElement.innerText =
-              label ?? Homey.__(`settings.boolean.${id}`)
-          }
-          selectElement.appendChild(optionElement)
-        })
-        const values: any[] = flatDeviceSettings[setting.id]
-        if (values.length === 1) {
-          selectElement.value = String(values[0])
+    driverSettings.forEach((setting: DriverSetting): void => {
+      if (!['checkbox', 'dropdown'].includes(setting.type)) {
+        return
+      }
+      const divElement: HTMLDivElement = document.createElement('div')
+      divElement.className = 'homey-form-group'
+      const labelElement = document.createElement('label')
+      labelElement.className = 'homey-form-label'
+      labelElement.id = `setting-${setting.id}`
+      labelElement.innerText = setting.title
+      const selectElement = document.createElement('select')
+      selectElement.className = 'homey-form-select'
+      selectElement.id = setting.id
+      labelElement.htmlFor = selectElement.id
+      ;[
+        { id: '' },
+        ...(setting.type === 'checkbox'
+          ? [{ id: 'false' }, { id: 'true' }]
+          : setting.values ?? [])
+      ].forEach((value: { id: string; label?: string }): void => {
+        const { id, label } = value
+        const optionElement: HTMLOptionElement =
+          document.createElement('option')
+        optionElement.value = id
+        if (id !== '') {
+          optionElement.innerText = label ?? Homey.__(`settings.boolean.${id}`)
         }
-        divElement.appendChild(labelElement)
-        divElement.appendChild(selectElement)
-        settingsElement.appendChild(divElement)
+        selectElement.appendChild(optionElement)
       })
+      const values: any[] = flatDeviceSettings[setting.id]
+      if (values.length === 1) {
+        selectElement.value = String(values[0])
+      }
+      divElement.appendChild(labelElement)
+      divElement.appendChild(selectElement)
+      settingsElement.appendChild(divElement)
+    })
     addSettingsEventListener(
       applySettingsElement,
       Array.from(settingsElement.querySelectorAll('select'))
