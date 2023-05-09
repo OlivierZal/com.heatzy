@@ -132,7 +132,7 @@ export default class HeatzyDevice extends Device {
     const modeNumber: ModeNumber = modeToNumber[this.mode]
     const success: boolean = await this.app.setDeviceMode(this, modeNumber)
     if (!success) {
-      this.mode = this.previousMode
+      this.mode = this.isOn ? this.previousMode : 'stop'
     }
     await this.sync()
   }
