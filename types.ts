@@ -74,8 +74,8 @@ export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
 
 export type CapabilityValue = boolean | Mode
 
-export interface DataError {
-  error_message: string
+export interface Data {
+  error_message?: string
 }
 
 export interface LoginCredentials {

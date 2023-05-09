@@ -4,7 +4,7 @@ import type HeatzyDevice from './drivers/heatzy/device'
 import {
   type DeviceData,
   type Bindings,
-  type DataError,
+  type Data,
   type Device,
   type DeviceDetails,
   type DevicePostData,
@@ -78,7 +78,7 @@ export default class HeatzyApp extends App {
         return false
       }
       this.log('Login...\n', postData)
-      const { data } = await axios.post<LoginDataSuccess | DataError>(
+      const { data } = await axios.post<LoginDataSuccess | Required<Data>>(
         '/login',
         postData
       )
@@ -157,12 +157,9 @@ export default class HeatzyApp extends App {
         device.productKey
       )
       device.log('Syncing with device...\n', postData)
-      const { data } = await axios.post<null | DataError>(
-        `/control/${device.id}`,
-        postData
-      )
+      const { data } = await axios.post<Data>(`/control/${device.id}`, postData)
       device.log('Syncing with device:\n', data)
-      if (data !== null && 'error_message' in data) {
+      if ('error_message' in data) {
         throw new Error(data.error_message)
       }
       return true
