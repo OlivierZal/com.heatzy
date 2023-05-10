@@ -6,7 +6,7 @@ import {
   type Mode,
   type ModeNumber,
   type ModeString,
-  type Settings
+  type Settings,
 } from '../../types'
 
 function reverseMapping(
@@ -25,7 +25,7 @@ const modeFromNumber: Record<ModeNumber, Mode> = {
   0: 'cft',
   1: 'eco',
   2: 'fro',
-  3: 'stop'
+  3: 'stop',
 } as const
 
 const modeToNumber: Record<Mode, ModeNumber> = reverseMapping(
@@ -42,7 +42,7 @@ const modeFromString: Record<ModeString, Mode> = {
   fro: 'fro',
   解冻: 'fro',
   stop: 'stop',
-  停止: 'stop'
+  停止: 'stop',
 } as const
 
 export default class HeatzyDevice extends Device {
@@ -171,7 +171,7 @@ export default class HeatzyDevice extends Device {
 
   async onSettings({
     newSettings,
-    changedKeys
+    changedKeys,
   }: {
     newSettings: Settings
     changedKeys: string[]

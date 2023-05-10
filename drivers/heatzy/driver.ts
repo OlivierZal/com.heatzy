@@ -4,7 +4,7 @@ import type HeatzyApp from '../../app'
 import {
   type DeviceDetails,
   type FlowArgs,
-  type LoginCredentials
+  type LoginCredentials,
 } from '../../types'
 
 export default class HeatzyDriver extends Driver {

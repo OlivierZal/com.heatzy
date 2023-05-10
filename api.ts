@@ -11,7 +11,7 @@ import {
   type ManifestDriverSetting,
   type ManifestDriverSettingData,
   type PairSetting,
-  type Settings
+  type Settings,
 } from './types'
 
 function getDevices(homey: Homey): HeatzyDevice[] {
@@ -26,7 +26,7 @@ function getLanguage(homey: Homey): string {
 
 module.exports = {
   async getDeviceSettings({
-    homey
+    homey,
   }: {
     homey: Homey
   }): Promise<DeviceSettings> {
@@ -49,7 +49,7 @@ module.exports = {
   },
 
   async getDriverSettings({
-    homey
+    homey,
   }: {
     homey: Homey
   }): Promise<DriverSetting[]> {
@@ -74,12 +74,12 @@ module.exports = {
                     label: Record<string, string>
                   }): { id: string; label: string } => ({
                     id: value.id,
-                    label: value.label[language]
+                    label: value.label[language],
                   })
                 ),
                 driverId: driver.id,
                 groupId: setting.id,
-                groupLabel: setting.label[language]
+                groupLabel: setting.label[language],
               })
             )
         )
@@ -109,7 +109,7 @@ module.exports = {
                 id: key,
                 title: '',
                 type: isPassword ? 'password' : 'text',
-                driverId: driver.id
+                driverId: driver.id,
               }
               if (option.endsWith('Placeholder')) {
                 driverLoginSettings[key].placeholder = label[language]
@@ -132,7 +132,7 @@ module.exports = {
 
   async login({
     homey,
-    body
+    body,
   }: {
     homey: Homey
     body: LoginCredentials
@@ -142,7 +142,7 @@ module.exports = {
 
   async setDeviceSettings({
     homey,
-    body
+    body,
   }: {
     homey: Homey
     body: Settings
@@ -174,7 +174,7 @@ module.exports = {
             })
             await device.onSettings({
               newSettings: device.getSettings(),
-              changedKeys: deviceChangedKeys
+              changedKeys: deviceChangedKeys,
             })
           } catch (error: unknown) {
             const errorMessage: string =
@@ -187,5 +187,5 @@ module.exports = {
     } catch (error: unknown) {
       throw new Error(error instanceof Error ? error.message : String(error))
     }
-  }
+  },
 }

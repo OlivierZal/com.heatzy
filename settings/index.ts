@@ -3,7 +3,7 @@ import {
   type DeviceSettings,
   type DriverSetting,
   type LoginCredentials,
-  type Settings
+  type Settings,
 } from '../types'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -139,7 +139,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     ...(await Promise.all(
       credentialKeys.map(
         async (credentialKey: string): Promise<Record<string, string>> => ({
-          [credentialKey]: await getHomeySetting(credentialKey)
+          [credentialKey]: await getHomeySetting(credentialKey),
         })
       )
     ))
@@ -192,7 +192,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         Homey.__('settings.int_error', {
           name: Homey.__(labelElement?.innerText ?? ''),
           min: minValue,
-          max: maxValue
+          max: maxValue,
         })
       )
     }
@@ -336,7 +336,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         { id: '' },
         ...(setting.type === 'checkbox'
           ? [{ id: 'false' }, { id: 'true' }]
-          : setting.values ?? [])
+          : setting.values ?? []),
       ].forEach((value: { id: string; label?: string }): void => {
         const { id, label } = value
         const optionElement: HTMLOptionElement =
@@ -386,7 +386,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     }
     const body: LoginCredentials = {
       username,
-      password
+      password,
     }
     // @ts-expect-error bug
     Homey.api(

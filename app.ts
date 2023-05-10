@@ -12,7 +12,7 @@ import {
   type LoginDataSuccess,
   type ModeNumber,
   type ModeString,
-  type Settings
+  type Settings,
 } from './types'
 
 function isPiloteFirstGen(productKey: string): boolean {
@@ -46,7 +46,7 @@ export default class HeatzyApp extends App {
     this.clearLoginRefresh()
     const loginCredentials: LoginCredentials = {
       username: this.homey.settings.get('username') ?? '',
-      password: this.homey.settings.get('password') ?? ''
+      password: this.homey.settings.get('password') ?? '',
     }
     const expireAt: number | null = this.homey.settings.get('expire_at') * 1000
     if (expireAt !== null) {
@@ -91,7 +91,7 @@ export default class HeatzyApp extends App {
         token: data.token,
         expire_at: data.expire_at,
         username,
-        password
+        password,
       })
       await this.refreshLogin()
       return true
@@ -113,8 +113,8 @@ export default class HeatzyApp extends App {
           name: device.dev_alias,
           data: {
             id: device.did,
-            productKey: device.product_key
-          }
+            productKey: device.product_key,
+          },
         })
       )
     } catch (error: unknown) {
