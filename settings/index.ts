@@ -326,11 +326,10 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       divElement.className = 'homey-form-group'
       const labelElement = document.createElement('label')
       labelElement.className = 'homey-form-label'
-      labelElement.id = `setting-${setting.id}`
       labelElement.innerText = setting.title
       const selectElement = document.createElement('select')
       selectElement.className = 'homey-form-select'
-      selectElement.id = setting.id
+      selectElement.id = `setting-${setting.id}`
       labelElement.htmlFor = selectElement.id
       ;[
         { id: '' },
