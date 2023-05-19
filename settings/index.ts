@@ -233,10 +233,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     }
 
     return settings.reduce<Settings>(
-      (body, setting: HTMLInputElement | HTMLSelectElement) => {
-        const settingValue: any = processSettingValue(setting)
-        if (shouldUpdate(settingValue, setting.id)) {
-          body[setting.id] = settingValue
+      (body, element: HTMLInputElement | HTMLSelectElement) => {
+        const settingValue: any = processSettingValue(element)
+        const settingId: string = element.id.split('--')[0]
+        if (shouldUpdate(settingValue, settingId)) {
+          body[settingId] = settingValue
         }
         return body
       },
@@ -329,7 +330,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       labelElement.innerText = setting.title
       const selectElement = document.createElement('select')
       selectElement.className = 'homey-form-select'
-      selectElement.id = `setting-${setting.id}`
+      selectElement.id = `${setting.id}--setting`
       labelElement.htmlFor = selectElement.id
       ;[
         { id: '' },
