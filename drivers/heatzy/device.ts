@@ -1,12 +1,12 @@
 import { Device } from 'homey'
 import type HeatzyDriver from './driver'
 import type HeatzyApp from '../../app'
-import {
-  type CapabilityValue,
-  type Mode,
-  type ModeNumber,
-  type ModeString,
-  type Settings,
+import type {
+  CapabilityValue,
+  Mode,
+  ModeNumber,
+  ModeString,
+  Settings,
 } from '../../types'
 
 function reverseMapping(
@@ -173,8 +173,8 @@ export default class HeatzyDevice extends Device {
     newSettings,
     changedKeys,
   }: {
-    newSettings: Settings
     changedKeys: string[]
+    newSettings: Settings
   }): Promise<void> {
     if (changedKeys.includes('on_mode')) {
       this.setOnMode(newSettings.on_mode)

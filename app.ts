@@ -1,18 +1,18 @@
 import axios from 'axios'
 import { App } from 'homey'
 import type HeatzyDevice from './drivers/heatzy/device'
-import {
-  type DeviceData,
-  type Bindings,
-  type Data,
-  type Device,
-  type DeviceDetails,
-  type DevicePostData,
-  type LoginCredentials,
-  type LoginDataSuccess,
-  type ModeNumber,
-  type ModeString,
-  type Settings,
+import type {
+  DeviceData,
+  Bindings,
+  Data,
+  Device,
+  DeviceDetails,
+  DevicePostData,
+  LoginCredentials,
+  LoginDataSuccess,
+  ModeNumber,
+  ModeString,
+  Settings,
 } from './types'
 
 function isPiloteFirstGen(productKey: string): boolean {

@@ -1,11 +1,7 @@
 import { Driver } from 'homey'
 import type PairSession from 'homey/lib/PairSession'
 import type HeatzyApp from '../../app'
-import {
-  type DeviceDetails,
-  type FlowArgs,
-  type LoginCredentials,
-} from '../../types'
+import type { DeviceDetails, FlowArgs, LoginCredentials } from '../../types'
 
 export default class HeatzyDriver extends Driver {
   app!: HeatzyApp

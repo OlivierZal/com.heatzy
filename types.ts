@@ -5,17 +5,17 @@ export type Settings = Record<string, any>
 export interface ManifestDriverSettingData {
   readonly id: string
   readonly label: Record<string, string>
-  readonly type: string
-  readonly min?: number
   readonly max?: number
+  readonly min?: number
+  readonly type: string
   readonly units?: string
   readonly values?: Array<{ id: string; label: Record<string, string> }>
 }
 
 export interface ManifestDriverSetting {
-  readonly label: Record<string, string>
-  readonly id?: string
   readonly children?: ManifestDriverSettingData[]
+  readonly id?: string
+  readonly label: Record<string, string>
 }
 
 export type PairSetting = { id: string } & Record<string, any>
@@ -23,35 +23,35 @@ export type PairSetting = { id: string } & Record<string, any>
 export interface LoginSetting extends PairSetting {
   readonly id: 'login'
   readonly options: {
-    readonly usernameLabel: Record<string, string>
-    readonly usernamePlaceholder: Record<string, string>
     readonly passwordLabel: Record<string, string>
     readonly passwordPlaceholder: Record<string, string>
+    readonly usernameLabel: Record<string, string>
+    readonly usernamePlaceholder: Record<string, string>
   }
 }
 
 export interface ManifestDriver {
-  readonly id: string
   readonly capabilitiesOptions?: Record<
     string,
     { readonly title?: Record<string, string> }
   >
+  readonly id: string
   readonly pair?: LoginSetting & PairSetting[]
   readonly settings?: ManifestDriverSetting[]
 }
 
 export interface DriverSetting {
-  readonly id: string
-  readonly type: string
   readonly driverId: string
-  title: string
   readonly groupId?: string
   readonly groupLabel?: string
-  readonly min?: number
+  readonly id: string
   readonly max?: number
+  readonly min?: number
+  placeholder?: string
+  title: string
+  readonly type: string
   readonly units?: string
   readonly values?: Array<{ id: string; label: string }>
-  placeholder?: string
 }
 
 export type DeviceSettings = Record<string, Record<string, any[]>>
@@ -79,13 +79,13 @@ export interface Data {
 }
 
 export interface LoginCredentials {
-  username: string
   password: string
+  username: string
 }
 
 export interface LoginDataSuccess {
-  token: string
   expire_at: number
+  token: string
 }
 
 export interface Device {
@@ -99,11 +99,11 @@ export interface Bindings {
 }
 
 export interface DeviceDetails {
-  readonly name: string
   readonly data: {
     readonly id: string
     readonly productKey: string
   }
+  readonly name: string
 }
 
 export type DevicePostData =

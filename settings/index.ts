@@ -1,9 +1,9 @@
 import type Homey from 'homey/lib/Homey'
-import {
-  type DeviceSettings,
-  type DriverSetting,
-  type LoginCredentials,
-  type Settings,
+import type {
+  DeviceSettings,
+  DriverSetting,
+  LoginCredentials,
+  Settings,
 } from '../types'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

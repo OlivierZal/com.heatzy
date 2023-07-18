@@ -2,16 +2,16 @@ import type Homey from 'homey/lib/Homey'
 import { type Driver } from 'homey'
 import type HeatzyApp from './app'
 import type HeatzyDevice from './drivers/heatzy/device'
-import {
-  type DeviceSettings,
-  type DriverSetting,
-  type LoginCredentials,
-  type LoginSetting,
-  type ManifestDriver,
-  type ManifestDriverSetting,
-  type ManifestDriverSettingData,
-  type PairSetting,
-  type Settings,
+import type {
+  DeviceSettings,
+  DriverSetting,
+  LoginCredentials,
+  LoginSetting,
+  ManifestDriver,
+  ManifestDriverSetting,
+  ManifestDriverSettingData,
+  PairSetting,
+  Settings,
 } from './types'
 
 function getDevices(homey: Homey): HeatzyDevice[] {
@@ -133,8 +133,8 @@ module.exports = {
     homey,
     body,
   }: {
-    homey: Homey
     body: LoginCredentials
+    homey: Homey
   }): Promise<boolean> {
     return await (homey.app as HeatzyApp).login(body)
   },
@@ -143,8 +143,8 @@ module.exports = {
     homey,
     body,
   }: {
-    homey: Homey
     body: Settings
+    homey: Homey
   }): Promise<void> {
     const changedKeys: string[] = Object.keys(body)
     if (changedKeys.length === 0) {
