@@ -1,5 +1,6 @@
-import type Homey from 'homey/lib/Homey'
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { type Driver } from 'homey'
+import type Homey from 'homey/lib/Homey'
 import type HeatzyApp from './app'
 import type HeatzyDevice from './drivers/heatzy/device'
 import type {
@@ -33,16 +34,17 @@ module.exports = {
     return getDevices(homey).reduce<DeviceSettings>(
       (deviceSettings, device) => {
         const driverId: string = device.driver.id
-        deviceSettings[driverId] ??= {}
+        const newDeviceSettings: DeviceSettings = { ...deviceSettings }
+        newDeviceSettings[driverId] ??= {}
         Object.entries(device.getSettings()).forEach(
           ([settingId, value]: [string, any]) => {
-            deviceSettings[driverId][settingId] ??= []
-            if (!deviceSettings[driverId][settingId].includes(value)) {
-              deviceSettings[driverId][settingId].push(value)
+            newDeviceSettings[driverId][settingId] ??= []
+            if (!newDeviceSettings[driverId][settingId].includes(value)) {
+              newDeviceSettings[driverId][settingId].push(value)
             }
           }
         )
-        return deviceSettings
+        return newDeviceSettings
       },
       {}
     )
@@ -103,19 +105,20 @@ module.exports = {
               const key: keyof LoginCredentials = isPassword
                 ? 'password'
                 : 'username'
-              driverLoginSettings[key] ??= {
+              const newDriverLoginSettings: Record<string, DriverSetting> = {
+                ...driverLoginSettings,
+              }
+              newDriverLoginSettings[key] ??= {
                 groupId: 'login',
                 id: key,
                 title: '',
                 type: isPassword ? 'password' : 'text',
                 driverId: driver.id,
               }
-              if (option.endsWith('Placeholder')) {
-                driverLoginSettings[key].placeholder = label[language]
-              } else {
-                driverLoginSettings[key].title = label[language]
-              }
-              return driverLoginSettings
+              newDriverLoginSettings[key][
+                option.endsWith('Placeholder') ? 'placeholder' : 'title'
+              ] = label[language]
+              return newDriverLoginSettings
             },
             {}
           )
@@ -136,7 +139,7 @@ module.exports = {
     body: LoginCredentials
     homey: Homey
   }): Promise<boolean> {
-    return await (homey.app as HeatzyApp).login(body)
+    return (homey.app as HeatzyApp).login(body)
   },
 
   async setDeviceSettings({
@@ -161,10 +164,7 @@ module.exports = {
             return
           }
           const deviceSettings: Settings = deviceChangedKeys.reduce<Settings>(
-            (settings, key: string) => {
-              settings[key] = body[key]
-              return settings
-            },
+            (settings, key: string) => ({ ...settings, [key]: body[key] }),
             {}
           )
           try {

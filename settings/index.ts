@@ -6,7 +6,6 @@ import type {
   Settings,
 } from '../types'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function onHomeyReady(Homey: Homey): Promise<void> {
   await Homey.ready()
 
@@ -27,7 +26,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   })
 
   async function getDeviceSettings(): Promise<DeviceSettings> {
-    return await new Promise<DeviceSettings>((resolve, reject) => {
+    return new Promise<DeviceSettings>((resolve, reject) => {
       // @ts-expect-error bug
       Homey.api(
         'GET',
@@ -46,7 +45,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   async function getDriverSettings(): Promise<DriverSetting[]> {
-    return await new Promise<DriverSetting[]>((resolve, reject) => {
+    return new Promise<DriverSetting[]>((resolve, reject) => {
       // @ts-expect-error bug
       Homey.api(
         'GET',
@@ -67,19 +66,22 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     })
   }
 
-  function flattenDeviceSettings(): Record<string, any[]> {
+  function flattenDeviceSettings(
+    deviceSettings: DeviceSettings
+  ): Record<string, any[]> {
     return Object.values(deviceSettings).reduce<Record<string, any[]>>(
       (flatDeviceSettings, settings: Record<string, any[]>) =>
         Object.entries(settings).reduce<Record<string, any[]>>(
           (merged, [settingId, settingValues]: [string, any[]]) => {
-            merged[settingId] ??= []
-            merged[settingId].push(
+            const newMerged: Record<string, any[]> = { ...merged }
+            newMerged[settingId] ??= []
+            newMerged[settingId].push(
               ...settingValues.filter(
                 (settingValue: any): boolean =>
-                  !merged[settingId].includes(settingValue)
+                  !newMerged[settingId].includes(settingValue)
               )
             )
-            return merged
+            return newMerged
           },
           flatDeviceSettings
         ),
@@ -88,7 +90,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   const deviceSettings: DeviceSettings = await getDeviceSettings()
-  const flatDeviceSettings: Record<string, any[]> = flattenDeviceSettings()
+  const flatDeviceSettings: Record<string, any[]> =
+    flattenDeviceSettings(deviceSettings)
 
   const allDriverSettings: DriverSetting[] = await getDriverSettings()
   const driverSettings: DriverSetting[] = allDriverSettings.filter(
@@ -96,7 +99,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   )
 
   async function getHomeySettings(): Promise<Record<string, any>> {
-    return await new Promise<Record<string, any>>((resolve, reject) => {
+    return new Promise<Record<string, any>>((resolve, reject) => {
       // @ts-expect-error bug
       Homey.get(
         async (error: Error, settings: Record<string, any>): Promise<void> => {
@@ -136,23 +139,23 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   const credentialKeys: string[] = ['username', 'password']
   const [usernameElement, passwordElement]: Array<HTMLInputElement | null> =
     credentialKeys.map((credentialKey: string): HTMLInputElement | null => {
-      const setting: DriverSetting | undefined = allDriverSettings.find(
+      const driverSetting: DriverSetting | undefined = allDriverSettings.find(
         (setting: DriverSetting): boolean => setting.id === credentialKey
       )
-      if (setting === undefined) {
+      if (driverSetting === undefined) {
         return null
       }
       const divElement: HTMLDivElement = document.createElement('div')
       divElement.classList.add('homey-form-group')
       const labelElement: HTMLLabelElement = document.createElement('label')
       labelElement.classList.add('homey-form-label')
-      labelElement.innerText = setting.title
+      labelElement.innerText = driverSetting.title
       const inputElement: HTMLInputElement = document.createElement('input')
       inputElement.classList.add('homey-form-input')
-      inputElement.type = setting.type
-      inputElement.placeholder = setting.placeholder ?? ''
-      inputElement.value = homeySettings[setting.id] ?? ''
-      inputElement.id = setting.id
+      inputElement.type = driverSetting.type
+      inputElement.placeholder = driverSetting.placeholder ?? ''
+      inputElement.value = homeySettings[driverSetting.id] ?? ''
+      inputElement.id = driverSetting.id
       labelElement.htmlFor = inputElement.id
       loginElement.appendChild(labelElement)
       loginElement.appendChild(inputElement)
@@ -169,11 +172,12 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
 
   function int(
     element: HTMLInputElement,
-    value: number = Number.parseInt(element.value)
+    value: number = Number.parseInt(element.value, 10)
   ): number {
     const minValue: number = Number(element.min)
     const maxValue: number = Number(element.max)
     if (Number.isNaN(value) || value < minValue || value > maxValue) {
+      // eslint-disable-next-line no-param-reassign
       element.value = ''
       const labelElement: HTMLLabelElement | null = document.querySelector(
         `label[for="${element.id}"]`
@@ -192,11 +196,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   function processSettingValue(
     setting: HTMLInputElement | HTMLSelectElement
   ): any {
-    const value: any = setting.value
+    const { value } = setting
     if (value === '') {
-      return
+      return null
     }
-    const intValue: number = Number.parseInt(value)
+    const intValue: number = Number.parseInt(value, 10)
     if (!Number.isNaN(intValue)) {
       return setting instanceof HTMLInputElement
         ? int(setting, intValue)
@@ -206,7 +210,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       if (!setting.indeterminate) {
         return setting.checked
       }
-      return
+      return null
     }
     return ['true', 'false'].includes(value) ? value === 'true' : value
   }
@@ -215,7 +219,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     settings: Array<HTMLInputElement | HTMLSelectElement>
   ): Settings {
     const shouldUpdate = (settingValue: any, settingId: string): boolean => {
-      if (settingValue !== undefined) {
+      if (settingValue !== null) {
         const deviceSetting: any[] = flatDeviceSettings[settingId]
         return deviceSetting.length !== 1 || settingValue !== deviceSetting[0]
       }
@@ -227,7 +231,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         const settingValue: any = processSettingValue(element)
         const settingId: string = element.id.split('--')[0]
         if (shouldUpdate(settingValue, settingId)) {
-          body[settingId] = settingValue
+          return { ...body, [settingId]: settingValue }
         }
         return body
       },
@@ -240,6 +244,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       ([settingId, settingValue]: [string, any]): void => {
         Object.values(deviceSettings).forEach(
           (settings: Record<string, any[]>): void => {
+            // eslint-disable-next-line no-param-reassign
             settings[settingId] = [settingValue]
           }
         )
@@ -356,15 +361,6 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     unhide(authenticatingElement, value)
   }
 
-  async function load(): Promise<void> {
-    generateChildrenElements()
-    try {
-      await login()
-    } catch (error: unknown) {
-      await needsAuthentication()
-    }
-  }
-
   async function login(): Promise<void> {
     const username: string = usernameElement?.value ?? ''
     const password: string = passwordElement?.value ?? ''
@@ -383,8 +379,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       'POST',
       '/login',
       body,
-      async (error: Error, login: boolean): Promise<void> => {
-        if (error !== null || !login) {
+      async (error: Error, loggedIn: boolean): Promise<void> => {
+        if (error !== null || !loggedIn) {
           authenticateElement.classList.remove('is-disabled')
           // @ts-expect-error bug
           await Homey.alert(
@@ -399,9 +395,18 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     )
   }
 
+  async function load(): Promise<void> {
+    generateChildrenElements()
+    try {
+      await login()
+    } catch (error: unknown) {
+      await needsAuthentication()
+    }
+  }
+
   authenticateElement.addEventListener('click', (): void => {
     authenticateElement.classList.add('is-disabled')
-    void login()
+    login()
   })
 
   await load()

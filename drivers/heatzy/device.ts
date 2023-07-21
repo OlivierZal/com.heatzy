@@ -1,22 +1,41 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Device } from 'homey'
+import axios from 'axios'
 import type HeatzyDriver from './driver'
 import type HeatzyApp from '../../app'
 import type {
   CapabilityValue,
+  Data,
+  DeviceData,
+  DevicePostData,
   Mode,
   ModeNumber,
   ModeString,
   Settings,
 } from '../../types'
 
+function isPiloteFirstGen(productKey: string): boolean {
+  return productKey === '9420ae048da545c88fc6274d204dd25f'
+}
+
+function formatDevicePostData(
+  mode: ModeNumber,
+  productKey: string
+): DevicePostData {
+  if (isPiloteFirstGen(productKey)) {
+    return { raw: [1, 1, mode] }
+  }
+  return { attrs: { mode } }
+}
+
 function reverseMapping(
   mapping: Record<number, string>
 ): Record<string, number> {
   return Object.entries(mapping).reduce<Record<string, number>>(
-    (reversedMapping, [deviceValue, capabilityValue]: [string, string]) => {
-      reversedMapping[capabilityValue] = Number(deviceValue)
-      return reversedMapping
-    },
+    (reversedMapping, [deviceValue, capabilityValue]: [string, string]) => ({
+      ...reversedMapping,
+      [capabilityValue]: Number(deviceValue),
+    }),
     {}
   )
 }
@@ -47,14 +66,19 @@ const modeFromString: Record<ModeString, Mode> = {
 
 export default class HeatzyDevice extends Device {
   app!: HeatzyApp
+
   declare driver: HeatzyDriver
 
   id!: string
+
   productKey!: string
 
   mode!: Mode
+
   isOn!: boolean
+
   onMode!: Exclude<Mode, 'stop'> | null
+
   previousMode!: Exclude<Mode, 'stop'>
 
   syncTimeout!: NodeJS.Timeout
@@ -70,6 +94,47 @@ export default class HeatzyDevice extends Device {
     this.previousMode = this.getOnMode()
     this.registerCapabilityListeners()
     await this.syncFromDevice()
+  }
+
+  async getDeviceMode(): Promise<ModeString | null> {
+    try {
+      this.log('Syncing from device...')
+      const { data } = await axios.get<DeviceData>(`devdata/${this.id}/latest`)
+      this.log('Syncing from device:\n', data)
+      const { mode } = data.attr
+      if (mode === undefined) {
+        throw new Error('mode is undefined')
+      }
+      return mode
+    } catch (error: unknown) {
+      this.error(
+        'Syncing from device:',
+        error instanceof Error ? error.message : error
+      )
+    }
+    return null
+  }
+
+  async setDeviceMode(mode: ModeNumber): Promise<boolean> {
+    try {
+      const postData: DevicePostData = formatDevicePostData(
+        mode,
+        this.productKey
+      )
+      this.log('Syncing with device...\n', postData)
+      const { data } = await axios.post<Data>(`/control/${this.id}`, postData)
+      this.log('Syncing with device:\n', data)
+      if ('error_message' in data) {
+        throw new Error(data.error_message)
+      }
+      return true
+    } catch (error: unknown) {
+      this.error(
+        'Syncing with device:',
+        error instanceof Error ? error.message : error
+      )
+    }
+    return false
   }
 
   setOnMode(
@@ -130,7 +195,7 @@ export default class HeatzyDevice extends Device {
 
   async syncToDevice(): Promise<void> {
     const modeNumber: ModeNumber = modeToNumber[this.mode]
-    const success: boolean = await this.app.setDeviceMode(this, modeNumber)
+    const success: boolean = await this.setDeviceMode(modeNumber)
     if (!success) {
       this.mode = this.isOn ? this.previousMode : 'stop'
     }
@@ -138,7 +203,7 @@ export default class HeatzyDevice extends Device {
   }
 
   async syncFromDevice(): Promise<void> {
-    const modeString: ModeString | null = await this.app.getDeviceMode(this)
+    const modeString: ModeString | null = await this.getDeviceMode()
     this.mode = modeString !== null ? modeFromString[modeString] : 'stop'
     await this.sync()
   }

@@ -1,33 +1,15 @@
-import axios from 'axios'
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { App } from 'homey'
-import type HeatzyDevice from './drivers/heatzy/device'
+import axios from 'axios'
 import type {
-  DeviceData,
   Bindings,
   Data,
   Device,
   DeviceDetails,
-  DevicePostData,
   LoginCredentials,
   LoginDataSuccess,
-  ModeNumber,
-  ModeString,
   Settings,
 } from './types'
-
-function isPiloteFirstGen(productKey: string): boolean {
-  return productKey === '9420ae048da545c88fc6274d204dd25f'
-}
-
-function formatDevicePostData(
-  mode: ModeNumber,
-  productKey: string
-): DevicePostData {
-  if (isPiloteFirstGen(productKey)) {
-    return { raw: [1, 1, mode] }
-  }
-  return { attrs: { mode } }
-}
 
 export default class HeatzyApp extends App {
   loginTimeout!: NodeJS.Timeout
@@ -54,7 +36,7 @@ export default class HeatzyApp extends App {
       expireAtDate.setDate(expireAtDate.getDate() - 1)
       const ms: number = expireAtDate.getTime() - new Date().getTime()
       if (ms > 0) {
-        const maxTimeout: number = Math.pow(2, 31) - 1
+        const maxTimeout: number = 2 ** 31 - 1
         const interval: number = Math.min(ms, maxTimeout)
         this.loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
           await this.login(loginCredentials).catch(this.error)
@@ -124,52 +106,6 @@ export default class HeatzyApp extends App {
       )
     }
     return []
-  }
-
-  async getDeviceMode(device: HeatzyDevice): Promise<ModeString | null> {
-    try {
-      device.log('Syncing from device...')
-      const { data } = await axios.get<DeviceData>(
-        `devdata/${device.id}/latest`
-      )
-      device.log('Syncing from device:\n', data)
-      const { mode } = data.attr
-      if (mode === undefined) {
-        throw new Error('mode is undefined')
-      }
-      return mode
-    } catch (error: unknown) {
-      device.error(
-        'Syncing from device:',
-        error instanceof Error ? error.message : error
-      )
-    }
-    return null
-  }
-
-  async setDeviceMode(
-    device: HeatzyDevice,
-    mode: ModeNumber
-  ): Promise<boolean> {
-    try {
-      const postData: DevicePostData = formatDevicePostData(
-        mode,
-        device.productKey
-      )
-      device.log('Syncing with device...\n', postData)
-      const { data } = await axios.post<Data>(`/control/${device.id}`, postData)
-      device.log('Syncing with device:\n', data)
-      if ('error_message' in data) {
-        throw new Error(data.error_message)
-      }
-      return true
-    } catch (error: unknown) {
-      device.error(
-        'Syncing with device:',
-        error instanceof Error ? error.message : error
-      )
-    }
-    return false
   }
 
   setSettings(settings: Settings): void {
