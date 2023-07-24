@@ -8,6 +8,7 @@ import type {
   DeviceDetails,
   LoginCredentials,
   LoginDataSuccess,
+  SettingValue,
   Settings,
 } from './types'
 
@@ -110,7 +111,7 @@ export default class HeatzyApp extends App {
 
   setSettings(settings: Settings): void {
     Object.entries(settings).forEach(
-      ([setting, value]: [string, any]): void => {
+      ([setting, value]: [string, SettingValue]): void => {
         if (value !== this.homey.settings.get(setting)) {
           this.homey.settings.set(setting, value)
         }

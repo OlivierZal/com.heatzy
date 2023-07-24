@@ -1,8 +1,10 @@
 import type Homey from 'homey/lib/Homey'
 import type {
+  DeviceSetting,
   DeviceSettings,
   DriverSetting,
   LoginCredentials,
+  SettingValue,
   Settings,
 } from '../types'
 
@@ -68,16 +70,16 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
 
   function flattenDeviceSettings(
     deviceSettings: DeviceSettings
-  ): Record<string, any[]> {
-    return Object.values(deviceSettings).reduce<Record<string, any[]>>(
-      (flatDeviceSettings, settings: Record<string, any[]>) =>
-        Object.entries(settings).reduce<Record<string, any[]>>(
-          (merged, [settingId, settingValues]: [string, any[]]) => {
-            const newMerged: Record<string, any[]> = { ...merged }
+  ): DeviceSetting {
+    return Object.values(deviceSettings).reduce<DeviceSetting>(
+      (flatDeviceSettings, settings: DeviceSetting) =>
+        Object.entries(settings).reduce<DeviceSetting>(
+          (merged, [settingId, settingValues]: [string, SettingValue[]]) => {
+            const newMerged: DeviceSetting = { ...merged }
             newMerged[settingId] ??= []
             newMerged[settingId].push(
               ...settingValues.filter(
-                (settingValue: any): boolean =>
+                (settingValue: SettingValue): boolean =>
                   !newMerged[settingId].includes(settingValue)
               )
             )
@@ -90,7 +92,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   const deviceSettings: DeviceSettings = await getDeviceSettings()
-  const flatDeviceSettings: Record<string, any[]> =
+  const flatDeviceSettings: DeviceSetting =
     flattenDeviceSettings(deviceSettings)
 
   const allDriverSettings: DriverSetting[] = await getDriverSettings()
@@ -98,20 +100,18 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     (setting: DriverSetting): boolean => setting.groupId !== 'login'
   )
 
-  async function getHomeySettings(): Promise<Record<string, any>> {
-    return new Promise<Record<string, any>>((resolve, reject) => {
+  async function getHomeySettings(): Promise<Settings> {
+    return new Promise<Settings>((resolve, reject) => {
       // @ts-expect-error bug
-      Homey.get(
-        async (error: Error, settings: Record<string, any>): Promise<void> => {
-          if (error !== null) {
-            // @ts-expect-error bug
-            await Homey.alert(error.message)
-            reject(error)
-            return
-          }
-          resolve(settings)
+      Homey.get(async (error: Error, settings: Settings): Promise<void> => {
+        if (error !== null) {
+          // @ts-expect-error bug
+          await Homey.alert(error.message)
+          reject(error)
+          return
         }
-      )
+        resolve(settings)
+      })
     })
   }
 
@@ -135,7 +135,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     'settings'
   ) as HTMLDivElement
 
-  const homeySettings: Record<string, any> = await getHomeySettings()
+  const homeySettings: Settings = await getHomeySettings()
   const credentialKeys: string[] = ['username', 'password']
   const [usernameElement, passwordElement]: Array<HTMLInputElement | null> =
     credentialKeys.map((credentialKey: string): HTMLInputElement | null => {
@@ -154,7 +154,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       inputElement.classList.add('homey-form-input')
       inputElement.type = driverSetting.type
       inputElement.placeholder = driverSetting.placeholder ?? ''
-      inputElement.value = homeySettings[driverSetting.id] ?? ''
+      inputElement.value = (homeySettings[driverSetting.id] as string) ?? ''
       inputElement.id = driverSetting.id
       labelElement.htmlFor = inputElement.id
       loginElement.appendChild(labelElement)
@@ -195,7 +195,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
 
   function processSettingValue(
     setting: HTMLInputElement | HTMLSelectElement
-  ): any {
+  ): SettingValue {
     const { value } = setting
     if (value === '') {
       return null
@@ -218,9 +218,12 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   function buildSettingsBody(
     settings: Array<HTMLInputElement | HTMLSelectElement>
   ): Settings {
-    const shouldUpdate = (settingValue: any, settingId: string): boolean => {
+    const shouldUpdate = (
+      settingValue: SettingValue,
+      settingId: string
+    ): boolean => {
       if (settingValue !== null) {
-        const deviceSetting: any[] = flatDeviceSettings[settingId]
+        const deviceSetting: SettingValue[] = flatDeviceSettings[settingId]
         return deviceSetting.length !== 1 || settingValue !== deviceSetting[0]
       }
       return false
@@ -228,7 +231,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
 
     return settings.reduce<Settings>(
       (body, element: HTMLInputElement | HTMLSelectElement) => {
-        const settingValue: any = processSettingValue(element)
+        const settingValue: SettingValue = processSettingValue(element)
         const settingId: string = element.id.split('--')[0]
         if (shouldUpdate(settingValue, settingId)) {
           return { ...body, [settingId]: settingValue }
@@ -241,7 +244,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
 
   function updateDeviceSettings(body: Settings): void {
     Object.entries(body).forEach(
-      ([settingId, settingValue]: [string, any]): void => {
+      ([settingId, settingValue]: [string, SettingValue]): void => {
         Object.keys(deviceSettings).forEach((id: string): void => {
           deviceSettings[id][settingId] = [settingValue]
         })
@@ -339,7 +342,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         }
         selectElement.appendChild(optionElement)
       })
-      const values: any[] = flatDeviceSettings[setting.id]
+      const values: SettingValue[] = flatDeviceSettings[setting.id]
       if (values.length === 1) {
         selectElement.value = String(values[0])
       }

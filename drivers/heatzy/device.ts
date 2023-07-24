@@ -242,7 +242,7 @@ export default class HeatzyDevice extends Device {
     newSettings: Settings
   }): Promise<void> {
     if (changedKeys.includes('on_mode')) {
-      this.setOnMode(newSettings.on_mode)
+      this.setOnMode(newSettings.on_mode as Exclude<Mode, 'stop'>)
     }
     if (
       changedKeys.includes('always_on') &&
@@ -274,11 +274,11 @@ export default class HeatzyDevice extends Device {
     }
   }
 
-  log(...args: any[]): void {
+  log(...args: unknown[]): void {
     super.log(this.getName(), '-', ...args)
   }
 
-  error(...args: any[]): void {
+  error(...args: unknown[]): void {
     super.error(this.getName(), '-', ...args)
   }
 }

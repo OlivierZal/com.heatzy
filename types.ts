@@ -1,6 +1,8 @@
 import type HeatzyDevice from './drivers/heatzy/device'
 
-export type Settings = Record<string, any>
+export type SettingValue = boolean | number | string | null | undefined
+
+export type Settings = Record<string, SettingValue>
 
 export interface ManifestDriverSettingData {
   readonly id: string
@@ -18,7 +20,7 @@ export interface ManifestDriverSetting {
   readonly label: Record<string, string>
 }
 
-export type PairSetting = { id: string } & Record<string, any>
+export type PairSetting = { id: string }
 
 export interface LoginSetting extends PairSetting {
   readonly id: 'login'
@@ -54,7 +56,9 @@ export interface DriverSetting {
   readonly values?: Array<{ id: string; label: string }>
 }
 
-export type DeviceSettings = Record<string, Record<string, any[]>>
+export type DeviceSetting = Record<string, SettingValue[]>
+
+export type DeviceSettings = Record<string, DeviceSetting>
 
 export type ModeNumber = 0 | 1 | 2 | 3
 

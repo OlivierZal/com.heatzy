@@ -13,6 +13,7 @@ import type {
   ManifestDriverSettingData,
   PairSetting,
   Settings,
+  SettingValue,
 } from './types'
 
 function getDevices(homey: Homey): HeatzyDevice[] {
@@ -36,8 +37,8 @@ module.exports = {
         const driverId: string = device.driver.id
         const newDeviceSettings: DeviceSettings = { ...deviceSettings }
         newDeviceSettings[driverId] ??= {}
-        Object.entries(device.getSettings()).forEach(
-          ([settingId, value]: [string, any]) => {
+        Object.entries(device.getSettings() as Settings).forEach(
+          ([settingId, value]: [string, SettingValue]): void => {
             newDeviceSettings[driverId][settingId] ??= []
             if (!newDeviceSettings[driverId][settingId].includes(value)) {
               newDeviceSettings[driverId][settingId].push(value)
@@ -88,7 +89,8 @@ module.exports = {
     const settingsLogin: DriverSetting[] = app.manifest.drivers.flatMap(
       (driver: ManifestDriver): DriverSetting[] => {
         const driverLoginSetting: LoginSetting | undefined = driver.pair?.find(
-          (pairSetting: PairSetting): boolean => pairSetting.id === 'login'
+          (pairSetting: LoginSetting | PairSetting): boolean =>
+            pairSetting.id === 'login'
         ) as LoginSetting | undefined
         if (driverLoginSetting === undefined) {
           return []
