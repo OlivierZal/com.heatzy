@@ -4,8 +4,8 @@ import type {
   DeviceSettings,
   DriverSetting,
   LoginCredentials,
-  SettingValue,
   Settings,
+  SettingValue,
 } from '../types'
 
 async function onHomeyReady(Homey: Homey): Promise<void> {
