@@ -11,7 +11,7 @@ export interface ManifestDriverSettingData {
   readonly min?: number
   readonly type: string
   readonly units?: string
-  readonly values?: Array<{ id: string; label: Record<string, string> }>
+  readonly values?: { id: string; label: Record<string, string> }[]
 }
 
 export interface ManifestDriverSetting {
@@ -53,7 +53,7 @@ export interface DriverSetting {
   title: string
   readonly type: string
   readonly units?: string
-  readonly values?: Array<{ id: string; label: string }>
+  readonly values?: { id: string; label: string }[]
 }
 
 export type DeviceSetting = Record<string, SettingValue[]>

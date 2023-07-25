@@ -137,7 +137,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
 
   const homeySettings: Settings = await getHomeySettings()
   const credentialKeys: string[] = ['username', 'password']
-  const [usernameElement, passwordElement]: Array<HTMLInputElement | null> =
+  const [usernameElement, passwordElement]: (HTMLInputElement | null)[] =
     credentialKeys.map((credentialKey: string): HTMLInputElement | null => {
       const driverSetting: DriverSetting | undefined = allDriverSettings.find(
         (setting: DriverSetting): boolean => setting.id === credentialKey
@@ -216,7 +216,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   }
 
   function buildSettingsBody(
-    settings: Array<HTMLInputElement | HTMLSelectElement>
+    settings: (HTMLInputElement | HTMLSelectElement)[]
   ): Settings {
     const shouldUpdate = (
       settingValue: SettingValue,
@@ -278,7 +278,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
 
   function addSettingsEventListener(
     buttonElement: HTMLButtonElement,
-    elements: Array<HTMLInputElement | HTMLSelectElement>
+    elements: (HTMLInputElement | HTMLSelectElement)[]
   ): void {
     buttonElement.addEventListener('click', (): void => {
       let body: Settings = {}
