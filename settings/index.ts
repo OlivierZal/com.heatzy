@@ -79,7 +79,9 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         Object.entries(settings).reduce<DeviceSetting>(
           (merged, [settingId, settingValues]: [string, SettingValue[]]) => {
             const newMerged: DeviceSetting = { ...merged }
-            newMerged[settingId] = settingId in merged ? merged[settingId] : []
+            if (!(settingId in newMerged)) {
+              newMerged[settingId] = []
+            }
             newMerged[settingId].push(
               ...settingValues.filter(
                 (settingValue: SettingValue): boolean =>

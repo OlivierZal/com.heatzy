@@ -32,14 +32,14 @@ module.exports = {
       (deviceSettings, device) => {
         const driverId: string = device.driver.id
         const newDeviceSettings: DeviceSettings = { ...deviceSettings }
-        newDeviceSettings[driverId] =
-          driverId in deviceSettings ? deviceSettings[driverId] : {}
+        if (!(driverId in newDeviceSettings)) {
+          newDeviceSettings[driverId] = {}
+        }
         Object.entries(device.getSettings() as Settings).forEach(
           ([settingId, value]: [string, SettingValue]): void => {
-            newDeviceSettings[driverId][settingId] =
-              settingId in deviceSettings[driverId]
-                ? deviceSettings[driverId][settingId]
-                : []
+            if (!(settingId in newDeviceSettings[driverId])) {
+              newDeviceSettings[driverId][settingId] = []
+            }
             if (!newDeviceSettings[driverId][settingId].includes(value)) {
               newDeviceSettings[driverId][settingId].push(value)
             }
@@ -106,16 +106,15 @@ module.exports = {
               const newDriverLoginSettings: Record<string, DriverSetting> = {
                 ...driverLoginSettings,
               }
-              newDriverLoginSettings[key] =
-                key in driverLoginSettings
-                  ? driverLoginSettings[key]
-                  : {
-                      groupId: 'login',
-                      id: key,
-                      title: '',
-                      type: isPassword ? 'password' : 'text',
-                      driverId: driver.id,
-                    }
+              if (!(key in newDriverLoginSettings)) {
+                newDriverLoginSettings[key] = {
+                  groupId: 'login',
+                  id: key,
+                  title: '',
+                  type: isPassword ? 'password' : 'text',
+                  driverId: driver.id,
+                }
+              }
               newDriverLoginSettings[key][
                 option.endsWith('Placeholder') ? 'placeholder' : 'title'
               ] = label[language]
