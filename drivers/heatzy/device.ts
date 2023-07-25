@@ -91,7 +91,7 @@ export default class HeatzyDevice extends Device {
     this.productKey = productKey
 
     this.setOnMode()
-    this.previousMode = this.getOnMode()
+    this.previousMode = this.onMode ?? 'eco'
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -101,11 +101,7 @@ export default class HeatzyDevice extends Device {
       this.log('Syncing from device...')
       const { data } = await axios.get<DeviceData>(`devdata/${this.id}/latest`)
       this.log('Syncing from device:\n', data)
-      const { mode } = data.attr
-      if (mode === undefined) {
-        throw new Error('mode is undefined')
-      }
-      return mode
+      return data.attr.mode
     } catch (error: unknown) {
       this.error(
         'Syncing from device:',
@@ -146,7 +142,7 @@ export default class HeatzyDevice extends Device {
   }
 
   getOnMode(): Exclude<Mode, 'stop'> {
-    return this.onMode ?? this.previousMode ?? 'eco'
+    return this.onMode ?? this.previousMode
   }
 
   registerCapabilityListeners(): void {
@@ -253,7 +249,7 @@ export default class HeatzyDevice extends Device {
     }
   }
 
-  async onDeleted(): Promise<void> {
+  onDeleted(): void {
     this.clearSyncPlan()
   }
 
@@ -270,7 +266,9 @@ export default class HeatzyDevice extends Device {
         .then((): void => {
           this.log('Capability', capability, 'is', value)
         })
-        .catch(this.error)
+        .catch((err): void => {
+          this.error(err.message)
+        })
     }
   }
 

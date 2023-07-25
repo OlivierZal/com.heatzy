@@ -11,6 +11,7 @@ export default class HeatzyDriver extends Driver {
 
   heatPumpType!: string
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async onInit(): Promise<void> {
     this.app = this.homey.app as HeatzyApp
 

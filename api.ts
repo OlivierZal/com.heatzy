@@ -27,19 +27,19 @@ function getLanguage(homey: Homey): string {
 }
 
 module.exports = {
-  async getDeviceSettings({
-    homey,
-  }: {
-    homey: Homey
-  }): Promise<DeviceSettings> {
+  getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {
     return getDevices(homey).reduce<DeviceSettings>(
       (deviceSettings, device) => {
         const driverId: string = device.driver.id
         const newDeviceSettings: DeviceSettings = { ...deviceSettings }
-        newDeviceSettings[driverId] ??= {}
+        newDeviceSettings[driverId] =
+          driverId in deviceSettings ? deviceSettings[driverId] : {}
         Object.entries(device.getSettings() as Settings).forEach(
           ([settingId, value]: [string, SettingValue]): void => {
-            newDeviceSettings[driverId][settingId] ??= []
+            newDeviceSettings[driverId][settingId] =
+              settingId in deviceSettings[driverId]
+                ? deviceSettings[driverId][settingId]
+                : []
             if (!newDeviceSettings[driverId][settingId].includes(value)) {
               newDeviceSettings[driverId][settingId].push(value)
             }
@@ -51,11 +51,7 @@ module.exports = {
     )
   },
 
-  async getDriverSettings({
-    homey,
-  }: {
-    homey: Homey
-  }): Promise<DriverSetting[]> {
+  getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
     const app: HeatzyApp = homey.app as HeatzyApp
     const language: string = getLanguage(homey)
     const settings: DriverSetting[] = app.manifest.drivers.flatMap(
@@ -110,13 +106,16 @@ module.exports = {
               const newDriverLoginSettings: Record<string, DriverSetting> = {
                 ...driverLoginSettings,
               }
-              newDriverLoginSettings[key] ??= {
-                groupId: 'login',
-                id: key,
-                title: '',
-                type: isPassword ? 'password' : 'text',
-                driverId: driver.id,
-              }
+              newDriverLoginSettings[key] =
+                key in driverLoginSettings
+                  ? driverLoginSettings[key]
+                  : {
+                      groupId: 'login',
+                      id: key,
+                      title: '',
+                      type: isPassword ? 'password' : 'text',
+                      driverId: driver.id,
+                    }
               newDriverLoginSettings[key][
                 option.endsWith('Placeholder') ? 'placeholder' : 'title'
               ] = label[language]
@@ -130,7 +129,7 @@ module.exports = {
     return [...settings, ...settingsLogin]
   },
 
-  async getLanguage({ homey }: { homey: Homey }): Promise<string> {
+  getLanguage({ homey }: { homey: Homey }): string {
     return getLanguage(homey)
   },
 

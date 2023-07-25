@@ -20,7 +20,9 @@ export interface ManifestDriverSetting {
   readonly label: Record<string, string>
 }
 
-export type PairSetting = { id: string }
+export interface PairSetting {
+  id: string
+}
 
 export interface LoginSetting extends PairSetting {
   readonly id: 'login'

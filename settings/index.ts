@@ -16,7 +16,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     Homey.api(
       'GET',
       '/language',
-      async (error: Error, language: string): Promise<void> => {
+      (error: Error | null, language: string): void => {
         if (error !== null) {
           reject(error)
           return
@@ -33,7 +33,10 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       Homey.api(
         'GET',
         '/devices/settings',
-        async (error: Error, deviceSettings: DeviceSettings): Promise<void> => {
+        async (
+          error: Error | null,
+          deviceSettings: DeviceSettings
+        ): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error bug
             await Homey.alert(error.message)
@@ -53,7 +56,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         'GET',
         '/drivers/settings',
         async (
-          error: Error,
+          error: Error | null,
           driverSettings: DriverSetting[]
         ): Promise<void> => {
           if (error !== null) {
@@ -76,7 +79,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         Object.entries(settings).reduce<DeviceSetting>(
           (merged, [settingId, settingValues]: [string, SettingValue[]]) => {
             const newMerged: DeviceSetting = { ...merged }
-            newMerged[settingId] ??= []
+            newMerged[settingId] = settingId in merged ? merged[settingId] : []
             newMerged[settingId].push(
               ...settingValues.filter(
                 (settingValue: SettingValue): boolean =>
@@ -103,15 +106,17 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   async function getHomeySettings(): Promise<Settings> {
     return new Promise<Settings>((resolve, reject) => {
       // @ts-expect-error bug
-      Homey.get(async (error: Error, settings: Settings): Promise<void> => {
-        if (error !== null) {
-          // @ts-expect-error bug
-          await Homey.alert(error.message)
-          reject(error)
-          return
+      Homey.get(
+        async (error: Error | null, settings: Settings): Promise<void> => {
+          if (error !== null) {
+            // @ts-expect-error bug
+            await Homey.alert(error.message)
+            reject(error)
+            return
+          }
+          resolve(settings)
         }
-        resolve(settings)
-      })
+      )
     })
   }
 
@@ -154,7 +159,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       inputElement.classList.add('homey-form-input')
       inputElement.type = driverSetting.type
       inputElement.placeholder = driverSetting.placeholder ?? ''
-      inputElement.value = (homeySettings[driverSetting.id] as string) ?? ''
+      inputElement.value = homeySettings[driverSetting.id] as string
       inputElement.id = driverSetting.id
       labelElement.htmlFor = inputElement.id
       loginElement.appendChild(labelElement)
@@ -162,11 +167,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       return inputElement
     })
 
-  function hide(element: HTMLDivElement, value: boolean = true): void {
+  function hide(element: HTMLDivElement, value = true): void {
     element.classList.toggle('hidden', value)
   }
 
-  function unhide(element: HTMLDivElement, value: boolean = true): void {
+  function unhide(element: HTMLDivElement, value = true): void {
     element.classList.toggle('hidden', !value)
   }
 
@@ -174,8 +179,8 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     element: HTMLInputElement,
     value: number = Number.parseInt(element.value, 10)
   ): number {
-    const minValue: number = Number(element.min)
-    const maxValue: number = Number(element.max)
+    const minValue = Number(element.min)
+    const maxValue = Number(element.max)
     if (Number.isNaN(value) || value < minValue || value > maxValue) {
       // eslint-disable-next-line no-param-reassign
       element.value = ''
@@ -262,7 +267,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       'POST',
       '/devices/settings',
       body,
-      async (error: Error): Promise<void> => {
+      async (error: Error | null): Promise<void> => {
         if (error !== null) {
           // @ts-expect-error bug
           await Homey.alert(error.message)
@@ -298,7 +303,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       Homey.confirm(
         Homey.__('settings.devices.apply.confirm'),
         null,
-        async (error: Error, ok: boolean): Promise<void> => {
+        async (error: Error | null, ok: boolean): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error bug
             await Homey.alert(error.message)
@@ -356,7 +361,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     )
   }
 
-  async function needsAuthentication(value: boolean = true): Promise<void> {
+  function needsAuthentication(value = true): void {
     hide(authenticatedElement, value)
     unhide(authenticatingElement, value)
   }
@@ -379,7 +384,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       'POST',
       '/login',
       body,
-      async (error: Error, loggedIn: boolean): Promise<void> => {
+      async (error: Error | null, loggedIn: boolean): Promise<void> => {
         if (error !== null || !loggedIn) {
           authenticateElement.classList.remove('is-disabled')
           // @ts-expect-error bug
@@ -390,7 +395,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           )
           return
         }
-        await needsAuthentication(false)
+        needsAuthentication(false)
       }
     )
   }
@@ -400,13 +405,16 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     try {
       await login()
     } catch (error: unknown) {
-      await needsAuthentication()
+      needsAuthentication()
     }
   }
 
   authenticateElement.addEventListener('click', (): void => {
     authenticateElement.classList.add('is-disabled')
-    login()
+    login().catch(async (err: Error): Promise<void> => {
+      // @ts-expect-error bug
+      await Homey.alert(err.message)
+    })
   })
 
   await load()
