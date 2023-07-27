@@ -30,7 +30,7 @@ export default class HeatzyApp extends App {
       username: this.homey.settings.get('username') ?? '',
       password: this.homey.settings.get('password') ?? '',
     }
-    const expiredAt = this.homey.settings.get('expire_at') as number | null
+    const expiredAt: number | null = this.homey.settings.get('expire_at')
     if (expiredAt !== null) {
       const expireAtDate: Date = new Date(expiredAt * 1000)
       expireAtDate.setDate(expireAtDate.getDate() - 1)
