@@ -162,7 +162,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       inputElement.type = driverSetting.type
       inputElement.placeholder = driverSetting.placeholder ?? ''
       inputElement.value =
-        (homeySettings[driverSetting.id] as string | null) ?? ''
+        (homeySettings[driverSetting.id] as string | undefined) ?? ''
       inputElement.id = driverSetting.id
       labelElement.htmlFor = inputElement.id
       loginElement.appendChild(labelElement)
