@@ -1,15 +1,13 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const js = require('@eslint/js')
 const typescriptEslintParser = require('@typescript-eslint/parser')
 const typescriptEslintPlugin = require('@typescript-eslint/eslint-plugin')
 const importPlugin = require('eslint-plugin-import')
 const prettier = require('eslint-config-prettier')
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 module.exports = [
   {
     ...js.configs.recommended,
-    files: ['**/*.js', '**/*.ts'],
+    files: ['**/*.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
       parser: typescriptEslintParser,
