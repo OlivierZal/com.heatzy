@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Device } from 'homey'
 import axios from 'axios'
 import type HeatzyDriver from './driver'
@@ -79,8 +78,6 @@ export default class HeatzyDevice extends Device {
 
   onMode!: Exclude<Mode, 'stop'> | null
 
-  previousMode!: Exclude<Mode, 'stop'>
-
   syncTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
@@ -90,8 +87,10 @@ export default class HeatzyDevice extends Device {
     this.id = id
     this.productKey = productKey
 
+    if (this.getStoreValue('previous_mode') === undefined) {
+      await this.setStoreValue('previous_mode', 'eco')
+    }
     this.setOnMode()
-    this.previousMode = this.onMode ?? 'eco'
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -142,7 +141,7 @@ export default class HeatzyDevice extends Device {
   }
 
   getOnMode(): Exclude<Mode, 'stop'> {
-    return this.onMode ?? this.previousMode
+    return this.onMode ?? this.getStoreValue('previous_mode')
   }
 
   registerCapabilityListeners(): void {
@@ -173,7 +172,7 @@ export default class HeatzyDevice extends Device {
     if (this.mode === 'stop' && alwaysOn) {
       await this.setWarning(this.homey.__('warnings.always_on'))
       await this.setWarning(null)
-      this.mode = this.previousMode
+      this.mode = this.getStoreValue('previous_mode')
     }
     this.applySyncToDevice()
   }
@@ -193,7 +192,7 @@ export default class HeatzyDevice extends Device {
     const modeNumber: ModeNumber = modeToNumber[this.mode]
     const success: boolean = await this.setDeviceMode(modeNumber)
     if (!success) {
-      this.mode = this.isOn ? this.previousMode : 'stop'
+      this.mode = this.isOn ? this.getStoreValue('previous_mode') : 'stop'
     }
     await this.sync()
   }
@@ -213,12 +212,8 @@ export default class HeatzyDevice extends Device {
     this.isOn = this.mode !== 'stop'
     await this.setCapabilityValue('onoff', this.isOn)
     await this.setCapabilityValue('mode', this.mode)
-    this.setPreviousMode()
-  }
-
-  setPreviousMode(): void {
     if (this.mode !== 'stop') {
-      this.previousMode = this.mode
+      await this.setStoreValue('previous_mode', this.mode)
     }
   }
 

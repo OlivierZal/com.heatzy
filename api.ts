@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { type Driver } from 'homey'
 import type Homey from 'homey/lib/Homey'
 import type HeatzyApp from './app'
