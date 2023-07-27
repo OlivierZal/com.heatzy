@@ -6,10 +6,6 @@ import type { DeviceDetails, FlowArgs, LoginCredentials } from '../../types'
 export default class HeatzyDriver extends Driver {
   app!: HeatzyApp
 
-  deviceType!: number
-
-  heatPumpType!: string
-
   // eslint-disable-next-line @typescript-eslint/require-await
   async onInit(): Promise<void> {
     this.app = this.homey.app as HeatzyApp

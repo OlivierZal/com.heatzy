@@ -30,21 +30,22 @@ export default class HeatzyApp extends App {
       username: this.homey.settings.get('username') ?? '',
       password: this.homey.settings.get('password') ?? '',
     }
-    const expireAtDate: Date = new Date(
-      this.homey.settings.get('expire_at') * 1000
-    )
-    expireAtDate.setDate(expireAtDate.getDate() - 1)
-    const ms: number = expireAtDate.getTime() - new Date().getTime()
-    if (ms > 0) {
-      const maxTimeout: number = 2 ** 31 - 1
-      const interval: number = Math.min(ms, maxTimeout)
-      this.loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
-        await this.login(loginCredentials).catch((err: Error): void => {
-          this.error(err.message)
-        })
-      }, interval)
-      this.log('Login refresh has been scheduled')
-      return
+    const expiredAt = this.homey.settings.get('expire_at') as number | null
+    if (expiredAt !== null) {
+      const expireAtDate: Date = new Date(expiredAt * 1000)
+      expireAtDate.setDate(expireAtDate.getDate() - 1)
+      const ms: number = expireAtDate.getTime() - new Date().getTime()
+      if (ms > 0) {
+        const maxTimeout: number = 2 ** 31 - 1
+        const interval: number = Math.min(ms, maxTimeout)
+        this.loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
+          await this.login(loginCredentials).catch((err: Error): void => {
+            this.error(err.message)
+          })
+        }, interval)
+        this.log('Login refresh has been scheduled')
+        return
+      }
     }
     await this.login(loginCredentials).catch((err: Error): void => {
       this.error(err.message)
