@@ -199,7 +199,10 @@ export default class HeatzyDevice extends Device {
 
   async syncFromDevice(): Promise<void> {
     const modeString: ModeString | null = await this.getDeviceMode()
-    this.mode = modeString !== null ? modeFromString[modeString] : 'stop'
+    this.mode =
+      modeString !== null && modeString in modeFromString
+        ? modeFromString[modeString]
+        : 'stop'
     await this.sync()
   }
 
