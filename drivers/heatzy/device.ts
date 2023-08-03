@@ -278,5 +278,3 @@ export default class HeatzyDevice extends Device {
     super.error(this.getName(), '-', ...args)
   }
 }
-
-module.exports = HeatzyDevice
