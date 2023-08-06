@@ -8,12 +8,12 @@ import type {
   SettingValue,
 } from '../types'
 
-async function onHomeyReady(Homey: Homey): Promise<void> {
-  await Homey.ready()
+async function onHomeyReady(homey: Homey): Promise<void> {
+  await homey.ready()
 
   await new Promise<string>((resolve, reject) => {
     // @ts-expect-error bug
-    Homey.api(
+    homey.api(
       'GET',
       '/language',
       (error: Error | null, language: string): void => {
@@ -30,7 +30,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   async function getDeviceSettings(): Promise<DeviceSettings> {
     return new Promise<DeviceSettings>((resolve, reject) => {
       // @ts-expect-error bug
-      Homey.api(
+      homey.api(
         'GET',
         '/devices/settings',
         async (
@@ -39,7 +39,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         ): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error bug
-            await Homey.alert(error.message)
+            await homey.alert(error.message)
             reject(error)
             return
           }
@@ -52,7 +52,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   async function getDriverSettings(): Promise<DriverSetting[]> {
     return new Promise<DriverSetting[]>((resolve, reject) => {
       // @ts-expect-error bug
-      Homey.api(
+      homey.api(
         'GET',
         '/drivers/settings',
         async (
@@ -61,7 +61,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         ): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error bug
-            await Homey.alert(error.message)
+            await homey.alert(error.message)
             reject(error)
             return
           }
@@ -108,11 +108,11 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
   async function getHomeySettings(): Promise<Settings> {
     return new Promise<Settings>((resolve, reject) => {
       // @ts-expect-error bug
-      Homey.get(
+      homey.get(
         async (error: Error | null, settings: Settings): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error bug
-            await Homey.alert(error.message)
+            await homey.alert(error.message)
             reject(error)
             return
           }
@@ -185,13 +185,14 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     const minValue = Number(element.min)
     const maxValue = Number(element.max)
     if (Number.isNaN(value) || value < minValue || value > maxValue) {
+      // eslint-disable-next-line no-param-reassign
       element.value = ''
       const labelElement: HTMLLabelElement | null = document.querySelector(
         `label[for="${element.id}"]`
       )
       throw new Error(
-        Homey.__('settings.int_error', {
-          name: Homey.__(labelElement?.innerText ?? ''),
+        homey.__('settings.int_error', {
+          name: homey.__(labelElement?.innerText ?? ''),
           min: minValue,
           max: maxValue,
         })
@@ -265,20 +266,20 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     body: Settings
   ): void {
     // @ts-expect-error bug
-    Homey.api(
+    homey.api(
       'POST',
       '/devices/settings',
       body,
       async (error: Error | null): Promise<void> => {
         if (error !== null) {
           // @ts-expect-error bug
-          await Homey.alert(error.message)
+          await homey.alert(error.message)
           return
         }
         updateDeviceSettings(body)
         buttonElement.classList.remove('is-disabled')
         // @ts-expect-error bug
-        await Homey.alert(Homey.__('settings.success'))
+        await homey.alert(homey.__('settings.success'))
       }
     )
   }
@@ -293,22 +294,22 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         body = buildSettingsBody(elements)
       } catch (error: unknown) {
         // @ts-expect-error bug
-        Homey.alert(error instanceof Error ? error.message : String(error))
+        homey.alert(error instanceof Error ? error.message : String(error))
         return
       }
       if (Object.keys(body).length === 0) {
         // @ts-expect-error bug
-        Homey.alert(Homey.__('settings.devices.apply.nothing'))
+        homey.alert(homey.__('settings.devices.apply.nothing'))
         return
       }
       // @ts-expect-error bug
-      Homey.confirm(
-        Homey.__('settings.devices.apply.confirm'),
+      homey.confirm(
+        homey.__('settings.devices.apply.confirm'),
         null,
         async (error: Error | null, ok: boolean): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error bug
-            await Homey.alert(error.message)
+            await homey.alert(error.message)
             return
           }
           if (ok) {
@@ -345,7 +346,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
           document.createElement('option')
         optionElement.value = id
         if (id !== '') {
-          optionElement.innerText = label ?? Homey.__(`settings.boolean.${id}`)
+          optionElement.innerText = label ?? homey.__(`settings.boolean.${id}`)
         }
         selectElement.appendChild(optionElement)
       })
@@ -374,7 +375,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     if (username === '' || password === '') {
       authenticateElement.classList.remove('is-disabled')
       // @ts-expect-error bug
-      await Homey.alert(Homey.__('settings.authenticate.failure'))
+      await homey.alert(homey.__('settings.authenticate.failure'))
       return
     }
     const body: LoginCredentials = {
@@ -382,7 +383,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
       password,
     }
     // @ts-expect-error bug
-    Homey.api(
+    homey.api(
       'POST',
       '/login',
       body,
@@ -390,10 +391,10 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
         if (error !== null || !loggedIn) {
           authenticateElement.classList.remove('is-disabled')
           // @ts-expect-error bug
-          await Homey.alert(
+          await homey.alert(
             error !== null
               ? error.message
-              : Homey.__('settings.authenticate.failure')
+              : homey.__('settings.authenticate.failure')
           )
           return
         }
@@ -415,7 +416,7 @@ async function onHomeyReady(Homey: Homey): Promise<void> {
     authenticateElement.classList.add('is-disabled')
     login().catch(async (err: Error): Promise<void> => {
       // @ts-expect-error bug
-      await Homey.alert(err.message)
+      await homey.alert(err.message)
     })
   })
 
