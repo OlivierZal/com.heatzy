@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { App } from 'homey'
 import axios from 'axios'
 import type {
