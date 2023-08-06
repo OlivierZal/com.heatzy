@@ -82,10 +82,10 @@ export default [
       ...tsPlugin.configs['eslint-recommended'].overrides[0].rules,
       ...tsPlugin.configs['strict-type-checked'].rules,
       ...tsPlugin.configs['stylistic-type-checked'].rules,
+      ...importPlugin.configs.recommended.rules,
       ...tsDisabledRules,
     },
   },
-  importPlugin.configs.recommended,
   importPlugin.configs.typescript,
   {
     languageOptions: {
