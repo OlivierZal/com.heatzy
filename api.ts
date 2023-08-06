@@ -1,4 +1,4 @@
-import { type Driver } from 'homey'
+import type { Driver } from 'homey'
 import type Homey from 'homey/lib/Homey'
 import type HeatzyApp from './app'
 import type HeatzyDevice from './drivers/heatzy/device'
