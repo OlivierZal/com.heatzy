@@ -25,7 +25,7 @@ function getLanguage(homey: Homey): string {
   return homey.i18n.getLanguage()
 }
 
-export default {
+module.exports = {
   getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {
     return getDevices(homey).reduce<DeviceSettings>(
       (deviceSettings, device) => {
