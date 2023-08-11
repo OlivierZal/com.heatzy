@@ -42,3 +42,5 @@ export default class HeatzyDriver extends Driver {
     )
   }
 }
+
+module.exports = HeatzyDriver
