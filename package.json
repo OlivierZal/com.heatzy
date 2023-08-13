@@ -10,7 +10,7 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.1",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.4",
-    "@types/node": "^20.4.10",
+    "@types/node": "^20.5.0",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
     "eslint": "^8.47.0",
