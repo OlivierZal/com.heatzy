@@ -13,7 +13,7 @@ import type {
   Settings,
 } from './types'
 
-export default class HeatzyApp extends App {
+export = class HeatzyApp extends App {
   loginTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
@@ -124,5 +124,3 @@ export default class HeatzyApp extends App {
     )
   }
 }
-
-module.exports = HeatzyApp

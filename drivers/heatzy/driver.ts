@@ -4,7 +4,7 @@ import type PairSession from 'homey/lib/PairSession'
 import type HeatzyApp from '../../app'
 import type { DeviceDetails, FlowArgs, LoginCredentials } from '../../types'
 
-export default class HeatzyDriver extends Driver {
+export = class HeatzyDriver extends Driver {
   app!: HeatzyApp
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -42,5 +42,3 @@ export default class HeatzyDriver extends Driver {
     )
   }
 }
-
-module.exports = HeatzyDriver

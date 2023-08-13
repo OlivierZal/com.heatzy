@@ -64,7 +64,7 @@ const modeFromString: Record<ModeString, Mode> = {
   停止: 'stop',
 } as const
 
-export default class HeatzyDevice extends Device {
+export = class HeatzyDevice extends Device {
   app!: HeatzyApp
 
   declare driver: HeatzyDriver
@@ -279,5 +279,3 @@ export default class HeatzyDevice extends Device {
     super.error(this.getName(), '-', ...args)
   }
 }
-
-module.exports = HeatzyDevice
