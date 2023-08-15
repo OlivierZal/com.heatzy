@@ -271,11 +271,11 @@ export = class HeatzyDevice extends Device {
     }
   }
 
-  log(...args: unknown[]): void {
+  log(...args: any[]): void {
     super.log(this.getName(), '-', ...args)
   }
 
-  error(...args: unknown[]): void {
+  error(...args: any[]): void {
     super.error(this.getName(), '-', ...args)
   }
 }
