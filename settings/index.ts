@@ -100,8 +100,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   const flatDeviceSettings: DeviceSetting =
     flattenDeviceSettings(deviceSettings)
 
-  const allDriverSettings: DriverSetting[] = await getDriverSettings()
-  const driverSettings: DriverSetting[] = allDriverSettings.filter(
+  const driverSettingsAll: DriverSetting[] = await getDriverSettings()
+  const driverSettings: DriverSetting[] = driverSettingsAll.filter(
     (setting: DriverSetting): boolean => setting.groupId !== 'login'
   )
 
@@ -146,7 +146,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   const credentialKeys: string[] = ['username', 'password']
   const [usernameElement, passwordElement]: (HTMLInputElement | null)[] =
     credentialKeys.map((credentialKey: string): HTMLInputElement | null => {
-      const driverSetting: DriverSetting | undefined = allDriverSettings.find(
+      const driverSetting: DriverSetting | undefined = driverSettingsAll.find(
         (setting: DriverSetting): boolean => setting.id === credentialKey
       )
       if (driverSetting === undefined) {
