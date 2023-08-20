@@ -49,7 +49,6 @@ export = {
       {}
     )
   },
-
   getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
     const app: HeatzyApp = homey.app as HeatzyApp
     const language: string = getLanguage(homey)
@@ -126,11 +125,9 @@ export = {
     )
     return [...settings, ...settingsLogin]
   },
-
   getLanguage({ homey }: { homey: Homey }): string {
     return getLanguage(homey)
   },
-
   async login({
     homey,
     body,
@@ -140,7 +137,6 @@ export = {
   }): Promise<boolean> {
     return (homey.app as HeatzyApp).login(body)
   },
-
   async setDeviceSettings({
     homey,
     body,
