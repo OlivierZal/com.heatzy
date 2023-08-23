@@ -1,8 +1,7 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Device } from 'homey'
-import axios from 'axios'
+import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type HeatzyDriver from './driver'
 import type HeatzyApp from '../../app'
+import WithAPIAndLogging from '../../mixin'
 import type {
   CapabilityValue,
   Data,
@@ -64,7 +63,7 @@ const modeFromString: Record<ModeString, Mode> = {
   停止: 'stop',
 } as const
 
-export = class HeatzyDevice extends Device {
+export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   app!: HeatzyApp
 
   declare driver: HeatzyDriver
@@ -98,17 +97,13 @@ export = class HeatzyDevice extends Device {
 
   async getDeviceMode(): Promise<ModeString | null> {
     try {
-      this.log('Syncing from device...')
-      const { data } = await axios.get<DeviceData>(`devdata/${this.id}/latest`)
-      this.log('Syncing from device:\n', data)
+      const { data } = await this.api.get<DeviceData>(
+        `devdata/${this.id}/latest`
+      )
       return data.attr.mode
     } catch (error: unknown) {
-      this.error(
-        'Syncing from device:',
-        error instanceof Error ? error.message : error
-      )
+      return null
     }
-    return null
   }
 
   async setDeviceMode(mode: ModeNumber): Promise<boolean> {
@@ -117,20 +112,17 @@ export = class HeatzyDevice extends Device {
         mode,
         this.productKey
       )
-      this.log('Syncing with device...\n', postData)
-      const { data } = await axios.post<Data>(`/control/${this.id}`, postData)
-      this.log('Syncing with device:\n', data)
+      const { data } = await this.api.post<Data>(
+        `/control/${this.id}`,
+        postData
+      )
       if ('error_message' in data) {
         throw new Error(data.error_message)
       }
       return true
     } catch (error: unknown) {
-      this.error(
-        'Syncing with device:',
-        error instanceof Error ? error.message : error
-      )
+      return false
     }
-    return false
   }
 
   setOnMode(
@@ -265,17 +257,9 @@ export = class HeatzyDevice extends Device {
         .then((): void => {
           this.log('Capability', capability, 'is', value)
         })
-        .catch((err): void => {
-          this.error(err.message)
+        .catch((error): void => {
+          this.error(error.message)
         })
     }
-  }
-
-  error(...args: any[]): void {
-    super.error(this.getName(), '-', ...args)
-  }
-
-  log(...args: any[]): void {
-    super.log(this.getName(), '-', ...args)
   }
 }

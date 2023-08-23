@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Driver } from 'homey'
+import { Driver } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type PairSession from 'homey/lib/PairSession'
 import type HeatzyApp from '../../app'
 import type { DeviceDetails, FlowArgs, LoginCredentials } from '../../types'
@@ -27,18 +26,18 @@ export = class HeatzyDriver extends Driver {
   onPair(session: PairSession): void {
     session.setHandler(
       'login',
-      async (data: LoginCredentials): Promise<boolean> => this.app.login(data)
+      (data: LoginCredentials): Promise<boolean> => this.app.login(data)
     )
     session.setHandler(
       'list_devices',
-      async (): Promise<DeviceDetails[]> => this.app.listDevices()
+      (): Promise<DeviceDetails[]> => this.app.listDevices()
     )
   }
 
   onRepair(session: PairSession): void {
     session.setHandler(
       'login',
-      async (data: LoginCredentials): Promise<boolean> => this.app.login(data)
+      (data: LoginCredentials): Promise<boolean> => this.app.login(data)
     )
   }
 }
