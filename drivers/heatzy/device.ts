@@ -252,14 +252,12 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
       this.hasCapability(capability) &&
       value !== this.getCapabilityValue(capability)
     ) {
-      await super
-        .setCapabilityValue(capability, value)
-        .then((): void => {
-          this.log('Capability', capability, 'is', value)
-        })
-        .catch((error): void => {
-          this.error(error.message)
-        })
+      try {
+        await super.setCapabilityValue(capability, value)
+        this.log('Capability', capability, 'is', value)
+      } catch (error: unknown) {
+        this.error(error instanceof Error ? error.message : error)
+      }
     }
   }
 }

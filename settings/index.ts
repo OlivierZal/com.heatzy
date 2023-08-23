@@ -386,15 +386,10 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       'POST',
       '/login',
       body,
-      async (error: Error | null, loggedIn: boolean): Promise<void> => {
-        if (error !== null || !loggedIn) {
-          authenticateElement.classList.remove('is-disabled')
+      async (_: Error | null, loggedIn: boolean): Promise<void> => {
+        if (!loggedIn) {
           // @ts-expect-error bug
-          await homey.alert(
-            error !== null
-              ? error.message
-              : homey.__('settings.authenticate.failure')
-          )
+          await homey.alert(homey.__('settings.authenticate.failure'))
           return
         }
         needsAuthentication(false)
@@ -413,10 +408,14 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   authenticateElement.addEventListener('click', (): void => {
     authenticateElement.classList.add('is-disabled')
-    login().catch(async (error: Error): Promise<void> => {
-      // @ts-expect-error bug
-      await homey.alert(error.message)
-    })
+    login()
+      .catch(async (error: Error): Promise<void> => {
+        // @ts-expect-error bug
+        await homey.alert(error.message)
+      })
+      .finally((): void => {
+        authenticateElement.classList.remove('is-disabled')
+      })
   })
 
   await load()
