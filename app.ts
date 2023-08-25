@@ -5,7 +5,6 @@ import WithAPIAndLogging from './mixin'
 import type {
   Bindings,
   Data,
-  Device,
   DeviceDetails,
   LoginCredentials,
   LoginDataSuccess,
@@ -90,13 +89,15 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
     try {
       const { data } = await this.api.get<Bindings>('/bindings')
       return data.devices.map(
-        (device: Device): DeviceDetails => ({
-          name: device.dev_alias,
+        /* eslint-disable camelcase */
+        ({ dev_alias, did, product_key }): DeviceDetails => ({
+          name: dev_alias,
           data: {
-            id: device.did,
-            productKey: device.product_key,
+            id: did,
+            productKey: product_key,
           },
         })
+        /* eslint-enable camelcase */
       )
     } catch (error: unknown) {
       return []

@@ -11,7 +11,10 @@ export interface ManifestDriverSettingData {
   readonly min?: number
   readonly type: string
   readonly units?: string
-  readonly values?: { id: string; label: Record<string, string> }[]
+  readonly values?: {
+    readonly id: string
+    readonly label: Record<string, string>
+  }[]
 }
 
 export interface ManifestDriverSetting {
@@ -21,7 +24,7 @@ export interface ManifestDriverSetting {
 }
 
 export interface PairSetting {
-  id: string
+  readonly id: string
 }
 
 export interface LoginSetting extends PairSetting {
@@ -55,7 +58,7 @@ export interface DriverSetting {
   title: string
   readonly type: string
   readonly units?: string
-  readonly values?: { id: string; label: string }[]
+  readonly values?: { readonly id: string; readonly label: string }[]
 }
 
 export type DeviceSetting = Record<string, SettingValue[]>
@@ -81,27 +84,25 @@ export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
 export type CapabilityValue = boolean | Mode
 
 export interface Data {
-  error_message?: string
+  readonly error_message?: string
 }
 
 export interface LoginCredentials {
-  password: string
-  username: string
+  readonly password: string
+  readonly username: string
 }
 
 export interface LoginDataSuccess {
-  expire_at: number
-  token: string
-}
-
-export interface Device {
-  readonly dev_alias: string
-  readonly did: string
-  readonly product_key: string
+  readonly expire_at: number
+  readonly token: string
 }
 
 export interface Bindings {
-  readonly devices: Device[]
+  readonly devices: {
+    readonly dev_alias: string
+    readonly did: string
+    readonly product_key: string
+  }[]
 }
 
 export interface DeviceDetails {
@@ -113,16 +114,16 @@ export interface DeviceDetails {
 }
 
 export type DevicePostData =
-  | { raw: [1, 1, ModeNumber] }
+  | { readonly raw: [1, 1, ModeNumber] }
   | {
-      attrs: {
-        mode: ModeNumber
+      readonly attrs: {
+        readonly mode: ModeNumber
       }
     }
 
 export interface DeviceData {
-  attr: {
-    mode: ModeString
+  readonly attr: {
+    readonly mode: ModeString
   }
 }
 
