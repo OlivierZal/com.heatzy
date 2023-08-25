@@ -1,10 +1,9 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import axios from 'axios'
-import type {
-  AxiosError,
-  AxiosInstance,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
+import axios, {
+  type AxiosError,
+  type AxiosInstance,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
 } from 'axios'
 
 type TimerClass = new (...args: any[]) => {
