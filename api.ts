@@ -83,9 +83,10 @@ export = {
     const settingsLogin: DriverSetting[] = app.manifest.drivers.flatMap(
       (driver: ManifestDriver): DriverSetting[] => {
         const driverLoginSetting: LoginSetting | undefined = driver.pair?.find(
-          (pairSetting: LoginSetting | PairSetting): boolean =>
-            pairSetting.id === 'login'
-        ) as LoginSetting | undefined
+          (
+            pairSetting: LoginSetting | PairSetting
+          ): pairSetting is LoginSetting => pairSetting.id === 'login'
+        )
         if (driverLoginSetting === undefined) {
           return []
         }
@@ -152,7 +153,7 @@ export = {
       await Promise.all(
         getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
           const deviceChangedKeys: string[] = changedKeys.filter(
-            (changedKey: string): boolean =>
+            (changedKey: string) =>
               body[changedKey] !== device.getSetting(changedKey)
           )
           if (deviceChangedKeys.length === 0) {

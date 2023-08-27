@@ -30,12 +30,13 @@ function formatDevicePostData(
 function reverseMapping(
   mapping: Record<number, string>
 ): Record<string, number> {
-  return Object.entries(mapping).reduce<Record<string, number>>(
-    (reversedMapping, [deviceValue, capabilityValue]: [string, string]) => ({
-      ...reversedMapping,
-      [capabilityValue]: Number(deviceValue),
-    }),
-    {}
+  return Object.fromEntries(
+    Object.entries(mapping).map(
+      ([deviceValue, capabilityValue]: [string, string]): [string, number] => [
+        capabilityValue,
+        Number(deviceValue),
+      ]
+    )
   )
 }
 
