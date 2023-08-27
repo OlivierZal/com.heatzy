@@ -27,27 +27,23 @@ function getLanguage(homey: Homey): string {
 
 export = {
   getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {
-    return getDevices(homey).reduce<DeviceSettings>(
-      (deviceSettings, device) => {
-        const driverId: string = device.driver.id
-        const newDeviceSettings: DeviceSettings = { ...deviceSettings }
-        if (!(driverId in newDeviceSettings)) {
-          newDeviceSettings[driverId] = {}
-        }
-        Object.entries(device.getSettings() as Settings).forEach(
-          ([settingId, value]: [string, SettingValue]): void => {
-            if (!(settingId in newDeviceSettings[driverId])) {
-              newDeviceSettings[driverId][settingId] = []
-            }
-            if (!newDeviceSettings[driverId][settingId].includes(value)) {
-              newDeviceSettings[driverId][settingId].push(value)
-            }
+    return getDevices(homey).reduce<DeviceSettings>((acc, device) => {
+      const driverId: string = device.driver.id
+      if (!(driverId in acc)) {
+        acc[driverId] = {}
+      }
+      Object.entries(device.getSettings() as Settings).forEach(
+        ([settingId, value]: [string, SettingValue]): void => {
+          if (!(settingId in acc[driverId])) {
+            acc[driverId][settingId] = []
           }
-        )
-        return newDeviceSettings
-      },
-      {}
-    )
+          if (!acc[driverId][settingId].includes(value)) {
+            acc[driverId][settingId].push(value)
+          }
+        }
+      )
+      return acc
+    }, {})
   },
   getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
     const app: HeatzyApp = homey.app as HeatzyApp
@@ -93,34 +89,24 @@ export = {
         return Object.values(
           Object.entries(driverLoginSetting.options).reduce<
             Record<string, DriverSetting>
-          >(
-            (
-              driverLoginSettings,
-              [option, label]: [string, Record<string, string>]
-            ) => {
-              const isPassword: boolean = option.startsWith('password')
-              const key: keyof LoginCredentials = isPassword
-                ? 'password'
-                : 'username'
-              const newDriverLoginSettings: Record<string, DriverSetting> = {
-                ...driverLoginSettings,
+          >((acc, [option, label]: [string, Record<string, string>]) => {
+            const isPassword: boolean = option.startsWith('password')
+            const key: keyof LoginCredentials = isPassword
+              ? 'password'
+              : 'username'
+            if (!(key in acc)) {
+              acc[key] = {
+                groupId: 'login',
+                id: key,
+                title: '',
+                type: isPassword ? 'password' : 'text',
+                driverId: driver.id,
               }
-              if (!(key in newDriverLoginSettings)) {
-                newDriverLoginSettings[key] = {
-                  groupId: 'login',
-                  id: key,
-                  title: '',
-                  type: isPassword ? 'password' : 'text',
-                  driverId: driver.id,
-                }
-              }
-              newDriverLoginSettings[key][
-                option.endsWith('Placeholder') ? 'placeholder' : 'title'
-              ] = label[language]
-              return newDriverLoginSettings
-            },
-            {}
-          )
+            }
+            acc[key][option.endsWith('Placeholder') ? 'placeholder' : 'title'] =
+              label[language]
+            return acc
+          }, {})
         )
       }
     )
@@ -159,9 +145,11 @@ export = {
           if (deviceChangedKeys.length === 0) {
             return
           }
-          const deviceSettings: Settings = deviceChangedKeys.reduce<Settings>(
-            (settings, key: string) => ({ ...settings, [key]: body[key] }),
-            {}
+          const deviceSettings: Settings = Object.fromEntries(
+            deviceChangedKeys.map((key: string): [string, SettingValue] => [
+              key,
+              body[key],
+            ])
           )
           try {
             await device.setSettings(deviceSettings)
