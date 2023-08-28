@@ -143,12 +143,33 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     'settings'
   ) as HTMLDivElement
 
-  let usernameElement: HTMLInputElement | null = document.getElementById(
-    'username'
-  ) as HTMLInputElement | null
-  let passwordElement: HTMLInputElement | null = document.getElementById(
-    'password'
-  ) as HTMLInputElement | null
+  const [usernameElement, passwordElement]: (HTMLInputElement | null)[] = [
+    'username',
+    'password',
+  ].map((credentialKey: string): HTMLInputElement | null => {
+    const driverSetting: DriverSetting | undefined = driverSettingsAll.find(
+      (setting: DriverSetting) => setting.id === credentialKey
+    )
+    if (driverSetting === undefined) {
+      return null
+    }
+    const divElement: HTMLDivElement = document.createElement('div')
+    divElement.classList.add('homey-form-group')
+    const labelElement: HTMLLabelElement = document.createElement('label')
+    labelElement.classList.add('homey-form-label')
+    labelElement.innerText = driverSetting.title
+    const inputElement: HTMLInputElement = document.createElement('input')
+    inputElement.classList.add('homey-form-input')
+    inputElement.type = driverSetting.type
+    inputElement.placeholder = driverSetting.placeholder ?? ''
+    inputElement.value =
+      (homeySettings[driverSetting.id] as string | undefined) ?? ''
+    inputElement.id = driverSetting.id
+    labelElement.htmlFor = inputElement.id
+    loginElement.appendChild(labelElement)
+    loginElement.appendChild(inputElement)
+    return inputElement
+  })
 
   function hide(element: HTMLDivElement, value = true): void {
     element.classList.toggle('hidden', value)
@@ -159,36 +180,6 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   function needsAuthentication(value = true): void {
-    if (loginElement.childElementCount === 0) {
-      const credentialKeys: string[] = ['username', 'password']
-      ;[usernameElement, passwordElement] = credentialKeys.map(
-        (credentialKey: string): HTMLInputElement | null => {
-          const driverSetting: DriverSetting | undefined =
-            driverSettingsAll.find(
-              (setting: DriverSetting) => setting.id === credentialKey
-            )
-          if (driverSetting === undefined) {
-            return null
-          }
-          const divElement: HTMLDivElement = document.createElement('div')
-          divElement.classList.add('homey-form-group')
-          const labelElement: HTMLLabelElement = document.createElement('label')
-          labelElement.classList.add('homey-form-label')
-          labelElement.innerText = driverSetting.title
-          const inputElement: HTMLInputElement = document.createElement('input')
-          inputElement.classList.add('homey-form-input')
-          inputElement.type = driverSetting.type
-          inputElement.placeholder = driverSetting.placeholder ?? ''
-          inputElement.value =
-            (homeySettings[driverSetting.id] as string | undefined) ?? ''
-          inputElement.id = driverSetting.id
-          labelElement.htmlFor = inputElement.id
-          loginElement.appendChild(labelElement)
-          loginElement.appendChild(inputElement)
-          return inputElement
-        }
-      )
-    }
     hide(authenticatedElement, value)
     unhide(authenticatingElement, value)
   }
