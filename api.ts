@@ -79,9 +79,8 @@ export = {
     const settingsLogin: DriverSetting[] = app.manifest.drivers.flatMap(
       (driver: ManifestDriver): DriverSetting[] => {
         const driverLoginSetting: LoginSetting | undefined = driver.pair?.find(
-          (
-            pairSetting: LoginSetting | PairSetting
-          ): pairSetting is LoginSetting => pairSetting.id === 'login'
+          (pairSetting: PairSetting): pairSetting is LoginSetting =>
+            pairSetting.id === 'login'
         )
         if (driverLoginSetting === undefined) {
           return []
