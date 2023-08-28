@@ -408,11 +408,11 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   async function load(): Promise<void> {
+    generateChildrenElements()
     if (homeySettings.token === undefined) {
       needsAuthentication()
       return
     }
-    generateChildrenElements()
     try {
       await login()
     } catch (error: unknown) {
