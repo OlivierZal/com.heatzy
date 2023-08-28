@@ -27,6 +27,23 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   })
 
+  async function getHomeySettings(): Promise<Settings> {
+    return new Promise<Settings>((resolve, reject) => {
+      // @ts-expect-error: homey is partially typed
+      homey.get(
+        async (error: Error | null, settings: Settings): Promise<void> => {
+          if (error !== null) {
+            // @ts-expect-error: homey is partially typed
+            await homey.alert(error.message)
+            reject(error)
+            return
+          }
+          resolve(settings)
+        }
+      )
+    })
+  }
+
   async function getDeviceSettings(): Promise<DeviceSettings> {
     return new Promise<DeviceSettings>((resolve, reject) => {
       // @ts-expect-error: homey is partially typed
@@ -95,6 +112,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
+  const homeySettings: Settings = await getHomeySettings()
+
   const deviceSettings: DeviceSettings = await getDeviceSettings()
   const flatDeviceSettings: DeviceSetting =
     flattenDeviceSettings(deviceSettings)
@@ -103,23 +122,6 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   const driverSettings: DriverSetting[] = driverSettingsAll.filter(
     (setting: DriverSetting) => setting.groupId !== 'login'
   )
-
-  async function getHomeySettings(): Promise<Settings> {
-    return new Promise<Settings>((resolve, reject) => {
-      // @ts-expect-error: homey is partially typed
-      homey.get(
-        async (error: Error | null, settings: Settings): Promise<void> => {
-          if (error !== null) {
-            // @ts-expect-error: homey is partially typed
-            await homey.alert(error.message)
-            reject(error)
-            return
-          }
-          resolve(settings)
-        }
-      )
-    })
-  }
 
   const applySettingsElement: HTMLButtonElement = document.getElementById(
     'apply-settings'
@@ -141,33 +143,12 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     'settings'
   ) as HTMLDivElement
 
-  const homeySettings: Settings = await getHomeySettings()
-  const credentialKeys: string[] = ['username', 'password']
-  const [usernameElement, passwordElement]: (HTMLInputElement | null)[] =
-    credentialKeys.map((credentialKey: string): HTMLInputElement | null => {
-      const driverSetting: DriverSetting | undefined = driverSettingsAll.find(
-        (setting: DriverSetting) => setting.id === credentialKey
-      )
-      if (driverSetting === undefined) {
-        return null
-      }
-      const divElement: HTMLDivElement = document.createElement('div')
-      divElement.classList.add('homey-form-group')
-      const labelElement: HTMLLabelElement = document.createElement('label')
-      labelElement.classList.add('homey-form-label')
-      labelElement.innerText = driverSetting.title
-      const inputElement: HTMLInputElement = document.createElement('input')
-      inputElement.classList.add('homey-form-input')
-      inputElement.type = driverSetting.type
-      inputElement.placeholder = driverSetting.placeholder ?? ''
-      inputElement.value =
-        (homeySettings[driverSetting.id] as string | undefined) ?? ''
-      inputElement.id = driverSetting.id
-      labelElement.htmlFor = inputElement.id
-      loginElement.appendChild(labelElement)
-      loginElement.appendChild(inputElement)
-      return inputElement
-    })
+  let usernameElement: HTMLInputElement | null = document.getElementById(
+    'username'
+  ) as HTMLInputElement | null
+  let passwordElement: HTMLInputElement | null = document.getElementById(
+    'password'
+  ) as HTMLInputElement | null
 
   function hide(element: HTMLDivElement, value = true): void {
     element.classList.toggle('hidden', value)
@@ -175,6 +156,41 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   function unhide(element: HTMLDivElement, value = true): void {
     element.classList.toggle('hidden', !value)
+  }
+
+  function needsAuthentication(value = true): void {
+    if (loginElement.childElementCount === 0) {
+      const credentialKeys: string[] = ['username', 'password']
+      ;[usernameElement, passwordElement] = credentialKeys.map(
+        (credentialKey: string): HTMLInputElement | null => {
+          const driverSetting: DriverSetting | undefined =
+            driverSettingsAll.find(
+              (setting: DriverSetting) => setting.id === credentialKey
+            )
+          if (driverSetting === undefined) {
+            return null
+          }
+          const divElement: HTMLDivElement = document.createElement('div')
+          divElement.classList.add('homey-form-group')
+          const labelElement: HTMLLabelElement = document.createElement('label')
+          labelElement.classList.add('homey-form-label')
+          labelElement.innerText = driverSetting.title
+          const inputElement: HTMLInputElement = document.createElement('input')
+          inputElement.classList.add('homey-form-input')
+          inputElement.type = driverSetting.type
+          inputElement.placeholder = driverSetting.placeholder ?? ''
+          inputElement.value =
+            (homeySettings[driverSetting.id] as string | undefined) ?? ''
+          inputElement.id = driverSetting.id
+          labelElement.htmlFor = inputElement.id
+          loginElement.appendChild(labelElement)
+          loginElement.appendChild(inputElement)
+          return inputElement
+        }
+      )
+    }
+    hide(authenticatedElement, value)
+    unhide(authenticatingElement, value)
   }
 
   function int(
@@ -363,16 +379,10 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  function needsAuthentication(value = true): void {
-    hide(authenticatedElement, value)
-    unhide(authenticatingElement, value)
-  }
-
   async function login(): Promise<void> {
     const username: string = usernameElement?.value ?? ''
     const password: string = passwordElement?.value ?? ''
     if (username === '' || password === '') {
-      authenticateElement.classList.remove('is-disabled')
       // @ts-expect-error: homey is partially typed
       await homey.alert(homey.__('settings.authenticate.failure'))
       return
@@ -418,5 +428,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       })
   })
 
+  if (homeySettings.token === undefined) {
+    needsAuthentication()
+    return
+  }
   await load()
 }
