@@ -235,7 +235,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       settingValue: SettingValue,
       settingId: string
     ): boolean => {
-      if (settingValue !== null) {
+      if (settingValue !== null && settingId in flatDeviceSettings) {
         const deviceSetting: SettingValue[] = flatDeviceSettings[settingId]
         return deviceSetting.length !== 1 || settingValue !== deviceSetting[0]
       }
@@ -356,9 +356,11 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           }
           selectElement.appendChild(optionElement)
         })
-        const values: SettingValue[] = flatDeviceSettings[setting.id]
-        if (values.length === 1) {
-          selectElement.value = String(values[0])
+        if (setting.id in flatDeviceSettings) {
+          const values: SettingValue[] = flatDeviceSettings[setting.id]
+          if (values.length === 1) {
+            selectElement.value = String(values[0])
+          }
         }
         divElement.appendChild(labelElement)
         divElement.appendChild(selectElement)
