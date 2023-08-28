@@ -321,9 +321,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   function generateChildrenElements(): void {
     driverSettings
-      .filter(
-        (setting: DriverSetting) =>
-          !['checkbox', 'dropdown'].includes(setting.type)
+      .filter((setting: DriverSetting) =>
+        ['checkbox', 'dropdown'].includes(setting.type)
       )
       .forEach((setting: DriverSetting): void => {
         const divElement: HTMLDivElement = document.createElement('div')
