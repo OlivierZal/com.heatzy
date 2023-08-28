@@ -416,6 +416,14 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     }
   }
 
+  async function run(): Promise<void> {
+    if (homeySettings.token === undefined) {
+      needsAuthentication()
+      return
+    }
+    await load()
+  }
+
   authenticateElement.addEventListener('click', (): void => {
     authenticateElement.classList.add('is-disabled')
     login()
@@ -428,9 +436,5 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       })
   })
 
-  if (homeySettings.token === undefined) {
-    needsAuthentication()
-    return
-  }
-  await load()
+  await run()
 }
