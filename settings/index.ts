@@ -235,9 +235,14 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       settingValue: SettingValue,
       settingId: string
     ): boolean => {
-      if (settingValue !== null && settingId in flatDeviceSettings) {
-        const deviceSetting: SettingValue[] = flatDeviceSettings[settingId]
-        return deviceSetting.length !== 1 || settingValue !== deviceSetting[0]
+      if (settingValue !== null) {
+        const deviceSetting: SettingValue[] | undefined =
+          flatDeviceSettings[settingId]
+        return (
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          deviceSetting !== undefined &&
+          (deviceSetting.length !== 1 || settingValue !== deviceSetting[0])
+        )
       }
       return false
     }
@@ -356,11 +361,10 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           }
           selectElement.appendChild(optionElement)
         })
-        if (setting.id in flatDeviceSettings) {
-          const values: SettingValue[] = flatDeviceSettings[setting.id]
-          if (values.length === 1) {
-            selectElement.value = String(values[0])
-          }
+        const values: SettingValue[] = flatDeviceSettings[setting.id]
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (values !== undefined && values.length === 1) {
+          selectElement.value = String(values[0])
         }
         divElement.appendChild(labelElement)
         divElement.appendChild(selectElement)
