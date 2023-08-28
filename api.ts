@@ -42,7 +42,6 @@ export = {
           }
         }
       )
-      console.log(acc)
       return acc
     }, {})
   },
