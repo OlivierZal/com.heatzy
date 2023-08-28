@@ -105,12 +105,13 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
   }
 
   setSettings(settings: Settings): void {
-    Object.entries(settings).forEach(
-      ([setting, value]: [string, SettingValue]): void => {
-        if (value !== this.homey.settings.get(setting)) {
-          this.homey.settings.set(setting, value)
-        }
-      }
-    )
+    Object.entries(settings)
+      .filter(
+        ([setting, value]: [string, SettingValue]) =>
+          value !== this.homey.settings.get(setting)
+      )
+      .forEach(([setting, value]: [string, SettingValue]): void => {
+        this.homey.settings.set(setting, value)
+      })
   }
 }
