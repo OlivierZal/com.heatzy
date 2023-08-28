@@ -408,20 +408,16 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   async function load(): Promise<void> {
+    if (homeySettings.token === undefined) {
+      needsAuthentication()
+      return
+    }
     generateChildrenElements()
     try {
       await login()
     } catch (error: unknown) {
       needsAuthentication()
     }
-  }
-
-  async function run(): Promise<void> {
-    if (homeySettings.token === undefined) {
-      needsAuthentication()
-      return
-    }
-    await load()
   }
 
   authenticateElement.addEventListener('click', (): void => {
@@ -436,5 +432,5 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       })
   })
 
-  await run()
+  await load()
 }
