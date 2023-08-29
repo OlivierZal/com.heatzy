@@ -236,10 +236,10 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       settingValue: SettingValue
     ): boolean => {
       if (settingValue !== null) {
-        const deviceSetting: SettingValue[] | undefined =
-          flatDeviceSettings[settingId]
+        const deviceSetting: SettingValue[] | undefined = flatDeviceSettings[
+          settingId
+        ] as SettingValue[] | undefined
         return (
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           deviceSetting !== undefined &&
           (deviceSetting.length !== 1 || settingValue !== deviceSetting[0])
         )
@@ -368,8 +368,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           }
           selectElement.appendChild(optionElement)
         })
-        const values: SettingValue[] = flatDeviceSettings[setting.id]
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        const values: SettingValue[] | undefined = flatDeviceSettings[
+          setting.id
+        ] as SettingValue[] | undefined
         if (values !== undefined && values.length === 1) {
           selectElement.value = String(values[0])
         }

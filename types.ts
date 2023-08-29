@@ -62,7 +62,6 @@ export interface DriverSetting {
 }
 
 export type DeviceSetting = Record<string, SettingValue[]>
-
 export type DeviceSettings = Record<string, DeviceSetting>
 
 export type ModeNumber = 0 | 1 | 2 | 3
