@@ -269,8 +269,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   function updateDeviceSettings(body: Settings): void {
     Object.entries(body).forEach(
       ([settingId, settingValue]: [string, SettingValue]): void => {
-        Object.keys(deviceSettings).forEach((id: string): void => {
-          deviceSettings[id][settingId] = [settingValue]
+        Object.keys(deviceSettings).forEach((driver: string): void => {
+          deviceSettings[driver][settingId] = [settingValue]
         })
         flatDeviceSettings[settingId] = [settingValue]
       }
