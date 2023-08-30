@@ -19,7 +19,8 @@
     },
     "int_error": "__name__ : doit être un entier compris entre __min__ et __max__.",
     "success": "La mise à jour a réussi.",
-    "title": "Paramètres Heatzy"
+    "title": "Paramètres Heatzy",
+    "refresh": "Rafraîchir"
   },
   "warnings": {
     "always_on": "L'extinction depuis Homey a été désactivée."

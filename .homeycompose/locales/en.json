@@ -18,6 +18,7 @@
       "legend": "Device Settings"
     },
     "int_error": "__name__: must be an integer between __min__ and __max__.",
+    "refresh": "Refresh",
     "success": "Update succeeded.",
     "title": "Heatzy Settings"
   },

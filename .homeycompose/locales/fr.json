@@ -18,6 +18,7 @@
       "legend": "Paramètres des appareils"
     },
     "int_error": "__name__ : doit être un entier compris entre __min__ et __max__.",
+    "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",
     "title": "Paramètres Heatzy"
   },

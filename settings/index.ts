@@ -27,8 +27,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   })
 
-  async function getHomeySettings(): Promise<Settings> {
-    return new Promise<Settings>((resolve, reject) => {
+  const homeySettings: Settings = await new Promise<Settings>(
+    (resolve, reject) => {
       // @ts-expect-error: homey is partially typed
       homey.get(
         async (error: Error | null, settings: Settings): Promise<void> => {
@@ -41,18 +41,18 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           resolve(settings)
         }
       )
-    })
-  }
+    }
+  )
 
-  async function getDeviceSettings(): Promise<DeviceSettings> {
-    return new Promise<DeviceSettings>((resolve, reject) => {
+  const deviceSettings: DeviceSettings = await new Promise<DeviceSettings>(
+    (resolve, reject) => {
       // @ts-expect-error: homey is partially typed
       homey.api(
         'GET',
         '/devices/settings',
         async (
           error: Error | null,
-          deviceSettings: DeviceSettings
+          settings: DeviceSettings
         ): Promise<void> => {
           if (error !== null) {
             // @ts-expect-error: homey is partially typed
@@ -60,14 +60,36 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             reject(error)
             return
           }
-          resolve(deviceSettings)
+          resolve(settings)
         }
       )
-    })
-  }
+    }
+  )
 
-  async function getDriverSettings(): Promise<DriverSetting[]> {
-    return new Promise<DriverSetting[]>((resolve, reject) => {
+  const flatDeviceSettings: DeviceSetting = Object.values(
+    deviceSettings
+  ).reduce<DeviceSetting>(
+    (flattenedDeviceSettings, settings: DeviceSetting) =>
+      Object.entries(settings).reduce<DeviceSetting>(
+        (acc, [settingId, settingValues]: [string, SettingValue[]]) => {
+          if (!(settingId in acc)) {
+            acc[settingId] = []
+          }
+          acc[settingId].push(
+            ...settingValues.filter(
+              (settingValue: SettingValue) =>
+                !acc[settingId].includes(settingValue)
+            )
+          )
+          return acc
+        },
+        flattenedDeviceSettings
+      ),
+    {}
+  )
+
+  const driverSettingsAll: DriverSetting[] = await new Promise<DriverSetting[]>(
+    (resolve, reject) => {
       // @ts-expect-error: homey is partially typed
       homey.api(
         'GET',
@@ -85,40 +107,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           resolve(driverSettings)
         }
       )
-    })
-  }
+    }
+  )
 
-  function flattenDeviceSettings(
-    deviceSettings: DeviceSettings
-  ): DeviceSetting {
-    return Object.values(deviceSettings).reduce<DeviceSetting>(
-      (flatDeviceSettings, settings: DeviceSetting) =>
-        Object.entries(settings).reduce<DeviceSetting>(
-          (acc, [settingId, settingValues]: [string, SettingValue[]]) => {
-            if (!(settingId in acc)) {
-              acc[settingId] = []
-            }
-            acc[settingId].push(
-              ...settingValues.filter(
-                (settingValue: SettingValue) =>
-                  !acc[settingId].includes(settingValue)
-              )
-            )
-            return acc
-          },
-          flatDeviceSettings
-        ),
-      {}
-    )
-  }
-
-  const homeySettings: Settings = await getHomeySettings()
-
-  const deviceSettings: DeviceSettings = await getDeviceSettings()
-  const flatDeviceSettings: DeviceSetting =
-    flattenDeviceSettings(deviceSettings)
-
-  const driverSettingsAll: DriverSetting[] = await getDriverSettings()
   const driverSettings: DriverSetting[] = driverSettingsAll.filter(
     (setting: DriverSetting) => setting.groupId !== 'login'
   )
@@ -128,6 +119,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   ) as HTMLButtonElement
   const authenticateElement: HTMLButtonElement = document.getElementById(
     'authenticate'
+  ) as HTMLButtonElement
+  const refreshSettingsElement: HTMLButtonElement = document.getElementById(
+    'refresh-settings'
   ) as HTMLButtonElement
 
   const authenticatedElement: HTMLDivElement = document.getElementById(
@@ -171,6 +165,22 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     return inputElement
   })
 
+  function disableButtons(value = true): void {
+    ;[applySettingsElement, refreshSettingsElement].forEach(
+      (buttonElement: HTMLButtonElement): void => {
+        if (value) {
+          buttonElement.classList.add('is-disabled')
+        } else {
+          buttonElement.classList.remove('is-disabled')
+        }
+      }
+    )
+  }
+
+  function enableButtons(value = true): void {
+    disableButtons(!value)
+  }
+
   function hide(element: HTMLDivElement, value = true): void {
     element.classList.toggle('hidden', value)
   }
@@ -207,21 +217,21 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   function processSettingValue(
-    setting: HTMLInputElement | HTMLSelectElement
+    element: HTMLInputElement | HTMLSelectElement
   ): SettingValue {
-    const { value } = setting
+    const { value } = element
     if (value === '') {
       return null
     }
     const intValue: number = Number.parseInt(value, 10)
     if (!Number.isNaN(intValue)) {
-      return setting instanceof HTMLInputElement
-        ? int(setting, intValue)
+      return element instanceof HTMLInputElement
+        ? int(element, intValue)
         : intValue
     }
-    if (setting instanceof HTMLInputElement && setting.type === 'checkbox') {
-      if (!setting.indeterminate) {
-        return setting.checked
+    if (element instanceof HTMLInputElement && element.type === 'checkbox') {
+      if (!element.indeterminate) {
+        return element.checked
       }
       return null
     }
@@ -229,7 +239,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   function buildSettingsBody(
-    settings: (HTMLInputElement | HTMLSelectElement)[]
+    elements: (HTMLInputElement | HTMLSelectElement)[]
   ): Settings {
     const shouldUpdate = (
       settingId: string,
@@ -248,7 +258,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     }
 
     return Object.fromEntries(
-      settings
+      elements
         .map(
           (
             element: HTMLInputElement | HTMLSelectElement
@@ -277,10 +287,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  function setDeviceSettings(
-    buttonElement: HTMLButtonElement,
-    body: Settings
-  ): void {
+  function setDeviceSettings(body: Settings): void {
     // @ts-expect-error: homey is partially typed
     homey.api(
       'POST',
@@ -293,18 +300,15 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           return
         }
         updateDeviceSettings(body)
-        buttonElement.classList.remove('is-disabled')
+        enableButtons()
         // @ts-expect-error: homey is partially typed
         await homey.alert(homey.__('settings.success'))
       }
     )
   }
 
-  function addSettingsEventListener(
-    buttonElement: HTMLButtonElement,
-    elements: (HTMLInputElement | HTMLSelectElement)[]
-  ): void {
-    buttonElement.addEventListener('click', (): void => {
+  function addApplySettingsEventListener(elements: HTMLSelectElement[]) {
+    applySettingsElement.addEventListener('click', (): void => {
       let body: Settings = {}
       try {
         body = buildSettingsBody(elements)
@@ -329,12 +333,32 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             return
           }
           if (ok) {
-            buttonElement.classList.add('is-disabled')
-            setDeviceSettings(buttonElement, body)
+            disableButtons()
+            setDeviceSettings(body)
           }
         }
       )
     })
+  }
+
+  function addRefreshSettingsEventListener(elements: HTMLSelectElement[]) {
+    refreshSettingsElement.addEventListener('click', (): void => {
+      disableButtons()
+      elements.forEach((element: HTMLSelectElement): void => {
+        const values: SettingValue[] | undefined = flatDeviceSettings[
+          element.id.split('--')[0]
+        ] as SettingValue[] | undefined
+        if (values !== undefined && values.length === 1) {
+          element.value = String(values[0]) // eslint-disable-line no-param-reassign
+        }
+      })
+      enableButtons()
+    })
+  }
+
+  function addSettingsEventListeners(elements: HTMLSelectElement[]): void {
+    addApplySettingsEventListener(elements)
+    addRefreshSettingsEventListener(elements)
   }
 
   function generateChildrenElements(): void {
@@ -378,8 +402,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         divElement.appendChild(selectElement)
         settingsElement.appendChild(divElement)
       })
-    addSettingsEventListener(
-      applySettingsElement,
+    addSettingsEventListeners(
       Array.from(settingsElement.querySelectorAll('select'))
     )
   }
