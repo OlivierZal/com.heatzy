@@ -11,7 +11,7 @@ import type {
 async function onHomeyReady(homey: Homey): Promise<void> {
   await homey.ready()
 
-  await new Promise<string>((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     // @ts-expect-error: homey is partially typed
     homey.api(
       'GET',
@@ -22,7 +22,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           return
         }
         document.documentElement.lang = language
-        resolve(language)
+        resolve()
       }
     )
   })
