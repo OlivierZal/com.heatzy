@@ -135,7 +135,10 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   }
 
   getOnMode(): Exclude<Mode, 'stop'> {
-    return this.onMode ?? this.getStoreValue('previous_mode')
+    return (
+      this.onMode ??
+      (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
+    )
   }
 
   registerCapabilityListeners(): void {
