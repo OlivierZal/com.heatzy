@@ -142,6 +142,7 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   }
 
   registerCapabilityListeners(): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.driver.manifest.capabilities as string[]).forEach(
       (capability: string): void => {
         this.registerCapabilityListener(
