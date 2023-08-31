@@ -142,14 +142,16 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   }
 
   registerCapabilityListeners(): void {
-    this.driver.manifest.capabilities.forEach((capability: string): void => {
-      this.registerCapabilityListener(
-        capability,
-        async (value: CapabilityValue): Promise<void> => {
-          await this.onCapability(capability, value)
-        }
-      )
-    })
+    ;(this.driver.manifest.capabilities as string[]).forEach(
+      (capability: string): void => {
+        this.registerCapabilityListener(
+          capability,
+          async (value: CapabilityValue): Promise<void> => {
+            await this.onCapability(capability, value)
+          }
+        )
+      }
+    )
   }
 
   async onCapability(
