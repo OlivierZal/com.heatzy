@@ -1,4 +1,3 @@
- 
 import type Homey from 'homey/lib/Homey'
 import type {
   DeviceSetting,
