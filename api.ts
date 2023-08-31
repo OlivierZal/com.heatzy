@@ -160,7 +160,7 @@ export = {
             await device.setSettings(deviceSettings)
             device.log('Settings:', deviceSettings)
             await device.onSettings({
-              newSettings: device.getSettings(),
+              newSettings: device.getSettings() as Settings,
               changedKeys: deviceChangedKeys,
             })
           } catch (error: unknown) {

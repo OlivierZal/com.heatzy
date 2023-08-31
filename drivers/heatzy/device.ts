@@ -6,6 +6,7 @@ import type {
   CapabilityValue,
   Data,
   DeviceData,
+  DeviceDetails,
   DevicePostData,
   Mode,
   ModeNumber,
@@ -84,7 +85,7 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   async onInit(): Promise<void> {
     this.app = this.homey.app as HeatzyApp
 
-    const { id, productKey } = this.getData()
+    const { id, productKey } = this.getData() as DeviceDetails['data']
     this.id = id
     this.productKey = productKey
 
@@ -129,7 +130,7 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   setOnMode(
     onModeSetting: Exclude<Mode, 'stop'> | 'previous' = this.getSetting(
       'on_mode'
-    )
+    ) as Exclude<Mode, 'stop'> | 'previous'
   ): void {
     this.onMode = onModeSetting !== 'previous' ? onModeSetting : null
   }
@@ -172,7 +173,7 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
     if (this.mode === 'stop' && alwaysOn) {
       await this.setWarning(this.homey.__('warnings.always_on'))
       await this.setWarning(null)
-      this.mode = this.getStoreValue('previous_mode')
+      this.mode = this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>
     }
     this.applySyncToDevice()
   }
@@ -192,7 +193,9 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
     const modeNumber: ModeNumber = modeToNumber[this.mode]
     const success: boolean = await this.setDeviceMode(modeNumber)
     if (!success) {
-      this.mode = this.isOn ? this.getStoreValue('previous_mode') : 'stop'
+      this.mode = this.isOn
+        ? (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
+        : 'stop'
     }
     await this.sync()
   }
