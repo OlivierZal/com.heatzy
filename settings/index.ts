@@ -344,17 +344,19 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     })
   }
 
+  function updateChildrenElement(element: HTMLSelectElement): void {
+    const values: SettingValue[] | undefined = flatDeviceSettings[
+      element.id.split('--')[0]
+    ] as SettingValue[] | undefined
+    if (values !== undefined && values.length === 1) {
+      element.value = String(values[0]) // eslint-disable-line no-param-reassign
+    }
+  }
+
   function addRefreshSettingsEventListener(elements: HTMLSelectElement[]) {
     refreshSettingsElement.addEventListener('click', (): void => {
       disableButtons()
-      elements.forEach((element: HTMLSelectElement): void => {
-        const values: SettingValue[] | undefined = flatDeviceSettings[
-          element.id.split('--')[0]
-        ] as SettingValue[] | undefined
-        if (values !== undefined && values.length === 1) {
-          element.value = String(values[0]) // eslint-disable-line no-param-reassign
-        }
-      })
+      elements.forEach(updateChildrenElement)
       enableButtons()
     })
   }
@@ -395,12 +397,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           }
           selectElement.appendChild(optionElement)
         })
-        const values: SettingValue[] | undefined = flatDeviceSettings[
-          setting.id
-        ] as SettingValue[] | undefined
-        if (values !== undefined && values.length === 1) {
-          selectElement.value = String(values[0])
-        }
+        updateChildrenElement(selectElement)
         divElement.appendChild(labelElement)
         divElement.appendChild(selectElement)
         settingsElement.appendChild(divElement)
