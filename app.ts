@@ -71,13 +71,15 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
       if ('error_message' in data) {
         throw new Error(data.error_message)
       }
-      const { token, expire_at } = data // eslint-disable-line camelcase
+      /* eslint-disable camelcase */
+      const { token, expire_at } = data
       this.setSettings({
         token,
-        expire_at, // eslint-disable-line camelcase
+        expire_at,
         username,
         password,
       })
+      /* eslint-enable camelcase */
       await this.refreshLogin()
       return true
     } catch (error: unknown) {
