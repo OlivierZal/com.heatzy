@@ -19,5 +19,8 @@
   },
   "7.0.0": {
     "en": "Use new eslint config."
+  },
+  "8.0.0": {
+    "en": "Reshaped code."
   }
 }
