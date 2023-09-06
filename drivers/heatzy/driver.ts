@@ -23,7 +23,8 @@ export = class HeatzyDriver extends Driver {
       })
   }
 
-  onPair(session: PairSession): void {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async onPair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
       (data: LoginCredentials): Promise<boolean> => this.app.login(data)
@@ -34,7 +35,8 @@ export = class HeatzyDriver extends Driver {
     )
   }
 
-  onRepair(session: PairSession): void {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async onRepair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
       (data: LoginCredentials): Promise<boolean> => this.app.login(data)
