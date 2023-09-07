@@ -348,9 +348,10 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     const values: SettingValue[] | undefined = flatDeviceSettings[
       element.id.split('--')[0]
     ] as SettingValue[] | undefined
-    if (values !== undefined && values.length === 1) {
-      element.value = String(values[0]) // eslint-disable-line no-param-reassign
-    }
+    // eslint-disable-next-line no-param-reassign
+    element.value = String(
+      values !== undefined && values.length === 1 ? values[0] : ''
+    )
   }
 
   function addRefreshSettingsEventListener(elements: HTMLSelectElement[]) {
