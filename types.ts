@@ -26,6 +26,13 @@ export interface Settings extends Record<string, SettingValue> {
   readonly mode?: OnMode
 }
 
+export interface HomeySettings extends Record<string, SettingValue> {
+  readonly username?: string | null
+  readonly password?: string | null
+  readonly token?: string | null
+  readonly expire_at?: number | null
+}
+
 export interface ManifestDriverSettingData {
   readonly id: string
   readonly label: Record<string, string>

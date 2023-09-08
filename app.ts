@@ -4,10 +4,10 @@ import axios from 'axios'
 import WithAPIAndLogging from './mixin'
 import type {
   Data,
+  HomeySettings,
   LoginCredentials,
   LoginDataSuccess,
   SettingValue,
-  Settings,
 } from './types'
 
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
@@ -85,7 +85,7 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
     }
   }
 
-  setSettings(settings: Settings): void {
+  setSettings(settings: HomeySettings): void {
     Object.entries(settings)
       .filter(
         ([setting, value]: [string, SettingValue]) =>
