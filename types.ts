@@ -1,8 +1,31 @@
 import type HeatzyDevice from './drivers/heatzy/device'
 
+export type ModeNumber = 0 | 1 | 2 | 3
+
+export type ModeString =
+  | 'cft'
+  | 'eco'
+  | 'fro'
+  | 'stop'
+  | 'cft1'
+  | 'cft2'
+  | '舒适' // 'cft'
+  | '经济' // 'eco'
+  | '解冻' // 'fro'
+  | '停止' // 'stop'
+
+export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
+
+export type OnMode = Exclude<Mode, 'stop'> | 'previous'
+
+export type CapabilityValue = boolean | Mode
+
 export type SettingValue = boolean | number | string | null | undefined
 
-export type Settings = Record<string, SettingValue>
+export interface Settings extends Record<string, SettingValue> {
+  readonly always_on?: boolean
+  readonly mode?: OnMode
+}
 
 export interface ManifestDriverSettingData {
   readonly id: string
@@ -63,24 +86,6 @@ export interface DriverSetting {
 
 export type DeviceSetting = Record<string, SettingValue[]>
 export type DeviceSettings = Record<string, DeviceSetting>
-
-export type ModeNumber = 0 | 1 | 2 | 3
-
-export type ModeString =
-  | 'cft'
-  | 'eco'
-  | 'fro'
-  | 'stop'
-  | 'cft1'
-  | 'cft2'
-  | '舒适' // 'cft'
-  | '经济' // 'eco'
-  | '解冻' // 'fro'
-  | '停止' // 'stop'
-
-export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
-
-export type CapabilityValue = boolean | Mode
 
 export interface Data {
   readonly error_message?: string

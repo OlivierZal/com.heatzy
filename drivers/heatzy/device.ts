@@ -11,6 +11,7 @@ import type {
   Mode,
   ModeNumber,
   ModeString,
+  OnMode,
   Settings,
 } from '../../types'
 
@@ -128,9 +129,7 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   }
 
   setOnMode(
-    onModeSetting: Exclude<Mode, 'stop'> | 'previous' = this.getSetting(
-      'on_mode'
-    ) as Exclude<Mode, 'stop'> | 'previous'
+    onModeSetting: OnMode = this.getSetting('on_mode') as OnMode
   ): void {
     this.onMode = onModeSetting !== 'previous' ? onModeSetting : null
   }
