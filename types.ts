@@ -1,7 +1,6 @@
 import type HeatzyDevice from './drivers/heatzy/device'
 
 export type ModeNumber = 0 | 1 | 2 | 3
-
 export type ModeString =
   | 'cft'
   | 'eco'
