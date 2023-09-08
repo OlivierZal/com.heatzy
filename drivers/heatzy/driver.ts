@@ -1,7 +1,7 @@
 import { Driver } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type PairSession from 'homey/lib/PairSession'
 import type HeatzyApp from '../../app'
-import WithAPIAndLogging from '../../mixin'
+import { WithAPIAndLogging } from '../../mixins'
 import type {
   Bindings,
   DeviceDetails,

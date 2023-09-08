@@ -17,7 +17,8 @@ type TimerClass = new (...args: any[]) => {
   }
 }
 
-export default function WithAPIAndLogging<T extends TimerClass>(Base: T) {
+// eslint-disable-next-line import/prefer-default-export
+export function WithAPIAndLogging<T extends TimerClass>(Base: T) {
   return class extends Base {
     api: AxiosInstance
 

@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios from 'axios'
-import WithAPIAndLogging from './mixin'
+import { WithAPIAndLogging } from './mixins'
 import type {
   Data,
   HomeySettings,
