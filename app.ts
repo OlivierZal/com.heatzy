@@ -3,9 +3,7 @@ import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependen
 import axios from 'axios'
 import WithAPIAndLogging from './mixin'
 import type {
-  Bindings,
   Data,
-  DeviceDetails,
   LoginCredentials,
   LoginDataSuccess,
   SettingValue,
@@ -84,25 +82,6 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
       return true
     } catch (error: unknown) {
       throw new Error(error instanceof Error ? error.message : String(error))
-    }
-  }
-
-  async listDevices(): Promise<DeviceDetails[]> {
-    try {
-      const { data } = await this.api.get<Bindings>('/bindings')
-      return data.devices.map(
-        /* eslint-disable camelcase */
-        ({ dev_alias, did, product_key }): DeviceDetails => ({
-          name: dev_alias,
-          data: {
-            id: did,
-            productKey: product_key,
-          },
-        })
-        /* eslint-enable camelcase */
-      )
-    } catch (error: unknown) {
-      return []
     }
   }
 

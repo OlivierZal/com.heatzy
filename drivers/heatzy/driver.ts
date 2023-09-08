@@ -1,9 +1,15 @@
 import { Driver } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type PairSession from 'homey/lib/PairSession'
 import type HeatzyApp from '../../app'
-import type { DeviceDetails, FlowArgs, LoginCredentials } from '../../types'
+import WithAPIAndLogging from '../../mixin'
+import type {
+  Bindings,
+  DeviceDetails,
+  FlowArgs,
+  LoginCredentials,
+} from '../../types'
 
-export = class HeatzyDriver extends Driver {
+export = class HeatzyDriver extends WithAPIAndLogging(Driver) {
   app!: HeatzyApp
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -31,8 +37,27 @@ export = class HeatzyDriver extends Driver {
     )
     session.setHandler(
       'list_devices',
-      (): Promise<DeviceDetails[]> => this.app.listDevices()
+      (): Promise<DeviceDetails[]> => this.discoverDevices()
     )
+  }
+
+  async discoverDevices(): Promise<DeviceDetails[]> {
+    try {
+      const { data } = await this.api.get<Bindings>('/bindings')
+      return data.devices.map(
+        /* eslint-disable camelcase */
+        ({ dev_alias, did, product_key }): DeviceDetails => ({
+          name: dev_alias,
+          data: {
+            id: did,
+            productKey: product_key,
+          },
+        })
+        /* eslint-enable camelcase */
+      )
+    } catch (error: unknown) {
+      return []
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
