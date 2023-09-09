@@ -163,9 +163,9 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
       return
     }
     this.clearSyncPlan()
-    const alwaysOn: boolean = this.getSetting('always_on') === true
+    const alwaysOn: boolean = this.getSetting('always_on') as boolean
     if (capability === 'onoff') {
-      this.mode = value === true ? this.getOnMode() : 'stop'
+      this.mode = value ? this.getOnMode() : 'stop'
     } else {
       this.mode = value as Mode
     }
@@ -242,8 +242,8 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
     }
     if (
       changedKeys.includes('always_on') &&
-      newSettings.always_on === true &&
-      this.getCapabilityValue('onoff') === false
+      newSettings.always_on &&
+      !this.getCapabilityValue('onoff')
     ) {
       await this.onCapability('onoff', true)
     }
