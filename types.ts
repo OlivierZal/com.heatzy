@@ -29,10 +29,10 @@ export interface Settings {
 export type SettingValue = ValueOf<Settings>
 
 export interface HomeySettings {
-  readonly username?: string | null
-  readonly password?: string | null
-  readonly token?: string | null
-  readonly expire_at?: number | null
+  readonly username: string | null
+  readonly password: string | null
+  readonly token: string | null
+  readonly expire_at: number | null
 }
 
 export type HomeySettingValue = ValueOf<HomeySettings>

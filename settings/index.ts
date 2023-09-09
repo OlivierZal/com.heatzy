@@ -31,22 +31,25 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   })
 
-  const homeySettings: HomeySettings = await new Promise<HomeySettings>(
-    (resolve, reject) => {
-      // @ts-expect-error: homey is partially typed
-      homey.get(
-        async (error: Error | null, settings: HomeySettings): Promise<void> => {
-          if (error !== null) {
-            // @ts-expect-error: homey is partially typed
-            await homey.alert(error.message)
-            reject(error)
-            return
-          }
-          resolve(settings)
+  const homeySettings: Partial<HomeySettings> = await new Promise<
+    Partial<HomeySettings>
+  >((resolve, reject) => {
+    // @ts-expect-error: homey is partially typed
+    homey.get(
+      async (
+        error: Error | null,
+        settings: Partial<HomeySettings>
+      ): Promise<void> => {
+        if (error !== null) {
+          // @ts-expect-error: homey is partially typed
+          await homey.alert(error.message)
+          reject(error)
+          return
         }
-      )
-    }
-  )
+        resolve(settings)
+      }
+    )
+  })
 
   const deviceSettings: DeviceSettings = await new Promise<DeviceSettings>(
     (resolve, reject) => {

@@ -5,9 +5,9 @@ import { WithAPIAndLogging } from './mixins'
 import type {
   Data,
   HomeySettings,
+  HomeySettingValue,
   LoginCredentials,
   LoginDataSuccess,
-  SettingValue,
 } from './types'
 
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
@@ -85,13 +85,13 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
     }
   }
 
-  setSettings(settings: HomeySettings): void {
+  setSettings(settings: Partial<HomeySettings>): void {
     Object.entries(settings)
       .filter(
-        ([setting, value]: [string, SettingValue]) =>
+        ([setting, value]: [string, HomeySettingValue]) =>
           value !== this.homey.settings.get(setting)
       )
-      .forEach(([setting, value]: [string, SettingValue]): void => {
+      .forEach(([setting, value]: [string, HomeySettingValue]): void => {
         this.homey.settings.set(setting, value)
       })
   }
