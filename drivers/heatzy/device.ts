@@ -231,8 +231,8 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   }
 
   async onSettings({
-    newSettings,
     changedKeys,
+    newSettings,
   }: {
     changedKeys: string[]
     newSettings: Settings
