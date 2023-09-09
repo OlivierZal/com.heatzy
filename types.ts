@@ -26,7 +26,7 @@ export interface Settings extends Record<string, SettingValue> {
   readonly mode?: OnMode
 }
 
-export interface HomeySettings extends Record<string, SettingValue> {
+export interface HomeySettings {
   readonly username?: string | null
   readonly password?: string | null
   readonly token?: string | null
@@ -90,16 +90,20 @@ export interface DriverSetting {
   readonly values?: { readonly id: string; readonly label: string }[]
 }
 
+export interface LoginCredentials {
+  readonly password: string
+  readonly username: string
+}
+
+export interface LoginDriverSetting extends DriverSetting {
+  readonly id: keyof LoginCredentials
+}
+
 export type DeviceSetting = Record<string, SettingValue[]>
 export type DeviceSettings = Record<string, DeviceSetting>
 
 export interface Data {
   readonly error_message?: string
-}
-
-export interface LoginCredentials {
-  readonly password: string
-  readonly username: string
 }
 
 export interface LoginDataSuccess {

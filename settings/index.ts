@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import type Homey from 'homey/lib/Homey'
-import type {
-  DeviceSetting,
-  DeviceSettings,
-  DriverSetting,
-  HomeySettings,
-  LoginCredentials,
-  Settings,
-  SettingValue,
+import {
+  type DeviceSetting,
+  type DeviceSettings,
+  type DriverSetting,
+  type HomeySettings,
+  type LoginCredentials,
+  type LoginDriverSetting,
+  type Settings,
+  type SettingValue,
 } from '../types'
 
 async function onHomeyReady(homey: Homey): Promise<void> {
@@ -139,33 +140,36 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     'settings'
   ) as HTMLDivElement
 
-  const [usernameElement, passwordElement]: (HTMLInputElement | null)[] = [
-    'username',
-    'password',
-  ].map((credentialKey: string): HTMLInputElement | null => {
-    const driverSetting: DriverSetting | undefined = driverSettingsAll.find(
-      (setting: DriverSetting) => setting.id === credentialKey
+  const credentialKeys: (keyof LoginCredentials)[] = ['username', 'password']
+  const [usernameElement, passwordElement]: (HTMLInputElement | null)[] =
+    credentialKeys.map(
+      (credentialKey: keyof LoginCredentials): HTMLInputElement | null => {
+        const driverSetting: LoginDriverSetting | undefined =
+          driverSettingsAll.find(
+            (setting): setting is LoginDriverSetting =>
+              setting.id === credentialKey
+          )
+        if (driverSetting === undefined) {
+          return null
+        }
+        const { id } = driverSetting
+        const divElement: HTMLDivElement = document.createElement('div')
+        divElement.classList.add('homey-form-group')
+        const labelElement: HTMLLabelElement = document.createElement('label')
+        labelElement.classList.add('homey-form-label')
+        labelElement.innerText = driverSetting.title
+        const inputElement: HTMLInputElement = document.createElement('input')
+        inputElement.classList.add('homey-form-input')
+        inputElement.type = driverSetting.type
+        inputElement.placeholder = driverSetting.placeholder ?? ''
+        inputElement.value = (homeySettings[id] as string | undefined) ?? ''
+        inputElement.id = id
+        labelElement.htmlFor = inputElement.id
+        loginElement.appendChild(labelElement)
+        loginElement.appendChild(inputElement)
+        return inputElement
+      }
     )
-    if (driverSetting === undefined) {
-      return null
-    }
-    const divElement: HTMLDivElement = document.createElement('div')
-    divElement.classList.add('homey-form-group')
-    const labelElement: HTMLLabelElement = document.createElement('label')
-    labelElement.classList.add('homey-form-label')
-    labelElement.innerText = driverSetting.title
-    const inputElement: HTMLInputElement = document.createElement('input')
-    inputElement.classList.add('homey-form-input')
-    inputElement.type = driverSetting.type
-    inputElement.placeholder = driverSetting.placeholder ?? ''
-    inputElement.value =
-      (homeySettings[driverSetting.id] as string | undefined) ?? ''
-    inputElement.id = driverSetting.id
-    labelElement.htmlFor = inputElement.id
-    loginElement.appendChild(labelElement)
-    loginElement.appendChild(inputElement)
-    return inputElement
-  })
 
   function disableButtons(value = true): void {
     ;[applySettingsElement, refreshSettingsElement].forEach(
