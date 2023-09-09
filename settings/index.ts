@@ -21,7 +21,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       'GET',
       '/language',
       (error: Error | null, language: string): void => {
-        if (error !== null) {
+        if (error) {
           reject(error)
           return
         }
@@ -40,7 +40,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         error: Error | null,
         settings: Partial<HomeySettings>
       ): Promise<void> => {
-        if (error !== null) {
+        if (error) {
           // @ts-expect-error: homey is partially typed
           await homey.alert(error.message)
           reject(error)
@@ -61,7 +61,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           error: Error | null,
           settings: DeviceSettings
         ): Promise<void> => {
-          if (error !== null) {
+          if (error) {
             // @ts-expect-error: homey is partially typed
             await homey.alert(error.message)
             reject(error)
@@ -105,7 +105,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           error: Error | null,
           driverSettings: DriverSetting[]
         ): Promise<void> => {
-          if (error !== null) {
+          if (error) {
             // @ts-expect-error: homey is partially typed
             await homey.alert(error.message)
             reject(error)
@@ -153,7 +153,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             (setting): setting is LoginDriverSetting =>
               setting.id === credentialKey
           )
-        if (driverSetting === undefined) {
+        if (!driverSetting) {
           return null
         }
         const { id } = driverSetting
@@ -208,7 +208,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     element: HTMLInputElement | HTMLSelectElement
   ): SettingValue | null {
     const { value } = element
-    if (value === '') {
+    if (!value) {
       return null
     }
     if (element instanceof HTMLInputElement && element.type === 'checkbox') {
@@ -247,8 +247,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             const settingId: string = element.id.split('--')[0]
             const settingValue: SettingValue | null =
               processSettingValue(element)
-            return settingValue !== null &&
-              shouldUpdate(settingId, settingValue)
+            return settingValue && shouldUpdate(settingId, settingValue)
               ? [settingId, settingValue]
               : [null]
           }
@@ -256,7 +255,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         .filter(
           (
             entry: [string, SettingValue] | [null]
-          ): entry is [string, SettingValue] => entry[0] !== null
+          ): entry is [string, SettingValue] => !!entry[0]
         )
     )
   }
@@ -279,7 +278,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       '/devices/settings',
       body,
       async (error: Error | null): Promise<void> => {
-        if (error !== null) {
+        if (error) {
           // @ts-expect-error: homey is partially typed
           await homey.alert(error.message)
           return
@@ -302,7 +301,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         homey.alert(error instanceof Error ? error.message : String(error))
         return
       }
-      if (Object.keys(body).length === 0) {
+      if (!Object.keys(body).length) {
         // @ts-expect-error: homey is partially typed
         homey.alert(homey.__('settings.devices.apply.nothing'))
         return
@@ -312,7 +311,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         homey.__('settings.devices.apply.confirm'),
         null,
         async (error: Error | null, ok: boolean): Promise<void> => {
-          if (error !== null) {
+          if (error) {
             // @ts-expect-error: homey is partially typed
             await homey.alert(error.message)
             return
@@ -331,8 +330,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       element.id.split('--')[0]
     ] as SettingValue[] | undefined
     // eslint-disable-next-line no-param-reassign
-    element.value =
-      values !== undefined && values.length === 1 ? String(values[0]) : ''
+    element.value = values && values.length === 1 ? String(values[0]) : ''
   }
 
   function addRefreshSettingsEventListener(elements: HTMLSelectElement[]) {
@@ -373,7 +371,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           const optionElement: HTMLOptionElement =
             document.createElement('option')
           optionElement.value = id
-          if (id !== '') {
+          if (id) {
             optionElement.innerText =
               label ?? homey.__(`settings.boolean.${id}`)
           }
@@ -392,7 +390,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   async function login(): Promise<void> {
     const username: string = usernameElement?.value ?? ''
     const password: string = passwordElement?.value ?? ''
-    if (username === '' || password === '') {
+    if (!username || !password) {
       // @ts-expect-error: homey is partially typed
       await homey.alert(homey.__('settings.authenticate.failure'))
       return
@@ -419,7 +417,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   async function load(): Promise<void> {
     generateChildrenElements()
-    if (homeySettings.token === undefined) {
+    if (!homeySettings.token) {
       needsAuthentication()
       return
     }

@@ -30,11 +30,11 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
     const expiredAt: number | null = this.homey.settings.get('expire_at') as
       | number
       | null
-    if (expiredAt !== null) {
+    if (expiredAt) {
       const expireAtDate: Date = new Date(expiredAt * 1000)
       expireAtDate.setDate(expireAtDate.getDate() - 1)
       const ms: number = expireAtDate.getTime() - new Date().getTime()
-      if (ms > 0) {
+      if (ms) {
         const maxTimeout: number = 2 ** 31 - 1
         const interval: number = Math.min(ms, maxTimeout)
         this.loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
@@ -59,7 +59,7 @@ export = class HeatzyApp extends WithAPIAndLogging(App) {
   async login(postData: LoginCredentials): Promise<boolean> {
     try {
       const { username, password } = postData
-      if (username === '' || password === '') {
+      if (!username || !password) {
         return false
       }
       const { data } = await this.api.post<LoginDataSuccess | Required<Data>>(

@@ -90,7 +90,7 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
     this.id = id
     this.productKey = productKey
 
-    if (this.getStoreValue('previous_mode') === undefined) {
+    if (!this.getStoreValue('previous_mode')) {
       await this.setStoreValue('previous_mode', 'eco')
     }
     this.setOnMode()
@@ -202,7 +202,7 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   async syncFromDevice(): Promise<void> {
     const modeString: ModeString | null = await this.getDeviceMode()
     this.mode =
-      modeString !== null && modeString in modeFromString
+      modeString && modeString in modeFromString
         ? modeFromString[modeString]
         : 'stop'
     await this.sync()

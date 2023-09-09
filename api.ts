@@ -87,7 +87,7 @@ export = {
               (pairSetting: PairSetting): pairSetting is LoginSetting =>
                 pairSetting.id === 'login'
             )
-          if (driverLoginSetting === undefined) {
+          if (!driverLoginSetting) {
             return []
           }
           return Object.values(
@@ -139,7 +139,7 @@ export = {
     const changedKeys: (keyof Settings)[] = Object.keys(
       body
     ) as (keyof Settings)[]
-    if (changedKeys.length === 0) {
+    if (!changedKeys.length) {
       return
     }
     try {
@@ -149,7 +149,7 @@ export = {
             (changedKey: keyof Settings) =>
               body[changedKey] !== device.getSetting(changedKey)
           )
-          if (deviceChangedKeys.length === 0) {
+          if (!deviceChangedKeys.length) {
             return
           }
           const deviceSettings: Settings = Object.fromEntries(
