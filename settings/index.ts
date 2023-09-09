@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import type Homey from 'homey/lib/Homey'
 import {
+  type OnMode,
   type DeviceSetting,
   type DeviceSettings,
   type DriverSetting,
@@ -200,40 +201,12 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     unhide(authenticatingElement, value)
   }
 
-  function int(
-    element: HTMLInputElement,
-    value: number = Number.parseInt(element.value, 10)
-  ): number {
-    const minValue = Number(element.min)
-    const maxValue = Number(element.max)
-    if (Number.isNaN(value) || value < minValue || value > maxValue) {
-      element.value = '' // eslint-disable-line no-param-reassign
-      const labelElement: HTMLLabelElement | null = document.querySelector(
-        `label[for="${element.id}"]`
-      )
-      throw new Error(
-        homey.__('settings.int_error', {
-          name: homey.__(labelElement?.innerText ?? ''),
-          min: minValue,
-          max: maxValue,
-        })
-      )
-    }
-    return value
-  }
-
   function processSettingValue(
     element: HTMLInputElement | HTMLSelectElement
-  ): SettingValue {
+  ): SettingValue | null {
     const { value } = element
     if (value === '') {
       return null
-    }
-    const intValue: number = Number.parseInt(value, 10)
-    if (!Number.isNaN(intValue)) {
-      return element instanceof HTMLInputElement
-        ? int(element, intValue)
-        : intValue
     }
     if (element instanceof HTMLInputElement && element.type === 'checkbox') {
       if (!element.indeterminate) {
@@ -241,7 +214,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       }
       return null
     }
-    return ['true', 'false'].includes(value) ? value === 'true' : value
+    return ['true', 'false'].includes(value)
+      ? value === 'true'
+      : (value as OnMode)
   }
 
   function buildSettingsBody(
@@ -251,16 +226,13 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       settingId: string,
       settingValue: SettingValue
     ): boolean => {
-      if (settingValue !== null) {
-        const deviceSetting: SettingValue[] | undefined = flatDeviceSettings[
-          settingId
-        ] as SettingValue[] | undefined
-        return (
-          deviceSetting !== undefined &&
-          (deviceSetting.length !== 1 || settingValue !== deviceSetting[0])
-        )
-      }
-      return false
+      const deviceSetting: SettingValue[] | undefined = flatDeviceSettings[
+        settingId
+      ] as SettingValue[] | undefined
+      return (
+        deviceSetting !== undefined &&
+        (deviceSetting.length !== 1 || settingValue !== deviceSetting[0])
+      )
     }
 
     return Object.fromEntries(
@@ -270,8 +242,10 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             element: HTMLInputElement | HTMLSelectElement
           ): [string, SettingValue] | [null] => {
             const settingId: string = element.id.split('--')[0]
-            const settingValue: SettingValue = processSettingValue(element)
-            return shouldUpdate(settingId, settingValue)
+            const settingValue: SettingValue | null =
+              processSettingValue(element)
+            return settingValue !== null &&
+              shouldUpdate(settingId, settingValue)
               ? [settingId, settingValue]
               : [null]
           }

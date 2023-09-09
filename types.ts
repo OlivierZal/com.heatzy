@@ -19,12 +19,14 @@ export type OnMode = Exclude<Mode, 'stop'> | 'previous'
 
 export type CapabilityValue = boolean | Mode
 
-export type SettingValue = boolean | number | string | null | undefined
+type ValueOf<T> = T[keyof T]
 
-export interface Settings extends Record<string, SettingValue> {
+export interface Settings {
   readonly always_on?: boolean
-  readonly mode?: OnMode
+  readonly on_mode?: OnMode
 }
+
+export type SettingValue = ValueOf<Settings>
 
 export interface HomeySettings {
   readonly username?: string | null
@@ -32,6 +34,8 @@ export interface HomeySettings {
   readonly token?: string | null
   readonly expire_at?: number | null
 }
+
+export type HomeySettingValue = ValueOf<HomeySettings>
 
 export interface ManifestDriverSettingData {
   readonly id: string
