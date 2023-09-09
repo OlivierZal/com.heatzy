@@ -231,11 +231,11 @@ export = class HeatzyDevice extends WithAPIAndLogging(Device) {
   }
 
   async onSettings({
-    changedKeys,
     newSettings,
+    changedKeys,
   }: {
-    changedKeys: string[]
     newSettings: Settings
+    changedKeys: string[]
   }): Promise<void> {
     if (changedKeys.includes('on_mode')) {
       this.setOnMode(newSettings.on_mode as Exclude<Mode, 'stop'>)
