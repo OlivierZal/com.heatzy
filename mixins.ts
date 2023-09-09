@@ -6,13 +6,14 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
+import type { HomeySettingValue } from './types'
 
 type TimerClass = new (...args: any[]) => {
   error(...errorArgs: any[]): void
   log(...logArgs: any[]): void
   homey: {
     settings: {
-      get(key: string): number | string | null
+      get(key: string): HomeySettingValue
     }
   }
 }
