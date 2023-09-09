@@ -13,7 +13,7 @@ type TimerClass = new (...args: any[]) => {
   log(...logArgs: any[]): void
   homey: {
     settings: {
-      get(key: string): HomeySettingValue
+      get(key: string): Exclude<HomeySettingValue, undefined>
     }
   }
 }
