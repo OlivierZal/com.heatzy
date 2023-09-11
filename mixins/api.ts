@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios, {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import type { HomeySettingValue } from './types'
+import type { HomeySettingValue } from '../types'
 
-type TimerClass = new (...args: any[]) => {
+type ApiClass = new (...args: any[]) => {
   error(...errorArgs: any[]): void
   log(...logArgs: any[]): void
   homey: {
@@ -18,8 +17,7 @@ type TimerClass = new (...args: any[]) => {
   }
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export function WithAPIAndLogging<T extends TimerClass>(Base: T) {
+export default function WithAPI<T extends ApiClass>(Base: T) {
   return class extends Base {
     api: AxiosInstance
 
@@ -73,22 +71,6 @@ export function WithAPIAndLogging<T extends TimerClass>(Base: T) {
         error.response ? error.response.data : error
       )
       return Promise.reject(error)
-    }
-
-    customLog(method: 'log' | 'error', ...args: any[]): void {
-      if (this instanceof Device) {
-        super[method](this.getName(), '-', ...args)
-      } else {
-        super[method](...args)
-      }
-    }
-
-    error(...args: any[]): void {
-      this.customLog('error', ...args)
-    }
-
-    log(...args: any[]): void {
-      this.customLog('log', ...args)
     }
   }
 }

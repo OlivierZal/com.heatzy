@@ -1,15 +1,16 @@
 import { Driver } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type PairSession from 'homey/lib/PairSession'
 import type HeatzyApp from '../../app'
-import { WithAPIAndLogging } from '../../mixins'
+import WithAPI from '../../mixins/api'
 import type {
   Bindings,
   DeviceDetails,
   FlowArgs,
   LoginCredentials,
+  Mode,
 } from '../../types'
 
-export = class HeatzyDriver extends WithAPIAndLogging(Driver) {
+export = class HeatzyDriver extends WithAPI(Driver) {
   app!: HeatzyApp
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -20,7 +21,7 @@ export = class HeatzyDriver extends WithAPIAndLogging(Driver) {
       .getConditionCard('mode_condition')
       .registerRunListener(
         (args: FlowArgs): boolean =>
-          args.mode === args.device.getCapabilityValue('mode')
+          args.mode === (args.device.getCapabilityValue('mode') as Mode)
       )
     this.homey.flow
       .getActionCard('mode_action')

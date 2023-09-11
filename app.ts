@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios from 'axios'
-import { WithAPIAndLogging } from './mixins'
+import WithAPI from './mixins/api'
 import type {
   Data,
   HomeySettings,
@@ -14,7 +14,7 @@ axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
 axios.defaults.headers.common['X-Gizwits-Application-Id'] =
   'c70a66ff039d41b4a220e198b0fcc8b3'
 
-export = class HeatzyApp extends WithAPIAndLogging(App) {
+export = class HeatzyApp extends WithAPI(App) {
   loginTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
