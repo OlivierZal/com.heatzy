@@ -234,7 +234,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       ] as SettingValue[] | undefined
       return (
         deviceSetting !== undefined &&
-        (deviceSetting.length !== 1 || settingValue !== deviceSetting[0])
+        (new Set(deviceSetting).size !== 1 || settingValue !== deviceSetting[0])
       )
     }
 
@@ -330,7 +330,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       element.id.split('--')[0]
     ] as SettingValue[] | undefined
     // eslint-disable-next-line no-param-reassign
-    element.value = values && values.length === 1 ? String(values[0]) : ''
+    element.value =
+      values && new Set(values).size === 1 ? String(values[0]) : ''
   }
 
   function addRefreshSettingsEventListener(elements: HTMLSelectElement[]) {
