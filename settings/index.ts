@@ -247,7 +247,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             const settingId: string = element.id.split('--')[0]
             const settingValue: SettingValue | null =
               processSettingValue(element)
-            return settingValue && shouldUpdate(settingId, settingValue)
+            return settingValue !== null &&
+              shouldUpdate(settingId, settingValue)
               ? [settingId, settingValue]
               : [null]
           }
