@@ -23,10 +23,9 @@ function formatDevicePostData(
   mode: ModeNumber,
   productKey: string
 ): DevicePostData {
-  if (isPiloteFirstGen(productKey)) {
-    return { raw: [1, 1, mode] }
-  }
-  return { attrs: { mode } }
+  return isPiloteFirstGen(productKey)
+    ? { raw: [1, 1, mode] }
+    : { attrs: { mode } }
 }
 
 function reverseMapping(
