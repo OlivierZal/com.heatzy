@@ -108,10 +108,10 @@ export = class HeatzyDevice extends WithAPI(Device) {
     }
   }
 
-  async setDeviceMode(mode: ModeNumber): Promise<boolean> {
+  async setDeviceMode(): Promise<boolean> {
     try {
       const postData: DevicePostData = formatDevicePostData(
-        mode,
+        modeToNumber[this.mode],
         this.productKey
       )
       const { data } = await this.api.post<Data>(
@@ -188,8 +188,7 @@ export = class HeatzyDevice extends WithAPI(Device) {
   }
 
   async syncToDevice(): Promise<void> {
-    const modeNumber: ModeNumber = modeToNumber[this.mode]
-    const success: boolean = await this.setDeviceMode(modeNumber)
+    const success: boolean = await this.setDeviceMode()
     if (!success) {
       this.mode = this.isOn
         ? (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
