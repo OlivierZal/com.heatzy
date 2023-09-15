@@ -27,7 +27,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         }
         document.documentElement.lang = language
         resolve()
-      }
+      },
     )
   })
 
@@ -38,7 +38,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     homey.get(
       async (
         error: Error | null,
-        settings: Partial<HomeySettings>
+        settings: Partial<HomeySettings>,
       ): Promise<void> => {
         if (error) {
           // @ts-expect-error: homey is partially typed
@@ -47,7 +47,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           return
         }
         resolve(settings)
-      }
+      },
     )
   })
 
@@ -59,7 +59,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         '/devices/settings',
         async (
           error: Error | null,
-          settings: DeviceSettings
+          settings: DeviceSettings,
         ): Promise<void> => {
           if (error) {
             // @ts-expect-error: homey is partially typed
@@ -68,13 +68,13 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             return
           }
           resolve(settings)
-        }
+        },
       )
-    }
+    },
   )
 
   const flatDeviceSettings: DeviceSetting = Object.values(
-    deviceSettings
+    deviceSettings,
   ).reduce<DeviceSetting>(
     (flattenedDeviceSettings, settings: DeviceSetting) =>
       Object.entries(settings).reduce<DeviceSetting>(
@@ -85,14 +85,14 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           acc[settingId].push(
             ...settingValues.filter(
               (settingValue: SettingValue) =>
-                !acc[settingId].includes(settingValue)
-            )
+                !acc[settingId].includes(settingValue),
+            ),
           )
           return acc
         },
-        flattenedDeviceSettings
+        flattenedDeviceSettings,
       ),
-    {}
+    {},
   )
 
   const driverSettingsAll: DriverSetting[] = await new Promise<DriverSetting[]>(
@@ -103,7 +103,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         '/drivers/settings',
         async (
           error: Error | null,
-          driverSettings: DriverSetting[]
+          driverSettings: DriverSetting[],
         ): Promise<void> => {
           if (error) {
             // @ts-expect-error: homey is partially typed
@@ -112,36 +112,36 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             return
           }
           resolve(driverSettings)
-        }
+        },
       )
-    }
+    },
   )
 
   const driverSettings: DriverSetting[] = driverSettingsAll.filter(
-    (setting: DriverSetting) => setting.groupId !== 'login'
+    (setting: DriverSetting) => setting.groupId !== 'login',
   )
 
   const applySettingsElement: HTMLButtonElement = document.getElementById(
-    'apply-settings'
+    'apply-settings',
   ) as HTMLButtonElement
   const authenticateElement: HTMLButtonElement = document.getElementById(
-    'authenticate'
+    'authenticate',
   ) as HTMLButtonElement
   const refreshSettingsElement: HTMLButtonElement = document.getElementById(
-    'refresh-settings'
+    'refresh-settings',
   ) as HTMLButtonElement
 
   const authenticatedElement: HTMLDivElement = document.getElementById(
-    'authenticated'
+    'authenticated',
   ) as HTMLDivElement
   const authenticatingElement: HTMLDivElement = document.getElementById(
-    'authenticating'
+    'authenticating',
   ) as HTMLDivElement
   const loginElement: HTMLDivElement = document.getElementById(
-    'login'
+    'login',
   ) as HTMLDivElement
   const settingsElement: HTMLDivElement = document.getElementById(
-    'settings'
+    'settings',
   ) as HTMLDivElement
 
   const credentialKeys: (keyof LoginCredentials)[] = ['username', 'password']
@@ -151,7 +151,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         const driverSetting: LoginDriverSetting | undefined =
           driverSettingsAll.find(
             (setting): setting is LoginDriverSetting =>
-              setting.id === credentialKey
+              setting.id === credentialKey,
           )
         if (!driverSetting) {
           return null
@@ -172,7 +172,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         loginElement.appendChild(labelElement)
         loginElement.appendChild(inputElement)
         return inputElement
-      }
+      },
     )
 
   function disableButtons(value = true): void {
@@ -183,7 +183,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         } else {
           buttonElement.classList.remove('is-disabled')
         }
-      }
+      },
     )
   }
 
@@ -205,7 +205,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   function processSettingValue(
-    element: HTMLInputElement | HTMLSelectElement
+    element: HTMLInputElement | HTMLSelectElement,
   ): SettingValue | null {
     const { value } = element
     if (!value) {
@@ -223,11 +223,11 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   function buildSettingsBody(
-    elements: (HTMLInputElement | HTMLSelectElement)[]
+    elements: (HTMLInputElement | HTMLSelectElement)[],
   ): Settings {
     const shouldUpdate = (
       settingId: string,
-      settingValue: SettingValue
+      settingValue: SettingValue,
     ): boolean => {
       const deviceSetting: SettingValue[] | undefined = flatDeviceSettings[
         settingId
@@ -242,7 +242,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       elements
         .map(
           (
-            element: HTMLInputElement | HTMLSelectElement
+            element: HTMLInputElement | HTMLSelectElement,
           ): [string, SettingValue] | [null] => {
             const settingId: string = element.id.split('--')[0]
             const settingValue: SettingValue | null =
@@ -251,13 +251,13 @@ async function onHomeyReady(homey: Homey): Promise<void> {
               shouldUpdate(settingId, settingValue)
               ? [settingId, settingValue]
               : [null]
-          }
+          },
         )
         .filter(
           (
-            entry: [string, SettingValue] | [null]
-          ): entry is [string, SettingValue] => !!entry[0]
-        )
+            entry: [string, SettingValue] | [null],
+          ): entry is [string, SettingValue] => !!entry[0],
+        ),
     )
   }
 
@@ -268,7 +268,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           deviceSettings[driver][settingId] = [settingValue]
         })
         flatDeviceSettings[settingId] = [settingValue]
-      }
+      },
     )
   }
 
@@ -288,7 +288,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         enableButtons()
         // @ts-expect-error: homey is partially typed
         await homey.alert(homey.__('settings.success'))
-      }
+      },
     )
   }
 
@@ -321,7 +321,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
             disableButtons()
             setDeviceSettings(body)
           }
-        }
+        },
       )
     })
   }
@@ -351,7 +351,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   function generateChildrenElements(): void {
     driverSettings
       .filter((setting: DriverSetting) =>
-        ['checkbox', 'dropdown'].includes(setting.type)
+        ['checkbox', 'dropdown'].includes(setting.type),
       )
       .forEach((setting: DriverSetting): void => {
         const divElement: HTMLDivElement = document.createElement('div')
@@ -385,7 +385,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         settingsElement.appendChild(divElement)
       })
     addSettingsEventListeners(
-      Array.from(settingsElement.querySelectorAll('select'))
+      Array.from(settingsElement.querySelectorAll('select')),
     )
   }
 
@@ -413,7 +413,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           return
         }
         needsAuthentication(false)
-      }
+      },
     )
   }
 

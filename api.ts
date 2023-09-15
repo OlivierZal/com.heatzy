@@ -17,7 +17,7 @@ import type {
 
 function getDevices(homey: Homey): HeatzyDevice[] {
   return Object.values(homey.drivers.getDrivers()).flatMap(
-    (driver: Driver): HeatzyDevice[] => driver.getDevices() as HeatzyDevice[]
+    (driver: Driver): HeatzyDevice[] => driver.getDevices() as HeatzyDevice[],
   )
 }
 
@@ -40,7 +40,7 @@ export = {
           if (!acc[driverId][settingId].includes(value)) {
             acc[driverId][settingId].push(value)
           }
-        }
+        },
       )
       return acc
     }, {})
@@ -69,14 +69,14 @@ export = {
                     }): { id: string; label: string } => ({
                       id: value.id,
                       label: value.label[language],
-                    })
+                    }),
                   ),
                   driverId: driver.id,
                   groupId: setting.id,
                   groupLabel: setting.label[language],
-                })
-              )
-          )
+                }),
+              ),
+          ),
       )
     const settingsLogin: DriverSetting[] =
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -85,7 +85,7 @@ export = {
           const driverLoginSetting: LoginSetting | undefined =
             driver.pair?.find(
               (pairSetting: PairSetting): pairSetting is LoginSetting =>
-                pairSetting.id === 'login'
+                pairSetting.id === 'login',
             )
           if (!driverLoginSetting) {
             return []
@@ -111,9 +111,9 @@ export = {
                 option.endsWith('Placeholder') ? 'placeholder' : 'title'
               ] = label[language]
               return acc
-            }, {})
+            }, {}),
           )
-        }
+        },
       )
     return [...settings, ...settingsLogin]
   },
@@ -137,7 +137,7 @@ export = {
     homey: Homey
   }): Promise<void> {
     const changedKeys: (keyof Settings)[] = Object.keys(
-      body
+      body,
     ) as (keyof Settings)[]
     if (!changedKeys.length) {
       return
@@ -147,15 +147,15 @@ export = {
         getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
           const deviceChangedKeys: (keyof Settings)[] = changedKeys.filter(
             (changedKey: keyof Settings) =>
-              body[changedKey] !== device.getSetting(changedKey)
+              body[changedKey] !== device.getSetting(changedKey),
           )
           if (!deviceChangedKeys.length) {
             return
           }
           const deviceSettings: Settings = Object.fromEntries(
             deviceChangedKeys.map(
-              (key: keyof Settings): [string, SettingValue] => [key, body[key]]
-            )
+              (key: keyof Settings): [string, SettingValue] => [key, body[key]],
+            ),
           )
           try {
             await device.setSettings(deviceSettings)
@@ -170,7 +170,7 @@ export = {
             device.error('Settings:', errorMessage)
             throw new Error(errorMessage)
           }
-        })
+        }),
       )
     } catch (error: unknown) {
       throw new Error(error instanceof Error ? error.message : String(error))

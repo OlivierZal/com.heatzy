@@ -21,7 +21,7 @@ export = class HeatzyDriver extends WithAPI(Driver) {
       .getConditionCard('mode_condition')
       .registerRunListener(
         (args: FlowArgs): boolean =>
-          args.mode === (args.device.getCapabilityValue('mode') as Mode)
+          args.mode === (args.device.getCapabilityValue('mode') as Mode),
       )
     this.homey.flow
       .getActionCard('mode_action')
@@ -34,11 +34,11 @@ export = class HeatzyDriver extends WithAPI(Driver) {
   async onPair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
-      (data: LoginCredentials): Promise<boolean> => this.app.login(data)
+      (data: LoginCredentials): Promise<boolean> => this.app.login(data),
     )
     session.setHandler(
       'list_devices',
-      (): Promise<DeviceDetails[]> => this.discoverDevices()
+      (): Promise<DeviceDetails[]> => this.discoverDevices(),
     )
   }
 
@@ -53,7 +53,7 @@ export = class HeatzyDriver extends WithAPI(Driver) {
             id: did,
             productKey: product_key,
           },
-        })
+        }),
         /* eslint-enable camelcase */
       )
     } catch (error: unknown) {
@@ -65,7 +65,7 @@ export = class HeatzyDriver extends WithAPI(Driver) {
   async onRepair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
-      (data: LoginCredentials): Promise<boolean> => this.app.login(data)
+      (data: LoginCredentials): Promise<boolean> => this.app.login(data),
     )
   }
 }

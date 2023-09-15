@@ -21,7 +21,7 @@ function isPiloteFirstGen(productKey: string): boolean {
 
 function formatDevicePostData(
   mode: ModeNumber,
-  productKey: string
+  productKey: string,
 ): DevicePostData {
   return isPiloteFirstGen(productKey)
     ? { raw: [1, 1, mode] }
@@ -29,15 +29,15 @@ function formatDevicePostData(
 }
 
 function reverseMapping(
-  mapping: Record<number, string>
+  mapping: Record<number, string>,
 ): Record<string, number> {
   return Object.fromEntries(
     Object.entries(mapping).map(
       ([deviceValue, capabilityValue]: [string, string]): [string, number] => [
         capabilityValue,
         Number(deviceValue),
-      ]
-    )
+      ],
+    ),
   )
 }
 
@@ -49,7 +49,7 @@ const modeFromNumber: Record<ModeNumber, Mode> = {
 } as const
 
 const modeToNumber: Record<Mode, ModeNumber> = reverseMapping(
-  modeFromNumber
+  modeFromNumber,
 ) as Record<Mode, ModeNumber>
 
 const modeFromString: Record<ModeString, Mode> = {
@@ -100,7 +100,7 @@ export = class HeatzyDevice extends WithAPI(Device) {
   async getDeviceMode(): Promise<ModeString | null> {
     try {
       const { data } = await this.api.get<DeviceData>(
-        `devdata/${this.id}/latest`
+        `devdata/${this.id}/latest`,
       )
       return data.attr.mode
     } catch (error: unknown) {
@@ -112,11 +112,11 @@ export = class HeatzyDevice extends WithAPI(Device) {
     try {
       const postData: DevicePostData = formatDevicePostData(
         modeToNumber[this.mode],
-        this.productKey
+        this.productKey,
       )
       const { data } = await this.api.post<Data>(
         `/control/${this.id}`,
-        postData
+        postData,
       )
       if ('error_message' in data) {
         throw new Error(data.error_message)
@@ -128,7 +128,7 @@ export = class HeatzyDevice extends WithAPI(Device) {
   }
 
   setOnMode(
-    onModeSetting: OnMode = this.getSetting('on_mode') as OnMode
+    onModeSetting: OnMode = this.getSetting('on_mode') as OnMode,
   ): void {
     this.onMode = onModeSetting !== 'previous' ? onModeSetting : null
   }
@@ -148,15 +148,15 @@ export = class HeatzyDevice extends WithAPI(Device) {
           capability,
           async (value: CapabilityValue): Promise<void> => {
             await this.onCapability(capability, value)
-          }
+          },
         )
-      }
+      },
     )
   }
 
   async onCapability(
     capability: string,
-    value: CapabilityValue
+    value: CapabilityValue,
   ): Promise<void> {
     if (capability === 'onoff' && value === this.isOn) {
       return
@@ -253,7 +253,7 @@ export = class HeatzyDevice extends WithAPI(Device) {
 
   async setCapabilityValue(
     capability: string,
-    value: CapabilityValue
+    value: CapabilityValue,
   ): Promise<void> {
     if (
       this.hasCapability(capability) &&

@@ -64,7 +64,7 @@ export = class HeatzyApp extends WithAPI(App) {
       }
       const { data } = await this.api.post<LoginDataSuccess | Required<Data>>(
         '/login',
-        postData
+        postData,
       )
       if ('error_message' in data) {
         throw new Error(data.error_message)
@@ -89,7 +89,7 @@ export = class HeatzyApp extends WithAPI(App) {
     Object.entries(settings)
       .filter(
         ([setting, value]: [string, HomeySettingValue]) =>
-          value !== this.homey.settings.get(setting)
+          value !== this.homey.settings.get(setting),
       )
       .forEach(([setting, value]: [string, HomeySettingValue]): void => {
         this.homey.settings.set(setting, value)
