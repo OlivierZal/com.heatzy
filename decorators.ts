@@ -7,7 +7,10 @@
 */
 export default function logName<This, Args extends any[], Return>(
   originalMethod: any,
-  _context: ClassMethodDecoratorContext,
+  _context: ClassMethodDecoratorContext<
+    This,
+    (this: This, ...args: Args) => Return
+  >,
 ) {
   function replacementMethod(this: any, ...args: any[]) {
     return originalMethod.call(this, this.getName(), '-', ...args)
