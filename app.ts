@@ -50,7 +50,7 @@ export = class HeatzyApp extends WithAPI(App) {
     try {
       await this.login(loginCredentials)
     } catch (error: unknown) {
-      this.error(error instanceof Error ? error.message : String(error))
+      this.error(error instanceof Error ? error.message : error)
     }
   }
 
