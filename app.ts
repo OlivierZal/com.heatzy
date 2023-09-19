@@ -22,7 +22,6 @@ export = class HeatzyApp extends WithAPI(App) {
   }
 
   async refreshLogin(): Promise<void> {
-    this.clearLoginRefresh()
     const loginCredentials: LoginCredentials = {
       username: (this.homey.settings.get('username') as string | null) ?? '',
       password: (this.homey.settings.get('password') as string | null) ?? '',
@@ -47,11 +46,6 @@ export = class HeatzyApp extends WithAPI(App) {
     await this.tryLogin(loginCredentials)
   }
 
-  clearLoginRefresh(): void {
-    this.homey.clearTimeout(this.loginTimeout)
-    this.log('Login refresh has been paused')
-  }
-
   async tryLogin(loginCredentials: LoginCredentials): Promise<void> {
     try {
       await this.login(loginCredentials)
@@ -61,6 +55,7 @@ export = class HeatzyApp extends WithAPI(App) {
   }
 
   async login(postData: LoginCredentials): Promise<boolean> {
+    this.clearLoginRefresh()
     try {
       const { username, password } = postData
       if (!username || !password) {
@@ -87,6 +82,11 @@ export = class HeatzyApp extends WithAPI(App) {
     } catch (error: unknown) {
       throw new Error(error instanceof Error ? error.message : String(error))
     }
+  }
+
+  clearLoginRefresh(): void {
+    this.homey.clearTimeout(this.loginTimeout)
+    this.log('Login refresh has been paused')
   }
 
   setSettings(settings: Partial<HomeySettings>): void {
