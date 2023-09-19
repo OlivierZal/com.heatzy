@@ -38,22 +38,26 @@ export = class HeatzyApp extends WithAPI(App) {
         const maxTimeout: number = 2 ** 31 - 1
         const interval: number = Math.min(ms, maxTimeout)
         this.loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
-          await this.login(loginCredentials).catch((error: Error): void => {
-            this.error(error.message)
-          })
+          await this.tryLogin(loginCredentials)
         }, interval)
         this.log('Login refresh has been scheduled')
         return
       }
     }
-    await this.login(loginCredentials).catch((error: Error): void => {
-      this.error(error.message)
-    })
+    await this.tryLogin(loginCredentials)
   }
 
   clearLoginRefresh(): void {
     this.homey.clearTimeout(this.loginTimeout)
     this.log('Login refresh has been paused')
+  }
+
+  async tryLogin(loginCredentials: LoginCredentials): Promise<void> {
+    try {
+      await this.login(loginCredentials)
+    } catch (error: unknown) {
+      this.error(error instanceof Error ? error.message : String(error))
+    }
   }
 
   async login(postData: LoginCredentials): Promise<boolean> {
