@@ -257,15 +257,16 @@ export = class HeatzyDevice extends WithAPI(Device) {
     value: CapabilityValue,
   ): Promise<void> {
     if (
-      this.hasCapability(capability) &&
-      value !== this.getCapabilityValue(capability)
+      !this.hasCapability(capability) ||
+      value === this.getCapabilityValue(capability)
     ) {
-      try {
-        await super.setCapabilityValue(capability, value)
-        this.log('Capability', capability, 'is', value)
-      } catch (error: unknown) {
-        this.error(error instanceof Error ? error.message : error)
-      }
+      return
+    }
+    try {
+      await super.setCapabilityValue(capability, value)
+      this.log('Capability', capability, 'is', value)
+    } catch (error: unknown) {
+      this.error(error instanceof Error ? error.message : error)
     }
   }
 
