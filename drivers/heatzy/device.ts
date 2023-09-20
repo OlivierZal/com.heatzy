@@ -1,7 +1,7 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type HeatzyDriver from './driver'
 import type HeatzyApp from '../../app'
-import logName from '../../decorators'
+import addToLog from '../../decorators'
 import WithAPI from '../../mixins/api'
 import type {
   CapabilityValue,
@@ -270,12 +270,12 @@ export = class HeatzyDevice extends WithAPI(Device) {
   }
 
   /* eslint-disable @typescript-eslint/no-unsafe-argument */
-  @logName
+  @addToLog('getName()')
   error(...args: any[]): void {
     super.error(...args)
   }
 
-  @logName
+  @addToLog('getName()')
   log(...args: any[]): void {
     super.log(...args)
   }
