@@ -14,14 +14,14 @@ export default function addToLogs<T extends LogClass>(...logs: string[]) {
   ) {
     return class extends BaseClass {
       error(...args: any[]): void {
-        this.extendedLog('error', ...args)
+        this.commonLog('error', ...args)
       }
 
       log(...args: any[]): void {
-        this.extendedLog('log', ...args)
+        this.commonLog('log', ...args)
       }
 
-      extendedLog(logType: 'error' | 'log', ...args: any[]): void {
+      commonLog(logType: 'error' | 'log', ...args: any[]): void {
         super[logType](
           ...logs
             .filter((log: string) => log)
