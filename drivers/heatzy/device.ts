@@ -1,7 +1,7 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type HeatzyDriver from './driver'
 import type HeatzyApp from '../../app'
-import addToLog from '../../decorators'
+import addDeviceNameToLogs from '../../decorators'
 import WithAPI from '../../mixins/api'
 import type {
   CapabilityValue,
@@ -66,7 +66,8 @@ const modeFromString: Record<ModeString, Mode> = {
   停止: 'stop',
 } as const
 
-export = class HeatzyDevice extends WithAPI(Device) {
+@addDeviceNameToLogs
+class HeatzyDevice extends WithAPI(Device) {
   app!: HeatzyApp
 
   declare driver: HeatzyDriver
@@ -269,16 +270,6 @@ export = class HeatzyDevice extends WithAPI(Device) {
       this.error(error instanceof Error ? error.message : error)
     }
   }
-
-  /* eslint-disable @typescript-eslint/no-unsafe-argument */
-  @addToLog('getName()')
-  error(...args: any[]): void {
-    super.error(...args)
-  }
-
-  @addToLog('getName()')
-  log(...args: any[]): void {
-    super.log(...args)
-  }
-  /* eslint-enable @typescript-eslint/no-unsafe-argument */
 }
+
+export = HeatzyDevice
