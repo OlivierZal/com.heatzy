@@ -22,5 +22,8 @@
   },
   "8.0.0": {
     "en": "Reshaped code."
+  },
+  "9.0.0": {
+    "en": "Use decorator."
   }
 }
