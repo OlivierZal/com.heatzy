@@ -8,11 +8,9 @@ type LogClass = new (...args: any[]) => {
 }
 
 export default function addToLogs<T extends LogClass>(...logs: string[]) {
-  return function actualDecorator(
-    BaseClass: T,
-    _context: ClassDecoratorContext, // eslint-disable-line @typescript-eslint/no-unused-vars
-  ) {
-    return class HeatzyLogsDecorator extends BaseClass {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return function actualDecorator(Base: T, _context: ClassDecoratorContext) {
+    return class HeatzyLogsDecorator extends Base {
       error(...args: any[]): void {
         this.commonLog('error', ...args)
       }
@@ -23,22 +21,21 @@ export default function addToLogs<T extends LogClass>(...logs: string[]) {
 
       commonLog(logType: 'error' | 'log', ...args: any[]): void {
         super[logType](
-          ...logs
-            .flatMap((log: string): [any, '-'] => {
-              if (log.endsWith('()')) {
-                const funcName: string = log.slice(0, -2)
-                const func: () => any = (this as Record<any, any>)[
-                  funcName
-                ] as () => any
-                if (typeof func === 'function' && !func.length) {
-                  return [func.call(this), '-']
-                }
+          ...logs.flatMap((log: string): [any, '-'] => {
+            if (log.endsWith('()')) {
+              const funcName: string = log.slice(0, -2)
+              const func: () => any = (this as Record<any, any>)[
+                funcName
+              ] as () => any
+              if (typeof func === 'function' && !func.length) {
+                return [func.call(this), '-']
               }
-              if (log in this) {
-                return [(this as Record<any, any>)[log], '-']
-              }
-              return [log, '-']
-            }),
+            }
+            if (log in this) {
+              return [(this as Record<any, any>)[log], '-']
+            }
+            return [log, '-']
+          }),
           ...args,
         )
       }
