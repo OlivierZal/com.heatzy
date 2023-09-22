@@ -12,7 +12,7 @@ export default function addToLogs<T extends LogClass>(...logs: string[]) {
     BaseClass: T,
     _context: ClassDecoratorContext, // eslint-disable-line @typescript-eslint/no-unused-vars
   ) {
-    return class extends BaseClass {
+    return class HeatzyApp extends BaseClass {
       error(...args: any[]): void {
         this.commonLog('error', ...args)
       }
