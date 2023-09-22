@@ -18,7 +18,10 @@
     "en": "Updated modules."
   },
   "7.0.0": {
-    "en": "Use new eslint config."
+    "en": "Use eslint flat config."
+  },
+  "7.0.1": {
+    "en": "Use mixins."
   },
   "8.0.0": {
     "en": "Reshaped code."
