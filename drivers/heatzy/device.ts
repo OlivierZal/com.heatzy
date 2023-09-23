@@ -68,6 +68,19 @@ const modeFromString: Record<ModeString, Mode> = {
 
 @addToLogs('getName()')
 class HeatzyDevice extends WithAPI(Device) {
+  #onMode!: Exclude<Mode, 'stop'>
+
+  get onMode(): Exclude<Mode, 'stop'> {
+    return this.#onMode
+  }
+
+  set onMode(onModeSetting: OnMode) {
+    this.#onMode =
+      onModeSetting !== 'previous'
+        ? onModeSetting
+        : (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
+  }
+
   app!: HeatzyApp
 
   declare driver: HeatzyDriver
@@ -80,21 +93,18 @@ class HeatzyDevice extends WithAPI(Device) {
 
   isOn!: boolean
 
-  onMode!: Exclude<Mode, 'stop'> | null
-
   syncTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
     this.app = this.homey.app as HeatzyApp
+    if (!this.getStoreValue('previous_mode')) {
+      await this.setStoreValue('previous_mode', 'eco')
+    }
 
     const { id, productKey } = this.getData() as DeviceDetails['data']
     this.id = id
     this.productKey = productKey
-
-    if (!this.getStoreValue('previous_mode')) {
-      await this.setStoreValue('previous_mode', 'eco')
-    }
-    this.setOnMode()
+    this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -129,19 +139,6 @@ class HeatzyDevice extends WithAPI(Device) {
     }
   }
 
-  setOnMode(
-    onModeSetting: OnMode = this.getSetting('on_mode') as OnMode,
-  ): void {
-    this.onMode = onModeSetting !== 'previous' ? onModeSetting : null
-  }
-
-  getOnMode(): Exclude<Mode, 'stop'> {
-    return (
-      this.onMode ??
-      (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
-    )
-  }
-
   registerCapabilityListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.driver.manifest.capabilities as string[]).forEach(
@@ -166,7 +163,7 @@ class HeatzyDevice extends WithAPI(Device) {
     this.clearSyncPlan()
     const alwaysOn: boolean = this.getSetting('always_on') as boolean
     if (capability === 'onoff') {
-      this.mode = value ? this.getOnMode() : 'stop'
+      this.mode = value ? this.onMode : 'stop'
     } else {
       this.mode = value as Mode
     }
@@ -238,7 +235,7 @@ class HeatzyDevice extends WithAPI(Device) {
     changedKeys: string[]
   }): Promise<void> {
     if (changedKeys.includes('on_mode')) {
-      this.setOnMode(newSettings.on_mode as Exclude<Mode, 'stop'>)
+      this.onMode = newSettings.on_mode as Exclude<Mode, 'stop'>
     }
     if (
       changedKeys.includes('always_on') &&
