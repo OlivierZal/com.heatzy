@@ -23,12 +23,16 @@ export = class HeatzyApp extends WithAPI(App) {
 
   async refreshLogin(): Promise<void> {
     const loginCredentials: LoginCredentials = {
-      username: (this.homey.settings.get('username') as string | null) ?? '',
-      password: (this.homey.settings.get('password') as string | null) ?? '',
+      username:
+        (this.homey.settings.get('username') as HomeySettings['username']) ??
+        '',
+      password:
+        (this.homey.settings.get('password') as HomeySettings['password']) ??
+        '',
     }
-    const expiredAt: number | null = this.homey.settings.get('expire_at') as
-      | number
-      | null
+    const expiredAt: number | null = this.homey.settings.get(
+      'expire_at',
+    ) as HomeySettings['expire_at']
     if (expiredAt) {
       const expireAtDate: Date = new Date(expiredAt * 1000)
       expireAtDate.setDate(expireAtDate.getDate() - 1)
