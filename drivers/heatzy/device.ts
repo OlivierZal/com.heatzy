@@ -1,8 +1,8 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type HeatzyDriver from './driver'
 import type HeatzyApp from '../../app'
-import addToLogs from '../../decorators/logs'
-import WithAPI from '../../mixins/api'
+import addToLogs from '../../decorators/addToLogs'
+import WithAPI from '../../mixins/WithAPI'
 import type {
   CapabilityValue,
   Data,
