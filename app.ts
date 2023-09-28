@@ -15,13 +15,13 @@ axios.defaults.headers.common['X-Gizwits-Application-Id'] =
   'c70a66ff039d41b4a220e198b0fcc8b3'
 
 export = class HeatzyApp extends WithAPI(App) {
-  loginTimeout!: NodeJS.Timeout
+  #loginTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
     await this.refreshLogin()
   }
 
-  async refreshLogin(): Promise<void> {
+  private async refreshLogin(): Promise<void> {
     const loginCredentials: LoginCredentials = {
       username:
         (this.homey.settings.get('username') as HomeySettings['username']) ??
@@ -40,7 +40,7 @@ export = class HeatzyApp extends WithAPI(App) {
       if (ms) {
         const maxTimeout: number = 2 ** 31 - 1
         const interval: number = Math.min(ms, maxTimeout)
-        this.loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
+        this.#loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
           await this.tryLogin(loginCredentials)
         }, interval)
         this.log('Login refresh has been scheduled')
@@ -50,7 +50,7 @@ export = class HeatzyApp extends WithAPI(App) {
     await this.tryLogin(loginCredentials)
   }
 
-  async tryLogin(loginCredentials: LoginCredentials): Promise<void> {
+  private async tryLogin(loginCredentials: LoginCredentials): Promise<void> {
     try {
       await this.login(loginCredentials)
     } catch (error: unknown) {
@@ -88,12 +88,12 @@ export = class HeatzyApp extends WithAPI(App) {
     }
   }
 
-  clearLoginRefresh(): void {
-    this.homey.clearTimeout(this.loginTimeout)
+  private clearLoginRefresh(): void {
+    this.homey.clearTimeout(this.#loginTimeout)
     this.log('Login refresh has been paused')
   }
 
-  setSettings(settings: Partial<HomeySettings>): void {
+  private setSettings(settings: Partial<HomeySettings>): void {
     Object.entries(settings)
       .filter(
         ([setting, value]: [string, HomeySettingValue]) =>

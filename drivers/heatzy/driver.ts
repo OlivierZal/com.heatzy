@@ -42,7 +42,7 @@ export = class HeatzyDriver extends WithAPI(Driver) {
     )
   }
 
-  async discoverDevices(): Promise<DeviceDetails[]> {
+  private async discoverDevices(): Promise<DeviceDetails[]> {
     try {
       const { data } = await this.api.get<Bindings>('/bindings')
       return data.devices.map(

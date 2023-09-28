@@ -1,6 +1,4 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import type HeatzyDriver from './driver'
-import type HeatzyApp from '../../app'
 import addToLogs from '../../decorators/addToLogs'
 import WithAPI from '../../mixins/WithAPI'
 import type {
@@ -81,38 +79,33 @@ class HeatzyDevice extends WithAPI(Device) {
         : (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
   }
 
-  app!: HeatzyApp
+  #id!: string
 
-  declare driver: HeatzyDriver
+  #productKey!: string
 
-  id!: string
+  #mode!: Mode
 
-  productKey!: string
+  #isOn!: boolean
 
-  mode!: Mode
-
-  isOn!: boolean
-
-  syncTimeout!: NodeJS.Timeout
+  #syncTimeout!: NodeJS.Timeout
 
   async onInit(): Promise<void> {
-    this.app = this.homey.app as HeatzyApp
     if (!this.getStoreValue('previous_mode')) {
       await this.setStoreValue('previous_mode', 'eco')
     }
 
     const { id, productKey } = this.getData() as DeviceDetails['data']
-    this.id = id
-    this.productKey = productKey
+    this.#id = id
+    this.#productKey = productKey
     this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
 
-  async getDeviceMode(): Promise<ModeString | null> {
+  private async getDeviceMode(): Promise<ModeString | null> {
     try {
       const { data } = await this.api.get<DeviceData>(
-        `devdata/${this.id}/latest`,
+        `devdata/${this.#id}/latest`,
       )
       return data.attr.mode
     } catch (error: unknown) {
@@ -120,14 +113,14 @@ class HeatzyDevice extends WithAPI(Device) {
     }
   }
 
-  async setDeviceMode(): Promise<boolean> {
+  private async setDeviceMode(): Promise<boolean> {
     try {
       const postData: DevicePostData = formatDevicePostData(
-        modeToNumber[this.mode],
-        this.productKey,
+        modeToNumber[this.#mode],
+        this.#productKey,
       )
       const { data } = await this.api.post<Data>(
-        `/control/${this.id}`,
+        `/control/${this.#id}`,
         postData,
       )
       if ('error_message' in data) {
@@ -139,7 +132,7 @@ class HeatzyDevice extends WithAPI(Device) {
     }
   }
 
-  registerCapabilityListeners(): void {
+  private registerCapabilityListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.driver.manifest.capabilities as string[]).forEach(
       (capability: string): void => {
@@ -157,71 +150,71 @@ class HeatzyDevice extends WithAPI(Device) {
     capability: string,
     value: CapabilityValue,
   ): Promise<void> {
-    if (capability === 'onoff' && value === this.isOn) {
+    if (capability === 'onoff' && value === this.#isOn) {
       return
     }
     this.clearSyncPlan()
     const alwaysOn: boolean = this.getSetting('always_on') as boolean
     if (capability === 'onoff') {
-      this.mode = value ? this.onMode : 'stop'
+      this.#mode = value ? this.onMode : 'stop'
     } else {
-      this.mode = value as Mode
+      this.#mode = value as Mode
     }
-    if (this.mode === 'stop' && alwaysOn) {
+    if (this.#mode === 'stop' && alwaysOn) {
       await this.setWarning(this.homey.__('warnings.always_on'))
       await this.setWarning(null)
-      this.mode = this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>
+      this.#mode = this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>
     }
     this.applySyncToDevice()
   }
 
-  applySyncToDevice(): void {
-    this.syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
+  private applySyncToDevice(): void {
+    this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncToDevice()
     }, 1000)
   }
 
-  clearSyncPlan(): void {
-    this.homey.clearTimeout(this.syncTimeout)
+  private clearSyncPlan(): void {
+    this.homey.clearTimeout(this.#syncTimeout)
     this.log('Sync has been paused')
   }
 
-  async syncToDevice(): Promise<void> {
+  private async syncToDevice(): Promise<void> {
     const success: boolean = await this.setDeviceMode()
     if (!success) {
-      this.mode = this.isOn
+      this.#mode = this.#isOn
         ? (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
         : 'stop'
     }
     await this.sync()
   }
 
-  async syncFromDevice(): Promise<void> {
+  private async syncFromDevice(): Promise<void> {
     const modeString: ModeString | null = await this.getDeviceMode()
-    this.mode =
+    this.#mode =
       modeString && modeString in modeFromString
         ? modeFromString[modeString]
         : 'stop'
     await this.sync()
   }
 
-  async sync(): Promise<void> {
+  private async sync(): Promise<void> {
     await this.updateCapabilities()
     this.planSyncFromDevice(60000)
   }
 
-  async updateCapabilities(): Promise<void> {
-    this.isOn = this.mode !== 'stop'
-    await this.setCapabilityValue('onoff', this.isOn)
-    await this.setCapabilityValue('mode', this.mode)
-    if (this.mode !== 'stop') {
-      await this.setStoreValue('previous_mode', this.mode)
+  private async updateCapabilities(): Promise<void> {
+    this.#isOn = this.#mode !== 'stop'
+    await this.setCapabilityValue('onoff', this.#isOn)
+    await this.setCapabilityValue('mode', this.#mode)
+    if (this.#mode !== 'stop') {
+      await this.setStoreValue('previous_mode', this.#mode)
     }
   }
 
-  planSyncFromDevice(ms: number): void {
+  private planSyncFromDevice(ms: number): void {
     this.clearSyncPlan()
-    this.syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
+    this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncFromDevice()
     }, ms)
     this.log('Next sync in', ms / 1000, 'second(s)')
