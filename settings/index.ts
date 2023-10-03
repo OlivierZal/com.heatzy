@@ -256,7 +256,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         .filter(
           (
             entry: [null] | [string, SettingValue],
-          ): entry is [string, SettingValue] => Boolean(entry[0]),
+          ): entry is [string, SettingValue] => entry[0] !== null,
         ),
     )
   }
