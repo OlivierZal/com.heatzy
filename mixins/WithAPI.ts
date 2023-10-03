@@ -16,7 +16,7 @@ type ApiClass = new (...args: any[]) => {
 
 export default function WithAPI<T extends ApiClass>(Base: T) {
   return class extends Base {
-    api: AxiosInstance
+    protected api: AxiosInstance
 
     private constructor(...args: any[]) {
       super(...args)

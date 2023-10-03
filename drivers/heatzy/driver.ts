@@ -11,11 +11,11 @@ import type {
 } from '../../types'
 
 export = class HeatzyDriver extends WithAPI(Driver) {
-  app!: HeatzyApp
+  #app!: HeatzyApp
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async onInit(): Promise<void> {
-    this.app = this.homey.app as HeatzyApp
+    this.#app = this.homey.app as HeatzyApp
 
     this.homey.flow
       .getConditionCard('mode_condition')
@@ -34,7 +34,7 @@ export = class HeatzyDriver extends WithAPI(Driver) {
   async onPair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
-      (data: LoginCredentials): Promise<boolean> => this.app.login(data),
+      (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
     )
     session.setHandler(
       'list_devices',
@@ -65,7 +65,7 @@ export = class HeatzyDriver extends WithAPI(Driver) {
   async onRepair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
-      (data: LoginCredentials): Promise<boolean> => this.app.login(data),
+      (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
     )
   }
 }
