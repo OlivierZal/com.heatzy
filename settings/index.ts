@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import type Homey from 'homey/lib/Homey'
-import {
-  type OnMode,
-  type DeviceSetting,
-  type DeviceSettings,
-  type DriverSetting,
-  type HomeySettings,
-  type LoginCredentials,
-  type LoginDriverSetting,
-  type Settings,
-  type SettingValue,
+import type {
+  OnMode,
+  DeviceSetting,
+  DeviceSettings,
+  DriverSetting,
+  HomeySettings,
+  LoginCredentials,
+  LoginDriverSetting,
+  Settings,
+  SettingValue,
 } from '../types'
 
 async function onHomeyReady(homey: Homey): Promise<void> {
@@ -243,7 +243,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         .map(
           (
             element: HTMLInputElement | HTMLSelectElement,
-          ): [string, SettingValue] | [null] => {
+          ): [null] | [string, SettingValue] => {
             const settingId: string = element.id.split('--')[0]
             const settingValue: SettingValue | null =
               processSettingValue(element)
@@ -255,8 +255,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         )
         .filter(
           (
-            entry: [string, SettingValue] | [null],
-          ): entry is [string, SettingValue] => !!entry[0],
+            entry: [null] | [string, SettingValue],
+          ): entry is [string, SettingValue] => Boolean(entry[0]),
         ),
     )
   }
@@ -292,7 +292,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  function addApplySettingsEventListener(elements: HTMLSelectElement[]) {
+  function addApplySettingsEventListener(elements: HTMLSelectElement[]): void {
     applySettingsElement.addEventListener('click', (): void => {
       let body: Settings = {}
       try {
@@ -335,7 +335,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       values && new Set(values).size === 1 ? String(values[0]) : ''
   }
 
-  function addRefreshSettingsEventListener(elements: HTMLSelectElement[]) {
+  function addRefreshSettingsEventListener(
+    elements: HTMLSelectElement[],
+  ): void {
     refreshSettingsElement.addEventListener('click', (): void => {
       disableButtons()
       elements.forEach(updateChildrenElement)
@@ -419,7 +421,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   async function load(): Promise<void> {
     generateChildrenElements()
-    if (!homeySettings.token) {
+    if (homeySettings.token === undefined) {
       needsAuthentication()
       return
     }

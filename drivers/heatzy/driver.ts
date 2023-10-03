@@ -1,7 +1,7 @@
 import { Driver } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import type PairSession from 'homey/lib/PairSession'
 import type HeatzyApp from '../../app'
-import WithAPI from '../../mixins/WithAPI'
+import withAPI from '../../mixins/withAPI'
 import type {
   Bindings,
   DeviceDetails,
@@ -10,11 +10,11 @@ import type {
   Mode,
 } from '../../types'
 
-export = class HeatzyDriver extends WithAPI(Driver) {
+export = class HeatzyDriver extends withAPI(Driver) {
   #app!: HeatzyApp
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  async onInit(): Promise<void> {
+  public async onInit(): Promise<void> {
     this.#app = this.homey.app as HeatzyApp
 
     this.homey.flow
@@ -31,14 +31,22 @@ export = class HeatzyDriver extends WithAPI(Driver) {
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  async onPair(session: PairSession): Promise<void> {
+  public async onPair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
-      (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
+      async (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
     )
     session.setHandler(
       'list_devices',
-      (): Promise<DeviceDetails[]> => this.discoverDevices(),
+      async (): Promise<DeviceDetails[]> => this.discoverDevices(),
+    )
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  public async onRepair(session: PairSession): Promise<void> {
+    session.setHandler(
+      'login',
+      async (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
     )
   }
 
@@ -46,7 +54,7 @@ export = class HeatzyDriver extends WithAPI(Driver) {
     try {
       const { data } = await this.api.get<Bindings>('/bindings')
       return data.devices.map(
-        /* eslint-disable camelcase */
+        /* eslint-disable camelcase, @typescript-eslint/naming-convention */
         ({ dev_alias, did, product_key }): DeviceDetails => ({
           name: dev_alias,
           data: {
@@ -54,18 +62,10 @@ export = class HeatzyDriver extends WithAPI(Driver) {
             productKey: product_key,
           },
         }),
-        /* eslint-enable camelcase */
+        /* eslint-enable camelcase, @typescript-eslint/naming-convention */
       )
     } catch (error: unknown) {
       return []
     }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async onRepair(session: PairSession): Promise<void> {
-    session.setHandler(
-      'login',
-      (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
-    )
   }
 }

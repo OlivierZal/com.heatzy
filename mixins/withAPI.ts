@@ -9,13 +9,19 @@ import axios, {
 import type { HomeySettings } from '../types'
 
 type ApiClass = new (...args: any[]) => {
+  homey: Homey
+  /* eslint-disable @typescript-eslint/method-signature-style */
   error(...errorArgs: any[]): void
   log(...logArgs: any[]): void
-  homey: Homey
+  /* eslint-enable @typescript-eslint/method-signature-style */
 }
 
-export default function WithAPI<T extends ApiClass>(Base: T) {
-  return class extends Base {
+/* eslint-disable-next-line
+  @typescript-eslint/explicit-function-return-type,
+  @typescript-eslint/explicit-module-boundary-types
+*/
+export default function withAPI<T extends ApiClass>(base: T) {
+  return class extends base {
     protected api: AxiosInstance
 
     private constructor(...args: any[]) {
@@ -24,17 +30,17 @@ export default function WithAPI<T extends ApiClass>(Base: T) {
       this.setupAxiosInterceptors()
     }
 
-    private setupAxiosInterceptors() {
+    private setupAxiosInterceptors(): void {
       this.api.interceptors.request.use(
         (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig =>
           this.handleRequest(config),
-        (error: AxiosError): Promise<AxiosError> =>
+        async (error: AxiosError): Promise<AxiosError> =>
           this.handleError('request', error),
       )
       this.api.interceptors.response.use(
         (response: AxiosResponse): AxiosResponse =>
           this.handleResponse(response),
-        (error: AxiosError): Promise<AxiosError> =>
+        async (error: AxiosError): Promise<AxiosError> =>
           this.handleError('response', error),
       )
     }
@@ -58,7 +64,7 @@ export default function WithAPI<T extends ApiClass>(Base: T) {
       return response
     }
 
-    private handleError(
+    private async handleError(
       type: 'request' | 'response',
       error: AxiosError,
     ): Promise<AxiosError> {

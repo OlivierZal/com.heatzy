@@ -3,27 +3,29 @@ import type HeatzyDevice from './drivers/heatzy/device'
 export type ModeNumber = 0 | 1 | 2 | 3
 export type ModeString =
   | 'cft'
+  | 'cft1'
+  | 'cft2'
   | 'eco'
   | 'fro'
   | 'stop'
-  | 'cft1'
-  | 'cft2'
-  | '舒适' // 'cft'
-  | '经济' // 'eco'
-  | '解冻' // 'fro'
   | '停止' // 'stop'
+  | '经济' // 'eco'
+  | '舒适' // 'cft'
+  | '解冻' // 'fro'
 
 export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
 
 export type OnMode = Exclude<Mode, 'stop'> | 'previous'
 
-export type CapabilityValue = boolean | Mode
+export type CapabilityValue = Mode | boolean
 
 type ValueOf<T> = T[keyof T]
 
 export interface Settings {
+  /* eslint-disable @typescript-eslint/naming-convention */
   readonly always_on?: boolean
   readonly on_mode?: OnMode
+  /* eslint-enable @typescript-eslint/naming-convention */
 }
 
 export type SettingValue = ValueOf<Settings>
@@ -32,6 +34,7 @@ export interface HomeySettings {
   readonly username: string | null
   readonly password: string | null
   readonly token: string | null
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   readonly expire_at: number | null
 }
 
@@ -107,19 +110,23 @@ export type DeviceSetting = Record<string, SettingValue[]>
 export type DeviceSettings = Record<string, DeviceSetting>
 
 export interface Data {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   readonly error_message?: string
 }
 
 export interface LoginDataSuccess {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   readonly expire_at: number
   readonly token: string
 }
 
 export interface Bindings {
   readonly devices: {
+    /* eslint-disable @typescript-eslint/naming-convention */
     readonly dev_alias: string
     readonly did: string
     readonly product_key: string
+    /* eslint-enable @typescript-eslint/naming-convention */
   }[]
 }
 
@@ -132,12 +139,12 @@ export interface DeviceDetails {
 }
 
 export type DevicePostData =
-  | { readonly raw: [1, 1, ModeNumber] }
   | {
       readonly attrs: {
         readonly mode: ModeNumber
       }
     }
+  | { readonly raw: [1, 1, ModeNumber] }
 
 export interface DeviceData {
   readonly attr: {

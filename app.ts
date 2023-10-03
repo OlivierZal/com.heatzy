@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios from 'axios'
-import WithAPI from './mixins/WithAPI'
+import withAPI from './mixins/withAPI'
 import type {
   Data,
   HomeySettings,
@@ -14,11 +14,41 @@ axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
 axios.defaults.headers.common['X-Gizwits-Application-Id'] =
   'c70a66ff039d41b4a220e198b0fcc8b3'
 
-export = class HeatzyApp extends WithAPI(App) {
+export = class HeatzyApp extends withAPI(App) {
   #loginTimeout!: NodeJS.Timeout
 
-  async onInit(): Promise<void> {
+  public async onInit(): Promise<void> {
     await this.refreshLogin()
+  }
+
+  public async login(postData: LoginCredentials): Promise<boolean> {
+    this.clearLoginRefresh()
+    try {
+      const { username, password } = postData
+      if (!username || !password) {
+        return false
+      }
+      const { data } = await this.api.post<LoginDataSuccess | Required<Data>>(
+        '/login',
+        postData,
+      )
+      if ('error_message' in data) {
+        throw new Error(data.error_message)
+      }
+      /* eslint-disable camelcase, @typescript-eslint/naming-convention */
+      const { token, expire_at } = data
+      this.setSettings({
+        token,
+        expire_at,
+        username,
+        password,
+      })
+      /* eslint-enable camelcase, @typescript-eslint/naming-convention */
+      await this.refreshLogin()
+      return true
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : String(error))
+    }
   }
 
   private async refreshLogin(): Promise<void> {
@@ -33,7 +63,7 @@ export = class HeatzyApp extends WithAPI(App) {
     const expiredAt: number | null = this.homey.settings.get(
       'expire_at',
     ) as HomeySettings['expire_at']
-    if (expiredAt) {
+    if (expiredAt !== null) {
       const expireAtDate: Date = new Date(expiredAt * 1000)
       expireAtDate.setDate(expireAtDate.getDate() - 1)
       const ms: number = expireAtDate.getTime() - new Date().getTime()
@@ -55,36 +85,6 @@ export = class HeatzyApp extends WithAPI(App) {
       await this.login(loginCredentials)
     } catch (error: unknown) {
       this.error(error instanceof Error ? error.message : error)
-    }
-  }
-
-  async login(postData: LoginCredentials): Promise<boolean> {
-    this.clearLoginRefresh()
-    try {
-      const { username, password } = postData
-      if (!username || !password) {
-        return false
-      }
-      const { data } = await this.api.post<LoginDataSuccess | Required<Data>>(
-        '/login',
-        postData,
-      )
-      if ('error_message' in data) {
-        throw new Error(data.error_message)
-      }
-      /* eslint-disable camelcase */
-      const { token, expire_at } = data
-      this.setSettings({
-        token,
-        expire_at,
-        username,
-        password,
-      })
-      /* eslint-enable camelcase */
-      await this.refreshLogin()
-      return true
-    } catch (error: unknown) {
-      throw new Error(error instanceof Error ? error.message : String(error))
     }
   }
 

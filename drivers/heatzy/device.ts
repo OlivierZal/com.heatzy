@@ -1,6 +1,6 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import addToLogs from '../../decorators/addToLogs'
-import WithAPI from '../../mixins/WithAPI'
+import withAPI from '../../mixins/withAPI'
 import type {
   CapabilityValue,
   Data,
@@ -40,12 +40,12 @@ function reverseMapping(
   )
 }
 
-const modeFromNumber: Record<ModeNumber, Mode> = {
-  0: 'cft',
-  1: 'eco',
-  2: 'fro',
-  3: 'stop',
-} as const
+const modeFromNumber: Record<ModeNumber, Mode> = [
+  'cft',
+  'eco',
+  'fro',
+  'stop',
+] as const
 
 const modeToNumber: Record<Mode, ModeNumber> = reverseMapping(
   modeFromNumber,
@@ -65,19 +65,8 @@ const modeFromString: Record<ModeString, Mode> = {
 } as const
 
 @addToLogs('getName()')
-class HeatzyDevice extends WithAPI(Device) {
+class HeatzyDevice extends withAPI(Device) {
   #onMode!: Exclude<Mode, 'stop'>
-
-  get onMode(): Exclude<Mode, 'stop'> {
-    return this.#onMode
-  }
-
-  set onMode(onModeSetting: OnMode) {
-    this.#onMode =
-      onModeSetting !== 'previous'
-        ? onModeSetting
-        : (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
-  }
 
   #id!: string
 
@@ -89,8 +78,19 @@ class HeatzyDevice extends WithAPI(Device) {
 
   #syncTimeout!: NodeJS.Timeout
 
-  async onInit(): Promise<void> {
-    if (!this.getStoreValue('previous_mode')) {
+  public get onMode(): Exclude<Mode, 'stop'> {
+    return this.#onMode
+  }
+
+  public set onMode(onModeSetting: OnMode) {
+    this.#onMode =
+      onModeSetting !== 'previous'
+        ? onModeSetting
+        : (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
+  }
+
+  public async onInit(): Promise<void> {
+    if (this.getStoreValue('previous_mode') === null) {
       await this.setStoreValue('previous_mode', 'eco')
     }
 
@@ -100,6 +100,69 @@ class HeatzyDevice extends WithAPI(Device) {
     this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
+  }
+
+  public async onCapability(
+    capability: string,
+    value: CapabilityValue,
+  ): Promise<void> {
+    if (capability === 'onoff' && value === this.#isOn) {
+      return
+    }
+    this.clearSyncPlan()
+    const alwaysOn: boolean = this.getSetting('always_on') as boolean
+    if (capability === 'onoff') {
+      this.#mode = value !== false ? this.onMode : 'stop'
+    } else {
+      this.#mode = value as Mode
+    }
+    if (this.#mode === 'stop' && alwaysOn) {
+      await this.setWarning(this.homey.__('warnings.always_on'))
+      await this.setWarning(null)
+      this.#mode = this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>
+    }
+    this.applySyncToDevice()
+  }
+
+  public async onSettings({
+    newSettings,
+    changedKeys,
+  }: {
+    newSettings: Settings
+    changedKeys: string[]
+  }): Promise<void> {
+    if (changedKeys.includes('on_mode')) {
+      this.onMode = newSettings.on_mode as Exclude<Mode, 'stop'>
+    }
+    if (
+      changedKeys.includes('always_on') &&
+      newSettings.always_on === true &&
+      this.getCapabilityValue('onoff') === false
+    ) {
+      await this.onCapability('onoff', true)
+    }
+  }
+
+  public onDeleted(): void {
+    this.clearSyncPlan()
+  }
+
+  public async setCapabilityValue(
+    capability: string,
+    value: CapabilityValue,
+  ): Promise<void> {
+    if (
+      !this.hasCapability(capability) ||
+      value === this.getCapabilityValue(capability)
+    ) {
+      return
+    }
+    try {
+      await super.setCapabilityValue(capability, value)
+      this.log('Capability', capability, 'is', value)
+    } catch (error: unknown) {
+      this.error(error instanceof Error ? error.message : error)
+    }
   }
 
   private async getDeviceMode(): Promise<ModeString | null> {
@@ -144,28 +207,6 @@ class HeatzyDevice extends WithAPI(Device) {
         )
       },
     )
-  }
-
-  async onCapability(
-    capability: string,
-    value: CapabilityValue,
-  ): Promise<void> {
-    if (capability === 'onoff' && value === this.#isOn) {
-      return
-    }
-    this.clearSyncPlan()
-    const alwaysOn: boolean = this.getSetting('always_on') as boolean
-    if (capability === 'onoff') {
-      this.#mode = value ? this.onMode : 'stop'
-    } else {
-      this.#mode = value as Mode
-    }
-    if (this.#mode === 'stop' && alwaysOn) {
-      await this.setWarning(this.homey.__('warnings.always_on'))
-      await this.setWarning(null)
-      this.#mode = this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>
-    }
-    this.applySyncToDevice()
   }
 
   private applySyncToDevice(): void {
@@ -218,47 +259,6 @@ class HeatzyDevice extends WithAPI(Device) {
       await this.syncFromDevice()
     }, ms)
     this.log('Next sync in', ms / 1000, 'second(s)')
-  }
-
-  async onSettings({
-    newSettings,
-    changedKeys,
-  }: {
-    newSettings: Settings
-    changedKeys: string[]
-  }): Promise<void> {
-    if (changedKeys.includes('on_mode')) {
-      this.onMode = newSettings.on_mode as Exclude<Mode, 'stop'>
-    }
-    if (
-      changedKeys.includes('always_on') &&
-      newSettings.always_on &&
-      !this.getCapabilityValue('onoff')
-    ) {
-      await this.onCapability('onoff', true)
-    }
-  }
-
-  onDeleted(): void {
-    this.clearSyncPlan()
-  }
-
-  async setCapabilityValue(
-    capability: string,
-    value: CapabilityValue,
-  ): Promise<void> {
-    if (
-      !this.hasCapability(capability) ||
-      value === this.getCapabilityValue(capability)
-    ) {
-      return
-    }
-    try {
-      await super.setCapabilityValue(capability, value)
-      this.log('Capability', capability, 'is', value)
-    } catch (error: unknown) {
-      this.error(error instanceof Error ? error.message : error)
-    }
   }
 }
 
