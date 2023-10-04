@@ -22,10 +22,8 @@ export type CapabilityValue = Mode | boolean
 type ValueOf<T> = T[keyof T]
 
 export interface Settings {
-  /* eslint-disable @typescript-eslint/naming-convention */
   readonly always_on?: boolean
   readonly on_mode?: OnMode
-  /* eslint-enable @typescript-eslint/naming-convention */
 }
 
 export type SettingValue = ValueOf<Settings>
@@ -34,7 +32,6 @@ export interface HomeySettings {
   readonly username: string | null
   readonly password: string | null
   readonly token: string | null
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   readonly expire_at: number | null
 }
 
@@ -110,23 +107,19 @@ export type DeviceSetting = Record<string, SettingValue[]>
 export type DeviceSettings = Record<string, DeviceSetting>
 
 export interface Data {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   readonly error_message?: string
 }
 
 export interface LoginDataSuccess {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   readonly expire_at: number
   readonly token: string
 }
 
 export interface Bindings {
   readonly devices: {
-    /* eslint-disable @typescript-eslint/naming-convention */
     readonly dev_alias: string
     readonly did: string
     readonly product_key: string
-    /* eslint-enable @typescript-eslint/naming-convention */
   }[]
 }
 

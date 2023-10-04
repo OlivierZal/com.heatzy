@@ -54,7 +54,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
     try {
       const { data } = await this.api.get<Bindings>('/bindings')
       return data.devices.map(
-        /* eslint-disable camelcase, @typescript-eslint/naming-convention */
+        /* eslint-disable camelcase */
         ({ dev_alias, did, product_key }): DeviceDetails => ({
           name: dev_alias,
           data: {
@@ -62,7 +62,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
             productKey: product_key,
           },
         }),
-        /* eslint-enable camelcase, @typescript-eslint/naming-convention */
+        /* eslint-enable camelcase */
       )
     } catch (error: unknown) {
       return []
