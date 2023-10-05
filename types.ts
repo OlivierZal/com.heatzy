@@ -3,8 +3,10 @@ import type HeatzyDevice from './drivers/heatzy/device'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface Loggable {
-  error: (...errorArgs: any[]) => void
-  log: (...logArgs: any[]) => void
+  /* eslint-disable @typescript-eslint/method-signature-style */
+  error(...errorArgs: any[]): void
+  log(...logArgs: any[]): void
+  /* eslint-enable @typescript-eslint/method-signature-style */
 }
 
 export type LogClass = new (...args: any[]) => Loggable
