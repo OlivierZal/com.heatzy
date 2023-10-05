@@ -20,7 +20,6 @@ export default function addToLogs<T extends LogClass>(...logs: string[]) {
       }
 
       private commonLog(logType: 'error' | 'log', ...args: any[]): void {
-        /* eslint-disable @typescript-eslint/no-unsafe-argument */
         super[logType](
           ...logs.flatMap((log: string): [any, '-'] => {
             if (log.endsWith('()')) {
