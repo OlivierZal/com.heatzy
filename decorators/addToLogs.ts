@@ -1,3 +1,7 @@
+/* eslint-disable
+  @typescript-eslint/no-explicit-any,
+  @typescript-eslint/no-unsafe-argument
+*/
 import type { LogClass } from '../types'
 
 export default function addToLogs<T extends LogClass>(...logs: string[]) {
@@ -7,19 +11,14 @@ export default function addToLogs<T extends LogClass>(...logs: string[]) {
   */
   return function actualDecorator(target: T, context: ClassDecoratorContext) {
     class LogsDecorator extends target {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      public error(...args: any[]): void {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      public error = (...args: any[]): void => {
         this.commonLog('error', ...args)
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      public log(...args: any[]): void {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      public log = (...args: any[]): void => {
         this.commonLog('log', ...args)
       }
 
-      /* eslint-disable @typescript-eslint/no-explicit-any */
       private commonLog(logType: 'error' | 'log', ...args: any[]): void {
         /* eslint-disable @typescript-eslint/no-unsafe-argument */
         super[logType](
@@ -40,10 +39,8 @@ export default function addToLogs<T extends LogClass>(...logs: string[]) {
           }),
           ...args,
         )
-        /* eslint-enable @typescript-eslint/no-unsafe-argument */
       }
     }
-    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     Object.defineProperty(LogsDecorator, 'name', {
       value: context.name,

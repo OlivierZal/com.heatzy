@@ -1,26 +1,18 @@
 import type Homey from 'homey/lib/Homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface Loggable {
-  /* eslint-disable
-    @typescript-eslint/method-signature-style,
-    @typescript-eslint/no-explicit-any
-  */
-  error(...errorArgs: any[]): void
-  log(...logArgs: any[]): void
-  /* eslint-enable
-    @typescript-eslint/method-signature-style,
-    @typescript-eslint/no-explicit-any
-  */
+  error: (...errorArgs: any[]) => void
+  log: (...logArgs: any[]) => void
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type LogClass = new (...args: any[]) => Loggable
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type HomeyClass = new (...args: any[]) => Loggable & {
   homey: Homey
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export type ModeNumber = 0 | 1 | 2 | 3
 export type ModeString =
