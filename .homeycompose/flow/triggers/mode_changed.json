@@ -1,0 +1,21 @@
+{
+  "filter": "driver_ids=heatzy|heatzy_1",
+  "title": {
+    "en": "The mode has changed",
+    "fr": "Le mode a changé"
+  },
+  "tokens": [
+    {
+      "name": "mode",
+      "type": "string",
+      "title": {
+        "en": "Mode",
+        "fr": "Mode"
+      },
+      "example": {
+        "en": "Eco",
+        "fr": "Éco"
+      }
+    }
+  ]
+}

@@ -1,76 +1,45 @@
 {
+  "$extends": ["defaults"],
   "name": {
     "en": "Heatzy Pilote",
     "fr": "Heatzy Pilote"
   },
-  "capabilities": ["onoff", "mode"],
-  "class": "fan",
-  "images": {
-    "large": "/drivers/heatzy/assets/images/large.png",
-    "small": "/drivers/heatzy/assets/images/small.png"
-  },
-  "pair": [
-    {
-      "id": "login",
-      "template": "login_credentials",
-      "navigation": {
-        "next": "list_devices"
-      },
-      "options": {
-        "logo": "logo.png",
-        "usernameLabel": {
-          "en": "Username",
-          "fr": "Nom d'utilisateur"
-        },
-        "usernamePlaceholder": {
-          "en": "user@domain.com",
-          "fr": "utilisateur@domain.fr"
-        },
-        "passwordLabel": {
-          "en": "Password",
-          "fr": "Mot de passe"
-        },
-        "passwordPlaceholder": {
-          "en": "P4ssw0rd",
-          "fr": "P4ssw0rd"
-        }
-      }
-    },
-    {
-      "id": "list_devices",
-      "template": "list_devices",
-      "navigation": {
-        "next": "add_devices"
-      }
-    },
-    {
-      "id": "add_devices",
-      "template": "add_devices"
-    }
+  "capabilities": [
+    "mode",
+    "onoff",
+    "onoff.boost",
+    "onoff.timer",
+    "holiday_remaining",
+    "locked"
   ],
-  "repair": [
-    {
-      "id": "login",
-      "template": "login_credentials",
-      "options": {
-        "logo": "logo.png",
-        "usernameLabel": {
-          "en": "Username",
-          "fr": "Nom d'utilisateur"
-        },
-        "usernamePlaceholder": {
-          "en": "user@domain.com",
-          "fr": "utilisateur@domain.fr"
-        },
-        "passwordLabel": {
-          "en": "Password",
-          "fr": "Mot de passe"
-        },
-        "passwordPlaceholder": {
-          "en": "P4ssw0rd",
-          "fr": "P4ssw0rd"
-        }
+  "capabilitiesOptions": {
+    "onoff.boost": {
+      "title": {
+        "en": "Boost",
+        "fr": "Boost"
+      },
+      "insightsTitleTrue": {
+        "en": "Boosted",
+        "fr": "Boost activé"
+      },
+      "insightsTitleFalse": {
+        "en": "Unboosted",
+        "fr": "Boost désactivé"
+      }
+    },
+    "onoff.timer": {
+      "title": {
+        "en": "Timer",
+        "fr": "Programmateur"
+      },
+      "insightsTitleTrue": {
+        "en": "Scheduled",
+        "fr": "Programmation activé"
+      },
+      "insightsTitleFalse": {
+        "en": "Unscheduled",
+        "fr": "Programmation désactivé"
       }
     }
-  ]
+  }
 }
