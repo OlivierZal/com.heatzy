@@ -158,16 +158,15 @@ export interface BaseAttrs {
   readonly derog_time?: number
 }
 
+export interface FirstGenDevicePostData {
+  readonly raw: [1, 1, ModeNumber]
+}
+
 export interface DevicePostData {
   readonly attrs: BaseAttrs
 }
-
 export interface DeviceData {
   readonly attr: Omit<BaseAttrs, 'mode'> & { readonly mode: ModeString }
-}
-
-export interface FirstGenDevicePostData {
-  readonly raw: [1, 1, ModeNumber]
 }
 
 export type CommonDevicePostData = DevicePostData | FirstGenDevicePostData
