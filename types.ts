@@ -165,11 +165,10 @@ export interface FirstGenDevicePostData {
 export interface DevicePostData {
   readonly attrs: BaseAttrs
 }
+
 export interface DeviceData {
   readonly attr: Omit<BaseAttrs, 'mode'> & { readonly mode: ModeString }
 }
-
-export type CommonDevicePostData = DevicePostData | FirstGenDevicePostData
 
 export interface FlowArgs {
   readonly device: BaseHeatzyDevice
