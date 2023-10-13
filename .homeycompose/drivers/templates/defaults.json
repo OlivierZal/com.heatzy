@@ -1,0 +1,72 @@
+{
+  "images": {
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "small": "{{driverAssetsPath}}/images/small.png"
+  },
+  "icon": "{{driverAssetsPath}}/icon.svg",
+  "class": "fan",
+  "pair": [
+    {
+      "id": "login",
+      "template": "login_credentials",
+      "navigation": {
+        "next": "list_devices"
+      },
+      "options": {
+        "logo": "logo.png",
+        "usernameLabel": {
+          "en": "Username",
+          "fr": "Nom d'utilisateur"
+        },
+        "usernamePlaceholder": {
+          "en": "user@domain.com",
+          "fr": "utilisateur@domain.fr"
+        },
+        "passwordLabel": {
+          "en": "Password",
+          "fr": "Mot de passe"
+        },
+        "passwordPlaceholder": {
+          "en": "P4ssw0rd",
+          "fr": "P4ssw0rd"
+        }
+      }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "repair": [
+    {
+      "id": "login",
+      "template": "login_credentials",
+      "options": {
+        "logo": "logo.png",
+        "usernameLabel": {
+          "en": "Username",
+          "fr": "Nom d'utilisateur"
+        },
+        "usernamePlaceholder": {
+          "en": "user@domain.com",
+          "fr": "utilisateur@domain.fr"
+        },
+        "passwordLabel": {
+          "en": "Password",
+          "fr": "Mot de passe"
+        },
+        "passwordPlaceholder": {
+          "en": "P4ssw0rd",
+          "fr": "P4ssw0rd"
+        }
+      }
+    }
+  ]
+}

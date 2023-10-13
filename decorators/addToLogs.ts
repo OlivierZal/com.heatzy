@@ -9,7 +9,7 @@ export default function addToLogs<T extends LogClass>(...logs: string[]) {
     target: T,
     context: ClassDecoratorContext<T>,
   ): T {
-    class LogsDecorator extends target {
+    abstract class LogsDecorator extends target {
       public error(...args: any[]): void {
         this.commonLog('error', ...args)
       }

@@ -1,123 +1,17 @@
 {
   "triggers": [
     {
-      "id": "mode_changed",
-      "title": {
-        "en": "The mode has changed",
-        "fr": "Le mode a changé"
-      },
-      "tokens": [
-        {
-          "name": "mode",
-          "type": "string",
-          "title": {
-            "en": "Mode",
-            "fr": "Mode"
-          },
-          "example": {
-            "en": "Eco",
-            "fr": "Éco"
-          }
-        }
-      ]
+      "$extends": "mode_changed"
     }
   ],
   "conditions": [
     {
-      "id": "mode_condition",
-      "title": {
-        "en": "The mode !{{is|is not}}",
-        "fr": "Le mode !{{est|n'est pas}}"
-      },
-      "titleFormatted": {
-        "en": "The mode !{{is|is not}} [[mode]]",
-        "fr": "Le mode !{{est|n'est pas}} [[mode]]"
-      },
-      "args": [
-        {
-          "name": "mode",
-          "type": "dropdown",
-          "values": [
-            {
-              "id": "cft",
-              "title": {
-                "en": "Comfort",
-                "fr": "Confort"
-              }
-            },
-            {
-              "id": "eco",
-              "title": {
-                "en": "Eco",
-                "fr": "Éco"
-              }
-            },
-            {
-              "id": "fro",
-              "title": {
-                "en": "Anti-frost",
-                "fr": "Anti-gel"
-              }
-            },
-            {
-              "id": "stop",
-              "title": {
-                "en": "Off",
-                "fr": "Désactivé"
-              }
-            }
-          ]
-        }
-      ]
+      "$extends": "mode_condition"
     }
   ],
   "actions": [
     {
-      "id": "mode_action",
-      "title": {
-        "en": "Set the mode",
-        "fr": "Définir le mode"
-      },
-      "titleFormatted": {
-        "en": "Set the mode to [[mode]]",
-        "fr": "Définir le mode à [[mode]]"
-      },
-      "args": [
-        {
-          "name": "mode",
-          "type": "dropdown",
-          "values": [
-            {
-              "id": "cft",
-              "title": {
-                "en": "Comfort",
-                "fr": "Confort"
-              }
-            },
-            {
-              "id": "eco",
-              "title": {
-                "en": "Eco",
-                "fr": "Éco"
-              }
-            },
-            {
-              "id": "fro",
-              "title": {
-                "en": "Anti-frost",
-                "fr": "Anti-gel"
-              }
-            },
-            {
-              "id": "stop",
-              "title": {
-                "en": "Off",
-                "fr": "Désactivé"
-              }
-            }
-          ]
-        }
-      ]
+      "$extends": "mode_action"
     }
   ]
 }

@@ -1,0 +1,46 @@
+{
+  "title": {
+    "en": "The mode !{{is|is not}}",
+    "fr": "Le mode !{{est|n'est pas}}"
+  },
+  "titleFormatted": {
+    "en": "The mode !{{is|is not}} [[mode]]",
+    "fr": "Le mode !{{est|n'est pas}} [[mode]]"
+  },
+  "args": [
+    {
+      "name": "mode",
+      "type": "dropdown",
+      "values": [
+        {
+          "id": "cft",
+          "title": {
+            "en": "Comfort",
+            "fr": "Confort"
+          }
+        },
+        {
+          "id": "eco",
+          "title": {
+            "en": "Eco",
+            "fr": "Éco"
+          }
+        },
+        {
+          "id": "fro",
+          "title": {
+            "en": "Anti-frost",
+            "fr": "Anti-gel"
+          }
+        },
+        {
+          "id": "stop",
+          "title": {
+            "en": "Off",
+            "fr": "Désactivé"
+          }
+        }
+      ]
+    }
+  ]
+}

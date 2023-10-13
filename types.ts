@@ -1,5 +1,5 @@
 import type Homey from 'homey/lib/Homey'
-import type HeatzyDevice from './drivers/heatzy/device'
+import type BaseHeatzyDevice from './bases/device'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface Loggable {
@@ -9,10 +9,10 @@ interface Loggable {
   /* eslint-enable @typescript-eslint/method-signature-style */
 }
 
-export type LogClass = new (...args: any[]) => Loggable
+export type LogClass = abstract new (...args: any[]) => Loggable
 
 export type HomeyClass = new (...args: any[]) => Loggable & {
-  homey: Homey
+  readonly homey: Homey
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
@@ -33,7 +33,7 @@ export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
 
 export type OnMode = Exclude<Mode, 'stop'> | 'previous'
 
-export type CapabilityValue = Mode | boolean
+export type CapabilityValue = boolean | number | string
 
 type ValueOf<T> = T[keyof T]
 
@@ -147,21 +147,30 @@ export interface DeviceDetails {
   readonly name: string
 }
 
-export type DevicePostData =
-  | {
-      readonly attrs: {
-        readonly mode: ModeNumber
-      }
-    }
-  | { readonly raw: [1, 1, ModeNumber] }
+export type Switch = 0 | 1
+
+export interface BaseAttrs {
+  readonly mode?: ModeNumber
+  readonly boost_switch?: Switch
+  readonly lock_switch?: Switch
+  readonly timer_switch?: Switch
+  readonly derog_mode?: Switch
+  readonly derog_time?: number
+}
+
+export interface FirstGenDevicePostData {
+  readonly raw: [1, 1, ModeNumber]
+}
+
+export interface DevicePostData {
+  readonly attrs: BaseAttrs
+}
 
 export interface DeviceData {
-  readonly attr: {
-    readonly mode: ModeString
-  }
+  readonly attr: Omit<BaseAttrs, 'mode'> & { readonly mode: ModeString }
 }
 
 export interface FlowArgs {
-  readonly device: HeatzyDevice
+  readonly device: BaseHeatzyDevice
   readonly mode: Mode
 }
