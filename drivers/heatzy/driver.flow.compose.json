@@ -1,0 +1,17 @@
+{
+  "triggers": [
+    {
+      "$extends": "mode_changed"
+    }
+  ],
+  "conditions": [
+    {
+      "$extends": "mode_condition"
+    }
+  ],
+  "actions": [
+    {
+      "$extends": "mode_action"
+    }
+  ]
+}
