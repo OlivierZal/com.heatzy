@@ -245,9 +245,6 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
     capability: string,
     value: CapabilityValue,
   ): Promise<Mode | null> {
-    if (capability === 'onoff' && value === this.getCapabilityValue('onoff')) {
-      return null
-    }
     let mode: Mode | null = null
     const alwaysOn: boolean = this.getSetting('always_on') as boolean
     if (capability === 'onoff') {
