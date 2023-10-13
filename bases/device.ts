@@ -206,9 +206,10 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
     if (mode !== undefined) {
       const newMode: Mode =
         typeof mode === 'string' ? modeFromString[mode] : modeFromNumber[mode]
-      await this.setCapabilityValue('onoff', newMode !== 'stop')
+      const isOn: boolean = newMode !== 'stop'
+      await this.setCapabilityValue('onoff', isOn)
       await this.setCapabilityValue('mode', newMode)
-      if (newMode !== 'stop') {
+      if (isOn) {
         await this.setStoreValue('previous_mode', newMode)
       }
     }
