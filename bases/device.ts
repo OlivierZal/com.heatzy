@@ -72,11 +72,11 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
     return this.#onMode
   }
 
-  private set onMode(onModeSetting: OnMode) {
+  private set onMode(value: OnMode) {
     this.#onMode =
-      onModeSetting === 'previous'
+      value === 'previous'
         ? (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
-        : onModeSetting
+        : value
   }
 
   public async onInit(): Promise<void> {
