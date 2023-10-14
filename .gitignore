@@ -6,5 +6,4 @@
 /locales/*
 !/locales/.keep
 /node_modules/
-/app.json
 /env.json
