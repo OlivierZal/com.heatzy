@@ -1,6 +1,10 @@
-/env.json
-/node_modules/
 /.homeybuild/
 !/.vscode
 /.vscode/*
 !/.vscode/settings.json
+!/locales
+/locales/*
+!/locales/.keep
+/node_modules/
+/app.json
+/env.json
