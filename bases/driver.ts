@@ -21,7 +21,7 @@ export default abstract class BaseHeatzyDriver extends withAPI(Driver) {
 
   // eslint-disable-next-line @typescript-eslint/require-await
   public async onInit(): Promise<void> {
-    this.#app = this.homey.app as HeatzyApp
+    this.#app =     this.homey.app as HeatzyApp
 
     this.homey.flow
       .getConditionCard('mode_condition')
