@@ -2,9 +2,7 @@
 !/.vscode
 /.vscode/*
 !/.vscode/settings.json
-!/locales
-/locales/*
-!/locales/.keep
+/locales/
 /node_modules/
 /app.json
 /env.json
