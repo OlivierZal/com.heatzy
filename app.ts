@@ -17,7 +17,7 @@ axios.defaults.headers.common['X-Gizwits-Application-Id'] =
 export = class HeatzyApp extends withAPI(App) {
   #loginTimeout!: NodeJS.Timeout
 
-  public async  onInit(): Promise<void> {
+  public async onInit(): Promise<void> {
     await this.refreshLogin()
   }
 
