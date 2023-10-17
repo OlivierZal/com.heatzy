@@ -15,7 +15,7 @@ export = class HeatzyDevice extends BaseHeatzyDevice {
     postData: DevicePostData,
   ): Promise<void> {
     if (success) {
-      await  this.updateCapabilities(postData.attrs)
+      await this.updateCapabilities(postData.attrs)
     }
   }
 }
