@@ -117,9 +117,19 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     },
   )
 
-  const driverSettings: DriverSetting[] = driverSettingsAll.filter(
-    (setting: DriverSetting) => setting.groupId !== 'login',
-  )
+  const driverSettingsCommon: DriverSetting[] = driverSettingsAll.reduce<
+    DriverSetting[]
+  >((acc, setting: DriverSetting) => {
+    if (setting.groupId === 'login') {
+      return acc
+    }
+    if (setting.groupId === 'options') {
+      if (!acc.some((option: DriverSetting) => option.id === setting.id)) {
+        acc.push(setting)
+      }
+    }
+    return acc
+  }, [])
 
   const applySettingsElement: HTMLButtonElement = document.getElementById(
     'apply-settings',
@@ -326,7 +336,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     })
   }
 
-  function updateChildrenElement(element: HTMLSelectElement): void {
+  function updateCommonChildrenElement(element: HTMLSelectElement): void {
     const values: SettingValue[] | undefined = flatDeviceSettings[
       element.id.split('--')[0]
     ] as SettingValue[] | undefined
@@ -340,7 +350,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   ): void {
     refreshSettingsElement.addEventListener('click', (): void => {
       disableButtons()
-      elements.forEach(updateChildrenElement)
+      elements.forEach(updateCommonChildrenElement)
       enableButtons()
     })
   }
@@ -350,8 +360,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     addRefreshSettingsEventListener(elements)
   }
 
-  function generateChildrenElements(): void {
-    driverSettings
+  function generateCommonChildrenElements(): void {
+    driverSettingsCommon
       .filter((setting: DriverSetting) =>
         ['checkbox', 'dropdown'].includes(setting.type),
       )
@@ -381,7 +391,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           }
           selectElement.appendChild(optionElement)
         })
-        updateChildrenElement(selectElement)
+        updateCommonChildrenElement(selectElement)
         divElement.appendChild(labelElement)
         divElement.appendChild(selectElement)
         settingsElement.appendChild(divElement)
@@ -420,7 +430,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   async function load(): Promise<void> {
-    generateChildrenElements()
+    generateCommonChildrenElements()
     if (homeySettings.token === undefined) {
       needsAuthentication()
       return
