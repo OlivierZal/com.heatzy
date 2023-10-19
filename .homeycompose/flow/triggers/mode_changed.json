@@ -12,9 +12,16 @@
         "fr": "Mode"
       },
       "example": {
-        "en": "Eco",
-        "fr": "Éco"
+        "en": "eco",
+        "fr": "eco"
       }
+    }
+  ],
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=heatzy|heatzy_1"
     }
   ]
 }
