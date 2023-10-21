@@ -154,7 +154,7 @@ export interface BaseAttrs {
   readonly boost_switch?: Switch
   readonly lock_switch?: Switch
   readonly timer_switch?: Switch
-  readonly derog_mode?: Switch
+  readonly derog_mode?: 0 | 1 | 2
   readonly derog_time?: number
 }
 

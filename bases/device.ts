@@ -113,6 +113,13 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
             boost_switch: booleanToSwitch(value as boolean),
           },
         })
+        await this.setDeviceData({
+          attrs: {
+            derog_mode: (this.getCapabilityValue('onoff.boost') as boolean)
+              ? 2
+              : 0,
+          },
+        })
         break
       case 'locked':
         await this.setDeviceData({
@@ -136,11 +143,11 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
         })
         await this.setDeviceData({
           attrs: {
-            derog_mode: booleanToSwitch(
-              Boolean(
-                Number(this.getCapabilityValue('vacation_remaining_days')),
-              ),
-            ),
+            derog_mode: Number(
+              this.getCapabilityValue('vacation_remaining_days'),
+            )
+              ? 1
+              : 0,
           },
         })
         break
@@ -216,7 +223,13 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
       }
     }
     if (boost_switch !== undefined) {
-      await this.setCapabilityValue('onoff.boost', Boolean(boost_switch))
+      await this.setCapabilityValue(
+        'onoff.boost',
+        Boolean(
+          derog_mode === undefined || derog_mode === 2 ? boost_switch : 0,
+        ),
+      )
+      await this.setCapabilityValue('vacation_remaining_days', String(0))
     }
     if (lock_switch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lock_switch))
@@ -235,10 +248,24 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
 
   private async handleCapabilities(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    await (this.driver.manifest.capabilities as string[]).reduce<Promise<void>>(
+    const capabilities: string[] = this.driver.manifest.capabilities as string[]
+    await this.getCapabilities().reduce<Promise<void>>(
       async (acc, capability: string) => {
         await acc
-        return this.addCapability(capability)
+        if (!capabilities.includes(capability)) {
+          return this.removeCapability(capability)
+        }
+        return Promise.resolve()
+      },
+      Promise.resolve(),
+    )
+    await capabilities.reduce<Promise<void>>(
+      async (acc, capability: string) => {
+        await acc
+        if (!this.hasCapability(capability)) {
+          return this.addCapability(capability)
+        }
+        return Promise.resolve()
       },
       Promise.resolve(),
     )
