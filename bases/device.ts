@@ -128,7 +128,7 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
           },
         })
         break
-      case 'holiday_remaining':
+      case 'vacation_remaining_days':
         await this.setDeviceData({
           attrs: {
             derog_time: Number(value),
@@ -137,7 +137,9 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
         await this.setDeviceData({
           attrs: {
             derog_mode: booleanToSwitch(
-              Boolean(Number(this.getCapabilityValue('holiday_remaining'))),
+              Boolean(
+                Number(this.getCapabilityValue('vacation_remaining_days')),
+              ),
             ),
           },
         })
@@ -224,7 +226,7 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
     }
     if (derog_time !== undefined) {
       await this.setCapabilityValue(
-        'holiday_remaining',
+        'vacation_remaining_days',
         String(derog_mode === undefined || derog_mode === 1 ? derog_time : 0),
       )
     }

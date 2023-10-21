@@ -9,7 +9,7 @@
     "onoff",
     "onoff.boost",
     "onoff.timer",
-    "holiday_remaining",
+    "vacation_remaining_days",
     "locked"
   ],
   "capabilitiesOptions": {
