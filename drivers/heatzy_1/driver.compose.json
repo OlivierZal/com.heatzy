@@ -1,8 +1,0 @@
-{
-  "$extends": ["defaults"],
-  "name": {
-    "en": "Heatzy Pilote 1st Generation",
-    "fr": "Heatzy Pilote 1re génération"
-  },
-  "capabilities": ["mode", "onoff"]
-}

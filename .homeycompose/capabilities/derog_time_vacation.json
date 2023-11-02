@@ -4,7 +4,7 @@
     "en": "Number of vacation days",
     "fr": "Nombre de jours de vacances"
   },
-  "getable": false,
+  "getable": true,
   "setable": true,
   "uiComponent": "picker",
   "values": [

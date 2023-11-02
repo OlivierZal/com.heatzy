@@ -11,7 +11,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=heatzy|heatzy_1&capabilities=mode"
+      "filter": "driver_id=heatzy&capabilities=mode"
     },
     {
       "name": "mode",

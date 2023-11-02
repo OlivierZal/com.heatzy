@@ -1,5 +1,5 @@
 import type Homey from 'homey/lib/Homey'
-import type BaseHeatzyDevice from './bases/device'
+import type BaseHeatzyDevice from './drivers/heatzy/device'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface Loggable {

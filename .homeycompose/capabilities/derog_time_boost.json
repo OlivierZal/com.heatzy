@@ -4,7 +4,7 @@
     "en": "Boost duration",
     "fr": "Durée de boost"
   },
-  "getable": false,
+  "getable": true,
   "setable": true,
   "uiComponent": "picker",
   "values": [
