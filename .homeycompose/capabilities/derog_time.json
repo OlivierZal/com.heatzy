@@ -1,8 +1,8 @@
 {
   "type": "string",
   "title": {
-    "en": "Remaining derogation duration",
-    "fr": "Durée de dérogation restante"
+    "en": "Derogation time",
+    "fr": "Temps de dérogation"
   },
   "getable": true,
   "setable": false,

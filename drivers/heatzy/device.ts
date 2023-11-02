@@ -102,7 +102,7 @@ class HeatzyDevice extends withAPI(Device) {
     this.#productName = productName
     this.#mode =
       this.#productName === undefined || this.#productName === 'Pilote_SoC'
-        ? this.#mode
+        ? 'mode'
         : 'mode_3'
     this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
@@ -130,8 +130,8 @@ class HeatzyDevice extends withAPI(Device) {
         if (value !== '0') {
           derog_time =
             value === '2'
-              ? Number(this.getCapabilityValue('derog_time_vacation'))
-              : Number(this.getCapabilityValue('derog_time_boost'))
+              ? Number(this.getCapabilityValue('derog_time_boost'))
+              : Number(this.getCapabilityValue('derog_time_vacation'))
         }
         postData = {
           attrs: {

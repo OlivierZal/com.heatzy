@@ -80,16 +80,22 @@ export = class HeatzyDriver extends withAPI(Driver) {
   }
 
   private registerFlowListeners(): void {
-    this.homey.flow
-      .getConditionCard('mode_condition')
-      .registerRunListener(
-        (args: FlowArgs): boolean =>
-          args.mode === (args.device.getCapabilityValue('mode') as Mode),
-      )
-    this.homey.flow
-      .getActionCard('mode_action')
-      .registerRunListener(async (args: FlowArgs): Promise<void> => {
-        await args.device.onCapability('mode', args.mode)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ;(this.manifest.capabilities as string[])
+      .filter((capability: string) => capability.startsWith('mode'))
+      .forEach((capability: string): void => {
+        this.homey.flow
+          .getConditionCard('mode_condition')
+          .registerRunListener(
+            (args: FlowArgs): boolean =>
+              args.mode ===
+              (args.device.getCapabilityValue(capability) as Mode),
+          )
+        this.homey.flow
+          .getActionCard('mode_action')
+          .registerRunListener(async (args: FlowArgs): Promise<void> => {
+            await args.device.onCapability(capability, args.mode)
+          })
       })
   }
 }

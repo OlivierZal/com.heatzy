@@ -7,8 +7,8 @@
   "capabilities": [
     "derog_mode",
     "derog_time",
-    "derog_time_boost",
     "derog_time_vacation",
+    "derog_time_boost",
     "mode",
     "mode_3",
     "onoff",
