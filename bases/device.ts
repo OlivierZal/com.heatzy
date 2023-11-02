@@ -39,12 +39,14 @@ const modeFromNumber: Record<ModeNumber, Mode> = [
   'eco',
   'fro',
   'stop',
+  'cft1',
+  'cft2',
 ] as const
 
 const modeFromString: Record<ModeString, Mode> = {
   cft: 'cft',
-  cft1: 'cft',
-  cft2: 'cft',
+  cft1: 'cft1',
+  cft2: 'cft2',
   舒适: 'cft',
   eco: 'eco',
   经济: 'eco',
@@ -62,9 +64,13 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
     modeFromNumber,
   ) as Record<Mode, ModeNumber>
 
-  #onMode!: Exclude<Mode, 'stop'>
-
   #id!: string
+
+  #productName!: string | undefined
+
+  #mode!: 'mode_3' | 'mode'
+
+  #onMode!: Exclude<Mode, 'stop'>
 
   #syncTimeout!: NodeJS.Timeout
 
@@ -86,75 +92,85 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
       await this.setStoreValue('previous_mode', 'eco')
     }
 
-    const { id } = this.getData() as DeviceDetails['data']
+    const { id, productName } = this.getData() as DeviceDetails['data']
     this.#id = id
+    this.#productName = productName
+    this.#mode =
+      this.#productName === undefined || this.#productName === 'Pilote_SoC'
+        ? this.#mode
+        : 'mode_3'
     this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
 
+  /* eslint-disable camelcase */
   public async onCapability(
     capability: string,
     value: CapabilityValue,
   ): Promise<void> {
     this.clearSyncPlan()
+    let derog_time = 0
     let mode: Mode | null = null
+    let postData: DevicePostData | FirstGenDevicePostData = { attrs: {} }
     switch (capability) {
       case 'onoff':
-      case 'mode':
+      case this.#mode:
         mode = await this.getMode(capability, value)
         if (mode) {
-          await this.setDeviceData(this.buildPostDataMode(mode))
+          postData = this.buildPostDataMode(mode)
         }
         break
-      case 'onoff.boost':
-        await this.setDeviceData({
+      case 'derog_mode':
+        if (value !== '0') {
+          derog_time =
+            value === '2'
+              ? Number(this.getCapabilityValue('derog_time_vacation'))
+              : Number(this.getCapabilityValue('derog_time_boost'))
+        }
+        postData = {
           attrs: {
-            boost_switch: booleanToSwitch(value as boolean),
+            derog_mode: Number(value) as 0 | 1 | 2,
+            derog_time,
           },
-        })
-        await this.setDeviceData({
-          attrs: {
-            derog_mode: (this.getCapabilityValue('onoff.boost') as boolean)
-              ? 2
-              : 0,
-          },
-        })
+        }
+        break
+      case 'derog_time_boost':
+        if (this.getCapabilityValue('derog_mode') === '2') {
+          derog_time = Number(value)
+          postData = {
+            attrs: {
+              derog_time,
+            },
+          }
+        }
+        break
+      case 'derog_time_vacation':
+        if (this.getCapabilityValue('derog_mode') === '1') {
+          derog_time = Number(value)
+          postData = {
+            attrs: {
+              derog_time,
+            },
+          }
+        }
         break
       case 'locked':
-        await this.setDeviceData({
-          attrs: {
-            lock_switch: booleanToSwitch(value as boolean),
-          },
-        })
+        postData = { attrs: { lock_switch: booleanToSwitch(value as boolean) } }
         break
       case 'onoff.timer':
-        await this.setDeviceData({
+        postData = {
           attrs: {
             timer_switch: booleanToSwitch(value as boolean),
           },
-        })
-        break
-      case 'vacation_remaining_days':
-        await this.setDeviceData({
-          attrs: {
-            derog_time: Number(value),
-          },
-        })
-        await this.setDeviceData({
-          attrs: {
-            derog_mode: Number(
-              this.getCapabilityValue('vacation_remaining_days'),
-            )
-              ? 1
-              : 0,
-          },
-        })
+        }
         break
       default:
     }
+    await this.setDeviceData(postData)
     this.planSyncFromDevice()
   }
+  /* eslint-enable camelcase */
 
   public async onSettings({
     newSettings,
@@ -199,37 +215,25 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
 
   /* eslint-disable camelcase */
   protected async updateCapabilities(
-    attr?: DeviceData['attr'] | DevicePostData['attrs'] | null,
+    attr: DeviceData['attr'] | DevicePostData['attrs'] | null,
   ): Promise<void> {
     if (!attr) {
       return
     }
-    const {
-      mode,
-      boost_switch,
-      lock_switch,
-      timer_switch,
-      derog_mode,
-      derog_time,
-    } = attr
+    const { mode, derog_mode, derog_time, lock_switch, timer_switch } = attr
     if (mode !== undefined) {
       const newMode: Mode =
         typeof mode === 'string' ? modeFromString[mode] : modeFromNumber[mode]
-      await this.setCapabilityValue('mode', newMode)
+      await this.setCapabilityValue(this.#mode, newMode)
       const isOn: boolean = newMode !== 'stop'
       await this.setCapabilityValue('onoff', isOn)
       if (isOn) {
         await this.setStoreValue('previous_mode', newMode)
       }
     }
-    if (boost_switch !== undefined) {
-      await this.setCapabilityValue(
-        'onoff.boost',
-        Boolean(
-          derog_mode === undefined || derog_mode === 2 ? boost_switch : 0,
-        ),
-      )
-      await this.setCapabilityValue('vacation_remaining_days', String(0))
+    if (derog_mode !== undefined && derog_time !== undefined) {
+      await this.setCapabilityValue('derog_mode', String(derog_mode))
+      await this.setCapabilityValue('derog_time', String(derog_time))
     }
     if (lock_switch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lock_switch))
@@ -237,42 +241,33 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
     if (timer_switch !== undefined) {
       await this.setCapabilityValue('onoff.timer', Boolean(timer_switch))
     }
-    if (derog_time !== undefined) {
-      await this.setCapabilityValue(
-        'vacation_remaining_days',
-        String(derog_mode === undefined || derog_mode === 1 ? derog_time : 0),
-      )
-    }
   }
   /* eslint-enable camelcase */
 
   private async handleCapabilities(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const capabilities: string[] = this.driver.manifest.capabilities as string[]
-    await this.getCapabilities().reduce<Promise<void>>(
+    await this.removeCapability('vacation_remaining_days')
+    const requiredCapabilities: string[] = this.driver.getRequiredCapabilities(
+      this.#productName,
+    )
+    await requiredCapabilities.reduce<Promise<void>>(
       async (acc, capability: string) => {
         await acc
-        if (!capabilities.includes(capability)) {
-          return this.removeCapability(capability)
-        }
-        return Promise.resolve()
+        return this.addCapability(capability)
       },
       Promise.resolve(),
     )
-    await capabilities.reduce<Promise<void>>(
-      async (acc, capability: string) => {
+    await this.getCapabilities()
+      .filter(
+        (capability: string) => !requiredCapabilities.includes(capability),
+      )
+      .reduce<Promise<void>>(async (acc, capability: string) => {
         await acc
-        if (!this.hasCapability(capability)) {
-          return this.addCapability(capability)
-        }
-        return Promise.resolve()
-      },
-      Promise.resolve(),
-    )
+        await this.removeCapability(capability)
+      }, Promise.resolve())
   }
 
   private async getMode(
-    capability: 'mode' | 'onoff',
+    capability: 'mode_3' | 'mode' | 'onoff',
     value: CapabilityValue,
   ): Promise<Mode | null> {
     let mode: Mode | null = null
@@ -291,7 +286,7 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
       async (): Promise<void> =>
         this.setCapabilityValue(
           capability,
-          capability === 'mode'
+          capability === this.#mode
             ? (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
             : true,
         ),
@@ -314,6 +309,11 @@ abstract class BaseHeatzyDevice extends withAPI(Device) {
   private async setDeviceData(
     postData: DevicePostData | FirstGenDevicePostData,
   ): Promise<void> {
+    if (
+      !Object.keys('raw' in postData ? postData.raw : postData.attrs).length
+    ) {
+      return
+    }
     const success: boolean = await this.control(postData)
     await this.handleSuccess(success, postData)
   }

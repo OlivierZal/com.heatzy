@@ -1,14 +1,12 @@
 {
   "type": "enum",
   "title": {
-    "en": "Remaining vacation days",
-    "fr": "Jours de vacances restants"
+    "en": "Number of vacation days",
+    "fr": "Nombre de jours de vacances"
   },
-  "getable": true,
+  "getable": false,
   "setable": true,
   "uiComponent": "picker",
-  "uiQuickAction": false,
-  "insights": true,
   "values": [
     {
       "id": "30",

@@ -1,0 +1,11 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Remaining derogation duration",
+    "fr": "Durée de dérogation restante"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/derog_time.svg"
+}

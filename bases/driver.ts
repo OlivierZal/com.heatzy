@@ -22,18 +22,7 @@ export default abstract class BaseHeatzyDriver extends withAPI(Driver) {
   // eslint-disable-next-line @typescript-eslint/require-await
   public async onInit(): Promise<void> {
     this.#app = this.homey.app as HeatzyApp
-
-    this.homey.flow
-      .getConditionCard('mode_condition')
-      .registerRunListener(
-        (args: FlowArgs): boolean =>
-          args.mode === (args.device.getCapabilityValue('mode') as Mode),
-      )
-    this.homey.flow
-      .getActionCard('mode_action')
-      .registerRunListener(async (args: FlowArgs): Promise<void> => {
-        await args.device.onCapability('mode', args.mode)
-      })
+    this.registerFlowListeners()
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -56,6 +45,18 @@ export default abstract class BaseHeatzyDriver extends withAPI(Driver) {
     )
   }
 
+  /* eslint-disable camelcase */
+  public getRequiredCapabilities(product_name: string | undefined): string[] {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return (this.manifest.capabilities as string[]).filter(
+      (capability: string) =>
+        product_name === undefined || product_name === 'Pilote_SoC'
+          ? capability !== 'mode_3'
+          : capability !== 'mode',
+    )
+  }
+  /* eslint-enable camelcase */
+
   protected async discoverDevices(): Promise<DeviceDetails[]> {
     try {
       const { data } = await this.api.get<Bindings>('/bindings')
@@ -65,17 +66,33 @@ export default abstract class BaseHeatzyDriver extends withAPI(Driver) {
           this.isFirstGen ? isFirstGen(product_key) : !isFirstGen(product_key),
         )
         .map(
-          ({ dev_alias, did, product_key }): DeviceDetails => ({
+          ({ dev_alias, did, product_key, product_name }): DeviceDetails => ({
             name: dev_alias,
             data: {
               id: did,
               productKey: product_key,
+              productName: product_name,
             },
+            capabilities: this.getRequiredCapabilities(product_name),
           }),
         )
       /* eslint-enable camelcase */
     } catch (error: unknown) {
       return []
     }
+  }
+
+  private registerFlowListeners(): void {
+    this.homey.flow
+      .getConditionCard('mode_condition')
+      .registerRunListener(
+        (args: FlowArgs): boolean =>
+          args.mode === (args.device.getCapabilityValue('mode') as Mode),
+      )
+    this.homey.flow
+      .getActionCard('mode_action')
+      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+        await args.device.onCapability('mode', args.mode)
+      })
   }
 }

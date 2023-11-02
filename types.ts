@@ -16,7 +16,7 @@ export type HomeyClass = new (...args: any[]) => Loggable & {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export type ModeNumber = 0 | 1 | 2 | 3
+export type ModeNumber = 0 | 1 | 2 | 3 | 4 | 5
 export type ModeString =
   | 'cft'
   | 'cft1'
@@ -29,7 +29,7 @@ export type ModeString =
   | '舒适' // 'cft'
   | '解冻' // 'fro'
 
-export type Mode = 'cft' | 'eco' | 'fro' | 'stop'
+export type Mode = 'cft' | 'cft1' | 'cft2' | 'eco' | 'fro' | 'stop'
 
 export type OnMode = Exclude<Mode, 'stop'> | 'previous'
 
@@ -136,6 +136,7 @@ export interface Bindings {
     readonly dev_alias: string
     readonly did: string
     readonly product_key: string
+    readonly product_name: string
   }[]
 }
 
@@ -143,19 +144,20 @@ export interface DeviceDetails {
   readonly data: {
     readonly id: string
     readonly productKey: string
+    readonly productName?: string
   }
   readonly name: string
+  readonly capabilities: string[]
 }
 
 export type Switch = 0 | 1
 
 export interface BaseAttrs {
-  readonly mode?: ModeNumber
-  readonly boost_switch?: Switch
-  readonly lock_switch?: Switch
-  readonly timer_switch?: Switch
   readonly derog_mode?: 0 | 1 | 2
   readonly derog_time?: number
+  readonly lock_switch?: Switch
+  readonly mode?: ModeNumber
+  readonly timer_switch?: Switch
 }
 
 export interface FirstGenDevicePostData {

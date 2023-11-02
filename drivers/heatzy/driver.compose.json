@@ -5,28 +5,17 @@
     "fr": "Heatzy Pilote"
   },
   "capabilities": [
+    "derog_mode",
+    "derog_time",
+    "derog_time_boost",
+    "derog_time_vacation",
     "mode",
+    "mode_3",
     "onoff",
-    "onoff.boost",
     "onoff.timer",
-    "vacation_remaining_days",
     "locked"
   ],
   "capabilitiesOptions": {
-    "onoff.boost": {
-      "title": {
-        "en": "Boost",
-        "fr": "Boost"
-      },
-      "insightsTitleTrue": {
-        "en": "Boosted",
-        "fr": "Boost activé"
-      },
-      "insightsTitleFalse": {
-        "en": "Unboosted",
-        "fr": "Boost désactivé"
-      }
-    },
     "onoff.timer": {
       "title": {
         "en": "Timer",

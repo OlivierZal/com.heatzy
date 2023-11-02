@@ -1,17 +1,17 @@
 {
   "title": {
-    "en": "The mode !{{is|is not}}",
-    "fr": "Le mode !{{est|n'est pas}}"
+    "en": "Set the mode",
+    "fr": "Définir le mode"
   },
   "titleFormatted": {
-    "en": "The mode !{{is|is not}} [[mode]]",
-    "fr": "Le mode !{{est|n'est pas}} [[mode]]"
+    "en": "Set the mode to [[mode]]",
+    "fr": "Définir le mode à [[mode]]"
   },
   "args": [
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=heatzy|heatzy_1&capabilities=mode"
+      "filter": "driver_id=heatzy&capabilities=mode_3"
     },
     {
       "name": "mode",
@@ -43,6 +43,20 @@
           "title": {
             "en": "Off",
             "fr": "Désactivé"
+          }
+        },
+        {
+          "id": "cft1",
+          "title": {
+            "en": "Comfort 1",
+            "fr": "Confort 1"
+          }
+        },
+        {
+          "id": "cft2",
+          "title": {
+            "en": "Comfort 2",
+            "fr": "Confort 2"
           }
         }
       ]

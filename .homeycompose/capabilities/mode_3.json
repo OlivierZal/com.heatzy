@@ -36,6 +36,20 @@
         "en": "Off",
         "fr": "Désactivé"
       }
+    },
+    {
+      "id": "cft1",
+      "title": {
+        "en": "Comfort 1",
+        "fr": "Confort 1"
+      }
+    },
+    {
+      "id": "cft2",
+      "title": {
+        "en": "Comfort 2",
+        "fr": "Confort 2"
+      }
     }
   ]
 }

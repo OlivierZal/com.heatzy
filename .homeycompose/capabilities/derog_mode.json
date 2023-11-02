@@ -1,0 +1,33 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Derogation mode",
+    "fr": "Mode de dérogation"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "values": [
+    {
+      "id": "0",
+      "title": {
+        "en": "Off",
+        "fr": "Désactivé"
+      }
+    },
+    {
+      "id": "1",
+      "title": {
+        "en": "Holidays",
+        "fr": "Vacances"
+      }
+    },
+    {
+      "id": "2",
+      "title": {
+        "en": "Boost",
+        "fr": "Boost"
+      }
+    }
+  ]
+}
