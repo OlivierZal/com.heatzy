@@ -1,7 +1,7 @@
 {
   "type": "string",
   "title": {
-    "en": "Derogation time end",
+    "en": "End of derogation",
     "fr": "Fin de la dérogation"
   },
   "getable": true,

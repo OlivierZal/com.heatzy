@@ -1,7 +1,7 @@
 {
   "type": "enum",
   "title": {
-    "en": "Holidays",
+    "en": "Vacation",
     "fr": "Vacances"
   },
   "getable": true,
