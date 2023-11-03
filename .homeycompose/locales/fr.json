@@ -24,6 +24,6 @@
   },
   "warnings": {
     "always_on": "L'extinction depuis Homey a été désactivée.",
-    "display_error": "Mise à jour réussie (même si une autre valeur est affichée)."
+    "display_error": "Mise à jour réussie (même si `Désactivé` est affiché)."
   }
 }

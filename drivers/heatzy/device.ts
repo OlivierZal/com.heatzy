@@ -300,14 +300,12 @@ class HeatzyDevice extends withAPI(Device) {
           await this.setCapabilityValue('derog_time_vacation', '0')
           break
         case 1:
-          await this.setCapabilityValue('derog_time_boost', '0')
           await this.setCapabilityValue('derog_time_vacation', derogTime)
-          await this.setDisplayErrorWarning()
+          await this.setDisplayErrorWarning('derog_time_boost')
           break
         case 2:
           await this.setCapabilityValue('derog_time_boost', derogTime)
-          await this.setCapabilityValue('derog_time_vacation', '0')
-          await this.setDisplayErrorWarning()
+          await this.setDisplayErrorWarning('derog_time_vacation')
           break
         default:
       }
@@ -424,9 +422,12 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async setDisplayErrorWarning(): Promise<void> {
-    await this.setWarning(this.homey.__('warnings.display_error'))
-    await this.setWarning(null)
+  private async setDisplayErrorWarning(capability: string): Promise<void> {
+    if (Number(this.getCapabilityValue(capability)) > 0) {
+      await this.setCapabilityValue(capability, '0')
+      await this.setWarning(this.homey.__('warnings.display_error'))
+      await this.setWarning(null)
+    }
   }
 }
 
