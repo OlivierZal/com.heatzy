@@ -28,5 +28,8 @@
   },
   "9.0.0": {
     "en": "Use decorator."
+  },
+  "10.0.0": {
+    "en": "Major release! Now supporting most Heatzy features (boost and vacation modes, on/off scheduling, comfort 1 and comfort 2 modes). Coming soon: temperature support for GLOW models."
   }
 }
