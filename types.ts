@@ -33,7 +33,7 @@ export type Mode = 'cft' | 'cft1' | 'cft2' | 'eco' | 'fro' | 'stop'
 
 export type OnMode = Exclude<Mode, 'stop'> | 'previous'
 
-export type CapabilityValue = boolean | number | string
+export type CapabilityValue = boolean | number | string | null
 
 type ValueOf<T> = T[keyof T]
 

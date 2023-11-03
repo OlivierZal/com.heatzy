@@ -1,4 +1,5 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
+import { DateTime } from 'luxon'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
 import withAPI from '../../mixins/withAPI'
@@ -21,6 +22,23 @@ import isFirstGen from '../../utils/isFirstGen'
 function booleanToSwitch(value: boolean): Switch {
   return Number(value) as Switch
 }
+
+/* eslint-disable camelcase */
+function getDerogTime(derog_mode: number, derog_time: number): string | null {
+  if (!derog_mode) {
+    return null
+  }
+  return derog_mode === 1
+    ? DateTime.now().plus({ days: derog_time }).toLocaleString({
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      })
+    : DateTime.now()
+        .plus({ minutes: derog_time })
+        .toLocaleString(DateTime.TIME_24_SIMPLE)
+}
+/* eslint-enable camelcase */
 
 function reverseMapping(
   mapping: Record<number, string>,
@@ -127,7 +145,7 @@ class HeatzyDevice extends withAPI(Device) {
       case 'derog_time_boost':
         postData = {
           attrs: {
-            derog_mode: 2,
+            derog_mode: Number(value) ? 2 : 0,
             derog_time: Number(value),
           },
         }
@@ -135,7 +153,7 @@ class HeatzyDevice extends withAPI(Device) {
       case 'derog_time_vacation':
         postData = {
           attrs: {
-            derog_mode: 1,
+            derog_mode: Number(value) ? 1 : 0,
             derog_time: Number(value),
           },
         }
@@ -253,6 +271,7 @@ class HeatzyDevice extends withAPI(Device) {
   /* eslint-disable camelcase */
   private async updateCapabilities(
     attr: DeviceData['attr'] | DevicePostData['attrs'] | null,
+    control = false,
   ): Promise<void> {
     if (!attr) {
       return
@@ -269,18 +288,27 @@ class HeatzyDevice extends withAPI(Device) {
       }
     }
     if (derog_mode !== undefined && derog_time !== undefined) {
-      if (!derog_mode) {
-        await this.setCapabilityValue('derog_time_boost', '0')
-        await this.setCapabilityValue('derog_time_vacation', '0')
-      } else {
+      if (control) {
         await this.setCapabilityValue(
-          derog_mode === 1 ? 'derog_time_vacation' : 'derog_time_boost',
-          String(derog_time),
+          'derog_end',
+          getDerogTime(derog_mode, derog_time),
         )
-        await this.setCapabilityValue(
-          derog_mode === 1 ? 'derog_time_boost' : 'derog_time_vacation',
-          '0',
-        )
+      }
+      const derogTime = String(derog_time)
+      switch (derog_mode) {
+        case 0:
+          await this.setCapabilityValue('derog_time_boost', '0')
+          await this.setCapabilityValue('derog_time_vacation', '0')
+          break
+        case 1:
+          await this.setCapabilityValue('derog_time_boost', '0')
+          await this.setCapabilityValue('derog_time_vacation', derogTime)
+          break
+        case 2:
+          await this.setCapabilityValue('derog_time_boost', derogTime)
+          await this.setCapabilityValue('derog_time_vacation', '0')
+          break
+        default:
       }
     }
     if (lock_switch !== undefined) {
@@ -381,6 +409,7 @@ class HeatzyDevice extends withAPI(Device) {
     if (success) {
       await this.updateCapabilities(
         'attrs' in postData ? postData.attrs : { mode: postData.raw[2] },
+        true,
       )
     }
   }

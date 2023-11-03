@@ -1,6 +1,7 @@
 import 'source-map-support/register'
 import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios from 'axios'
+import { Settings as LuxonSettings } from 'luxon'
 import withAPI from './mixins/withAPI'
 import type {
   Data,
@@ -18,6 +19,8 @@ export = class HeatzyApp extends withAPI(App) {
   #loginTimeout!: NodeJS.Timeout
 
   public async onInit(): Promise<void> {
+    LuxonSettings.defaultLocale = this.getLanguage()
+    LuxonSettings.defaultZone = this.homey.clock.getTimezone()
     await this.refreshLogin()
   }
 
@@ -35,18 +38,24 @@ export = class HeatzyApp extends withAPI(App) {
       if ('error_message' in data) {
         throw new Error(data.error_message)
       }
-      const { token, expire_at } = data // eslint-disable-line camelcase
+      /* eslint-disable camelcase */
+      const { token, expire_at } = data
       this.setSettings({
         token,
-        expire_at, // eslint-disable-line camelcase
+        expire_at,
         username,
         password,
       })
+      /* eslint-enable camelcase */
       await this.refreshLogin()
       return true
     } catch (error: unknown) {
       throw new Error(error instanceof Error ? error.message : String(error))
     }
+  }
+
+  public getLanguage(): string {
+    return this.homey.i18n.getLanguage()
   }
 
   private async refreshLogin(): Promise<void> {
