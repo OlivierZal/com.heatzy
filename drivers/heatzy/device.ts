@@ -423,7 +423,7 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async setDisplayErrorWarning(capability: string): Promise<void> {
-    if (Number(this.getCapabilityValue(capability)) > 0) {
+    if (this.getCapabilityValue(capability) !== '0') {
       await this.setCapabilityValue(capability, '0')
       await this.setWarning(this.homey.__('warnings.display_error'))
       await this.setWarning(null)
