@@ -23,6 +23,7 @@
     "title": "Heatzy Settings"
   },
   "warnings": {
-    "always_on": "Shutdown from Homey has been disabled."
+    "always_on": "Shutdown from Homey has been disabled.",
+    "display_error": "Update successful (even if another value is displayed)."
   }
 }

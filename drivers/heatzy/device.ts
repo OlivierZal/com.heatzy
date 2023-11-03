@@ -271,7 +271,6 @@ class HeatzyDevice extends withAPI(Device) {
   /* eslint-disable camelcase */
   private async updateCapabilities(
     attr: DeviceData['attr'] | DevicePostData['attrs'] | null,
-    control = false,
   ): Promise<void> {
     if (!attr) {
       return
@@ -288,7 +287,7 @@ class HeatzyDevice extends withAPI(Device) {
       }
     }
     if (derog_mode !== undefined && derog_time !== undefined) {
-      if (control) {
+      if (derog_mode !== this.getDerogMode()) {
         await this.setCapabilityValue(
           'derog_end',
           getDerogTime(derog_mode, derog_time),
@@ -303,10 +302,12 @@ class HeatzyDevice extends withAPI(Device) {
         case 1:
           await this.setCapabilityValue('derog_time_boost', '0')
           await this.setCapabilityValue('derog_time_vacation', derogTime)
+          await this.setDisplayErrorWarning()
           break
         case 2:
           await this.setCapabilityValue('derog_time_boost', derogTime)
           await this.setCapabilityValue('derog_time_vacation', '0')
+          await this.setDisplayErrorWarning()
           break
         default:
       }
@@ -319,6 +320,16 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
   /* eslint-enable camelcase */
+
+  private getDerogMode(): 0 | 1 | 2 {
+    if (this.getCapabilityValue('derog_time_boost') !== '0') {
+      return 2
+    }
+    if (this.getCapabilityValue('derog_time_vacation') !== '0') {
+      return 1
+    }
+    return 0
+  }
 
   private planSyncFromDevice(): void {
     this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
@@ -409,9 +420,13 @@ class HeatzyDevice extends withAPI(Device) {
     if (success) {
       await this.updateCapabilities(
         'attrs' in postData ? postData.attrs : { mode: postData.raw[2] },
-        true,
       )
     }
+  }
+
+  private async setDisplayErrorWarning(): Promise<void> {
+    await this.setWarning(this.homey.__('warnings.display_error'))
+    await this.setWarning(null)
   }
 }
 
