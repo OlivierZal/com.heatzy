@@ -1,13 +1,20 @@
 {
   "type": "enum",
   "title": {
-    "en": "Boost duration",
-    "fr": "Durée de boost"
+    "en": "Boost",
+    "fr": "Boost"
   },
   "getable": true,
   "setable": true,
   "uiComponent": "picker",
   "values": [
+    {
+      "id": "0",
+      "title": {
+        "en": "Off",
+        "fr": "Désactivé"
+      }
+    },
     {
       "id": "120",
       "title": {

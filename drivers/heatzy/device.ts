@@ -109,13 +109,11 @@ class HeatzyDevice extends withAPI(Device) {
     await this.syncFromDevice()
   }
 
-  /* eslint-disable camelcase */
   public async onCapability(
     capability: string,
     value: CapabilityValue,
   ): Promise<void> {
     this.clearSyncPlan()
-    let derog_time = 0
     let mode: Mode | null = null
     let postData: DevicePostData | FirstGenDevicePostData = { attrs: {} }
     switch (capability) {
@@ -126,40 +124,20 @@ class HeatzyDevice extends withAPI(Device) {
           postData = this.buildPostDataMode(mode)
         }
         break
-      case 'derog_mode':
-        if (value !== '0') {
-          derog_time =
-            value === '2'
-              ? Number(this.getCapabilityValue('derog_time_boost'))
-              : Number(this.getCapabilityValue('derog_time_vacation'))
-        }
+      case 'derog_time_boost':
         postData = {
           attrs: {
-            derog_mode: Number(value) as 0 | 1 | 2,
-            derog_time,
+            derog_mode: 2,
+            derog_time: Number(value),
           },
         }
         break
-      case 'derog_time_boost':
-        await this.setCapabilityValue('derog_time_boost', value)
-        if (this.getCapabilityValue('derog_mode') === '2') {
-          derog_time = Number(value)
-          postData = {
-            attrs: {
-              derog_time,
-            },
-          }
-        }
-        break
       case 'derog_time_vacation':
-        await this.setCapabilityValue('derog_time_vacation', value)
-        if (this.getCapabilityValue('derog_mode') === '1') {
-          derog_time = Number(value)
-          postData = {
-            attrs: {
-              derog_time,
-            },
-          }
+        postData = {
+          attrs: {
+            derog_mode: 1,
+            derog_time: Number(value),
+          },
         }
         break
       case 'locked':
@@ -177,7 +155,6 @@ class HeatzyDevice extends withAPI(Device) {
     await this.setDeviceData(postData)
     this.planSyncFromDevice()
   }
-  /* eslint-enable camelcase */
 
   public async onSettings({
     newSettings,
@@ -221,7 +198,6 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async handleCapabilities(): Promise<void> {
-    await this.removeCapability('vacation_remaining_days')
     const requiredCapabilities: string[] = this.driver.getRequiredCapabilities(
       this.#productKey,
       this.#productName,
@@ -293,11 +269,19 @@ class HeatzyDevice extends withAPI(Device) {
       }
     }
     if (derog_mode !== undefined && derog_time !== undefined) {
-      await this.setCapabilityValue('derog_mode', String(derog_mode))
-      await this.setCapabilityValue(
-        'derog_time',
-        String(derog_mode ? derog_time : 0),
-      )
+      if (!derog_mode) {
+        await this.setCapabilityValue('derog_time_boost', '0')
+        await this.setCapabilityValue('derog_time_vacation', '0')
+      } else {
+        await this.setCapabilityValue(
+          derog_mode === 1 ? 'derog_time_vacation' : 'derog_time_boost',
+          String(derog_time),
+        )
+        await this.setCapabilityValue(
+          derog_mode === 1 ? 'derog_time_boost' : 'derog_time_vacation',
+          '0',
+        )
+      }
     }
     if (lock_switch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lock_switch))

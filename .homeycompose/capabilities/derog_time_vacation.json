@@ -1,13 +1,20 @@
 {
   "type": "enum",
   "title": {
-    "en": "Number of vacation days",
-    "fr": "Nombre de jours de vacances"
+    "en": "Holidays",
+    "fr": "Vacances"
   },
   "getable": true,
   "setable": true,
   "uiComponent": "picker",
   "values": [
+    {
+      "id": "0",
+      "title": {
+        "en": "Off",
+        "fr": "Désactivé"
+      }
+    },
     {
       "id": "30",
       "title": {
@@ -216,13 +223,6 @@
       "title": {
         "en": "1 day",
         "fr": "1 jour"
-      }
-    },
-    {
-      "id": "0",
-      "title": {
-        "en": "0 day",
-        "fr": "0 jour"
       }
     }
   ]
