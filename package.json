@@ -1,6 +1,6 @@
 {
   "name": "com.heatzy",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "main": "app.ts",
   "prettier": {
     "semi": false,
