@@ -5,11 +5,11 @@
     "fr": "Heatzy Pilote"
   },
   "capabilities": [
+    "mode",
+    "mode_3",
     "derog_end",
     "derog_time_boost",
     "derog_time_vacation",
-    "mode",
-    "mode_3",
     "onoff",
     "onoff.timer",
     "locked",
