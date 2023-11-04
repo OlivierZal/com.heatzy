@@ -35,7 +35,7 @@
       "min": 0,
       "max": 25.5
     },
-    "target_temperature.high": {
+    "target_temperature.complement": {
       "title": {
         "en": "Thermal complement (comfort mode)",
         "fr": "Complément thermique (mode confort)"
