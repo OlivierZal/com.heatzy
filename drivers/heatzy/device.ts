@@ -87,7 +87,7 @@ class HeatzyDevice extends withAPI(Device) {
 
   #productKey!: string
 
-  #productName!: string | undefined
+  #productName!: string
 
   #mode!: 'mode_3' | 'mode'
 
@@ -107,17 +107,17 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   public async onInit(): Promise<void> {
-    await this.handleCapabilities()
-    if (this.getStoreValue('previous_mode') === null) {
-      await this.setStoreValue('previous_mode', 'eco')
-    }
-
     const { id, productKey, productName } =
       this.getData() as DeviceDetails['data']
     this.#id = id
     this.#productKey = productKey
     this.#productName = productName
-    this.#mode = isFirstPilot(productKey) ? 'mode' : 'mode_3'
+    await this.handleCapabilities()
+    if (this.getStoreValue('previous_mode') === null) {
+      await this.setStoreValue('previous_mode', 'eco')
+    }
+
+    this.#mode = isFirstPilot(this.#productKey) ? 'mode' : 'mode_3'
     this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
@@ -394,8 +394,8 @@ class HeatzyDevice extends withAPI(Device) {
     const postData: DevicePostData | FirstGenDevicePostData | null =
       this.buildPostData()
     if (postData) {
-      const success: boolean = await this.control(postData)
-      if (success) {
+      const data: Data | null = await this.control(postData)
+      if (data) {
         await this.updateCapabilities(
           'attrs' in postData ? postData.attrs : { mode: postData.raw[2] },
           true,
@@ -420,18 +420,15 @@ class HeatzyDevice extends withAPI(Device) {
 
   private async control(
     postData: DevicePostData | FirstGenDevicePostData,
-  ): Promise<boolean> {
+  ): Promise<Data | null> {
     try {
       const { data } = await this.api.post<Data>(
         `/control/${this.#id}`,
         postData,
       )
-      if ('error_message' in data) {
-        throw new Error(data.error_message)
-      }
-      return true
+      return data
     } catch (error: unknown) {
-      return false
+      return null
     }
   }
 

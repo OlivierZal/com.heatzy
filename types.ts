@@ -122,11 +122,9 @@ export interface LoginDriverSetting extends DriverSetting {
 export type DeviceSetting = Record<string, SettingValue[]>
 export type DeviceSettings = Record<string, DeviceSetting>
 
-export interface Data {
-  readonly error_message?: string
-}
+export type Data = Record<string, never>
 
-export interface LoginDataSuccess {
+export interface LoginData {
   readonly expire_at: number
   readonly token: string
 }
@@ -144,7 +142,7 @@ export interface DeviceDetails {
   readonly data: {
     readonly id: string
     readonly productKey: string
-    readonly productName?: string
+    readonly productName: string
   }
   readonly name: string
   readonly capabilities: string[]

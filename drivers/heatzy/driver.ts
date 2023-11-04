@@ -42,7 +42,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   public getRequiredCapabilities(
     productKey: string,
-    productName: string | undefined,
+    productName: string,
   ): string[] {
     if (isFirstGen(productKey)) {
       return ['onoff', 'mode']
