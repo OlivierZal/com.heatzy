@@ -48,18 +48,17 @@ export = class HeatzyDriver extends withAPI(Driver) {
     if (isFirstGen(product_key)) {
       return ['onoff', 'mode']
     }
-    return [
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      ...(this.manifest.capabilities as string[]).filter(
-        (capability: string) =>
-          isFirstPilot(product_name)
-            ? capability !== 'mode_3'
-            : capability !== 'mode',
-      ),
-      ...(isGlow(product_key)
-        ? ['target_temperature', 'target_temperature.complement']
-        : []),
-    ]
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return (this.manifest.capabilities as string[]).filter(
+      (capability: string) => {
+        if (capability.startsWith('target_temperature')) {
+          return isGlow(product_key)
+        }
+        return isFirstPilot(product_name)
+          ? capability !== 'mode_3'
+          : capability !== 'mode'
+      },
+    )
   }
   /* eslint-enable camelcase */
 
