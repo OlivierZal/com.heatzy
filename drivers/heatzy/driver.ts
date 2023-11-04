@@ -9,7 +9,7 @@ import type {
   LoginCredentials,
   Mode,
 } from '../../types'
-import isFirstGen from '../../utils/isFirstGen'
+import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
 
 export = class HeatzyDriver extends withAPI(Driver) {
   #app!: HeatzyApp
@@ -48,13 +48,18 @@ export = class HeatzyDriver extends withAPI(Driver) {
     if (isFirstGen(product_key)) {
       return ['onoff', 'mode']
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (this.manifest.capabilities as string[]).filter(
-      (capability: string) =>
-        product_name === undefined || product_name === 'Pilote_SoC'
-          ? capability !== 'mode_3'
-          : capability !== 'mode',
-    )
+    return [
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      ...(this.manifest.capabilities as string[]).filter(
+        (capability: string) =>
+          isFirstPilot(product_name)
+            ? capability !== 'mode_3'
+            : capability !== 'mode',
+      ),
+      ...(isGlow(product_key)
+        ? ['target_temperature', 'target_temperature.complement']
+        : []),
+    ]
   }
   /* eslint-enable camelcase */
 

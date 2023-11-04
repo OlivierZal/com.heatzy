@@ -12,7 +12,9 @@
     "mode_3",
     "onoff",
     "onoff.timer",
-    "locked"
+    "locked",
+    "target_temperature",
+    "target_temperature.complement"
   ],
   "capabilitiesOptions": {
     "onoff.timer": {
@@ -28,6 +30,19 @@
         "en": "Unscheduled",
         "fr": "Programmation désactivé"
       }
+    },
+    "target_temperature": {
+      "min": 0,
+      "max": 25.5
+    },
+    "target_temperature.high": {
+      "title": {
+        "en": "Thermal complement (comfort mode)",
+        "fr": "Complément thermique (mode confort)"
+      },
+      "min": 0,
+      "max": 10,
+      "step": 1
     }
   }
 }

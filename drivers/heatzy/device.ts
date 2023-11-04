@@ -4,6 +4,7 @@ import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
 import withAPI from '../../mixins/withAPI'
 import type {
+  BaseAttrs,
   CapabilityValue,
   Data,
   DeviceData,
@@ -17,7 +18,7 @@ import type {
   Settings,
   Switch,
 } from '../../types'
-import isFirstGen from '../../utils/isFirstGen'
+import { isFirstGen } from '../../utils'
 
 function booleanToSwitch(value: boolean): Switch {
   return Number(value) as Switch
@@ -83,6 +84,8 @@ const modeToNumber: Record<Mode, ModeNumber> = reverseMapping(
 class HeatzyDevice extends withAPI(Device) {
   public declare driver: HeatzyDriver
 
+  #attrs: BaseAttrs = {}
+
   #id!: string
 
   #productKey!: string
@@ -131,47 +134,39 @@ class HeatzyDevice extends withAPI(Device) {
     capability: string,
     value: CapabilityValue,
   ): Promise<void> {
-    this.clearSyncPlan()
+    this.clearSync()
     let mode: Mode | null = null
-    let postData: DevicePostData | FirstGenDevicePostData = { attrs: {} }
     switch (capability) {
       case 'onoff':
       case this.#mode:
         mode = await this.getMode(capability, value)
         if (mode) {
-          postData = this.buildPostDataMode(mode)
+          this.#attrs.mode = modeToNumber[mode]
         }
         break
       case 'derog_time_boost':
-        postData = {
-          attrs: {
-            derog_mode: Number(value) ? 2 : 0,
-            derog_time: Number(value),
-          },
-        }
+        this.#attrs.derog_mode = Number(value) ? 2 : 0
+        this.#attrs.derog_time = Number(value)
         break
       case 'derog_time_vacation':
-        postData = {
-          attrs: {
-            derog_mode: Number(value) ? 1 : 0,
-            derog_time: Number(value),
-          },
-        }
+        this.#attrs.derog_mode = Number(value) ? 1 : 0
+        this.#attrs.derog_time = Number(value)
         break
       case 'locked':
-        postData = { attrs: { lock_switch: booleanToSwitch(value as boolean) } }
+        this.#attrs.lock_switch = booleanToSwitch(value as boolean)
         break
       case 'onoff.timer':
-        postData = {
-          attrs: {
-            timer_switch: booleanToSwitch(value as boolean),
-          },
-        }
+        this.#attrs.timer_switch = booleanToSwitch(value as boolean)
+        break
+      case 'target_temperature':
+        this.#attrs.cft_tempL = (value as number) * 10
+        break
+      case 'target_temperature.complement':
+        this.#attrs.cft_tempH = (value as number) / 10
         break
       default:
     }
-    await this.setDeviceData(postData)
-    this.planSyncFromDevice()
+    this.applySyncToDevice()
   }
 
   public async onSettings({
@@ -194,7 +189,7 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   public onDeleted(): void {
-    this.clearSyncPlan()
+    this.clearSync()
   }
 
   public async setCapabilityValue(
@@ -254,7 +249,7 @@ class HeatzyDevice extends withAPI(Device) {
   private async syncFromDevice(): Promise<void> {
     const attr: DeviceData['attr'] | null = await this.getDeviceData()
     await this.updateCapabilities(attr)
-    this.planSyncFromDevice()
+    this.applySyncFromDevice()
   }
 
   private async getDeviceData(): Promise<DeviceData['attr'] | null> {
@@ -329,14 +324,14 @@ class HeatzyDevice extends withAPI(Device) {
     return 0
   }
 
-  private planSyncFromDevice(): void {
+  private applySyncFromDevice(): void {
     this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncFromDevice()
     }, 60000)
     this.log('Next sync in 1 minute')
   }
 
-  private clearSyncPlan(): void {
+  private clearSync(): void {
     this.homey.clearTimeout(this.#syncTimeout)
     this.log('Sync has been paused')
   }
@@ -370,28 +365,38 @@ class HeatzyDevice extends withAPI(Device) {
     return null
   }
 
-  private buildPostDataMode(
-    mode: Mode,
-  ): DevicePostData | FirstGenDevicePostData {
-    return isFirstGen(this.#productKey)
-      ? { raw: [1, 1, modeToNumber[mode]] }
-      : {
-          attrs: {
-            mode: modeToNumber[mode],
-          },
-        }
+  private applySyncToDevice(): void {
+    this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
+      await this.syncToDevice()
+    }, 1000)
+    this.log('Next sync in 1 second')
   }
 
-  private async setDeviceData(
-    postData: DevicePostData | FirstGenDevicePostData,
-  ): Promise<void> {
-    if (
-      !Object.keys('raw' in postData ? postData.raw : postData.attrs).length
-    ) {
-      return
+  private async syncToDevice(): Promise<void> {
+    const postData: DevicePostData | FirstGenDevicePostData | null =
+      this.buildPostData()
+    if (postData) {
+      const success: boolean = await this.control(postData)
+      if (success) {
+        await this.updateCapabilities(
+          'attrs' in postData ? postData.attrs : { mode: postData.raw[2] },
+        )
+      }
     }
-    const success: boolean = await this.control(postData)
-    await this.handleSuccess(success, postData)
+    this.applySyncFromDevice()
+  }
+
+  private buildPostData(): DevicePostData | FirstGenDevicePostData | null {
+    if (!Object.keys(this.#attrs).length) {
+      return null
+    }
+    const postData: DevicePostData | FirstGenDevicePostData = isFirstGen(
+      this.#productKey,
+    )
+      ? { raw: [1, 1, this.#attrs.mode as 0 | 1 | 2 | 3] }
+      : { attrs: this.#attrs }
+    this.#attrs = {}
+    return postData
   }
 
   private async control(
@@ -408,17 +413,6 @@ class HeatzyDevice extends withAPI(Device) {
       return true
     } catch (error: unknown) {
       return false
-    }
-  }
-
-  private async handleSuccess(
-    success: boolean,
-    postData: DevicePostData | FirstGenDevicePostData,
-  ): Promise<void> {
-    if (success) {
-      await this.updateCapabilities(
-        'attrs' in postData ? postData.attrs : { mode: postData.raw[2] },
-      )
     }
   }
 

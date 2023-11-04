@@ -153,11 +153,13 @@ export interface DeviceDetails {
 export type Switch = 0 | 1
 
 export interface BaseAttrs {
-  readonly derog_mode?: 0 | 1 | 2
-  readonly derog_time?: number
-  readonly lock_switch?: Switch
-  readonly mode?: ModeNumber
-  readonly timer_switch?: Switch
+  cft_tempL?: number
+  cft_tempH?: number
+  derog_mode?: 0 | 1 | 2
+  derog_time?: number
+  lock_switch?: Switch
+  mode?: ModeNumber
+  timer_switch?: Switch
 }
 
 export interface FirstGenDevicePostData {
