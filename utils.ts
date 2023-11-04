@@ -3,7 +3,7 @@ export function isFirstGen(productKey: string): boolean {
 }
 
 export function isFirstPilot(productName: string | undefined): boolean {
-  return productName === undefined || productName === 'Pilote_SoC'
+  return productName === 'Pilote_SoC'
 }
 
 export function isGlow(productKey: string): boolean {
