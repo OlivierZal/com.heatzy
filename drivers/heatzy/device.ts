@@ -192,6 +192,30 @@ class HeatzyDevice extends withAPI(Device) {
     this.clearSync()
   }
 
+  public async addCapability(capability: string): Promise<void> {
+    if (this.hasCapability(capability)) {
+      return
+    }
+    try {
+      await super.addCapability(capability)
+      this.log('Adding capability', capability)
+    } catch (error: unknown) {
+      this.error(error instanceof Error ? error.message : error)
+    }
+  }
+
+  public async removeCapability(capability: string): Promise<void> {
+    if (!this.hasCapability(capability)) {
+      return
+    }
+    try {
+      await super.removeCapability(capability)
+      this.log('Removing capability', capability)
+    } catch (error: unknown) {
+      this.error(error instanceof Error ? error.message : error)
+    }
+  }
+
   public async setCapabilityValue(
     capability: string,
     value: CapabilityValue,
