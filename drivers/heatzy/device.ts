@@ -24,22 +24,19 @@ function booleanToSwitch(value: boolean): Switch {
   return Number(value) as Switch
 }
 
-/* eslint-disable camelcase */
-function getDerogTime(derog_mode: number, derog_time: number): string | null {
-  if (!derog_mode) {
+function getDerogTime(derogMode: number, derogTime: number): string | null {
+  if (!derogMode) {
     return null
   }
-  return derog_mode === 1
-    ? DateTime.now().plus({ days: derog_time }).toLocaleString({
+  const now: DateTime = DateTime.now()
+  return derogMode === 1
+    ? now.plus({ days: derogTime }).toLocaleString({
         weekday: 'short',
         day: 'numeric',
         month: 'short',
       })
-    : DateTime.now()
-        .plus({ minutes: derog_time })
-        .toLocaleString(DateTime.TIME_24_SIMPLE)
+    : now.plus({ minutes: derogTime }).toLocaleString(DateTime.TIME_24_SIMPLE)
 }
-/* eslint-enable camelcase */
 
 function reverseMapping(
   mapping: Record<number, string>,
@@ -283,13 +280,14 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  /* eslint-disable camelcase */
   private async updateCapabilities(
     attr: DeviceData['attr'] | DevicePostData['attrs'] | null,
+    control = false,
   ): Promise<void> {
     if (!attr) {
       return
     }
+    /* eslint-disable camelcase */
     const { mode, derog_mode, derog_time, lock_switch, timer_switch } = attr
     if (mode !== undefined) {
       const newMode: Mode =
@@ -302,7 +300,7 @@ class HeatzyDevice extends withAPI(Device) {
       }
     }
     if (derog_mode !== undefined && derog_time !== undefined) {
-      if (derog_mode !== this.getDerogMode()) {
+      if (control || derog_mode !== this.getDerogMode()) {
         await this.setCapabilityValue(
           'derog_end',
           getDerogTime(derog_mode, derog_time),
@@ -331,8 +329,8 @@ class HeatzyDevice extends withAPI(Device) {
     if (timer_switch !== undefined) {
       await this.setCapabilityValue('onoff.timer', Boolean(timer_switch))
     }
+    /* eslint-enable camelcase */
   }
-  /* eslint-enable camelcase */
 
   private getDerogMode(): 0 | 1 | 2 {
     if (this.getCapabilityValue('derog_time_boost') !== '0') {
@@ -400,6 +398,7 @@ class HeatzyDevice extends withAPI(Device) {
       if (success) {
         await this.updateCapabilities(
           'attrs' in postData ? postData.attrs : { mode: postData.raw[2] },
+          true,
         )
       }
     }
