@@ -18,7 +18,7 @@ import type {
   Settings,
   Switch,
 } from '../../types'
-import { isFirstGen } from '../../utils'
+import { isFirstGen, isFirstPilot } from '../../utils'
 
 function booleanToSwitch(value: boolean): Switch {
   return Number(value) as Switch
@@ -111,7 +111,6 @@ class HeatzyDevice extends withAPI(Device) {
 
   public async onInit(): Promise<void> {
     await this.handleCapabilities()
-
     if (this.getStoreValue('previous_mode') === null) {
       await this.setStoreValue('previous_mode', 'eco')
     }
@@ -121,10 +120,7 @@ class HeatzyDevice extends withAPI(Device) {
     this.#id = id
     this.#productKey = productKey
     this.#productName = productName
-    this.#mode =
-      this.#productName === undefined || this.#productName === 'Pilote_SoC'
-        ? 'mode'
-        : 'mode_3'
+    this.#mode = isFirstPilot(productKey) ? 'mode' : 'mode_3'
     this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
