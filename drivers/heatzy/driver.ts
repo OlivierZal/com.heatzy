@@ -40,27 +40,25 @@ export = class HeatzyDriver extends withAPI(Driver) {
     )
   }
 
-  /* eslint-disable camelcase */
   public getRequiredCapabilities(
-    product_key: string,
-    product_name: string | undefined,
+    productKey: string,
+    productName: string | undefined,
   ): string[] {
-    if (isFirstGen(product_key)) {
+    if (isFirstGen(productKey)) {
       return ['onoff', 'mode']
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return (this.manifest.capabilities as string[]).filter(
       (capability: string) => {
         if (capability.startsWith('target_temperature')) {
-          return isGlow(product_key)
+          return isGlow(productKey)
         }
-        return isFirstPilot(product_name)
+        return isFirstPilot(productName)
           ? capability !== 'mode_3'
           : capability !== 'mode'
       },
     )
   }
-  /* eslint-enable camelcase */
 
   private async discoverDevices(): Promise<DeviceDetails[]> {
     try {
