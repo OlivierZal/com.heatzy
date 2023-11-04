@@ -30,10 +30,7 @@ export = class HeatzyApp extends withAPI(App) {
       if (!username || !password) {
         return false
       }
-      const { data } = await this.api.post<LoginData>(
-        '/login',
-        postData,
-      )
+      const { data } = await this.api.post<LoginData>('/login', postData)
       /* eslint-disable camelcase */
       const { token, expire_at } = data
       this.setSettings({
