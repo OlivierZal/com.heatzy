@@ -131,6 +131,11 @@ export type DeviceSettings = Record<string, DeviceSetting>
 
 export type Data = Record<string, never>
 
+export interface ErrorData {
+  readonly error_message: string | null
+  readonly detail_message: string | null
+}
+
 export interface LoginData {
   readonly expire_at: number
   readonly token: string
