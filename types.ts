@@ -44,12 +44,19 @@ export interface Settings {
 
 export type SettingValue = ValueOf<Settings>
 
-export interface HomeySettings {
-  readonly username: string | null
-  readonly password: string | null
-  readonly token: string | null
-  readonly expire_at: number | null
+interface BaseHomeySettingValue<T1, T2> {
+  readonly username: T1
+  readonly password: T1
+  readonly token: T1
+  readonly expire_at: T2
 }
+
+export type HomeySettings = BaseHomeySettingValue<string | null, number | null>
+
+export type HomeySettingsUI = BaseHomeySettingValue<
+  string | undefined,
+  number | undefined
+>
 
 export type HomeySettingValue = ValueOf<HomeySettings>
 
