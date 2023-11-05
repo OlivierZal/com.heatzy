@@ -1,5 +1,4 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import axios from 'axios'
 import { DateTime } from 'luxon'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
@@ -11,7 +10,6 @@ import type {
   DeviceData,
   DeviceDetails,
   DevicePostData,
-  ErrorData,
   FirstGenDevicePostData,
   Mode,
   ModeNumber,
@@ -283,7 +281,6 @@ class HeatzyDevice extends withAPI(Device) {
       )
       return data.attr
     } catch (error: unknown) {
-      await this.setErrorWarning(error)
       return null
     }
   }
@@ -448,22 +445,8 @@ class HeatzyDevice extends withAPI(Device) {
       )
       return data
     } catch (error: unknown) {
-      await this.setErrorWarning(error)
       return null
     }
-  }
-
-  private async setErrorWarning(error: unknown): Promise<void> {
-    if (axios.isAxiosError(error) && error.response) {
-      /* eslint-disable camelcase */
-      const { error_message, detail_message } = error.response.data as ErrorData
-      await this.setWarning(detail_message ?? error_message ?? error.message)
-      /* eslint-enable camelcase */
-      return
-    }
-    await this.setWarning(
-      error instanceof Error ? error.message : String(error),
-    )
   }
 
   private async setDisplayErrorWarning(capability: string): Promise<void> {

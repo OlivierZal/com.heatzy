@@ -13,6 +13,7 @@ export type LogClass = abstract new (...args: any[]) => Loggable
 
 export type HomeyClass = new (...args: any[]) => Loggable & {
   readonly homey: Homey
+  setWarning?: (warning: string) => Promise<void>
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

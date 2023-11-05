@@ -8,7 +8,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import type { HomeyClass, HomeySettings } from '../types'
+import type { ErrorData, HomeyClass, HomeySettings } from '../types'
 
 type APIClass = new (...args: any[]) => {
   api: AxiosInstance
@@ -65,9 +65,24 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       this.error(
         `Error in ${type}:`,
         error.config?.url,
-        error.response?.data ?? error,
+        error.response?.data ?? error.message,
       )
+      await this.setErrorWarning(error)
       return Promise.reject(error)
+    }
+
+    private async setErrorWarning(error: AxiosError): Promise<void> {
+      if (!this.setWarning) {
+        return
+      }
+      if (error.response?.data === undefined) {
+        await this.setWarning(error.message)
+        return
+      }
+      /* eslint-disable camelcase */
+      const { error_message, detail_message } = error.response.data as ErrorData
+      await this.setWarning(detail_message ?? error_message ?? error.message)
+      /* eslint-enable camelcase */
     }
   }
 }
