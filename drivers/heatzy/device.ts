@@ -87,7 +87,7 @@ class HeatzyDevice extends withAPI(Device) {
 
   #productKey!: string
 
-  #productName!: string
+  #productName?: string
 
   #mode!: 'mode_3' | 'mode'
 
@@ -117,7 +117,7 @@ class HeatzyDevice extends withAPI(Device) {
       await this.setStoreValue('previous_mode', 'eco')
     }
 
-    this.#mode = isFirstPilot(this.#productKey) ? 'mode' : 'mode_3'
+    this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
     this.onMode = this.getSetting('on_mode') as OnMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
@@ -228,8 +228,8 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   public async setWarning(warning: string | null): Promise<void> {
-    await super.setWarning(null)
     await super.setWarning(warning)
+    await super.setWarning(null)
   }
 
   private async handleCapabilities(): Promise<void> {

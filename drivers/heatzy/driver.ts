@@ -42,7 +42,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   public getRequiredCapabilities(
     productKey: string,
-    productName: string,
+    productName: string | undefined,
   ): string[] {
     if (isFirstGen(productKey)) {
       return ['onoff', 'mode']
@@ -87,16 +87,16 @@ export = class HeatzyDriver extends withAPI(Driver) {
       .filter((capability: string) => capability.startsWith('mode'))
       .forEach((capability: string): void => {
         this.homey.flow
-          .getConditionCard('mode_condition')
+          .getConditionCard(`${capability}_condition`)
           .registerRunListener(
             (args: FlowArgs): boolean =>
               args.mode ===
               (args.device.getCapabilityValue(capability) as Mode),
           )
         this.homey.flow
-          .getActionCard('mode_action')
+          .getActionCard(`${capability}_action`)
           .registerRunListener(async (args: FlowArgs): Promise<void> => {
-            await args.device.onCapability(capability, args.mode)
+            await args.device.triggerCapabilityListener(capability, args.mode)
           })
       })
   }
