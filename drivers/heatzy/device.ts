@@ -175,7 +175,7 @@ class HeatzyDevice extends withAPI(Device) {
     if (
       changedKeys.includes('always_on') &&
       newSettings.always_on === true &&
-      this.getCapabilityValue('onoff') === false
+      !(this.getCapabilityValue('onoff') as boolean)
     ) {
       await this.onCapability('onoff', true)
     }
