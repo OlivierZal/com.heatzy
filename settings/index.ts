@@ -5,7 +5,7 @@ import type {
   DeviceSetting,
   DeviceSettings,
   DriverSetting,
-  HomeySettings,
+  HomeySettingsUI,
   LoginCredentials,
   LoginDriverSetting,
   Settings,
@@ -31,25 +31,25 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   })
 
-  const homeySettings: Partial<HomeySettings> = await new Promise<
-    Partial<HomeySettings>
-  >((resolve, reject) => {
-    // @ts-expect-error: homey is partially typed
-    homey.get(
-      async (
-        error: Error | null,
-        settings: Partial<HomeySettings>,
-      ): Promise<void> => {
-        if (error) {
-          // @ts-expect-error: homey is partially typed
-          await homey.alert(error.message)
-          reject(error)
-          return
-        }
-        resolve(settings)
-      },
-    )
-  })
+  const homeySettings: HomeySettingsUI = await new Promise<HomeySettingsUI>(
+    (resolve, reject) => {
+      // @ts-expect-error: homey is partially typed
+      homey.get(
+        async (
+          error: Error | null,
+          settings: HomeySettingsUI,
+        ): Promise<void> => {
+          if (error) {
+            // @ts-expect-error: homey is partially typed
+            await homey.alert(error.message)
+            reject(error)
+            return
+          }
+          resolve(settings)
+        },
+      )
+    },
+  )
 
   const deviceSettings: DeviceSettings = await new Promise<DeviceSettings>(
     (resolve, reject) => {
@@ -176,7 +176,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         inputElement.classList.add('homey-form-input')
         inputElement.type = driverSetting.type
         inputElement.placeholder = driverSetting.placeholder ?? ''
-        inputElement.value = (homeySettings[id] as string | undefined) ?? ''
+        inputElement.value = homeySettings[id] ?? ''
         inputElement.id = id
         labelElement.htmlFor = inputElement.id
         loginElement.appendChild(labelElement)
