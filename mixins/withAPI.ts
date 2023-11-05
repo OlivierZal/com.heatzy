@@ -75,14 +75,15 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       if (!this.setWarning) {
         return
       }
-      if (error.response?.data === undefined) {
-        await this.setWarning(error.message)
+      if (error.response?.data !== undefined) {
+        /* eslint-disable camelcase */
+        const { error_message, detail_message } = error.response
+          .data as ErrorData
+        await this.setWarning(detail_message ?? error_message ?? error.message)
+        /* eslint-enable camelcase */
         return
       }
-      /* eslint-disable camelcase */
-      const { error_message, detail_message } = error.response.data as ErrorData
-      await this.setWarning(detail_message ?? error_message ?? error.message)
-      /* eslint-enable camelcase */
+      await this.setWarning(error.message)
     }
   }
 }
