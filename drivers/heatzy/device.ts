@@ -300,7 +300,11 @@ class HeatzyDevice extends withAPI(Device) {
       }
     }
     if (derog_mode !== undefined && derog_time !== undefined) {
-      if (control || derog_mode !== this.getDerogMode()) {
+      if (
+        control ||
+        derog_mode !== this.getDerogMode() ||
+        derog_time !== this.getDerogTime()
+      ) {
         await this.setCapabilityValue(
           'derog_end',
           getDerogTime(derog_mode, derog_time),
@@ -342,6 +346,16 @@ class HeatzyDevice extends withAPI(Device) {
     return 0
   }
 
+  private getDerogTime(): number {
+    return Number(
+      this.getCapabilityValue(
+        Number(this.getCapabilityValue('derog_time_boost'))
+          ? 'derog_time_boost'
+          : 'derog_time_vacation',
+      ),
+    )
+  }
+
   private applySyncFromDevice(): void {
     this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
       await this.syncFromDevice()
@@ -359,13 +373,12 @@ class HeatzyDevice extends withAPI(Device) {
     value: CapabilityValue,
   ): Promise<Mode | null> {
     let mode: Mode | null = null
-    const alwaysOn: boolean = this.getSetting('always_on') as boolean
     if (capability === 'onoff') {
-      mode = value === true ? this.onMode : 'stop'
+      mode = (value as boolean) ? this.onMode : 'stop'
     } else {
       mode = value as Mode
     }
-    if (!alwaysOn || mode !== 'stop') {
+    if (mode !== 'stop' || !(this.getSetting('always_on') as boolean)) {
       return mode
     }
     await this.setWarning(this.homey.__('warnings.always_on'))
