@@ -227,6 +227,11 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
+  public async setWarning(warning: string | null): Promise<void> {
+    await this.unsetWarning()
+    await super.setWarning(warning)
+  }
+
   private async handleCapabilities(): Promise<void> {
     const requiredCapabilities: string[] = this.driver.getRequiredCapabilities(
       this.#productKey,
@@ -382,7 +387,6 @@ class HeatzyDevice extends withAPI(Device) {
       return mode
     }
     await this.setWarning(this.homey.__('warnings.always_on'))
-    await this.setWarning(null)
     this.homey.setTimeout(
       async (): Promise<void> =>
         this.setCapabilityValue(
@@ -449,7 +453,6 @@ class HeatzyDevice extends withAPI(Device) {
     if (this.getCapabilityValue(capability) !== '0') {
       await this.setCapabilityValue(capability, '0')
       await this.setWarning(this.homey.__('warnings.display_error'))
-      await this.setWarning(null)
     }
   }
 }
