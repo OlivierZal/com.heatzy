@@ -42,13 +42,13 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   public getRequiredCapabilities(
     productKey: string,
-    productName: string | undefined,
+    productName: string,
   ): string[] {
     if (isFirstGen(productKey)) {
       return ['onoff', 'mode']
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (this.manifest.capabilities as string[]).filter(
+    const a = (this.manifest.capabilities as string[]).filter(
       (capability: string) => {
         if (capability.startsWith('target_temperature')) {
           return isGlow(productKey)
@@ -58,6 +58,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
           : capability !== 'mode'
       },
     )
+    return a
   }
 
   private async discoverDevices(): Promise<DeviceDetails[]> {

@@ -155,7 +155,7 @@ export interface DeviceDetails {
   readonly data: {
     readonly id: string
     readonly productKey: string
-    readonly productName?: string
+    readonly productName: string
   }
   readonly name: string
   readonly capabilities: string[]

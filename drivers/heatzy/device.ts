@@ -87,7 +87,7 @@ class HeatzyDevice extends withAPI(Device) {
 
   #productKey!: string
 
-  #productName?: string
+  #productName!: string
 
   #mode!: 'mode_3' | 'mode'
 
