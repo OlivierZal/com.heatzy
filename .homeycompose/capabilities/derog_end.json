@@ -6,7 +6,6 @@
   },
   "getable": true,
   "setable": false,
-  "insights": true,
   "uiComponent": "sensor",
   "icon": "/assets/derog_end.svg"
 }
