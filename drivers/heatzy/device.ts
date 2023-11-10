@@ -3,20 +3,19 @@ import { DateTime } from 'luxon'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
 import withAPI from '../../mixins/withAPI'
-import type {
-  BaseAttrs,
-  CapabilityValue,
-  Data,
-  DeviceData,
-  DeviceDetails,
-  DevicePostData,
-  FirstGenDevicePostData,
+import {
   Mode,
-  ModeNumber,
-  ModeString,
-  OnMode,
-  Settings,
-  Switch,
+  type BaseAttrs,
+  type CapabilityValue,
+  type Data,
+  type DeviceData,
+  type DeviceDetails,
+  type DevicePostData,
+  type FirstGenDevicePostData,
+  type ModeString,
+  type OnMode,
+  type Settings,
+  type Switch,
 } from '../../types'
 import { isFirstGen, isFirstPilot } from '../../utils'
 
@@ -38,20 +37,7 @@ function getDerogTime(derogMode: number, derogTime: number): string | null {
     : now.plus({ minutes: derogTime }).toLocaleString(DateTime.TIME_24_SIMPLE)
 }
 
-function reverseMapping(
-  mapping: Record<number, string>,
-): Record<string, number> {
-  return Object.fromEntries(
-    Object.entries(mapping).map(
-      ([deviceValue, capabilityValue]: [string, string]): [string, number] => [
-        capabilityValue,
-        Number(deviceValue),
-      ],
-    ),
-  )
-}
-
-const modeFromString: Record<ModeString, Mode> = {
+const modeFromString: Record<ModeString, keyof typeof Mode> = {
   cft: 'cft',
   cft1: 'cft1',
   cft2: 'cft2',
@@ -63,19 +49,6 @@ const modeFromString: Record<ModeString, Mode> = {
   stop: 'stop',
   停止: 'stop',
 } as const
-
-const modeFromNumber: Record<ModeNumber, Mode> = [
-  'cft',
-  'eco',
-  'fro',
-  'stop',
-  'cft1',
-  'cft2',
-] as const
-
-const modeToNumber: Record<Mode, ModeNumber> = reverseMapping(
-  modeFromNumber,
-) as Record<Mode, ModeNumber>
 
 @addToLogs('getName()')
 class HeatzyDevice extends withAPI(Device) {
@@ -91,18 +64,18 @@ class HeatzyDevice extends withAPI(Device) {
 
   #mode!: 'mode_3' | 'mode'
 
-  #onMode!: Exclude<Mode, 'stop'>
+  #onMode!: OnMode
 
   #syncTimeout!: NodeJS.Timeout
 
-  private get onMode(): Exclude<Mode, 'stop'> {
+  private get onMode(): OnMode {
     return this.#onMode
   }
 
-  private set onMode(value: OnMode) {
+  private set onMode(value: OnMode | 'previous') {
     this.#onMode =
       value === 'previous'
-        ? (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
+        ? (this.getStoreValue('previous_mode') as OnMode)
         : value
   }
 
@@ -118,7 +91,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
 
     this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
-    this.onMode = this.getSetting('on_mode') as OnMode
+    this.onMode = this.getSetting('on_mode') as OnMode | 'previous'
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -128,13 +101,13 @@ class HeatzyDevice extends withAPI(Device) {
     value: CapabilityValue,
   ): Promise<void> {
     this.clearSync()
-    let mode: Mode | null = null
+    let mode: keyof typeof Mode | null = null
     switch (capability) {
       case 'onoff':
       case this.#mode:
         mode = await this.getMode(capability, value)
         if (mode) {
-          this.#attrs.mode = modeToNumber[mode]
+          this.#attrs.mode = Mode[mode]
         }
         break
       case 'derog_time_boost':
@@ -169,8 +142,8 @@ class HeatzyDevice extends withAPI(Device) {
     newSettings: Settings
     changedKeys: string[]
   }): Promise<void> {
-    if (changedKeys.includes('on_mode')) {
-      this.onMode = newSettings.on_mode as Exclude<Mode, 'stop'>
+    if (changedKeys.includes('on_mode') && newSettings.on_mode) {
+      this.onMode = newSettings.on_mode
     }
     if (
       changedKeys.includes('always_on') &&
@@ -295,8 +268,10 @@ class HeatzyDevice extends withAPI(Device) {
     /* eslint-disable camelcase */
     const { mode, derog_mode, derog_time, lock_switch, timer_switch } = attr
     if (mode !== undefined) {
-      const newMode: Mode =
-        typeof mode === 'string' ? modeFromString[mode] : modeFromNumber[mode]
+      const newMode: keyof typeof Mode =
+        typeof mode === 'string'
+          ? modeFromString[mode]
+          : (Mode[mode] as keyof typeof Mode)
       await this.setCapabilityValue(this.#mode, newMode)
       const isOn: boolean = newMode !== 'stop'
       await this.setCapabilityValue('onoff', isOn)
@@ -376,12 +351,12 @@ class HeatzyDevice extends withAPI(Device) {
   private async getMode(
     capability: 'mode_3' | 'mode' | 'onoff',
     value: CapabilityValue,
-  ): Promise<Mode | null> {
-    let mode: Mode | null = null
+  ): Promise<keyof typeof Mode | null> {
+    let mode: keyof typeof Mode | null = null
     if (capability === 'onoff') {
       mode = (value as boolean) ? this.onMode : 'stop'
     } else {
-      mode = value as Mode
+      mode = value as keyof typeof Mode
     }
     if (mode !== 'stop' || !(this.getSetting('always_on') as boolean)) {
       return mode
@@ -392,7 +367,7 @@ class HeatzyDevice extends withAPI(Device) {
         this.setCapabilityValue(
           capability,
           capability === this.#mode
-            ? (this.getStoreValue('previous_mode') as Exclude<Mode, 'stop'>)
+            ? (this.getStoreValue('previous_mode') as OnMode)
             : true,
         ),
       1000,

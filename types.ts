@@ -17,7 +17,6 @@ export type HomeyClass = new (...args: any[]) => Loggable & {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export type ModeNumber = 0 | 1 | 2 | 3 | 4 | 5
 export type ModeString =
   | 'cft'
   | 'cft1'
@@ -30,9 +29,16 @@ export type ModeString =
   | '舒适' // 'cft'
   | '解冻' // 'fro'
 
-export type Mode = 'cft' | 'cft1' | 'cft2' | 'eco' | 'fro' | 'stop'
+export enum Mode {
+  cft = 0,
+  eco = 1,
+  fro = 2,
+  stop = 3,
+  cft1 = 4,
+  cft2 = 5,
+}
 
-export type OnMode = Exclude<Mode, 'stop'> | 'previous'
+export type OnMode = Exclude<keyof typeof Mode, 'stop'>
 
 export type CapabilityValue = boolean | number | string | null
 
@@ -40,7 +46,7 @@ type ValueOf<T> = T[keyof T]
 
 export interface Settings {
   readonly always_on?: boolean
-  readonly on_mode?: OnMode
+  readonly on_mode?: OnMode | 'previous'
 }
 
 export type SettingValue = ValueOf<Settings>
@@ -169,12 +175,12 @@ export interface BaseAttrs {
   derog_mode?: 0 | 1 | 2
   derog_time?: number
   lock_switch?: Switch
-  mode?: ModeNumber
+  mode?: number
   timer_switch?: Switch
 }
 
 export interface FirstGenDevicePostData {
-  readonly raw: [1, 1, ModeNumber]
+  readonly raw: [1, 1, number]
 }
 
 export interface DevicePostData {
