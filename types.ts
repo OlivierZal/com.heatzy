@@ -9,7 +9,7 @@ interface Loggable {
   /* eslint-enable @typescript-eslint/method-signature-style */
 }
 
-export type LogClass = abstract new (...args: any[]) => Loggable
+export type LogClass = new (...args: any[]) => Loggable
 
 export type HomeyClass = new (...args: any[]) => Loggable & {
   readonly homey: Homey
