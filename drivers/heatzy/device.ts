@@ -13,6 +13,7 @@ import {
   type DevicePostData,
   type FirstGenDevicePostData,
   type OnMode,
+  type PreviousMode,
   type Settings,
   type Switch,
 } from '../../types'
@@ -65,7 +66,7 @@ class HeatzyDevice extends withAPI(Device) {
     return this.#onMode
   }
 
-  private set onMode(value: OnMode | 'previous') {
+  private set onMode(value: PreviousMode) {
     this.#onMode =
       value === 'previous'
         ? (this.getStoreValue('previous_mode') as OnMode)
@@ -84,7 +85,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
 
     this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
-    this.onMode = this.getSetting('on_mode') as OnMode | 'previous'
+    this.onMode = this.getSetting('on_mode') as PreviousMode
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }

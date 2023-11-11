@@ -40,13 +40,15 @@ export enum Mode {
 
 export type OnMode = Exclude<keyof typeof Mode, 'stop'>
 
+export type PreviousMode = OnMode | 'previous'
+
 export type CapabilityValue = boolean | number | string | null
 
 type ValueOf<T> = T[keyof T]
 
 export interface Settings {
   readonly always_on?: boolean
-  readonly on_mode?: OnMode | 'previous'
+  readonly on_mode?: PreviousMode
 }
 
 export type SettingValue = ValueOf<Settings>
