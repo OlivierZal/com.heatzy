@@ -12,7 +12,6 @@ import {
   type DeviceDetails,
   type DevicePostData,
   type FirstGenDevicePostData,
-  type ModeString,
   type OnMode,
   type Settings,
   type Switch,
@@ -37,16 +36,10 @@ function getDerogTime(derogMode: number, derogTime: number): string | null {
     : now.plus({ minutes: derogTime }).toLocaleString(DateTime.TIME_24_SIMPLE)
 }
 
-const modeFromString: Record<ModeString, keyof typeof Mode> = {
-  cft: 'cft',
-  cft1: 'cft1',
-  cft2: 'cft2',
+const modeFromString: Record<string, keyof typeof Mode | undefined> = {
   舒适: 'cft',
-  eco: 'eco',
   经济: 'eco',
-  fro: 'fro',
   解冻: 'fro',
-  stop: 'stop',
   停止: 'stop',
 } as const
 
@@ -270,7 +263,7 @@ class HeatzyDevice extends withAPI(Device) {
     if (mode !== undefined) {
       const newMode: keyof typeof Mode =
         typeof mode === 'string'
-          ? modeFromString[mode]
+          ? modeFromString[mode] ?? (mode as keyof typeof Mode)
           : (Mode[mode] as keyof typeof Mode)
       await this.setCapabilityValue(this.#mode, newMode)
       const isOn: boolean = newMode !== 'stop'
@@ -279,39 +272,41 @@ class HeatzyDevice extends withAPI(Device) {
         await this.setStoreValue('previous_mode', newMode)
       }
     }
-    if (derog_mode !== undefined && derog_time !== undefined) {
-      if (
-        control ||
-        derog_mode !== this.getDerogMode() ||
-        derog_time !== this.getDerogTime()
-      ) {
-        await this.setCapabilityValue(
-          'derog_end',
-          getDerogTime(derog_mode, derog_time),
-        )
-      }
-      const derogTime = String(derog_time)
-      switch (derog_mode) {
-        case 0:
-          await this.setCapabilityValue('derog_time_boost', '0')
-          await this.setCapabilityValue('derog_time_vacation', '0')
-          break
-        case 1:
-          await this.setCapabilityValue('derog_time_vacation', derogTime)
-          await this.setDisplayErrorWarning('derog_time_boost')
-          break
-        case 2:
-          await this.setCapabilityValue('derog_time_boost', derogTime)
-          await this.setDisplayErrorWarning('derog_time_vacation')
-          break
-        default:
-      }
-    }
     if (lock_switch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lock_switch))
     }
     if (timer_switch !== undefined) {
       await this.setCapabilityValue('onoff.timer', Boolean(timer_switch))
+    }
+
+    if (derog_mode === undefined || derog_time === undefined) {
+      return
+    }
+    if (
+      control ||
+      derog_mode !== this.getDerogMode() ||
+      derog_time !== this.getDerogTime()
+    ) {
+      await this.setCapabilityValue(
+        'derog_end',
+        getDerogTime(derog_mode, derog_time),
+      )
+    }
+    const derogTime = String(derog_time)
+    switch (derog_mode) {
+      case 0:
+        await this.setCapabilityValue('derog_time_boost', '0')
+        await this.setCapabilityValue('derog_time_vacation', '0')
+        break
+      case 1:
+        await this.setCapabilityValue('derog_time_vacation', derogTime)
+        await this.setDisplayErrorWarning('derog_time_boost')
+        break
+      case 2:
+        await this.setCapabilityValue('derog_time_boost', derogTime)
+        await this.setDisplayErrorWarning('derog_time_vacation')
+        break
+      default:
     }
     /* eslint-enable camelcase */
   }

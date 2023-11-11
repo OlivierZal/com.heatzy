@@ -17,7 +17,7 @@ export type HomeyClass = new (...args: any[]) => Loggable & {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export type ModeString =
+type ModeString =
   | 'cft'
   | 'cft1'
   | 'cft2'
