@@ -2,7 +2,7 @@ import 'source-map-support/register'
 import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios from 'axios'
 import { Settings as LuxonSettings } from 'luxon'
-import withAPI from './mixins/withAPI'
+import withAPI, { getErrorMessage } from './mixins/withAPI'
 import type {
   HomeySettings,
   HomeySettingValue,
@@ -43,7 +43,13 @@ export = class HeatzyApp extends withAPI(App) {
       await this.refreshLogin()
       return true
     } catch (error: unknown) {
-      throw new Error(error instanceof Error ? error.message : String(error))
+      let errorMessage = String(error)
+      if (axios.isAxiosError(error)) {
+        errorMessage = getErrorMessage(error)
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      }
+      throw new Error(errorMessage)
     }
   }
 
