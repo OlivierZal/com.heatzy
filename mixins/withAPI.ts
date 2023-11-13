@@ -62,10 +62,11 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       type: 'request' | 'response',
       error: AxiosError,
     ): Promise<AxiosError> {
+      const { data } = error.response ?? {}
       this.error(
         `Error in ${type}:`,
         error.config?.url,
-        error.response?.data ?? error.message,
+        data !== undefined && data !== '' ? data : error.message,
       )
       await this.setErrorWarning(error)
       return Promise.reject(error)
