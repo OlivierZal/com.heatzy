@@ -90,45 +90,6 @@ class HeatzyDevice extends withAPI(Device) {
     await this.syncFromDevice()
   }
 
-  public async onCapability(
-    capability: string,
-    value: CapabilityValue,
-  ): Promise<void> {
-    this.clearSync()
-    let mode: keyof typeof Mode | null = null
-    switch (capability) {
-      case 'onoff':
-      case this.#mode:
-        mode = await this.getMode(capability, value)
-        if (mode) {
-          this.#attrs.mode = Mode[mode]
-        }
-        break
-      case 'derog_time_boost':
-        this.#attrs.derog_mode = Number(value) ? 2 : 0
-        this.#attrs.derog_time = Number(value)
-        break
-      case 'derog_time_vacation':
-        this.#attrs.derog_mode = Number(value) ? 1 : 0
-        this.#attrs.derog_time = Number(value)
-        break
-      case 'locked':
-        this.#attrs.lock_switch = booleanToSwitch(value as boolean)
-        break
-      case 'onoff.timer':
-        this.#attrs.timer_switch = booleanToSwitch(value as boolean)
-        break
-      case 'target_temperature':
-        this.#attrs.cft_tempL = (value as number) * 10
-        break
-      case 'target_temperature.complement':
-        this.#attrs.cft_tempH = (value as number) / 10
-        break
-      default:
-    }
-    this.applySyncToDevice()
-  }
-
   public async onSettings({
     newSettings,
     changedKeys,
@@ -197,6 +158,45 @@ class HeatzyDevice extends withAPI(Device) {
   public async setWarning(warning: string | null): Promise<void> {
     await super.setWarning(warning)
     await super.setWarning(null)
+  }
+
+  private async onCapability(
+    capability: string,
+    value: CapabilityValue,
+  ): Promise<void> {
+    this.clearSync()
+    let mode: keyof typeof Mode | null = null
+    switch (capability) {
+      case 'onoff':
+      case this.#mode:
+        mode = await this.getMode(capability, value)
+        if (mode) {
+          this.#attrs.mode = Mode[mode]
+        }
+        break
+      case 'derog_time_boost':
+        this.#attrs.derog_mode = Number(value) ? 2 : 0
+        this.#attrs.derog_time = Number(value)
+        break
+      case 'derog_time_vacation':
+        this.#attrs.derog_mode = Number(value) ? 1 : 0
+        this.#attrs.derog_time = Number(value)
+        break
+      case 'locked':
+        this.#attrs.lock_switch = booleanToSwitch(value as boolean)
+        break
+      case 'onoff.timer':
+        this.#attrs.timer_switch = booleanToSwitch(value as boolean)
+        break
+      case 'target_temperature':
+        this.#attrs.cft_tempL = (value as number) * 10
+        break
+      case 'target_temperature.complement':
+        this.#attrs.cft_tempH = (value as number) / 10
+        break
+      default:
+    }
+    this.applySyncToDevice()
   }
 
   private async handleCapabilities(): Promise<void> {
