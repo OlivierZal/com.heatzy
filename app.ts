@@ -43,13 +43,7 @@ export = class HeatzyApp extends withAPI(App) {
       await this.refreshLogin()
       return true
     } catch (error: unknown) {
-      let errorMessage = String(error)
-      if (axios.isAxiosError(error)) {
-        errorMessage = getErrorMessage(error)
-      } else if (error instanceof Error) {
-        errorMessage = error.message
-      }
-      throw new Error(errorMessage)
+      throw new Error(getErrorMessage(error))
     }
   }
 

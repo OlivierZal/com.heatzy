@@ -14,7 +14,7 @@ type APIClass = new (...args: any[]) => {
   api: AxiosInstance
 }
 
-export function getErrorMessage(error: AxiosError): string {
+function getAPIErrorMessage(error: AxiosError): string {
   const { data } = error.response ?? {}
   if (data !== undefined && data !== '') {
     /* eslint-disable camelcase */
@@ -26,6 +26,16 @@ export function getErrorMessage(error: AxiosError): string {
     }
   }
   return error.message
+}
+
+export function getErrorMessage(error: unknown): string {
+  let errorMessage = String(error)
+  if (axios.isAxiosError(error)) {
+    errorMessage = getAPIErrorMessage(error)
+  } else if (error instanceof Error) {
+    errorMessage = error.message
+  }
+  return errorMessage
 }
 
 export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
@@ -76,7 +86,11 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       type: 'request' | 'response',
       error: AxiosError,
     ): Promise<AxiosError> {
-      this.error(`Error in ${type}:`, error.config?.url, getErrorMessage(error))
+      this.error(
+        `Error in ${type}:`,
+        error.config?.url,
+        getAPIErrorMessage(error),
+      )
       await this.setErrorWarning(error)
       return Promise.reject(error)
     }
@@ -85,7 +99,7 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       if (!this.setWarning) {
         return
       }
-      await this.setWarning(getErrorMessage(error))
+      await this.setWarning(getAPIErrorMessage(error))
     }
   }
 }
