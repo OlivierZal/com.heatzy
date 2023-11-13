@@ -14,6 +14,20 @@ type APIClass = new (...args: any[]) => {
   api: AxiosInstance
 }
 
+function getErrorMessage(error: AxiosError): string {
+  const { data } = error.response ?? {}
+  if (data !== undefined && data !== '') {
+    /* eslint-disable camelcase */
+    const { error_message, detail_message } = data as ErrorData
+    const errorMessage: string = detail_message ?? error_message ?? ''
+    /* eslint-enable camelcase */
+    if (errorMessage) {
+      return errorMessage
+    }
+  }
+  return error.message
+}
+
 export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
   return class extends base {
     public api: AxiosInstance
@@ -62,12 +76,7 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       type: 'request' | 'response',
       error: AxiosError,
     ): Promise<AxiosError> {
-      const { data } = error.response ?? {}
-      this.error(
-        `Error in ${type}:`,
-        error.config?.url,
-        data !== undefined && data !== '' ? data : error.message,
-      )
+      this.error(`Error in ${type}:`, error.config?.url, getErrorMessage(error))
       await this.setErrorWarning(error)
       return Promise.reject(error)
     }
@@ -76,15 +85,7 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       if (!this.setWarning) {
         return
       }
-      if (error.response?.data !== undefined) {
-        /* eslint-disable camelcase */
-        const { error_message, detail_message } = error.response
-          .data as ErrorData
-        await this.setWarning(detail_message ?? error_message ?? error.message)
-        /* eslint-enable camelcase */
-        return
-      }
-      await this.setWarning(error.message)
+      await this.setWarning(getErrorMessage(error))
     }
   }
 }
