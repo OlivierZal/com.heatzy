@@ -1,5 +1,5 @@
 import type Homey from 'homey/lib/Homey'
-import type BaseHeatzyDevice from './drivers/heatzy/device'
+import type HeatzyDevice from './drivers/heatzy/device'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface Loggable {
@@ -194,6 +194,6 @@ export interface DeviceData {
 }
 
 export interface FlowArgs {
-  readonly device: BaseHeatzyDevice
+  readonly device: HeatzyDevice
   readonly mode: Mode
 }
