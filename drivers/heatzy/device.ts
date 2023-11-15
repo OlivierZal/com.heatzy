@@ -74,6 +74,8 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   public async onInit(): Promise<void> {
+    await this.setWarning(null)
+
     const { id, productKey, productName } =
       this.getData() as DeviceDetails['data']
     this.#id = id
@@ -156,7 +158,9 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   public async setWarning(warning: string | null): Promise<void> {
-    await super.setWarning(warning)
+    if (warning !== null) {
+      await super.setWarning(warning)
+    }
     await super.setWarning(null)
   }
 
