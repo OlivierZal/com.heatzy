@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios from 'axios'
-import { Settings as LuxonSettings } from 'luxon'
+import { DateTime, Settings as LuxonSettings } from 'luxon'
 import withAPI, { getErrorMessage } from './mixins/withAPI'
 import type {
   HomeySettings,
@@ -64,9 +64,10 @@ export = class HeatzyApp extends withAPI(App) {
       'expire_at',
     ) as HomeySettings['expire_at']
     if (expiredAt !== null) {
-      const expireAtDate: Date = new Date(expiredAt * 1000)
-      expireAtDate.setDate(expireAtDate.getDate() - 1)
-      const ms: number = expireAtDate.getTime() - new Date().getTime()
+      const expireAtDateTime: DateTime = DateTime.fromSeconds(expiredAt).minus({
+        days: 1,
+      })
+      const ms: number = expireAtDateTime.diffNow().milliseconds
       if (ms) {
         const maxTimeout: number = 2 ** 31 - 1
         const interval: number = Math.min(ms, maxTimeout)
