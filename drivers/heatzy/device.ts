@@ -1,5 +1,5 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
 import withAPI from '../../mixins/withAPI'
@@ -337,10 +337,12 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private applySyncFromDevice(): void {
-    this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
-      await this.syncFromDevice()
-    }, 60000)
-    this.log('Next sync in 1 minute')
+    this.#syncTimeout = this.homey.setTimeout(
+      async (): Promise<void> => {
+        await this.syncFromDevice()
+      },
+      Duration.fromObject({ minutes: 1 }).as('milliseconds'),
+    )
   }
 
   private clearSync(): void {
@@ -370,16 +372,18 @@ class HeatzyDevice extends withAPI(Device) {
             ? (this.getStoreValue('previous_mode') as OnMode)
             : true,
         ),
-      1000,
+      Duration.fromObject({ seconds: 1 }).as('milliseconds'),
     )
     return null
   }
 
   private applySyncToDevice(): void {
-    this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
-      await this.syncToDevice()
-    }, 1000)
-    this.log('Next sync in 1 second')
+    this.#syncTimeout = this.homey.setTimeout(
+      async (): Promise<void> => {
+        await this.syncToDevice()
+      },
+      Duration.fromObject({ seconds: 1 }).as('milliseconds'),
+    )
   }
 
   private async syncToDevice(): Promise<void> {

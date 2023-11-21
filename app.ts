@@ -3,11 +3,12 @@ import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependen
 import axios from 'axios'
 import { DateTime, Settings as LuxonSettings } from 'luxon'
 import withAPI, { getErrorMessage } from './mixins/withAPI'
-import type {
-  HomeySettings,
-  HomeySettingValue,
-  LoginCredentials,
-  LoginData,
+import {
+  loginURL,
+  type HomeySettings,
+  type HomeySettingValue,
+  type LoginCredentials,
+  type LoginData,
 } from './types'
 
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
@@ -40,7 +41,7 @@ export = class HeatzyApp extends withAPI(App) {
       if (!username || !password) {
         return false
       }
-      const { data } = await this.api.post<LoginData>('/login', postData)
+      const { data } = await this.api.post<LoginData>(loginURL, postData)
       /* eslint-disable camelcase */
       const { token, expire_at } = data
       this.setSettings({

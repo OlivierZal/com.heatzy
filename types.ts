@@ -1,6 +1,8 @@
 import type Homey from 'homey/lib/Homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 
+export const loginURL = '/login'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface Loggable {
   /* eslint-disable @typescript-eslint/method-signature-style */
