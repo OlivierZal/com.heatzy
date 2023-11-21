@@ -347,7 +347,6 @@ class HeatzyDevice extends withAPI(Device) {
 
   private clearSync(): void {
     this.homey.clearTimeout(this.#syncTimeout)
-    this.log('Sync has been paused')
   }
 
   private async getMode(

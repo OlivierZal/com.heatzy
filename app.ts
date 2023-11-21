@@ -86,7 +86,6 @@ export = class HeatzyApp extends withAPI(App) {
 
   private clearLoginRefresh(): void {
     this.homey.clearTimeout(this.#loginTimeout)
-    this.log('Login refresh has been paused')
   }
 
   private setSettings(settings: Partial<HomeySettings>): void {
