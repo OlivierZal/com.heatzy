@@ -21,7 +21,7 @@ export = class HeatzyApp extends withAPI(App) {
   public async onInit(): Promise<void> {
     LuxonSettings.defaultLocale = this.getLanguage()
     LuxonSettings.defaultZone = this.homey.clock.getTimezone()
-    await this.refreshLogin()
+    await this.login(undefined, false)
   }
 
   public async login(
