@@ -23,7 +23,17 @@ export = class HeatzyApp extends withAPI(App) {
     await this.refreshLogin()
   }
 
-  public async login(postData: LoginCredentials): Promise<boolean> {
+  public async login(
+    postData: LoginCredentials = {
+      username:
+        (this.homey.settings.get('username') as HomeySettings['username']) ??
+        '',
+      password:
+        (this.homey.settings.get('password') as HomeySettings['password']) ??
+        '',
+    },
+    raise = true,
+  ): Promise<boolean> {
     this.clearLoginRefresh()
     try {
       const { username, password } = postData
@@ -43,7 +53,10 @@ export = class HeatzyApp extends withAPI(App) {
       await this.refreshLogin()
       return true
     } catch (error: unknown) {
-      throw new Error(getErrorMessage(error))
+      if (raise) {
+        throw new Error(getErrorMessage(error))
+      }
+      return false
     }
   }
 
@@ -52,14 +65,6 @@ export = class HeatzyApp extends withAPI(App) {
   }
 
   private async refreshLogin(): Promise<void> {
-    const loginCredentials: LoginCredentials = {
-      username:
-        (this.homey.settings.get('username') as HomeySettings['username']) ??
-        '',
-      password:
-        (this.homey.settings.get('password') as HomeySettings['password']) ??
-        '',
-    }
     const expiredAt: number | null = this.homey.settings.get(
       'expire_at',
     ) as HomeySettings['expire_at']
@@ -75,20 +80,12 @@ export = class HeatzyApp extends withAPI(App) {
       const maxTimeout: number = 2 ** 31 - 1
       const interval: number = Math.min(ms, maxTimeout)
       this.#loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
-        await this.tryLogin(loginCredentials)
+        await this.login(undefined, false)
       }, interval)
       this.log('Login refresh has been scheduled')
       return
     }
-    await this.tryLogin(loginCredentials)
-  }
-
-  private async tryLogin(loginCredentials: LoginCredentials): Promise<void> {
-    try {
-      await this.login(loginCredentials)
-    } catch (error: unknown) {
-      // Logged by `withAPI`
-    }
+    await this.login(undefined, false)
   }
 
   private clearLoginRefresh(): void {
