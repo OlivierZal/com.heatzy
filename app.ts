@@ -21,7 +21,7 @@ export = class HeatzyApp extends withAPI(App) {
   public async onInit(): Promise<void> {
     LuxonSettings.defaultLocale = this.getLanguage()
     LuxonSettings.defaultZone = this.homey.clock.getTimezone()
-    await this.login(undefined, false)
+    await this.planRefreshLogin()
   }
 
   public async login(
@@ -33,7 +33,7 @@ export = class HeatzyApp extends withAPI(App) {
         (this.homey.settings.get('password') as HomeySettings['password']) ??
         '',
     },
-    raise = true,
+    raise = false,
   ): Promise<boolean> {
     this.clearLoginRefresh()
     try {
@@ -51,7 +51,7 @@ export = class HeatzyApp extends withAPI(App) {
         password,
       })
       /* eslint-enable camelcase */
-      await this.refreshLogin()
+      await this.planRefreshLogin()
       return true
     } catch (error: unknown) {
       if (raise) {
@@ -65,28 +65,23 @@ export = class HeatzyApp extends withAPI(App) {
     return this.homey.i18n.getLanguage()
   }
 
-  private async refreshLogin(): Promise<void> {
-    const expiredAt: number | null = this.homey.settings.get(
-      'expire_at',
-    ) as HomeySettings['expire_at']
-    const ms: number =
-      expiredAt !== null
-        ? DateTime.fromSeconds(expiredAt)
-            .minus({
-              days: 1,
-            })
-            .diffNow().milliseconds
-        : 0
-    if (ms) {
+  private async planRefreshLogin(): Promise<void> {
+    const expiredAt: number =
+      (this.homey.settings.get('expire_at') as HomeySettings['expire_at']) ?? 0
+    const ms: number = DateTime.fromSeconds(expiredAt)
+      .minus({
+        days: 1,
+      })
+      .diffNow().milliseconds
+    if (ms > 0) {
       const maxTimeout: number = 2 ** 31 - 1
       const interval: number = Math.min(ms, maxTimeout)
       this.#loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
-        await this.login(undefined, false)
+        await this.login()
       }, interval)
-      this.log('Login refresh has been scheduled')
       return
     }
-    await this.login(undefined, false)
+    await this.login()
   }
 
   private clearLoginRefresh(): void {
