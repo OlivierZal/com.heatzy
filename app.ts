@@ -75,10 +75,12 @@ export = class HeatzyApp extends withAPI(App) {
       .diffNow().milliseconds
     if (ms > 0) {
       const maxTimeout: number = 2 ** 31 - 1
-      const interval: number = Math.min(ms, maxTimeout)
-      this.#loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
-        await this.login()
-      }, interval)
+      this.#loginTimeout = this.homey.setTimeout(
+        async (): Promise<void> => {
+          await this.login()
+        },
+        Math.min(ms, maxTimeout),
+      )
       return
     }
     await this.login()
