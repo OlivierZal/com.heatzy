@@ -63,20 +63,22 @@ export = class HeatzyApp extends withAPI(App) {
     const expiredAt: number | null = this.homey.settings.get(
       'expire_at',
     ) as HomeySettings['expire_at']
-    if (expiredAt !== null) {
-      const expireAtDateTime: DateTime = DateTime.fromSeconds(expiredAt).minus({
-        days: 1,
-      })
-      const ms: number = expireAtDateTime.diffNow().milliseconds
-      if (ms) {
-        const maxTimeout: number = 2 ** 31 - 1
-        const interval: number = Math.min(ms, maxTimeout)
-        this.#loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
-          await this.tryLogin(loginCredentials)
-        }, interval)
-        this.log('Login refresh has been scheduled')
-        return
-      }
+    const ms: number =
+      expiredAt !== null
+        ? DateTime.fromSeconds(expiredAt)
+            .minus({
+              days: 1,
+            })
+            .diffNow().milliseconds
+        : 0
+    if (ms) {
+      const maxTimeout: number = 2 ** 31 - 1
+      const interval: number = Math.min(ms, maxTimeout)
+      this.#loginTimeout = this.homey.setTimeout(async (): Promise<void> => {
+        await this.tryLogin(loginCredentials)
+      }, interval)
+      this.log('Login refresh has been scheduled')
+      return
     }
     await this.tryLogin(loginCredentials)
   }
