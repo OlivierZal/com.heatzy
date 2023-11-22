@@ -10,8 +10,7 @@ import {
   type Data,
   type DeviceData,
   type DeviceDetails,
-  type DevicePostData,
-  type FirstGenDevicePostData,
+  type DevicePostDataAny,
   type OnMode,
   type PreviousMode,
   type Settings,
@@ -239,9 +238,8 @@ class HeatzyDevice extends withAPI(Device) {
     )
   }
 
-  private async syncFromDevice(): Promise<void> {
-    const attr: DeviceData['attr'] | null = await this.getDeviceData()
-    await this.updateCapabilities(attr)
+  private async syncFromDevice(control = false): Promise<void> {
+    await this.updateCapabilities(control)
     this.applySyncFromDevice()
   }
 
@@ -256,26 +254,22 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async updateCapabilities(
-    attr: DeviceData['attr'] | DevicePostData['attrs'] | null,
-    control = false,
-  ): Promise<void> {
+  private async updateCapabilities(control = false): Promise<void> {
+    const attr: DeviceData['attr'] | null = await this.getDeviceData()
     if (!attr) {
       return
     }
     /* eslint-disable camelcase */
     const { mode, derog_mode, derog_time, lock_switch, timer_switch } = attr
-    if (mode !== undefined) {
-      const newMode: keyof typeof Mode =
-        typeof mode === 'string'
-          ? modeFromString[mode] ?? (mode as keyof typeof Mode)
-          : (Mode[mode] as keyof typeof Mode)
-      await this.setCapabilityValue(this.#mode, newMode)
-      const isOn: boolean = newMode !== 'stop'
-      await this.setCapabilityValue('onoff', isOn)
-      if (isOn) {
-        await this.setStoreValue('previous_mode', newMode)
-      }
+    const newMode: keyof typeof Mode =
+      typeof mode === 'string'
+        ? modeFromString[mode] ?? (mode as keyof typeof Mode)
+        : (Mode[mode] as keyof typeof Mode)
+    await this.setCapabilityValue(this.#mode, newMode)
+    const isOn: boolean = newMode !== 'stop'
+    await this.setCapabilityValue('onoff', isOn)
+    if (isOn) {
+      await this.setStoreValue('previous_mode', newMode)
     }
     if (lock_switch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lock_switch))
@@ -386,27 +380,16 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async syncToDevice(): Promise<void> {
-    const postData: DevicePostData | FirstGenDevicePostData | null =
-      this.buildPostData()
-    if (postData) {
-      const data: Data | null = await this.control(postData)
-      if (data) {
-        await this.updateCapabilities(
-          'attrs' in postData ? postData.attrs : { mode: postData.raw[2] },
-          true,
-        )
-      }
-    }
-    this.applySyncFromDevice()
+    const postData: DevicePostDataAny | null = this.buildPostData()
+    await this.control(postData)
+    await this.syncFromDevice(true)
   }
 
-  private buildPostData(): DevicePostData | FirstGenDevicePostData | null {
+  private buildPostData(): DevicePostDataAny | null {
     if (!Object.keys(this.#attrs).length) {
       return null
     }
-    const postData: DevicePostData | FirstGenDevicePostData = isFirstGen(
-      this.#productKey,
-    )
+    const postData: DevicePostDataAny = isFirstGen(this.#productKey)
       ? { raw: [1, 1, this.#attrs.mode as 0 | 1 | 2 | 3] }
       : { attrs: this.#attrs }
     this.#attrs = {}
@@ -414,8 +397,11 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async control(
-    postData: DevicePostData | FirstGenDevicePostData,
+    postData: DevicePostDataAny | null,
   ): Promise<Data | null> {
+    if (!postData) {
+      return null
+    }
     try {
       const { data } = await this.api.post<Data>(
         `/control/${this.#id}`,

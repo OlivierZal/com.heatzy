@@ -183,13 +183,15 @@ export interface BaseAttrs {
   timer_switch?: Switch
 }
 
-export interface FirstGenDevicePostData {
+interface FirstGenDevicePostData {
   readonly raw: [1, 1, number]
 }
 
-export interface DevicePostData {
+interface DevicePostData {
   readonly attrs: BaseAttrs
 }
+
+export type DevicePostDataAny = DevicePostData | FirstGenDevicePostData
 
 export interface DeviceData {
   readonly attr: Omit<BaseAttrs, 'mode'> & { readonly mode: ModeString }
