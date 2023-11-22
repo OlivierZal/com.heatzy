@@ -359,21 +359,21 @@ class HeatzyDevice extends withAPI(Device) {
     } else {
       mode = value as keyof typeof Mode
     }
-    if (mode !== 'stop' || !(this.getSetting('always_on') as boolean)) {
-      return mode
+    if (mode === 'stop' && (this.getSetting('always_on') as boolean)) {
+      mode = null
+      await this.setWarning(this.homey.__('warnings.always_on'))
+      this.homey.setTimeout(
+        async (): Promise<void> =>
+          this.setCapabilityValue(
+            capability,
+            capability === this.#mode
+              ? (this.getStoreValue('previous_mode') as OnMode)
+              : true,
+          ),
+        Duration.fromObject({ seconds: 1 }).as('milliseconds'),
+      )
     }
-    await this.setWarning(this.homey.__('warnings.always_on'))
-    this.homey.setTimeout(
-      async (): Promise<void> =>
-        this.setCapabilityValue(
-          capability,
-          capability === this.#mode
-            ? (this.getStoreValue('previous_mode') as OnMode)
-            : true,
-        ),
-      Duration.fromObject({ seconds: 1 }).as('milliseconds'),
-    )
-    return null
+    return mode
   }
 
   private applySyncToDevice(): void {
