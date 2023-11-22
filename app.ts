@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
 import axios from 'axios'
-import { DateTime, Settings as LuxonSettings } from 'luxon'
+import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
 import withAPI, { getErrorMessage } from './mixins/withAPI'
 import {
   loginURL,
@@ -16,7 +16,11 @@ axios.defaults.headers.common['X-Gizwits-Application-Id'] =
   'c70a66ff039d41b4a220e198b0fcc8b3'
 
 export = class HeatzyApp extends withAPI(App) {
+  public retry = true
+
   #loginTimeout!: NodeJS.Timeout
+
+  readonly #retryTimeout!: NodeJS.Timeout
 
   public async onInit(): Promise<void> {
     LuxonSettings.defaultLocale = this.getLanguage()
@@ -63,6 +67,17 @@ export = class HeatzyApp extends withAPI(App) {
 
   public getLanguage(): string {
     return this.homey.i18n.getLanguage()
+  }
+
+  public handleRetry(): void {
+    this.retry = false
+    this.homey.clearTimeout(this.#retryTimeout)
+    this.homey.setTimeout(
+      () => {
+        this.retry = true
+      },
+      Duration.fromObject({ minutes: 1 }).as('milliseconds'),
+    )
   }
 
   private async planRefreshLogin(): Promise<void> {

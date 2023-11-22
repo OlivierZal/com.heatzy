@@ -8,7 +8,6 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import { Duration } from 'luxon'
 import type HeatzyApp from '../app'
 import {
   loginURL,
@@ -48,10 +47,6 @@ export function getErrorMessage(error: unknown): string {
 export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
   return class extends base {
     public api: AxiosInstance = axios.create()
-
-    #retry = true
-
-    readonly #retryTimeout!: NodeJS.Timeout
 
     public constructor(...args: any[]) {
       super(...args)
@@ -98,20 +93,14 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
     ): Promise<AxiosError> {
       const errorMessage: string = getAPIErrorMessage(error)
       this.error(`Error in ${type}:`, error.config?.url, errorMessage)
+      const app: HeatzyApp = this.homey.app as HeatzyApp
       if (
         error.response?.status === 400 &&
-        this.#retry &&
+        app.retry &&
         error.config?.url !== loginURL
       ) {
-        this.#retry = false
-        this.homey.clearTimeout(this.#retryTimeout)
-        this.homey.setTimeout(
-          () => {
-            this.#retry = true
-          },
-          Duration.fromObject({ minutes: 1 }).as('milliseconds'),
-        )
-        const loggedIn: boolean = await (this.homey.app as HeatzyApp).login()
+        app.handleRetry()
+        const loggedIn: boolean = await app.login()
         if (loggedIn && error.config) {
           return this.api.request(error.config)
         }
