@@ -22,7 +22,7 @@ type APIClass = new (...args: any[]) => {
 
 function getAPIErrorMessage(error: AxiosError): string {
   const { data } = error.response ?? {}
-  if (data !== undefined && data !== '') {
+  if (data !== undefined && data) {
     /* eslint-disable camelcase */
     const { error_message, detail_message } = data as ErrorData
     const errorMessage: string = detail_message ?? error_message ?? ''
