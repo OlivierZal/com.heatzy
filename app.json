@@ -1,0 +1,944 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.heatzy",
+  "sdk": 3,
+  "brandColor": "#153f35",
+  "name": {
+    "en": "Heatzy",
+    "fr": "Heatzy"
+  },
+  "description": {
+    "en": "Pilot your electric radiators",
+    "fr": "Pilotez vos radiateurs électriques"
+  },
+  "category": [
+    "climate"
+  ],
+  "version": "11.0.0",
+  "compatibility": ">=5.0.0",
+  "tags": {
+    "en": [
+      "acova",
+      "electric",
+      "heater",
+      "heatzy",
+      "radiator",
+      "towel warmer",
+      "underfloor heating"
+    ],
+    "fr": [
+      "acova",
+      "chauffage",
+      "électrique",
+      "heatzy",
+      "plancher chauffant",
+      "radiateur",
+      "sèche serviette"
+    ]
+  },
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Olivier Zalmanski",
+    "email": "olivier.zalmanski@me.com"
+  },
+  "bugs": {
+    "url": "https://github.com/OlivierZal/com.heatzy/issues"
+  },
+  "source": "https://github.com/OlivierZal/com.heatzy",
+  "support": "https://github.com/OlivierZal/com.heatzy/issues",
+  "homeyCommunityTopicId": 76406,
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "OlivierZalmanski"
+      }
+    }
+  },
+  "platforms": [
+    "local"
+  ],
+  "api": {
+    "getLanguage": {
+      "method": "GET",
+      "path": "/language"
+    },
+    "login": {
+      "method": "POST",
+      "path": "/login"
+    },
+    "getDeviceSettings": {
+      "method": "GET",
+      "path": "/devices/settings"
+    },
+    "setDeviceSettings": {
+      "method": "POST",
+      "path": "/devices/settings"
+    },
+    "getDriverSettings": {
+      "method": "GET",
+      "path": "/drivers/settings"
+    }
+  },
+  "flow": {
+    "triggers": [
+      {
+        "title": {
+          "en": "The mode has changed",
+          "fr": "Le mode a changé"
+        },
+        "tokens": [
+          {
+            "name": "mode_3",
+            "type": "string",
+            "title": {
+              "en": "Mode",
+              "fr": "Mode"
+            },
+            "example": {
+              "en": "eco"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode_3"
+          }
+        ],
+        "id": "mode_3_changed"
+      },
+      {
+        "title": {
+          "en": "The mode has changed",
+          "fr": "Le mode a changé"
+        },
+        "tokens": [
+          {
+            "name": "mode",
+            "type": "string",
+            "title": {
+              "en": "Mode",
+              "fr": "Mode"
+            },
+            "example": {
+              "en": "eco"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode"
+          }
+        ],
+        "id": "mode_changed"
+      }
+    ],
+    "conditions": [
+      {
+        "title": {
+          "en": "The mode !{{is|is not}}",
+          "fr": "Le mode !{{est|n'est pas}}"
+        },
+        "titleFormatted": {
+          "en": "The mode !{{is|is not}} [[mode]]",
+          "fr": "Le mode !{{est|n'est pas}} [[mode]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode_3"
+          },
+          {
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "cft",
+                "title": {
+                  "en": "Comfort",
+                  "fr": "Confort"
+                }
+              },
+              {
+                "id": "cft1",
+                "title": {
+                  "en": "Comfort 1",
+                  "fr": "Confort 1"
+                }
+              },
+              {
+                "id": "cft2",
+                "title": {
+                  "en": "Comfort 2",
+                  "fr": "Confort 2"
+                }
+              },
+              {
+                "id": "eco",
+                "title": {
+                  "en": "Eco",
+                  "fr": "Éco"
+                }
+              },
+              {
+                "id": "fro",
+                "title": {
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
+                }
+              },
+              {
+                "id": "stop",
+                "title": {
+                  "en": "Off",
+                  "fr": "Désactivé"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "mode_3_condition"
+      },
+      {
+        "title": {
+          "en": "The mode !{{is|is not}}",
+          "fr": "Le mode !{{est|n'est pas}}"
+        },
+        "titleFormatted": {
+          "en": "The mode !{{is|is not}} [[mode]]",
+          "fr": "Le mode !{{est|n'est pas}} [[mode]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode"
+          },
+          {
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "cft",
+                "title": {
+                  "en": "Comfort",
+                  "fr": "Confort"
+                }
+              },
+              {
+                "id": "eco",
+                "title": {
+                  "en": "Eco",
+                  "fr": "Éco"
+                }
+              },
+              {
+                "id": "fro",
+                "title": {
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
+                }
+              },
+              {
+                "id": "stop",
+                "title": {
+                  "en": "Off",
+                  "fr": "Désactivé"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "mode_condition"
+      }
+    ],
+    "actions": [
+      {
+        "title": {
+          "en": "Set the mode",
+          "fr": "Définir le mode"
+        },
+        "titleFormatted": {
+          "en": "Set the mode to [[mode]]",
+          "fr": "Définir le mode à [[mode]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode_3"
+          },
+          {
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "cft",
+                "title": {
+                  "en": "Comfort",
+                  "fr": "Confort"
+                }
+              },
+              {
+                "id": "cft1",
+                "title": {
+                  "en": "Comfort 1",
+                  "fr": "Confort 1"
+                }
+              },
+              {
+                "id": "cft2",
+                "title": {
+                  "en": "Comfort 2",
+                  "fr": "Confort 2"
+                }
+              },
+              {
+                "id": "eco",
+                "title": {
+                  "en": "Eco",
+                  "fr": "Éco"
+                }
+              },
+              {
+                "id": "fro",
+                "title": {
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
+                }
+              },
+              {
+                "id": "stop",
+                "title": {
+                  "en": "Off",
+                  "fr": "Désactivé"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "mode_3_action"
+      },
+      {
+        "title": {
+          "en": "Set the mode",
+          "fr": "Définir le mode"
+        },
+        "titleFormatted": {
+          "en": "Set the mode to [[mode]]",
+          "fr": "Définir le mode à [[mode]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode"
+          },
+          {
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "cft",
+                "title": {
+                  "en": "Comfort",
+                  "fr": "Confort"
+                }
+              },
+              {
+                "id": "eco",
+                "title": {
+                  "en": "Eco",
+                  "fr": "Éco"
+                }
+              },
+              {
+                "id": "fro",
+                "title": {
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
+                }
+              },
+              {
+                "id": "stop",
+                "title": {
+                  "en": "Off",
+                  "fr": "Désactivé"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "mode_action"
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "images": {
+        "large": "/drivers/heatzy/assets/images/large.png",
+        "small": "/drivers/heatzy/assets/images/small.png"
+      },
+      "icon": "/drivers/heatzy/assets/icon.svg",
+      "class": "thermostat",
+      "pair": [
+        {
+          "id": "login",
+          "template": "login_credentials",
+          "navigation": {
+            "next": "list_devices"
+          },
+          "options": {
+            "logo": "logo.png",
+            "usernameLabel": {
+              "en": "Username",
+              "fr": "Nom d'utilisateur"
+            },
+            "usernamePlaceholder": {
+              "en": "user@domain.com",
+              "fr": "utilisateur@domain.fr"
+            },
+            "passwordLabel": {
+              "en": "Password",
+              "fr": "Mot de passe"
+            },
+            "passwordPlaceholder": {
+              "en": "P4ssw0rd",
+              "fr": "P4ssw0rd"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "repair": [
+        {
+          "id": "login",
+          "template": "login_credentials",
+          "options": {
+            "logo": "logo.png",
+            "usernameLabel": {
+              "en": "Username",
+              "fr": "Nom d'utilisateur"
+            },
+            "usernamePlaceholder": {
+              "en": "user@domain.com",
+              "fr": "utilisateur@domain.fr"
+            },
+            "passwordLabel": {
+              "en": "Password",
+              "fr": "Mot de passe"
+            },
+            "passwordPlaceholder": {
+              "en": "P4ssw0rd",
+              "fr": "P4ssw0rd"
+            }
+          }
+        }
+      ],
+      "name": {
+        "en": "Heatzy Pilote",
+        "fr": "Heatzy Pilote"
+      },
+      "capabilities": [
+        "mode",
+        "mode_3",
+        "derog_end",
+        "derog_time_boost",
+        "derog_time_vacation",
+        "onoff",
+        "onoff.timer",
+        "locked",
+        "target_temperature",
+        "target_temperature.complement"
+      ],
+      "capabilitiesOptions": {
+        "onoff.timer": {
+          "title": {
+            "en": "Timer",
+            "fr": "Programmateur"
+          },
+          "insightsTitleTrue": {
+            "en": "Scheduled",
+            "fr": "Programmation activé"
+          },
+          "insightsTitleFalse": {
+            "en": "Unscheduled",
+            "fr": "Programmation désactivé"
+          }
+        },
+        "target_temperature": {
+          "min": 0,
+          "max": 25.5
+        },
+        "target_temperature.complement": {
+          "title": {
+            "en": "Thermal complement (comfort mode)",
+            "fr": "Complément thermique (mode confort)"
+          },
+          "min": 0,
+          "max": 10,
+          "step": 1
+        }
+      },
+      "id": "heatzy",
+      "settings": [
+        {
+          "id": "options",
+          "type": "group",
+          "label": {
+            "en": "Options",
+            "fr": "Options"
+          },
+          "children": [
+            {
+              "id": "always_on",
+              "type": "checkbox",
+              "label": {
+                "en": "Disable shutdown from Homey",
+                "fr": "Désactiver l'extinction depuis Homey"
+              },
+              "value": false,
+              "hint": {
+                "en": "This setting prevents the device from being switched off from Homey, it can still be switched off manually (from a remote control or from the physical device)",
+                "fr": "Ce paramètre empêche l'appareil d'être éteint depuis Homey, il peut toujours être éteint manuellement (à partir d'une télécommande ou depuis l'appareil physique)"
+              }
+            },
+            {
+              "id": "on_mode",
+              "type": "dropdown",
+              "label": {
+                "en": "Behavior when switching on",
+                "fr": "Comportement à l'allumage"
+              },
+              "value": "previous",
+              "values": [
+                {
+                  "id": "cft",
+                  "label": {
+                    "en": "Comfort",
+                    "fr": "Confort"
+                  }
+                },
+                {
+                  "id": "eco",
+                  "label": {
+                    "en": "Eco",
+                    "fr": "Éco"
+                  }
+                },
+                {
+                  "id": "previous",
+                  "label": {
+                    "en": "Previous mode",
+                    "fr": "Mode précédent"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "capabilities": {
+    "derog_end": {
+      "type": "string",
+      "title": {
+        "en": "End of derogation",
+        "fr": "Fin de la dérogation"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/derog_end.svg"
+    },
+    "derog_time_boost": {
+      "type": "enum",
+      "title": {
+        "en": "Boost",
+        "fr": "Boost"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off",
+            "fr": "Désactivé"
+          }
+        },
+        {
+          "id": "120",
+          "title": {
+            "en": "2 hours",
+            "fr": "2 heures"
+          }
+        },
+        {
+          "id": "90",
+          "title": {
+            "en": "1 hour 30",
+            "fr": "1 heure 30"
+          }
+        },
+        {
+          "id": "60",
+          "title": {
+            "en": "1 hour",
+            "fr": "1 heure"
+          }
+        },
+        {
+          "id": "30",
+          "title": {
+            "en": "30 minutes",
+            "fr": "30 minutes"
+          }
+        }
+      ]
+    },
+    "derog_time_vacation": {
+      "type": "enum",
+      "title": {
+        "en": "Vacation",
+        "fr": "Vacances"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off",
+            "fr": "Désactivé"
+          }
+        },
+        {
+          "id": "30",
+          "title": {
+            "en": "30 days",
+            "fr": "30 jours"
+          }
+        },
+        {
+          "id": "29",
+          "title": {
+            "en": "29 days",
+            "fr": "29 jours"
+          }
+        },
+        {
+          "id": "28",
+          "title": {
+            "en": "28 days",
+            "fr": "28 jours"
+          }
+        },
+        {
+          "id": "27",
+          "title": {
+            "en": "27 days",
+            "fr": "27 jours"
+          }
+        },
+        {
+          "id": "26",
+          "title": {
+            "en": "26 days",
+            "fr": "26 jours"
+          }
+        },
+        {
+          "id": "25",
+          "title": {
+            "en": "25 days",
+            "fr": "25 jours"
+          }
+        },
+        {
+          "id": "24",
+          "title": {
+            "en": "24 days",
+            "fr": "24 jours"
+          }
+        },
+        {
+          "id": "23",
+          "title": {
+            "en": "23 days",
+            "fr": "23 jours"
+          }
+        },
+        {
+          "id": "22",
+          "title": {
+            "en": "22 days",
+            "fr": "22 jours"
+          }
+        },
+        {
+          "id": "21",
+          "title": {
+            "en": "21 days",
+            "fr": "21 jours"
+          }
+        },
+        {
+          "id": "20",
+          "title": {
+            "en": "20 days",
+            "fr": "20 jours"
+          }
+        },
+        {
+          "id": "19",
+          "title": {
+            "en": "19 days",
+            "fr": "19 jours"
+          }
+        },
+        {
+          "id": "18",
+          "title": {
+            "en": "18 days",
+            "fr": "18 jours"
+          }
+        },
+        {
+          "id": "17",
+          "title": {
+            "en": "17 days",
+            "fr": "17 jours"
+          }
+        },
+        {
+          "id": "16",
+          "title": {
+            "en": "16 days",
+            "fr": "16 jours"
+          }
+        },
+        {
+          "id": "15",
+          "title": {
+            "en": "15 days",
+            "fr": "15 jours"
+          }
+        },
+        {
+          "id": "14",
+          "title": {
+            "en": "14 days",
+            "fr": "14 jours"
+          }
+        },
+        {
+          "id": "13",
+          "title": {
+            "en": "13 days",
+            "fr": "13 jours"
+          }
+        },
+        {
+          "id": "12",
+          "title": {
+            "en": "12 days",
+            "fr": "12 jours"
+          }
+        },
+        {
+          "id": "11",
+          "title": {
+            "en": "11 days",
+            "fr": "11 jours"
+          }
+        },
+        {
+          "id": "10",
+          "title": {
+            "en": "10 days",
+            "fr": "10 jours"
+          }
+        },
+        {
+          "id": "9",
+          "title": {
+            "en": "9 days",
+            "fr": "9 jours"
+          }
+        },
+        {
+          "id": "8",
+          "title": {
+            "en": "8 days",
+            "fr": "8 jours"
+          }
+        },
+        {
+          "id": "7",
+          "title": {
+            "en": "7 days",
+            "fr": "7 jours"
+          }
+        },
+        {
+          "id": "6",
+          "title": {
+            "en": "6 days",
+            "fr": "6 jours"
+          }
+        },
+        {
+          "id": "5",
+          "title": {
+            "en": "5 days",
+            "fr": "5 jours"
+          }
+        },
+        {
+          "id": "4",
+          "title": {
+            "en": "4 days",
+            "fr": "4 jours"
+          }
+        },
+        {
+          "id": "3",
+          "title": {
+            "en": "3 days",
+            "fr": "3 jours"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "2 days",
+            "fr": "2 jours"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "1 day",
+            "fr": "1 jour"
+          }
+        }
+      ]
+    },
+    "mode": {
+      "type": "enum",
+      "title": {
+        "en": "Mode",
+        "fr": "Mode"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "cft",
+          "title": {
+            "en": "Comfort",
+            "fr": "Confort"
+          }
+        },
+        {
+          "id": "eco",
+          "title": {
+            "en": "Eco",
+            "fr": "Éco"
+          }
+        },
+        {
+          "id": "fro",
+          "title": {
+            "en": "Anti-frost",
+            "fr": "Anti-gel"
+          }
+        },
+        {
+          "id": "stop",
+          "title": {
+            "en": "Off",
+            "fr": "Désactivé"
+          }
+        }
+      ]
+    },
+    "mode_3": {
+      "type": "enum",
+      "title": {
+        "en": "Mode",
+        "fr": "Mode"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "cft",
+          "title": {
+            "en": "Comfort",
+            "fr": "Confort"
+          }
+        },
+        {
+          "id": "cft1",
+          "title": {
+            "en": "Comfort 1",
+            "fr": "Confort 1"
+          }
+        },
+        {
+          "id": "cft2",
+          "title": {
+            "en": "Comfort 2",
+            "fr": "Confort 2"
+          }
+        },
+        {
+          "id": "eco",
+          "title": {
+            "en": "Eco",
+            "fr": "Éco"
+          }
+        },
+        {
+          "id": "fro",
+          "title": {
+            "en": "Anti-frost",
+            "fr": "Anti-gel"
+          }
+        },
+        {
+          "id": "stop",
+          "title": {
+            "en": "Off",
+            "fr": "Désactivé"
+          }
+        }
+      ]
+    }
+  }
+}
