@@ -15,15 +15,12 @@ import type {
   SettingValue,
 } from './types'
 
-function getDevices(homey: Homey): HeatzyDevice[] {
-  return Object.values(homey.drivers.getDrivers()).flatMap(
+const getDevices = (homey: Homey): HeatzyDevice[] =>
+  Object.values(homey.drivers.getDrivers()).flatMap(
     (driver: Driver): HeatzyDevice[] => driver.getDevices() as HeatzyDevice[],
   )
-}
 
-function getLanguage(homey: Homey): string {
-  return homey.i18n.getLanguage()
-}
+const getLanguage = (homey: Homey): string => homey.i18n.getLanguage()
 
 export = {
   getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {

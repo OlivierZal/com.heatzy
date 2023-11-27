@@ -185,7 +185,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       },
     )
 
-  function disableButtons(value = true): void {
+  const disableButtons = (value = true): void => {
     ;[applySettingsElement, refreshSettingsElement].forEach(
       (buttonElement: HTMLButtonElement): void => {
         if (value) {
@@ -197,26 +197,26 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  function enableButtons(value = true): void {
+  const enableButtons = (value = true): void => {
     disableButtons(!value)
   }
 
-  function hide(element: HTMLDivElement, value = true): void {
+  const hide = (element: HTMLDivElement, value = true): void => {
     element.classList.toggle('hidden', value)
   }
 
-  function unhide(element: HTMLDivElement, value = true): void {
+  const unhide = (element: HTMLDivElement, value = true): void => {
     hide(element, !value)
   }
 
-  function needsAuthentication(value = true): void {
+  const needsAuthentication = (value = true): void => {
     hide(authenticatedElement, value)
     unhide(authenticatingElement, value)
   }
 
-  function processSettingValue(
+  const processSettingValue = (
     element: HTMLInputElement | HTMLSelectElement,
-  ): SettingValue | null {
+  ): SettingValue | null => {
     const { value } = element
     if (!value) {
       return null
@@ -232,9 +232,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       : (value as OnMode)
   }
 
-  function buildSettingsBody(
+  const buildSettingsBody = (
     elements: (HTMLInputElement | HTMLSelectElement)[],
-  ): Settings {
+  ): Settings => {
     const shouldUpdate = (
       settingId: string,
       settingValue: SettingValue,
@@ -271,7 +271,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  function updateDeviceSettings(body: Settings): void {
+  const updateDeviceSettings = (body: Settings): void => {
     Object.entries(body).forEach(
       ([settingId, settingValue]: [string, SettingValue]): void => {
         Object.keys(deviceSettings).forEach((driver: string): void => {
@@ -282,7 +282,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  function setDeviceSettings(body: Settings): void {
+  const setDeviceSettings = (body: Settings): void => {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
       'POST',
@@ -302,7 +302,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  function addApplySettingsEventListener(elements: HTMLSelectElement[]): void {
+  const addApplySettingsEventListener = (
+    elements: HTMLSelectElement[],
+  ): void => {
     applySettingsElement.addEventListener('click', (): void => {
       let body: Settings = {}
       try {
@@ -336,7 +338,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     })
   }
 
-  function updateCommonChildrenElement(element: HTMLSelectElement): void {
+  const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
     const values: SettingValue[] | undefined = flatDeviceSettings[
       element.id.split('--')[0]
     ] as SettingValue[] | undefined
@@ -345,9 +347,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       values && new Set(values).size === 1 ? String(values[0]) : ''
   }
 
-  function addRefreshSettingsEventListener(
+  const addRefreshSettingsEventListener = (
     elements: HTMLSelectElement[],
-  ): void {
+  ): void => {
     refreshSettingsElement.addEventListener('click', (): void => {
       disableButtons()
       elements.forEach(updateCommonChildrenElement)
@@ -355,12 +357,12 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     })
   }
 
-  function addSettingsEventListeners(elements: HTMLSelectElement[]): void {
+  const addSettingsEventListeners = (elements: HTMLSelectElement[]): void => {
     addApplySettingsEventListener(elements)
     addRefreshSettingsEventListener(elements)
   }
 
-  function generateCommonChildrenElements(): void {
+  const generateCommonChildrenElements = (): void => {
     driverSettingsCommon
       .filter((setting: DriverSetting) =>
         ['checkbox', 'dropdown'].includes(setting.type),
@@ -401,7 +403,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  async function login(): Promise<void> {
+  const login = async (): Promise<void> => {
     const username: string = usernameElement?.value ?? ''
     const password: string = passwordElement?.value ?? ''
     if (!username || !password) {
@@ -434,7 +436,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     )
   }
 
-  async function load(): Promise<void> {
+  const load = async (): Promise<void> => {
     generateCommonChildrenElements()
     if (homeySettings.token === undefined) {
       needsAuthentication()

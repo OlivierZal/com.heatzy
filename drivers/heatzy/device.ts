@@ -18,11 +18,9 @@ import {
 } from '../../types'
 import { isFirstGen, isFirstPilot } from '../../utils'
 
-function booleanToSwitch(value: boolean): Switch {
-  return Number(value) as Switch
-}
+const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
-function getDerogTime(derogMode: number, derogTime: number): string | null {
+const getDerogTime = (derogMode: number, derogTime: number): string | null => {
   if (!derogMode) {
     return null
   }

@@ -20,7 +20,7 @@ type APIClass = new (...args: any[]) => {
   readonly api: AxiosInstance
 }
 
-function getAPIErrorMessage(error: AxiosError): string {
+const getAPIErrorMessage = (error: AxiosError): string => {
   const { data } = error.response ?? {}
   if (data !== undefined && data) {
     /* eslint-disable camelcase */
@@ -34,7 +34,7 @@ function getAPIErrorMessage(error: AxiosError): string {
   return error.message
 }
 
-export function getErrorMessage(error: unknown): string {
+export const getErrorMessage = (error: unknown): string => {
   let errorMessage = String(error)
   if (axios.isAxiosError(error)) {
     errorMessage = getAPIErrorMessage(error)
@@ -44,8 +44,8 @@ export function getErrorMessage(error: unknown): string {
   return errorMessage
 }
 
-export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
-  return class extends base {
+const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
+  class extends base {
     public api: AxiosInstance = axios.create()
 
     public constructor(...args: any[]) {
@@ -115,4 +115,5 @@ export default function withAPI<T extends HomeyClass>(base: T): APIClass & T {
       }
     }
   }
-}
+
+export default withAPI
