@@ -267,7 +267,11 @@ class HeatzyDevice extends withAPI(Device) {
     const isOn: boolean = newMode !== 'stop'
     await this.setCapabilityValue('onoff', isOn)
     if (isOn) {
-      await this.setStoreValue('previous_mode', newMode)
+      try {
+        await this.setStoreValue('previous_mode', newMode)
+      } catch (error: unknown) {
+        this.error(newMode)
+      }
     }
     if (lock_switch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lock_switch))
