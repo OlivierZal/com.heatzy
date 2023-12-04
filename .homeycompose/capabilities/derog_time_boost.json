@@ -16,17 +16,10 @@
       }
     },
     {
-      "id": "120",
+      "id": "30",
       "title": {
-        "en": "2 hours",
-        "fr": "2 heures"
-      }
-    },
-    {
-      "id": "90",
-      "title": {
-        "en": "1 hour 30",
-        "fr": "1 heure 30"
+        "en": "30 minutes",
+        "fr": "30 minutes"
       }
     },
     {
@@ -37,10 +30,17 @@
       }
     },
     {
-      "id": "30",
+      "id": "90",
       "title": {
-        "en": "30 minutes",
-        "fr": "30 minutes"
+        "en": "1 hour 30",
+        "fr": "1 heure 30"
+      }
+    },
+    {
+      "id": "120",
+      "title": {
+        "en": "2 hours",
+        "fr": "2 heures"
       }
     }
   ]
