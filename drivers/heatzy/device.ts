@@ -382,7 +382,7 @@ class HeatzyDevice extends withAPI(Device) {
   private async syncToDevice(): Promise<void> {
     const postData: DevicePostDataAny | null = this.buildPostData()
     await this.control(postData)
-    this.applySyncFromDevice(true, { seconds: 1 })
+    this.applySyncFromDevice(true, { seconds: 5 })
   }
 
   private buildPostData(): DevicePostDataAny | null {
