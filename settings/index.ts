@@ -411,10 +411,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       await homey.alert(homey.__('settings.authenticate.failure'))
       return
     }
-    const body: LoginCredentials = {
-      username,
-      password,
-    }
+    const body: LoginCredentials = { username, password }
     // @ts-expect-error: `homey` is partially typed
     homey.api(
       'POST',

@@ -1,6 +1,5 @@
 /* eslint-disable
-  @typescript-eslint/no-explicit-any,
-  @typescript-eslint/no-unsafe-argument
+  @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
 */
 import axios, {
   type AxiosError,
@@ -16,9 +15,7 @@ import {
   type HomeySettings,
 } from '../types'
 
-type APIClass = new (...args: any[]) => {
-  readonly api: AxiosInstance
-}
+type APIClass = new (...args: any[]) => { readonly api: AxiosInstance }
 
 const getAPIErrorMessage = (error: AxiosError): string => {
   const { data } = error.response ?? {}

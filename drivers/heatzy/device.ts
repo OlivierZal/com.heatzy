@@ -26,11 +26,9 @@ const getDerogTime = (derogMode: number, derogTime: number): string | null => {
   }
   const now: DateTime = DateTime.now()
   return derogMode === 1
-    ? now.plus({ days: derogTime }).toLocaleString({
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-      })
+    ? now
+        .plus({ days: derogTime })
+        .toLocaleString({ weekday: 'short', day: 'numeric', month: 'short' })
     : now.plus({ minutes: derogTime }).toLocaleString(DateTime.TIME_24_SIMPLE)
 }
 

@@ -48,12 +48,7 @@ export = class HeatzyApp extends withAPI(App) {
       const { data } = await this.api.post<LoginData>(loginURL, postData)
       /* eslint-disable camelcase */
       const { token, expire_at } = data
-      this.setSettings({
-        token,
-        expire_at,
-        username,
-        password,
-      })
+      this.setSettings({ token, expire_at, username, password })
       /* eslint-enable camelcase */
       await this.planRefreshLogin()
       return true
@@ -84,9 +79,7 @@ export = class HeatzyApp extends withAPI(App) {
     const expiredAt: number =
       (this.homey.settings.get('expire_at') as HomeySettings['expire_at']) ?? 0
     const ms: number = DateTime.fromSeconds(expiredAt)
-      .minus({
-        days: 1,
-      })
+      .minus({ days: 1 })
       .diffNow().milliseconds
     if (ms > 0) {
       const maxTimeout: number = 2 ** 31 - 1
