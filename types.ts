@@ -69,14 +69,14 @@ export interface ManifestDriverSettingData {
   readonly min?: number
   readonly type: string
   readonly units?: string
-  readonly values?: {
+  readonly values?: readonly {
     readonly id: string
     readonly label: Record<string, string>
   }[]
 }
 
 export interface ManifestDriverSetting {
-  readonly children?: ManifestDriverSettingData[]
+  readonly children?: readonly ManifestDriverSettingData[]
   readonly id?: string
   readonly label: Record<string, string>
 }
@@ -101,8 +101,8 @@ export interface ManifestDriver {
     { readonly title?: Record<string, string> }
   >
   readonly id: string
-  readonly pair?: LoginSetting & PairSetting[]
-  readonly settings?: ManifestDriverSetting[]
+  readonly pair?: LoginSetting & readonly PairSetting[]
+  readonly settings?: readonly ManifestDriverSetting[]
 }
 
 export interface DriverSetting {
@@ -116,7 +116,7 @@ export interface DriverSetting {
   title: string
   readonly type: string
   readonly units?: string
-  readonly values?: { readonly id: string; readonly label: string }[]
+  readonly values?: readonly { readonly id: string; readonly label: string }[]
 }
 
 export interface LoginCredentials {
@@ -144,7 +144,7 @@ export interface LoginData {
 }
 
 export interface Bindings {
-  readonly devices: {
+  readonly devices: readonly {
     readonly dev_alias: string
     readonly did: string
     readonly product_key: string
@@ -153,13 +153,13 @@ export interface Bindings {
 }
 
 export interface DeviceDetails {
+  readonly capabilities: readonly string[]
   readonly data: {
     readonly id: string
     readonly productKey: string
     readonly productName: string
   }
   readonly name: string
-  readonly capabilities: string[]
 }
 
 export type Switch = 0 | 1
