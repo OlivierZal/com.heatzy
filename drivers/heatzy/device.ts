@@ -1,5 +1,5 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import { DateTime, Duration } from 'luxon'
+import { DateTime, Duration, type DurationLikeObject } from 'luxon'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
 import withAPI from '../../mixins/withAPI'
@@ -242,7 +242,7 @@ class HeatzyDevice extends withAPI(Device) {
   private async getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
       const { data } = await this.api.get<DeviceData>(
-        `devdata/${this.#id}/latest`,
+        `/devdata/${this.#id}/latest`,
       )
       return data.attr
     } catch (error: unknown) {
@@ -330,13 +330,13 @@ class HeatzyDevice extends withAPI(Device) {
     )
   }
 
-  private applySyncFromDevice(): void {
-    this.#syncTimeout = this.homey.setTimeout(
-      async (): Promise<void> => {
-        await this.syncFromDevice()
-      },
-      Duration.fromObject({ minutes: 1 }).as('milliseconds'),
-    )
+  private applySyncFromDevice(
+    control = false,
+    interval: DurationLikeObject = { minutes: 1 },
+  ): void {
+    this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
+      await this.syncFromDevice(control)
+    }, Duration.fromObject(interval).as('milliseconds'))
   }
 
   private clearSync(): void {
@@ -382,7 +382,7 @@ class HeatzyDevice extends withAPI(Device) {
   private async syncToDevice(): Promise<void> {
     const postData: DevicePostDataAny | null = this.buildPostData()
     await this.control(postData)
-    await this.syncFromDevice(true)
+    this.applySyncFromDevice(true, { seconds: 1 })
   }
 
   private buildPostData(): DevicePostDataAny | null {
