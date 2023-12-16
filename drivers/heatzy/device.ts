@@ -272,10 +272,10 @@ class HeatzyDevice extends withAPI(Device) {
       }
     }
     if (lock_switch !== undefined) {
-      await this.setCapabilityValue('locked', Boolean(lock_switch))
+      await this.setCapabilityValue('locked', !!lock_switch)
     }
     if (timer_switch !== undefined) {
-      await this.setCapabilityValue('onoff.timer', Boolean(timer_switch))
+      await this.setCapabilityValue('onoff.timer', !!timer_switch)
     }
 
     if (derog_mode === undefined || derog_time === undefined) {
