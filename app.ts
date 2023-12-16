@@ -80,7 +80,8 @@ export = class HeatzyApp extends withAPI(App) {
       (this.homey.settings.get('expire_at') as HomeySettings['expire_at']) ?? 0
     const ms: number = DateTime.fromSeconds(expiredAt)
       .minus({ days: 1 })
-      .diffNow().milliseconds
+      .diffNow()
+      .as('milliseconds')
     if (ms > 0) {
       const maxTimeout: number = 2 ** 31 - 1
       this.#loginTimeout = this.homey.setTimeout(
