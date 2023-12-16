@@ -20,7 +20,7 @@ import { isFirstGen, isFirstPilot } from '../../utils'
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
-const getDerogTime = (derogMode: number, derogTime: number): string | null => {
+const getDerogEnd = (derogMode: number, derogTime: number): string | null => {
   if (!derogMode) {
     return null
   }
@@ -288,7 +288,7 @@ class HeatzyDevice extends withAPI(Device) {
     ) {
       await this.setCapabilityValue(
         'derog_end',
-        getDerogTime(derog_mode, derog_time),
+        getDerogEnd(derog_mode, derog_time),
       )
     }
     const derogTime = String(derog_time)
