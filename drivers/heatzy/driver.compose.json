@@ -5,16 +5,16 @@
     "fr": "Heatzy Pilote"
   },
   "capabilities": [
-    "mode",
-    "mode_3",
-    "derog_end",
-    "derog_time_boost",
-    "derog_time_vacation",
     "onoff",
     "onoff.timer",
-    "locked",
     "target_temperature",
-    "target_temperature.complement"
+    "target_temperature.complement",
+    "mode",
+    "mode_3",
+    "locked",
+    "derog_end",
+    "derog_time_boost",
+    "derog_time_vacation"
   ],
   "capabilitiesOptions": {
     "onoff.timer": {

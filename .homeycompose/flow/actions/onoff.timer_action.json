@@ -1,0 +1,37 @@
+{
+  "title": {
+    "en": "Turn on / off the timer",
+    "fr": "Activer / désactiver le programmateur"
+  },
+  "titleFormatted": {
+    "en": "Turn [[onoff]] the timer",
+    "fr": "[[onoff]] le programmateur"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=heatzy"
+    },
+    {
+      "name": "onoff",
+      "type": "dropdown",
+      "values": [
+        {
+          "id": "true",
+          "title": {
+            "en": "on",
+            "fr": "Activer"
+          }
+        },
+        {
+          "id": "false",
+          "title": {
+            "en": "off",
+            "fr": "Désactiver"
+          }
+        }
+      ]
+    }
+  ]
+}

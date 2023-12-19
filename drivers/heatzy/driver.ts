@@ -79,21 +79,37 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   private registerFlowListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.manifest.capabilities as string[])
-      .filter((capability: string) => capability.startsWith('mode'))
-      .forEach((capability: string): void => {
-        this.homey.flow
-          .getConditionCard(`${capability}_condition`)
-          .registerRunListener(
-            (args: FlowArgs): boolean =>
-              args.mode ===
-              (args.device.getCapabilityValue(capability) as Mode),
-          )
-        this.homey.flow
-          .getActionCard(`${capability}_action`)
-          .registerRunListener(async (args: FlowArgs): Promise<void> => {
-            await args.device.triggerCapabilityListener(capability, args.mode)
-          })
-      })
+    ;(this.manifest.capabilities as string[]).forEach(
+      (capability: string): void => {
+        if (capability.startsWith('mode')) {
+          this.homey.flow
+            .getConditionCard(`${capability}_condition`)
+            .registerRunListener(
+              (args: FlowArgs): boolean =>
+                args.mode ===
+                (args.device.getCapabilityValue(capability) as Mode),
+            )
+          this.homey.flow
+            .getActionCard(`${capability}_action`)
+            .registerRunListener(async (args: FlowArgs): Promise<void> => {
+              await args.device.triggerCapabilityListener(capability, args.mode)
+            })
+        } else if (capability.startsWith('onoff.')) {
+          this.homey.flow
+            .getConditionCard(`${capability}_condition`)
+            .registerRunListener((args: FlowArgs): boolean =>
+              args.device.getCapabilityValue(capability),
+            )
+          this.homey.flow
+            .getActionCard(`${capability}_action`)
+            .registerRunListener(async (args: FlowArgs): Promise<void> => {
+              await args.device.triggerCapabilityListener(
+                capability,
+                args.onoff === 'true',
+              )
+            })
+        }
+      },
+    )
   }
 }

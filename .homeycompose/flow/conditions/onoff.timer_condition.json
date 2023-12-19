@@ -1,0 +1,13 @@
+{
+  "title": {
+    "en": "The timer is turned !{{on|off}}",
+    "fr": "Le programmateur est !{{activé|désactivé}}"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=heatzy"
+    }
+  ]
+}

@@ -191,4 +191,5 @@ export interface DeviceData {
 export interface FlowArgs {
   readonly device: HeatzyDevice
   readonly mode: Mode
+  readonly onoff: 'false' | 'true'
 }
