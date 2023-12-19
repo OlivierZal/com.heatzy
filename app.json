@@ -558,6 +558,31 @@
           }
         ],
         "id": "onoff.timer_action"
+      },
+      {
+        "title": {
+          "en": "Set the thermal complement (comfort mode)",
+          "fr": "Définir le complément thermique (mode confort)"
+        },
+        "titleFormatted": {
+          "en": "Set the thermal complement (comfort mode) to [[target_temperature]]",
+          "fr": "Définir le complément thermique (mode confort) à [[target_temperature]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=target_temperature.complement"
+          },
+          {
+            "name": "target_temperature",
+            "type": "number",
+            "min": 0,
+            "max": 10,
+            "step": 1
+          }
+        ],
+        "id": "target_temperature.complement_action"
       }
     ]
   },
