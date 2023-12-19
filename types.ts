@@ -193,4 +193,5 @@ export interface FlowArgs {
   readonly derog_time: string
   readonly mode: Mode
   readonly onoff: 'false' | 'true'
+  readonly target_temperature: number
 }
