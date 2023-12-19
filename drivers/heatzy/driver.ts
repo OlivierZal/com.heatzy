@@ -94,18 +94,25 @@ export = class HeatzyDriver extends withAPI(Driver) {
             .registerRunListener(async (args: FlowArgs): Promise<void> => {
               await args.device.triggerCapabilityListener(capability, args.mode)
             })
-        } else if (capability.startsWith('onoff.')) {
+        } else if (
+          capability === 'derog_time_boost' ||
+          capability.startsWith('onoff.')
+        ) {
           this.homey.flow
             .getConditionCard(`${capability}_condition`)
             .registerRunListener((args: FlowArgs): boolean =>
-              args.device.getCapabilityValue(capability),
+              capability === 'derog_time_boost'
+                ? !!Number(args.device.getCapabilityValue(capability))
+                : args.device.getCapabilityValue(capability),
             )
           this.homey.flow
             .getActionCard(`${capability}_action`)
             .registerRunListener(async (args: FlowArgs): Promise<void> => {
               await args.device.triggerCapabilityListener(
                 capability,
-                args.onoff === 'true',
+                capability === 'derog_time_boost'
+                  ? args.derog_time
+                  : args.onoff === 'true',
               )
             })
         }

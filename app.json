@@ -87,6 +87,33 @@
     "triggers": [
       {
         "title": {
+          "en": "The boost has changed",
+          "fr": "Le boost a changé"
+        },
+        "tokens": [
+          {
+            "name": "derog_time_boost",
+            "type": "string",
+            "title": {
+              "en": "Boost",
+              "fr": "Boost"
+            },
+            "example": {
+              "en": "30"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy"
+          }
+        ],
+        "id": "derog_time_boost_changed"
+      },
+      {
+        "title": {
           "en": "The mode has changed",
           "fr": "Le mode a changé"
         },
@@ -138,9 +165,51 @@
           }
         ],
         "id": "mode_changed"
+      },
+      {
+        "title": {
+          "en": "Timer turned off",
+          "fr": "Programmateur désactivé"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy"
+          }
+        ],
+        "id": "onoff.timer_false"
+      },
+      {
+        "title": {
+          "en": "Timer turned on",
+          "fr": "Programmateur activé"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy"
+          }
+        ],
+        "id": "onoff.timer_true"
       }
     ],
     "conditions": [
+      {
+        "title": {
+          "en": "The boost is turned !{{on|off}}",
+          "fr": "Le boost est !{{activé|désactivé}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy"
+          }
+        ],
+        "id": "derog_time_boost_condition"
+      },
       {
         "title": {
           "en": "The mode !{{is|is not}}",
@@ -258,9 +327,82 @@
           }
         ],
         "id": "mode_condition"
+      },
+      {
+        "title": {
+          "en": "The timer is turned !{{on|off}}",
+          "fr": "Le programmateur est !{{activé|désactivé}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy"
+          }
+        ],
+        "id": "onoff.timer_condition"
       }
     ],
     "actions": [
+      {
+        "title": {
+          "en": "Set the boost",
+          "fr": "Définir le boost"
+        },
+        "titleFormatted": {
+          "en": "Set the boost to [[derog_time]]",
+          "fr": "Définir le boost à [[derog_time]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy"
+          },
+          {
+            "name": "derog_time",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "0",
+                "title": {
+                  "en": "Off",
+                  "fr": "Désactivé"
+                }
+              },
+              {
+                "id": "30",
+                "title": {
+                  "en": "30 minutes",
+                  "fr": "30 minutes"
+                }
+              },
+              {
+                "id": "60",
+                "title": {
+                  "en": "60 minutes",
+                  "fr": "60 minutes"
+                }
+              },
+              {
+                "id": "90",
+                "title": {
+                  "en": "90 minutes",
+                  "fr": "90 minutes"
+                }
+              },
+              {
+                "id": "120",
+                "title": {
+                  "en": "120 minutes",
+                  "fr": "120 minutes"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "derog_time_boost_action"
+      },
       {
         "title": {
           "en": "Set the mode",
@@ -378,6 +520,44 @@
           }
         ],
         "id": "mode_action"
+      },
+      {
+        "title": {
+          "en": "Turn on / off the timer",
+          "fr": "Activer / désactiver le programmateur"
+        },
+        "titleFormatted": {
+          "en": "Turn [[onoff]] the timer",
+          "fr": "[[onoff]] le programmateur"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy"
+          },
+          {
+            "name": "onoff",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "true",
+                "title": {
+                  "en": "on",
+                  "fr": "Activer"
+                }
+              },
+              {
+                "id": "false",
+                "title": {
+                  "en": "off",
+                  "fr": "Désactiver"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "onoff.timer_action"
       }
     ]
   },
@@ -458,16 +638,16 @@
         "fr": "Heatzy Pilote"
       },
       "capabilities": [
-        "mode",
-        "mode_3",
-        "derog_end",
-        "derog_time_boost",
-        "derog_time_vacation",
         "onoff",
         "onoff.timer",
-        "locked",
         "target_temperature",
-        "target_temperature.complement"
+        "target_temperature.complement",
+        "mode",
+        "mode_3",
+        "locked",
+        "derog_end",
+        "derog_time_boost",
+        "derog_time_vacation"
       ],
       "capabilitiesOptions": {
         "onoff.timer": {
@@ -597,22 +777,22 @@
         {
           "id": "60",
           "title": {
-            "en": "1 hour",
-            "fr": "1 heure"
+            "en": "60 minutes",
+            "fr": "60 minutes"
           }
         },
         {
           "id": "90",
           "title": {
-            "en": "1 hour 30",
-            "fr": "1 heure 30"
+            "en": "90 minutes",
+            "fr": "90 minutes"
           }
         },
         {
           "id": "120",
           "title": {
-            "en": "2 hours",
-            "fr": "2 heures"
+            "en": "120 minutes",
+            "fr": "120 minutes"
           }
         }
       ]
