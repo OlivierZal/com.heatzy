@@ -34,5 +34,8 @@
   },
   "10.1.0": {
     "en": "Added support for GLOW devices."
+  },
+  "13.0.0": {
+    "en": "Added missing flows."
   }
 }
