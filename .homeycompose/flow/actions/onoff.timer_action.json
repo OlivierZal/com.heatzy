@@ -1,11 +1,11 @@
 {
   "title": {
-    "en": "Turn on / off the timer",
-    "fr": "Activer / désactiver le programmateur"
+    "en": "Set the timer",
+    "fr": "Définir le programmateur"
   },
   "titleFormatted": {
-    "en": "Turn [[onoff]] the timer",
-    "fr": "[[onoff]] le programmateur"
+    "en": "Set the timer to [[onoff]]",
+    "fr": "Définir le programmateur à [[onoff]]"
   },
   "args": [
     {
@@ -15,23 +15,11 @@
     },
     {
       "name": "onoff",
-      "type": "dropdown",
-      "values": [
-        {
-          "id": "true",
-          "title": {
-            "en": "on",
-            "fr": "Activer"
-          }
-        },
-        {
-          "id": "false",
-          "title": {
-            "en": "off",
-            "fr": "Désactiver"
-          }
-        }
-      ]
+      "type": "checkbox",
+      "title": {
+        "en": "Timer",
+        "fr": "Programmateur"
+      }
     }
   ]
 }

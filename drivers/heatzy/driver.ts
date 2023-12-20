@@ -115,7 +115,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
                   capability,
                   capability === 'derog_time_boost'
                     ? args.derog_time
-                    : args.onoff === 'true',
+                    : args.onoff,
                 )
               })
             break
