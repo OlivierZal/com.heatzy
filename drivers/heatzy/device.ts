@@ -1,5 +1,5 @@
 import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import { DateTime, Duration, type DurationLikeObject } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
 import withAPI from '../../mixins/withAPI'
@@ -234,9 +234,8 @@ class HeatzyDevice extends withAPI(Device) {
     )
   }
 
-  private async syncFromDevice(control = false): Promise<void> {
-    await this.updateCapabilities(control)
-    this.applySyncFromDevice()
+  private async syncFromDevice(): Promise<void> {
+    await this.updateCapabilities()
   }
 
   private async getDeviceData(): Promise<DeviceData['attr'] | null> {
@@ -251,24 +250,32 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async updateCapabilities(control = false): Promise<void> {
-    const attr: DeviceData['attr'] | null = await this.getDeviceData()
+    let attr: BaseAttrs | DeviceData['attr'] | null = null
+    if (control) {
+      attr = this.#attrs
+      this.#attrs = {}
+    } else {
+      attr = await this.getDeviceData()
+    }
     if (!attr) {
       return
     }
     /* eslint-disable camelcase */
     const { mode, derog_mode, derog_time, lock_switch, timer_switch } = attr
-    const newMode: keyof typeof Mode =
-      typeof mode === 'string'
-        ? modeFromString[mode] ?? (mode as keyof typeof Mode)
-        : (Mode[mode] as keyof typeof Mode)
-    await this.setCapabilityValue(this.#mode, newMode)
-    const isOn: boolean = newMode !== 'stop'
-    await this.setCapabilityValue('onoff', isOn)
-    if (isOn) {
-      try {
-        await this.setStoreValue('previous_mode', newMode)
-      } catch (error: unknown) {
-        this.error(newMode)
+    if (mode !== undefined) {
+      const newMode: keyof typeof Mode =
+        typeof mode === 'string'
+          ? modeFromString[mode] ?? (mode as keyof typeof Mode)
+          : (Mode[mode] as keyof typeof Mode)
+      await this.setCapabilityValue(this.#mode, newMode)
+      const isOn: boolean = newMode !== 'stop'
+      await this.setCapabilityValue('onoff', isOn)
+      if (isOn) {
+        try {
+          await this.setStoreValue('previous_mode', newMode)
+        } catch (error: unknown) {
+          this.error(newMode)
+        }
       }
     }
     if (lock_switch !== undefined) {
@@ -330,13 +337,13 @@ class HeatzyDevice extends withAPI(Device) {
     )
   }
 
-  private applySyncFromDevice(
-    control = false,
-    interval: DurationLikeObject = { minutes: 1 },
-  ): void {
-    this.#syncTimeout = this.homey.setTimeout(async (): Promise<void> => {
-      await this.syncFromDevice(control)
-    }, Duration.fromObject(interval).as('milliseconds'))
+  private applySyncFromDevice(): void {
+    this.#syncTimeout = this.homey.setTimeout(
+      async (): Promise<void> => {
+        await this.syncFromDevice()
+      },
+      Duration.fromObject({ minutes: 1 }).as('milliseconds'),
+    )
   }
 
   private clearSync(): void {
@@ -382,7 +389,6 @@ class HeatzyDevice extends withAPI(Device) {
   private async syncToDevice(): Promise<void> {
     const postData: DevicePostDataAny | null = this.buildPostData()
     await this.control(postData)
-    this.applySyncFromDevice(true, { seconds: 5 })
   }
 
   private buildPostData(): DevicePostDataAny | null {
@@ -392,7 +398,6 @@ class HeatzyDevice extends withAPI(Device) {
     const postData: DevicePostDataAny = isFirstGen(this.#productKey)
       ? { raw: [1, 1, this.#attrs.mode as 0 | 1 | 2 | 3] }
       : { attrs: this.#attrs }
-    this.#attrs = {}
     return postData
   }
 
@@ -407,8 +412,10 @@ class HeatzyDevice extends withAPI(Device) {
         `/control/${this.#id}`,
         postData,
       )
+      await this.updateCapabilities(true)
       return data
     } catch (error: unknown) {
+      await this.syncFromDevice()
       return null
     }
   }

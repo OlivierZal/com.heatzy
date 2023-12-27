@@ -1,5 +1,6 @@
 /* eslint-disable
-  @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+  @typescript-eslint/no-explicit-any,
+  @typescript-eslint/no-unsafe-argument
 */
 import axios, {
   type AxiosError,
@@ -8,14 +9,12 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import type HeatzyApp from '../app'
-import {
-  loginURL,
-  type ErrorData,
-  type HomeyClass,
-  type HomeySettings,
-} from '../types'
+import type { ErrorData, HomeyClass, HomeySettings } from '../types'
 
-type APIClass = new (...args: any[]) => { readonly api: AxiosInstance }
+type APIClass = new (...args: any[]) => {
+  readonly api: AxiosInstance
+  readonly loginURL: string
+}
 
 const getAPIErrorMessage = (error: AxiosError): string => {
   const { data } = error.response ?? {}
@@ -43,7 +42,9 @@ export const getErrorMessage = (error: unknown): string => {
 
 const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
   class extends base {
-    public api: AxiosInstance = axios.create()
+    public readonly api: AxiosInstance = axios.create()
+
+    public readonly loginURL: string = '/login'
 
     public constructor(...args: any[]) {
       super(...args)
@@ -94,7 +95,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       if (
         error.response?.status === 400 &&
         app.retry &&
-        error.config?.url !== loginURL
+        error.config?.url !== this.loginURL
       ) {
         app.handleRetry()
         const loggedIn: boolean = await app.login()

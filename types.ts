@@ -2,8 +2,6 @@ import type { SimpleClass } from 'homey'
 import type Homey from 'homey/lib/Homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 
-export const loginURL = '/login'
-
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type HomeyClass = new (...args: any[]) => SimpleClass & {
   readonly homey: Homey
