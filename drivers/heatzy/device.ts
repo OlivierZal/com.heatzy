@@ -20,18 +20,6 @@ import { isFirstGen, isFirstPilot } from '../../utils'
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
-const getDerogEnd = (derogMode: number, derogTime: number): string | null => {
-  if (!derogMode) {
-    return null
-  }
-  const now: DateTime = DateTime.now()
-  return derogMode === 1
-    ? now
-        .plus({ days: derogTime })
-        .toLocaleString({ weekday: 'short', day: 'numeric', month: 'short' })
-    : now.plus({ minutes: derogTime }).toLocaleString(DateTime.TIME_24_SIMPLE)
-}
-
 const modeFromString: Record<string, keyof typeof Mode | undefined> = {
   舒适: 'cft',
   经济: 'eco',
@@ -236,6 +224,7 @@ class HeatzyDevice extends withAPI(Device) {
 
   private async syncFromDevice(): Promise<void> {
     await this.updateCapabilities()
+    this.applySyncFromDevice()
   }
 
   private async getDeviceData(): Promise<DeviceData['attr'] | null> {
@@ -284,57 +273,75 @@ class HeatzyDevice extends withAPI(Device) {
     if (timer_switch !== undefined) {
       await this.setCapabilityValue('onoff.timer', !!timer_switch)
     }
+    await this.handleDerog(control, derog_mode, derog_time)
+  }
 
-    if (derog_mode === undefined || derog_time === undefined) {
+  private async handleDerog(
+    control: boolean,
+    derogMode: number | undefined,
+    derogTime: number | undefined,
+  ): Promise<void> {
+    if (derogMode === undefined || derogTime === undefined) {
       return
     }
-    if (
-      control ||
-      derog_mode !== this.getDerogMode() ||
-      derog_time !== this.getDerogTime()
-    ) {
-      await this.setCapabilityValue(
-        'derog_end',
-        getDerogEnd(derog_mode, derog_time),
-      )
-    }
-    const derogTime = String(derog_time)
-    switch (derog_mode) {
-      case 0:
-        await this.setCapabilityValue('derog_time_boost', '0')
-        await this.setCapabilityValue('derog_time_vacation', '0')
-        break
-      case 1:
-        await this.setCapabilityValue('derog_time_vacation', derogTime)
-        await this.setDisplayErrorWarning('derog_time_boost')
-        break
-      case 2:
-        await this.setCapabilityValue('derog_time_boost', derogTime)
-        await this.setDisplayErrorWarning('derog_time_vacation')
-        break
-      default:
-    }
-    /* eslint-enable camelcase */
-  }
-
-  private getDerogMode(): 0 | 1 | 2 {
-    if (this.getCapabilityValue('derog_time_boost') !== '0') {
-      return 2
-    }
+    let currentDerogMode = 0
     if (this.getCapabilityValue('derog_time_vacation') !== '0') {
-      return 1
+      currentDerogMode = 1
+    } else if (this.getCapabilityValue('derog_time_boost') !== '0') {
+      currentDerogMode = 2
     }
-    return 0
-  }
-
-  private getDerogTime(): number {
-    return Number(
+    const currentDerogTime = Number(
       this.getCapabilityValue(
         Number(this.getCapabilityValue('derog_time_boost'))
           ? 'derog_time_boost'
           : 'derog_time_vacation',
       ),
     )
+    if (
+      control ||
+      derogMode !== currentDerogMode ||
+      derogTime !== currentDerogTime
+    ) {
+      let derogEnd: string | null = null
+      if (currentDerogMode) {
+        const now: DateTime = DateTime.now()
+        derogEnd =
+          currentDerogMode === 1
+            ? now.plus({ days: currentDerogTime }).toLocaleString({
+                weekday: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              })
+            : now
+                .plus({ minutes: currentDerogTime })
+                .toLocaleString(DateTime.TIME_24_SIMPLE)
+      }
+      await this.setCapabilityValue('derog_end', derogEnd)
+    }
+    switch (derogMode) {
+      case 0:
+        await this.setCapabilityValue('derog_time_boost', '0')
+        await this.setCapabilityValue('derog_time_vacation', '0')
+        break
+      case 1:
+        await this.setCapabilityValue(
+          'derog_time_vacation',
+          String(currentDerogTime),
+        )
+        await this.setDisplayErrorWarning('derog_time_boost')
+        break
+      case 2:
+        await this.setCapabilityValue(
+          'derog_time_boost',
+          String(currentDerogTime),
+        )
+        await this.setDisplayErrorWarning('derog_time_vacation')
+        break
+      default:
+    }
+    /* eslint-enable camelcase */
   }
 
   private applySyncFromDevice(): void {
