@@ -10,6 +10,8 @@ import type {
   LoginData,
 } from './types'
 
+const MAX_INT32: number = 2 ** 31 - 1
+
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
 axios.defaults.headers.common['X-Gizwits-Application-Id'] =
   'c70a66ff039d41b4a220e198b0fcc8b3'
@@ -45,10 +47,8 @@ export = class HeatzyApp extends withAPI(App) {
         return false
       }
       const { data } = await this.api.post<LoginData>(this.loginURL, postData)
-      /* eslint-disable camelcase */
-      const { token, expire_at } = data
-      this.setSettings({ token, expire_at, username, password })
-      /* eslint-enable camelcase */
+      const { token, expire_at: expireAt } = data
+      this.setSettings({ username, password, token, expireAt })
       await this.planRefreshLogin()
       return true
     } catch (error: unknown) {
@@ -76,18 +76,17 @@ export = class HeatzyApp extends withAPI(App) {
 
   private async planRefreshLogin(): Promise<void> {
     const expiredAt: number =
-      (this.homey.settings.get('expire_at') as HomeySettings['expire_at']) ?? 0
+      (this.homey.settings.get('expireAt') as HomeySettings['expireAt']) ?? 0
     const ms: number = DateTime.fromSeconds(expiredAt)
       .minus({ days: 1 })
       .diffNow()
       .as('milliseconds')
     if (ms > 0) {
-      const maxTimeout: number = 2 ** 31 - 1
       this.#loginTimeout = this.homey.setTimeout(
         async (): Promise<void> => {
           await this.login()
         },
-        Math.min(ms, maxTimeout),
+        Math.min(ms, MAX_INT32),
       )
       return
     }

@@ -36,7 +36,14 @@ const customRules = {
 }
 const tsCustomRules = {
   '@typescript-eslint/naming-convention': 'off',
-  '@typescript-eslint/no-magic-numbers': 'off',
+  '@typescript-eslint/no-magic-numbers': [
+    'error',
+    {
+      ignore: [0, 1, 2, 31, 10],
+      ignoreEnums: true,
+      ignoreReadonlyClassProperties: true,
+    },
+  ],
   '@typescript-eslint/no-unused-vars': [
     'error',
     { varsIgnorePattern: 'onHomeyReady' },

@@ -16,13 +16,14 @@ type APIClass = new (...args: any[]) => {
   readonly loginURL: string
 }
 
+const HTTP_STATUS_BAD_REQUEST = 400
+
 const getAPIErrorMessage = (error: AxiosError): string => {
   const { data } = error.response ?? {}
   if (data !== undefined && data) {
-    /* eslint-disable camelcase */
-    const { error_message, detail_message } = data as ErrorData
-    const errorMessage: string = detail_message ?? error_message ?? ''
-    /* eslint-enable camelcase */
+    const { error_message: message, detail_message: detailMessage } =
+      data as ErrorData
+    const errorMessage: string = detailMessage ?? message ?? ''
     if (errorMessage) {
       return errorMessage
     }
@@ -93,7 +94,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       this.error(`Error in ${type}:`, error.config?.url, errorMessage)
       const app: HeatzyApp = this.homey.app as HeatzyApp
       if (
-        error.response?.status === 400 &&
+        error.response?.status === HTTP_STATUS_BAD_REQUEST &&
         app.retry &&
         error.config?.url !== this.loginURL
       ) {

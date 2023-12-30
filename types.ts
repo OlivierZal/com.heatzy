@@ -29,6 +29,17 @@ export enum Mode {
   cft2 = 5,
 }
 
+export enum DerogMode {
+  off = 0,
+  vacation = 1,
+  boost = 2,
+}
+
+export enum Switch {
+  off = 0,
+  on = 1,
+}
+
 export type OnMode = Exclude<keyof typeof Mode, 'stop'>
 
 export type PreviousMode = OnMode | 'previous'
@@ -48,7 +59,7 @@ interface BaseHomeySettingValue<T1, T2> {
   readonly username: T1
   readonly password: T1
   readonly token: T1
-  readonly expire_at: T2
+  readonly expireAt: T2
 }
 
 export type HomeySettings = BaseHomeySettingValue<string | null, number | null>
@@ -160,12 +171,10 @@ export interface DeviceDetails {
   readonly name: string
 }
 
-export type Switch = 0 | 1
-
 export interface BaseAttrs {
   cft_tempL?: number
   cft_tempH?: number
-  derog_mode?: 0 | 1 | 2
+  derog_mode?: DerogMode
   derog_time?: number
   lock_switch?: Switch
   mode?: number

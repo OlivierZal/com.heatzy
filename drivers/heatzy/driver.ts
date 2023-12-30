@@ -63,15 +63,19 @@ export = class HeatzyDriver extends withAPI(Driver) {
   private async discoverDevices(): Promise<DeviceDetails[]> {
     try {
       const { data } = await this.api.get<Bindings>('/bindings')
-      /* eslint-disable camelcase */
+
       return data.devices.map(
-        ({ dev_alias, did, product_key, product_name }): DeviceDetails => ({
-          name: dev_alias,
-          data: { id: did, productKey: product_key, productName: product_name },
-          capabilities: this.getRequiredCapabilities(product_key, product_name),
+        ({
+          dev_alias: name,
+          did,
+          product_key: productKey,
+          product_name: productName,
+        }): DeviceDetails => ({
+          name,
+          data: { id: did, productKey, productName },
+          capabilities: this.getRequiredCapabilities(productKey, productName),
         }),
       )
-      /* eslint-enable camelcase */
     } catch (error: unknown) {
       return []
     }

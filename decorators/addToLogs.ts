@@ -4,6 +4,8 @@
 */
 import type { SimpleClass } from 'homey'
 
+const EMPTY_FUNCTION_PARENS = '()'
+
 const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
   ...logs: string[]
 ) =>
@@ -20,8 +22,11 @@ const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
       private commonLog(logType: 'error' | 'log', ...args: any[]): void {
         super[logType](
           ...logs.flatMap((log: string): [any, '-'] => {
-            if (log.endsWith('()')) {
-              const funcName: string = log.slice(0, -2)
+            if (log.endsWith(EMPTY_FUNCTION_PARENS)) {
+              const funcName: string = log.slice(
+                0,
+                -EMPTY_FUNCTION_PARENS.length,
+              )
               const func: () => any = (this as Record<any, any>)[
                 funcName
               ] as () => any
