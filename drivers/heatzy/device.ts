@@ -21,7 +21,7 @@ import { isFirstGen, isFirstPilot } from '../../utils'
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
-const modeFromString: Record<string, keyof typeof Mode | undefined> = {
+const chineseModes: Record<string, keyof typeof Mode | undefined> = {
   舒适: 'cft',
   经济: 'eco',
   解冻: 'fro',
@@ -263,7 +263,7 @@ class HeatzyDevice extends withAPI(Device) {
     if (mode !== undefined) {
       const newMode: keyof typeof Mode =
         typeof mode === 'string'
-          ? modeFromString[mode] ?? (mode as keyof typeof Mode)
+          ? chineseModes[mode] ?? (mode as keyof typeof Mode)
           : (Mode[mode] as keyof typeof Mode)
       await this.setCapabilityValue(this.#mode, newMode)
       const isOn: boolean = newMode !== 'stop'
@@ -272,7 +272,7 @@ class HeatzyDevice extends withAPI(Device) {
         try {
           await this.setStoreValue('previous_mode', newMode)
         } catch (error: unknown) {
-          this.error(newMode)
+          this.error('Unknown mode:', newMode)
         }
       }
     }
