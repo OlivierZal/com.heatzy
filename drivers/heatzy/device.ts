@@ -293,13 +293,14 @@ class HeatzyDevice extends withAPI(Device) {
     if (derogMode === undefined || derogTime === undefined) {
       return
     }
+    const off = String(DerogMode.off)
     let currentDerogMode: DerogMode = DerogMode.off
     if (
-      this.getCapabilityValue('derog_time_vacation') !== String(DerogMode.off)
+      this.getCapabilityValue('derog_time_vacation') !== off
     ) {
       currentDerogMode = DerogMode.vacation
     } else if (
-      this.getCapabilityValue('derog_time_boost') !== String(DerogMode.off)
+      this.getCapabilityValue('derog_time_boost') !== off
     ) {
       currentDerogMode = DerogMode.boost
     }
@@ -316,37 +317,36 @@ class HeatzyDevice extends withAPI(Device) {
       derogTime !== currentDerogTime
     ) {
       let derogEnd: string | null = null
-      if (currentDerogMode !== DerogMode.off) {
+      if (derogMode !== DerogMode.off) {
         const now: DateTime = DateTime.now()
-        derogEnd =
-          currentDerogMode === DerogMode.vacation
-            ? now.plus({ days: currentDerogTime }).toLocaleString({
-                weekday: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-              })
-            : now
-                .plus({ minutes: currentDerogTime })
-                .toLocaleString(DateTime.TIME_24_SIMPLE)
+        if (derogMode === DerogMode.vacation) {
+          derogEnd = now.plus({ days: derogTime }).toLocaleString({
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          })
+        } else if (derogMode === DerogMode.boost) {
+          derogEnd = now
+            .plus({ minutes: derogTime })
+            .toLocaleString(DateTime.TIME_24_SIMPLE)
+        }
       }
       await this.setCapabilityValue('derog_end', derogEnd)
     }
-    const off = String(DerogMode.off)
-    const derogTimeString = String(derogTime)
+    const time = String(derogTime)
     switch (derogMode) {
       case DerogMode.off:
         await this.setCapabilityValue('derog_time_vacation', off)
         await this.setCapabilityValue('derog_time_boost', off)
-
         break
       case DerogMode.vacation:
-        await this.setCapabilityValue('derog_time_vacation', derogTimeString)
+        await this.setCapabilityValue('derog_time_vacation', time)
         await this.setDisplayErrorWarning('derog_time_boost')
         break
       case DerogMode.boost:
-        await this.setCapabilityValue('derog_time_boost', derogTimeString)
+        await this.setCapabilityValue('derog_time_boost', time)
         await this.setDisplayErrorWarning('derog_time_vacation')
         break
       default:
