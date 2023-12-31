@@ -327,10 +327,10 @@ class HeatzyDevice extends withAPI(Device) {
             minute: '2-digit',
             hour12: false,
           })
-        } else if (derogMode === DerogMode.boost) {
-          derogEnd = now
-            .plus({ minutes: derogTime })
-            .toLocaleString(DateTime.TIME_24_SIMPLE)
+        } else {
+          derogEnd = now.plus({ minutes: derogTime }).toLocaleString(
+            DateTime.TIME_24_SIMPLE
+          )
         }
       }
       await this.setCapabilityValue('derog_end', derogEnd)
