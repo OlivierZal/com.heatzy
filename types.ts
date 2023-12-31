@@ -8,18 +8,6 @@ export type HomeyClass = new (...args: any[]) => SimpleClass & {
   readonly setWarning?: (warning: string | null) => Promise<void>
 }
 
-type ModeString =
-  | 'cft'
-  | 'cft1'
-  | 'cft2'
-  | 'eco'
-  | 'fro'
-  | 'stop'
-  | '停止' // 'stop'
-  | '经济' // 'eco'
-  | '舒适' // 'cft'
-  | '解冻' // 'fro'
-
 export enum Mode {
   cft = 0,
   eco = 1,
@@ -28,6 +16,15 @@ export enum Mode {
   cft1 = 4,
   cft2 = 5,
 }
+
+export enum ModeZh {
+  '舒适' = 0,
+  '经济' = 1,
+  '解冻' = 2,
+  '停止' = 3,
+}
+
+type ModeString = keyof typeof Mode | keyof typeof ModeZh
 
 export enum DerogMode {
   off = 0,

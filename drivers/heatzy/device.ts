@@ -6,6 +6,7 @@ import withAPI from '../../mixins/withAPI'
 import {
   DerogMode,
   Mode,
+  ModeZh,
   type BaseAttrs,
   type CapabilityValue,
   type Data,
@@ -20,13 +21,6 @@ import {
 import { isFirstGen, isFirstPilot } from '../../utils'
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
-
-const chineseModes: Record<string, keyof typeof Mode | undefined> = {
-  舒适: Mode.cft,
-  经济: Mode.eco,
-  解冻: Mode.fro,
-  停止: Mode.stop,
-} as const
 
 @addToLogs('getName()')
 class HeatzyDevice extends withAPI(Device) {
@@ -261,10 +255,14 @@ class HeatzyDevice extends withAPI(Device) {
       timer_switch: timerSwitch,
     } = attr
     if (mode !== undefined) {
-      const newMode: keyof typeof Mode =
-        typeof mode === 'string'
-          ? Mode[chineseModes[mode]] ?? (mode as keyof typeof Mode)
-          : (Mode[mode] as keyof typeof Mode)
+      let newMode: keyof typeof Mode | null = null
+      if (typeof mode === 'number') {
+        newMode = Mode[mode] as keyof typeof Mode
+      } else if (mode in ModeZh) {
+        newMode = Mode[ModeZh[mode as keyof typeof ModeZh]] as keyof typeof Mode
+      } else {
+        newMode = mode as keyof typeof Mode
+      }
       await this.setCapabilityValue(this.#mode, newMode)
       const isOn: boolean = Mode[newMode] !== Mode.stop
       await this.setCapabilityValue('onoff', isOn)
@@ -366,7 +364,9 @@ class HeatzyDevice extends withAPI(Device) {
   ): Promise<keyof typeof Mode | null> {
     let mode: keyof typeof Mode | null = null
     if (capability === 'onoff') {
-      mode = (value as boolean) ? this.onMode : Mode[Mode.stop]
+      mode = (value as boolean)
+        ? this.onMode
+        : (Mode[Mode.stop] as keyof typeof Mode)
     } else {
       mode = value as keyof typeof Mode
     }
