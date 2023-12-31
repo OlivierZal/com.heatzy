@@ -20,7 +20,7 @@ import {
 } from '../../types'
 import { isFirstGen, isFirstPilot } from '../../utils'
 
-const DEROG_MODE_OFF = String(DerogMode.off)
+const DEROG_MODE_CAP_OFF = String(DerogMode.off)
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
@@ -294,9 +294,11 @@ class HeatzyDevice extends withAPI(Device) {
       return
     }
     let currentDerogMode: DerogMode = DerogMode.off
-    if (this.getCapabilityValue('derog_time_vacation') !== DEROG_MODE_OFF) {
+    if (this.getCapabilityValue('derog_time_vacation') !== DEROG_MODE_CAP_OFF) {
       currentDerogMode = DerogMode.vacation
-    } else if (this.getCapabilityValue('derog_time_boost') !== DEROG_MODE_OFF) {
+    } else if (
+      this.getCapabilityValue('derog_time_boost') !== DEROG_MODE_CAP_OFF
+    ) {
       currentDerogMode = DerogMode.boost
     }
     const currentDerogTime = Number(
@@ -331,8 +333,8 @@ class HeatzyDevice extends withAPI(Device) {
     const time = String(derogTime)
     switch (derogMode) {
       case DerogMode.off:
-        await this.setCapabilityValue('derog_time_vacation', DEROG_MODE_OFF)
-        await this.setCapabilityValue('derog_time_boost', DEROG_MODE_OFF)
+        await this.setCapabilityValue('derog_time_vacation', DEROG_MODE_CAP_OFF)
+        await this.setCapabilityValue('derog_time_boost', DEROG_MODE_CAP_OFF)
         break
       case DerogMode.vacation:
         await this.setCapabilityValue('derog_time_vacation', time)
@@ -434,8 +436,8 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async setDisplayErrorWarning(capability: string): Promise<void> {
-    if (this.getCapabilityValue(capability) !== DEROG_MODE_OFF) {
-      await this.setCapabilityValue(capability, DEROG_MODE_OFF)
+    if (this.getCapabilityValue(capability) !== DEROG_MODE_CAP_OFF) {
+      await this.setCapabilityValue(capability, DEROG_MODE_CAP_OFF)
       await this.setWarning(this.homey.__('warnings.display_error'))
     }
   }
