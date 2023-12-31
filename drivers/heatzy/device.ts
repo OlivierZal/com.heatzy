@@ -295,13 +295,9 @@ class HeatzyDevice extends withAPI(Device) {
     }
     const off = String(DerogMode.off)
     let currentDerogMode: DerogMode = DerogMode.off
-    if (
-      this.getCapabilityValue('derog_time_vacation') !== off
-    ) {
+    if (this.getCapabilityValue('derog_time_vacation') !== off) {
       currentDerogMode = DerogMode.vacation
-    } else if (
-      this.getCapabilityValue('derog_time_boost') !== off
-    ) {
+    } else if (this.getCapabilityValue('derog_time_boost') !== off) {
       currentDerogMode = DerogMode.boost
     }
     const currentDerogTime = Number(
@@ -328,9 +324,9 @@ class HeatzyDevice extends withAPI(Device) {
             hour12: false,
           })
         } else {
-          derogEnd = now.plus({ minutes: derogTime }).toLocaleString(
-            DateTime.TIME_24_SIMPLE
-          )
+          derogEnd = now
+            .plus({ minutes: derogTime })
+            .toLocaleString(DateTime.TIME_24_SIMPLE)
         }
       }
       await this.setCapabilityValue('derog_end', derogEnd)
