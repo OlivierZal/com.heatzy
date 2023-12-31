@@ -22,10 +22,10 @@ import { isFirstGen, isFirstPilot } from '../../utils'
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
 const chineseModes: Record<string, keyof typeof Mode | undefined> = {
-  舒适: 'cft',
-  经济: 'eco',
-  解冻: 'fro',
-  停止: 'stop',
+  舒适: Mode.cft,
+  经济: Mode.eco,
+  解冻: Mode.fro,
+  停止: Mode.stop,
 } as const
 
 @addToLogs('getName()')
@@ -263,10 +263,10 @@ class HeatzyDevice extends withAPI(Device) {
     if (mode !== undefined) {
       const newMode: keyof typeof Mode =
         typeof mode === 'string'
-          ? chineseModes[mode] ?? (mode as keyof typeof Mode)
+          ? Mode[chineseModes[mode]] ?? (mode as keyof typeof Mode)
           : (Mode[mode] as keyof typeof Mode)
       await this.setCapabilityValue(this.#mode, newMode)
-      const isOn: boolean = newMode !== 'stop'
+      const isOn: boolean = Mode[newMode] !== Mode.stop
       await this.setCapabilityValue('onoff', isOn)
       if (isOn) {
         try {
@@ -313,21 +313,19 @@ class HeatzyDevice extends withAPI(Device) {
       derogTime !== currentDerogTime
     ) {
       let derogEnd: string | null = null
-      if (derogMode !== DerogMode.off) {
-        const now: DateTime = DateTime.now()
-        if (derogMode === DerogMode.vacation) {
-          derogEnd = now.plus({ days: derogTime }).toLocaleString({
-            day: 'numeric',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          })
-        } else {
-          derogEnd = now
-            .plus({ minutes: derogTime })
-            .toLocaleString(DateTime.TIME_24_SIMPLE)
-        }
+      const now: DateTime = DateTime.now()
+      if (derogMode === DerogMode.vacation) {
+        derogEnd = now.plus({ days: derogTime }).toLocaleString({
+          day: 'numeric',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+      } else if (derogMode === DerogMode.boost {
+        derogEnd = now
+          .plus({ minutes: derogTime })
+          .toLocaleString(DateTime.TIME_24_SIMPLE)
       }
       await this.setCapabilityValue('derog_end', derogEnd)
     }
@@ -368,11 +366,11 @@ class HeatzyDevice extends withAPI(Device) {
   ): Promise<keyof typeof Mode | null> {
     let mode: keyof typeof Mode | null = null
     if (capability === 'onoff') {
-      mode = (value as boolean) ? this.onMode : 'stop'
+      mode = (value as boolean) ? this.onMode : Mode[Mode.stop]
     } else {
       mode = value as keyof typeof Mode
     }
-    if (mode === 'stop' && (this.getSetting('always_on') as boolean)) {
+    if (Mode[mode] === Mode.stop && (this.getSetting('always_on') as boolean)) {
       mode = null
       await this.setWarning(this.homey.__('warnings.always_on'))
       this.homey.setTimeout(
@@ -409,7 +407,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
     const postData: DevicePostDataAny = isFirstGen(this.#productKey)
       ? {
-          raw: [1, 1, this.#attrs.mode as Exclude<Mode, Mode.cft1 | Mode.cft2>],
+          raw: [1, 1, this.#attrs.mode as Mode],
         }
       : { attrs: this.#attrs }
     return postData
