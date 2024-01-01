@@ -168,18 +168,18 @@ export interface DeviceDetails {
   readonly name: string
 }
 
+interface FirstGenDevicePostData {
+  readonly raw: [1, 1, Mode]
+}
+
 export interface BaseAttrs {
   cft_tempL?: number
   cft_tempH?: number
   derog_mode?: DerogMode
   derog_time?: number
   lock_switch?: Switch
-  mode?: number
+  mode?: Mode
   timer_switch?: Switch
-}
-
-interface FirstGenDevicePostData {
-  readonly raw: [1, 1, number]
 }
 
 interface DevicePostData {

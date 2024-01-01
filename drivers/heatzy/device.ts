@@ -408,12 +408,15 @@ class HeatzyDevice extends withAPI(Device) {
     if (!Object.keys(this.#attrs).length) {
       return null
     }
-    const postData: DevicePostDataAny = isFirstGen(this.#productKey)
-      ? {
-          raw: [1, 1, this.#attrs.mode as Mode],
-        }
-      : { attrs: this.#attrs }
-    return postData
+    if (!isFirstGen(this.#productKey)) {
+      return { attrs: this.#attrs }
+    }
+    if (this.#attrs.mode !== undefined) {
+      return {
+        raw: [1, 1, this.#attrs.mode],
+      }
+    }
+    return null
   }
 
   private async control(
