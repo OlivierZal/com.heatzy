@@ -13,6 +13,7 @@ import {
   type DeviceData,
   type DeviceDetails,
   type DevicePostDataAny,
+  type ModeString,
   type OnMode,
   type PreviousMode,
   type Settings,
@@ -256,6 +257,17 @@ class HeatzyDevice extends withAPI(Device) {
       lock_switch: lockSwitch,
       timer_switch: timerSwitch,
     } = attr
+    await this.handleMode(mode)
+    await this.handleDerog(control, derogMode, derogTime)
+    if (lockSwitch !== undefined) {
+      await this.setCapabilityValue('locked', Boolean(lockSwitch))
+    }
+    if (timerSwitch !== undefined) {
+      await this.setCapabilityValue('onoff.timer', Boolean(timerSwitch))
+    }
+  }
+
+  private async handleMode(mode: Mode | ModeString | undefined): Promise<void> {
     if (mode !== undefined) {
       let newMode: keyof typeof Mode | null = null
       if (typeof mode === 'number') {
@@ -276,13 +288,6 @@ class HeatzyDevice extends withAPI(Device) {
         }
       }
     }
-    if (lockSwitch !== undefined) {
-      await this.setCapabilityValue('locked', Boolean(lockSwitch))
-    }
-    if (timerSwitch !== undefined) {
-      await this.setCapabilityValue('onoff.timer', Boolean(timerSwitch))
-    }
-    await this.handleDerog(control, derogMode, derogTime)
   }
 
   private async handleDerog(

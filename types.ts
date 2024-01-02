@@ -24,7 +24,7 @@ export enum ModeZh {
   '停止' = 3,
 }
 
-type ModeString = keyof typeof Mode | keyof typeof ModeZh
+export type ModeString = keyof typeof Mode | keyof typeof ModeZh
 
 export enum DerogMode {
   off = 0,
