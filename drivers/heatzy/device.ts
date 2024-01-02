@@ -268,24 +268,25 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async handleMode(mode: Mode | ModeString | undefined): Promise<void> {
-    if (mode !== undefined) {
-      let newMode: keyof typeof Mode | null = null
-      if (typeof mode === 'number') {
-        newMode = Mode[mode] as keyof typeof Mode
-      } else if (mode in ModeZh) {
-        newMode = Mode[ModeZh[mode as keyof typeof ModeZh]] as keyof typeof Mode
-      } else {
-        newMode = mode as keyof typeof Mode
-      }
-      await this.setCapabilityValue(this.#mode, newMode)
-      const isOn: boolean = Mode[newMode] !== Mode.stop
-      await this.setCapabilityValue('onoff', isOn)
-      if (isOn) {
-        try {
-          await this.setStoreValue('previous_mode', newMode)
-        } catch (error: unknown) {
-          this.error('Unknown mode:', newMode)
-        }
+    if (mode === undefined) {
+      return
+    }
+    let newMode: keyof typeof Mode | null = null
+    if (typeof mode === 'number') {
+      newMode = Mode[mode] as keyof typeof Mode
+    } else if (mode in ModeZh) {
+      newMode = Mode[ModeZh[mode as keyof typeof ModeZh]] as keyof typeof Mode
+    } else {
+      newMode = mode as keyof typeof Mode
+    }
+    await this.setCapabilityValue(this.#mode, newMode)
+    const isOn: boolean = Mode[newMode] !== Mode.stop
+    await this.setCapabilityValue('onoff', isOn)
+    if (isOn) {
+      try {
+        await this.setStoreValue('previous_mode', newMode)
+      } catch (error: unknown) {
+        this.error('Unknown mode:', newMode)
       }
     }
   }
