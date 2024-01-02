@@ -279,15 +279,15 @@ class HeatzyDevice extends withAPI(Device) {
     } else {
       newMode = mode as keyof typeof Mode
     }
-    await this.setCapabilityValue(this.#mode, newMode)
+    try {
+      await this.setCapabilityValue(this.#mode, newMode)
+    } catch (error: unknown) {
+      this.error('Unknown mode:', newMode)
+    }
     const isOn: boolean = Mode[newMode] !== Mode.stop
     await this.setCapabilityValue('onoff', isOn)
     if (isOn) {
-      try {
-        await this.setStoreValue('previous_mode', newMode)
-      } catch (error: unknown) {
-        this.error('Unknown mode:', newMode)
-      }
+      await this.setStoreValue('previous_mode', newMode)
     }
   }
 
