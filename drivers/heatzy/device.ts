@@ -257,8 +257,8 @@ class HeatzyDevice extends withAPI(Device) {
       lock_switch: lockSwitch,
       timer_switch: timerSwitch,
     } = attr
-    await this.handleMode(mode)
-    await this.handleDerog(control, derogMode, derogTime)
+    await this.updateMode(mode, control)
+    await this.updateDerog(derogMode, derogTime, control)
     if (lockSwitch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lockSwitch))
     }
@@ -267,20 +267,23 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async handleMode(mode: Mode | ModeString | undefined): Promise<void> {
+  private async updateMode(
+    mode: Mode | ModeString | undefined,
+    control: boolean,
+  ): Promise<void> {
     if (mode === undefined) {
       return
     }
     let newMode: keyof typeof Mode | null = null
     switch (true) {
-      case typeof mode === 'number':
-        newMode = Mode[mode] as keyof typeof Mode
-        break
-      case mode in ModeZh:
-        newMode = Mode[ModeZh[mode as keyof typeof ModeZh]] as keyof typeof Mode
+      case control:
+        newMode = Mode[mode as Mode] as keyof typeof Mode
         break
       case mode in Mode:
         newMode = mode as keyof typeof Mode
+        break
+      case mode in ModeZh:
+        newMode = Mode[ModeZh[mode as keyof typeof ModeZh]] as keyof typeof Mode
         break
       default:
         throw new Error(`Unknown mode: ${mode}`)
@@ -293,10 +296,10 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async handleDerog(
-    control: boolean,
+  private async updateDerog(
     derogMode: DerogMode | undefined,
     derogTime: number | undefined,
+    control: boolean,
   ): Promise<void> {
     if (derogMode === undefined || derogTime === undefined) {
       return
