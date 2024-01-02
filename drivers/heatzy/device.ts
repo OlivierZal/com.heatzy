@@ -50,7 +50,7 @@ class HeatzyDevice extends withAPI(Device) {
   private set onMode(value: PreviousMode) {
     this.#onMode =
       value === 'previous'
-        ? (this.getStoreValue('previous_mode') as OnMode)
+        ? (this.getStoreValue('previousMode') as OnMode)
         : value
   }
 
@@ -63,8 +63,8 @@ class HeatzyDevice extends withAPI(Device) {
     this.#productKey = productKey
     this.#productName = productName
     await this.handleCapabilities()
-    if (this.getStoreValue('previous_mode') === null) {
-      await this.setStoreValue('previous_mode', 'eco')
+    if (this.getStoreValue('previousMode') === null) {
+      await this.setStoreValue('previousMode', 'eco')
     }
 
     this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
@@ -287,7 +287,7 @@ class HeatzyDevice extends withAPI(Device) {
     const isOn: boolean = Mode[newMode] !== Mode.stop
     await this.setCapabilityValue('onoff', isOn)
     if (isOn) {
-      await this.setStoreValue('previous_mode', newMode)
+      await this.setStoreValue('previousMode', newMode)
     }
   }
 
@@ -387,7 +387,7 @@ class HeatzyDevice extends withAPI(Device) {
           this.setCapabilityValue(
             capability,
             capability === this.#mode
-              ? (this.getStoreValue('previous_mode') as OnMode)
+              ? (this.getStoreValue('previousMode') as OnMode)
               : true,
           ),
         Duration.fromObject({ seconds: 1 }).as('milliseconds'),
