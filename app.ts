@@ -31,12 +31,8 @@ export = class HeatzyApp extends withAPI(App) {
 
   public async login(
     postData: LoginCredentials = {
-      username:
-        (this.homey.settings.get('username') as HomeySettings['username']) ??
-        '',
-      password:
-        (this.homey.settings.get('password') as HomeySettings['password']) ??
-        '',
+      username: this.getHomeySetting('username') ?? '',
+      password: this.getHomeySetting('password') ?? '',
     },
     raise = false,
   ): Promise<boolean> {
@@ -75,8 +71,7 @@ export = class HeatzyApp extends withAPI(App) {
   }
 
   private async planRefreshLogin(): Promise<void> {
-    const expiredAt: number =
-      (this.homey.settings.get('expireAt') as HomeySettings['expireAt']) ?? 0
+    const expiredAt: number = this.getHomeySetting('expireAt') ?? 0
     const ms: number = DateTime.fromSeconds(expiredAt)
       .minus({ days: 1 })
       .diffNow()
@@ -101,7 +96,7 @@ export = class HeatzyApp extends withAPI(App) {
     Object.entries(settings)
       .filter(
         ([setting, value]: [string, HomeySettingValue]) =>
-          value !== this.homey.settings.get(setting),
+          value !== this.getHomeySetting(setting as keyof HomeySettings),
       )
       .forEach(([setting, value]: [string, HomeySettingValue]): void => {
         this.homey.settings.set(setting, value)

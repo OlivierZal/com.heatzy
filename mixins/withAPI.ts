@@ -14,6 +14,9 @@ import type { ErrorData, HomeyClass, HomeySettings } from '../types'
 type APIClass = new (...args: any[]) => {
   readonly api: AxiosInstance
   readonly loginURL: string
+  readonly getHomeySetting: <K extends keyof HomeySettings>(
+    setting: K,
+  ) => HomeySettings[K]
 }
 
 const HTTP_STATUS_BAD_REQUEST = 400
@@ -52,6 +55,12 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       this.setupAxiosInterceptors()
     }
 
+    public getHomeySetting<K extends keyof HomeySettings>(
+      setting: K,
+    ): HomeySettings[K] {
+      return this.homey.settings.get(setting as string) as HomeySettings[K]
+    }
+
     private setupAxiosInterceptors(): void {
       this.api.interceptors.request.use(
         (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig =>
@@ -72,7 +81,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
     ): InternalAxiosRequestConfig {
       const updatedConfig: InternalAxiosRequestConfig = { ...config }
       updatedConfig.headers['X-Gizwits-User-token'] =
-        (this.homey.settings.get('token') as HomeySettings['token']) ?? ''
+        this.getHomeySetting('token') ?? ''
       this.log(
         'Sending request:',
         updatedConfig.url,
