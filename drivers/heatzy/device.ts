@@ -85,7 +85,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
     if (
       changedKeys.includes('always_on') &&
-      (newSettings.always_on ?? false) &&
+      newSettings.always_on === true &&
       !(this.getCapabilityValue('onoff') as boolean)
     ) {
       await this.triggerCapabilityListener('onoff', true)
@@ -388,7 +388,7 @@ class HeatzyDevice extends withAPI(Device) {
     } else {
       mode = value as keyof typeof Mode
     }
-    if (Mode[mode] === Mode.stop && (this.getSetting('always_on') ?? false)) {
+    if (Mode[mode] === Mode.stop && this.getSetting('always_on') === true) {
       mode = null
       await this.setWarning(this.homey.__('warnings.always_on'))
       this.homey.setTimeout(
