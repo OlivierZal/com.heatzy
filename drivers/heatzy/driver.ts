@@ -4,10 +4,10 @@ import type HeatzyApp from '../../app'
 import withAPI from '../../mixins/withAPI'
 import type {
   Bindings,
+  CapabilityKey,
   DeviceDetails,
   FlowArgs,
   LoginCredentials,
-  Mode,
 } from '../../types'
 import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
 
@@ -81,61 +81,55 @@ export = class HeatzyDriver extends withAPI(Driver) {
     }
   }
 
-  private registerFlowListeners(): void {
+  private registerFlowListeners<K extends CapabilityKey>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.manifest.capabilities as string[]).forEach(
-      (capability: string): void => {
-        switch (true) {
-          case capability.startsWith('mode'):
-            this.homey.flow
-              .getConditionCard(`${capability}_condition`)
-              .registerRunListener(
-                (args: FlowArgs): boolean =>
-                  args.mode ===
-                  (args.device.getCapabilityValue(capability) as Mode),
-              )
-            this.homey.flow
-              .getActionCard(`${capability}_action`)
-              .registerRunListener(async (args: FlowArgs): Promise<void> => {
-                await args.device.triggerCapabilityListener(
-                  capability,
-                  args.mode,
-                )
-              })
-            break
-          case capability === 'derog_time_boost' ||
-            capability.startsWith('onoff.'):
-            this.homey.flow
-              .getConditionCard(`${capability}_condition`)
-              .registerRunListener((args: FlowArgs): boolean =>
+    ;(this.manifest.capabilities as K[]).forEach((capability: K): void => {
+      switch (true) {
+        case capability.startsWith('mode'):
+          this.homey.flow
+            .getConditionCard(`${capability}_condition`)
+            .registerRunListener(
+              (args: FlowArgs): boolean =>
+                args.mode === args.device.getCapabilityValue(capability),
+            )
+          this.homey.flow
+            .getActionCard(`${capability}_action`)
+            .registerRunListener(async (args: FlowArgs): Promise<void> => {
+              await args.device.triggerCapabilityListener(capability, args.mode)
+            })
+          break
+        case capability === 'derog_time_boost':
+        case capability === 'onoff.timer':
+          this.homey.flow
+            .getConditionCard(`${capability}_condition`)
+            .registerRunListener((args: FlowArgs): boolean =>
+              capability === 'derog_time_boost'
+                ? !!Number(args.device.getCapabilityValue('derog_time_boost'))
+                : args.device.getCapabilityValue('onoff.timer'),
+            )
+          this.homey.flow
+            .getActionCard(`${capability}_action`)
+            .registerRunListener(async (args: FlowArgs): Promise<void> => {
+              await args.device.triggerCapabilityListener(
+                capability,
                 capability === 'derog_time_boost'
-                  ? !!Number(args.device.getCapabilityValue(capability))
-                  : args.device.getCapabilityValue(capability),
+                  ? args.derog_time
+                  : args.onoff,
               )
-            this.homey.flow
-              .getActionCard(`${capability}_action`)
-              .registerRunListener(async (args: FlowArgs): Promise<void> => {
-                await args.device.triggerCapabilityListener(
-                  capability,
-                  capability === 'derog_time_boost'
-                    ? args.derog_time
-                    : args.onoff,
-                )
-              })
-            break
-          case capability.startsWith('target_temperature.'):
-            this.homey.flow
-              .getActionCard(`${capability}_action`)
-              .registerRunListener(async (args: FlowArgs): Promise<void> => {
-                await args.device.triggerCapabilityListener(
-                  capability,
-                  args.target_temperature,
-                )
-              })
-            break
-          default:
-        }
-      },
-    )
+            })
+          break
+        case capability.startsWith('target_temperature.'):
+          this.homey.flow
+            .getActionCard(`${capability}_action`)
+            .registerRunListener(async (args: FlowArgs): Promise<void> => {
+              await args.device.triggerCapabilityListener(
+                capability,
+                args.target_temperature,
+              )
+            })
+          break
+        default:
+      }
+    })
   }
 }

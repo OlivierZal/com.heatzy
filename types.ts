@@ -32,7 +32,21 @@ export type OnMode = Exclude<keyof typeof Mode, 'stop'>
 
 export type PreviousMode = OnMode | 'previous'
 
-export type CapabilityValue = boolean | number | string | null
+export interface Capabilities {
+  readonly derog_end: string | null
+  readonly derog_mode: keyof typeof DerogMode
+  readonly derog_time_boost: string
+  readonly derog_time_vacation: string
+  readonly locked: boolean
+  readonly mode: keyof typeof Mode
+  readonly mode_3: keyof typeof Mode
+  readonly onoff: boolean
+  readonly 'onoff.timer': boolean
+  readonly target_temperature: number
+  readonly 'target_temperature.complement': number
+}
+
+export type CapabilityKey = keyof Capabilities
 
 type ValueOf<T> = T[keyof T]
 
@@ -44,6 +58,12 @@ export interface Settings {
 export type SettingKey = keyof Settings
 
 export type SettingValue = ValueOf<Settings>
+
+export interface Store {
+  readonly previousMode: OnMode | null
+}
+
+export type StoreKey = keyof Store
 
 interface BaseHomeySettingValue<T1, T2> {
   readonly username: T1
@@ -190,7 +210,7 @@ export interface DeviceData {
 export interface FlowArgs {
   readonly device: HeatzyDevice
   readonly derog_time: string
-  readonly mode: Mode
+  readonly mode: keyof typeof Mode
   readonly onoff: boolean
   readonly target_temperature: number
 }

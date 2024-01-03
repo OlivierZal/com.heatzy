@@ -7,7 +7,8 @@ import {
   DerogMode,
   Mode,
   type BaseAttrs,
-  type CapabilityValue,
+  type Capabilities,
+  type CapabilityKey,
   type Data,
   type DeviceData,
   type DeviceDetails,
@@ -16,6 +17,8 @@ import {
   type PreviousMode,
   type SettingKey,
   type Settings,
+  type Store,
+  type StoreKey,
   type Switch,
 } from '../../types'
 import { isFirstGen, isFirstPilot } from '../../utils'
@@ -57,7 +60,7 @@ class HeatzyDevice extends withAPI(Device) {
   private set onMode(value: PreviousMode) {
     this.#onMode =
       value === ON_MODE_PREVIOUS
-        ? (this.getStoreValue('previousMode') as OnMode)
+        ? this.getStoreValue('previousMode') ?? 'eco'
         : value
   }
 
@@ -70,7 +73,7 @@ class HeatzyDevice extends withAPI(Device) {
     this.#productKey = productKey
     this.#productName = productName
     await this.handleCapabilities()
-    if (this.getStoreValue('previousMode') === null) {
+    if (!this.getStoreValue('previousMode')) {
       await this.setStoreValue('previousMode', 'eco')
     }
 
@@ -93,7 +96,7 @@ class HeatzyDevice extends withAPI(Device) {
     if (
       changedKeys.includes('always_on') &&
       newSettings.always_on === true &&
-      !(this.getCapabilityValue('onoff') as boolean)
+      !this.getCapabilityValue('onoff')
     ) {
       await this.triggerCapabilityListener('onoff', true)
     }
@@ -127,9 +130,15 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  public async setCapabilityValue(
-    capability: string,
-    value: CapabilityValue,
+  public getCapabilityValue<K extends CapabilityKey>(
+    capability: K,
+  ): Capabilities[K] {
+    return super.getCapabilityValue(capability) as Capabilities[K]
+  }
+
+  public async setCapabilityValue<K extends CapabilityKey>(
+    capability: K,
+    value: Capabilities[K],
   ): Promise<void> {
     if (
       !this.hasCapability(capability) ||
@@ -149,6 +158,25 @@ class HeatzyDevice extends withAPI(Device) {
     return super.getSetting(setting) as Settings[K]
   }
 
+  public getStoreValue<K extends StoreKey>(key: K): Store[K] {
+    return super.getStoreValue(key) as Store[K]
+  }
+
+  public async setStoreValue<K extends StoreKey>(
+    key: K,
+    value: Store[K],
+  ): Promise<void> {
+    if (this.getStoreValue(key) === value) {
+      return
+    }
+    try {
+      await super.setStoreValue(key, value)
+      this.log('Store', key, 'is', value)
+    } catch (error: unknown) {
+      this.error(error instanceof Error ? error.message : error)
+    }
+  }
+
   public async setWarning(warning: string | null): Promise<void> {
     if (warning !== null) {
       await super.setWarning(warning)
@@ -156,16 +184,19 @@ class HeatzyDevice extends withAPI(Device) {
     await super.setWarning(null)
   }
 
-  private async onCapability(
-    capability: string,
-    value: CapabilityValue,
+  private async onCapability<K extends CapabilityKey>(
+    capability: K,
+    value: Capabilities[K],
   ): Promise<void> {
     this.clearSync()
     let mode: keyof typeof Mode | null = null
     switch (capability) {
       case 'onoff':
       case this.#mode:
-        mode = await this.getMode(capability, value)
+        mode = await this.getMode(
+          capability,
+          value as boolean | keyof typeof Mode,
+        )
         if (mode) {
           this.#attrs.mode = Mode[mode]
         }
@@ -219,13 +250,13 @@ class HeatzyDevice extends withAPI(Device) {
       }, Promise.resolve())
   }
 
-  private registerCapabilityListeners(): void {
+  private registerCapabilityListeners<K extends CapabilityKey>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.driver.manifest.capabilities as string[]).forEach(
-      (capability: string): void => {
+    ;(this.driver.manifest.capabilities as K[]).forEach(
+      (capability: K): void => {
         this.registerCapabilityListener(
           capability,
-          async (value: CapabilityValue): Promise<void> => {
+          async (value: Capabilities[K]): Promise<void> => {
             await this.onCapability(capability, value)
           },
         )
@@ -289,11 +320,11 @@ class HeatzyDevice extends withAPI(Device) {
     if (!(newMode in Mode)) {
       throw new Error(`Unknown mode: ${newMode}`)
     }
-    await this.setCapabilityValue(this.#mode, newMode)
+    await this.setCapabilityValue(this.#mode, newMode as keyof typeof Mode)
     const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
     await this.setCapabilityValue('onoff', isOn)
     if (isOn) {
-      await this.setStoreValue('previousMode', newMode)
+      await this.setStoreValue('previousMode', newMode as OnMode)
     }
   }
 
@@ -371,9 +402,9 @@ class HeatzyDevice extends withAPI(Device) {
     this.homey.clearTimeout(this.#syncTimeout)
   }
 
-  private async getMode(
-    capability: 'mode_3' | 'mode' | 'onoff',
-    value: CapabilityValue,
+  private async getMode<K extends 'mode_3' | 'mode' | 'onoff'>(
+    capability: K,
+    value: Capabilities[K],
   ): Promise<keyof typeof Mode | null> {
     let mode: keyof typeof Mode | null = null
     if (capability === 'onoff') {
@@ -387,13 +418,16 @@ class HeatzyDevice extends withAPI(Device) {
       mode = null
       await this.setWarning(this.homey.__('warnings.always_on'))
       this.homey.setTimeout(
-        async (): Promise<void> =>
-          this.setCapabilityValue(
-            capability,
-            capability === this.#mode
-              ? (this.getStoreValue('previousMode') as OnMode)
-              : true,
-          ),
+        async (): Promise<void> => {
+          if (capability === 'onoff') {
+            await this.setCapabilityValue('onoff', true)
+          } else {
+            await this.setCapabilityValue(
+              this.#mode,
+              this.getStoreValue('previousMode') ?? 'eco',
+            )
+          }
+        },
         Duration.fromObject({ seconds: 1 }).as('milliseconds'),
       )
     }
@@ -448,7 +482,9 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async setDisplayErrorWarning(capability: string): Promise<void> {
+  private async setDisplayErrorWarning(
+    capability: 'derog_time_boost' | 'derog_time_vacation',
+  ): Promise<void> {
     if (this.getCapabilityValue(capability) !== DEROG_MODE_OFF) {
       await this.setCapabilityValue(capability, DEROG_MODE_OFF)
       await this.setWarning(this.homey.__('warnings.display_error'))
