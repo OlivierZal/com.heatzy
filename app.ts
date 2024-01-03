@@ -4,6 +4,7 @@ import axios from 'axios'
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
 import withAPI, { getErrorMessage } from './mixins/withAPI'
 import type {
+  HomeySettingKey,
   HomeySettings,
   HomeySettingValue,
   LoginCredentials,
@@ -96,7 +97,7 @@ export = class HeatzyApp extends withAPI(App) {
     Object.entries(settings)
       .filter(
         ([setting, value]: [string, HomeySettingValue]) =>
-          value !== this.getHomeySetting(setting as keyof HomeySettings),
+          value !== this.getHomeySetting(setting as HomeySettingKey),
       )
       .forEach(([setting, value]: [string, HomeySettingValue]): void => {
         this.homey.settings.set(setting, value)

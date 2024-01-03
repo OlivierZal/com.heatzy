@@ -59,6 +59,8 @@ export type HomeySettingsUI = BaseHomeySettingValue<
   number | undefined
 >
 
+export type HomeySettingKey = keyof HomeySettings
+
 export type HomeySettingValue = ValueOf<HomeySettings>
 
 export interface ManifestDriverSettingData {
