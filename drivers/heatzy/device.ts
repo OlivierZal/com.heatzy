@@ -60,7 +60,7 @@ class HeatzyDevice extends withAPI(Device) {
   private set onMode(value: PreviousMode) {
     this.#onMode =
       value === ON_MODE_PREVIOUS
-        ? this.getStoreValue('previousMode') ?? 'eco'
+        ? this.getStoreValue('previousMode') ?? (Mode[Mode.eco] as OnMode)
         : value
   }
 
@@ -74,7 +74,7 @@ class HeatzyDevice extends withAPI(Device) {
     this.#productName = productName
     await this.handleCapabilities()
     if (!this.getStoreValue('previousMode')) {
-      await this.setStoreValue('previousMode', 'eco')
+      await this.setStoreValue('previousMode', Mode[Mode.eco] as OnMode)
     }
 
     this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
@@ -424,7 +424,7 @@ class HeatzyDevice extends withAPI(Device) {
           } else {
             await this.setCapabilityValue(
               this.#mode,
-              this.getStoreValue('previousMode') ?? 'eco',
+              this.getStoreValue('previousMode') ?? (Mode[Mode.eco] as OnMode),
             )
           }
         },
