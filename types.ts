@@ -17,15 +17,6 @@ export enum Mode {
   cft2 = 5,
 }
 
-export enum ModeZh {
-  '舒适' = 0,
-  '经济' = 1,
-  '解冻' = 2,
-  '停止' = 3,
-}
-
-export type ModeString = keyof typeof Mode | keyof typeof ModeZh
-
 export enum DerogMode {
   off = 0,
   vacation = 1,
@@ -49,6 +40,8 @@ export interface Settings {
   readonly always_on?: boolean
   readonly on_mode?: PreviousMode
 }
+
+export type SettingKey = keyof Settings
 
 export type SettingValue = ValueOf<Settings>
 
@@ -189,7 +182,7 @@ interface DevicePostData {
 export type DevicePostDataAny = DevicePostData | FirstGenDevicePostData
 
 export interface DeviceData {
-  readonly attr: Omit<BaseAttrs, 'mode'> & { readonly mode: ModeString }
+  readonly attr: Omit<BaseAttrs, 'mode'> & { readonly mode: string }
 }
 
 export interface FlowArgs {

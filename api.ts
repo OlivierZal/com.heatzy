@@ -11,6 +11,7 @@ import type {
   ManifestDriverSetting,
   ManifestDriverSettingData,
   PairSetting,
+  SettingKey,
   Settings,
   SettingValue,
 } from './types'
@@ -133,26 +134,25 @@ export = {
     body: Settings
     homey: Homey
   }): Promise<void> {
-    const changedKeys: (keyof Settings)[] = Object.keys(
-      body,
-    ) as (keyof Settings)[]
+    const changedKeys: SettingKey[] = Object.keys(body) as SettingKey[]
     if (!changedKeys.length) {
       return
     }
     try {
       await Promise.all(
         getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
-          const deviceChangedKeys: (keyof Settings)[] = changedKeys.filter(
-            (changedKey: keyof Settings) =>
+          const deviceChangedKeys: SettingKey[] = changedKeys.filter(
+            (changedKey: SettingKey) =>
               body[changedKey] !== device.getSetting(changedKey),
           )
           if (!deviceChangedKeys.length) {
             return
           }
           const deviceSettings: Settings = Object.fromEntries(
-            deviceChangedKeys.map(
-              (key: keyof Settings): [string, SettingValue] => [key, body[key]],
-            ),
+            deviceChangedKeys.map((key: SettingKey): [string, SettingValue] => [
+              key,
+              body[key],
+            ]),
           )
           try {
             await device.setSettings(deviceSettings)

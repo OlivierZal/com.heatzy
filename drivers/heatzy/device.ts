@@ -6,22 +6,29 @@ import withAPI from '../../mixins/withAPI'
 import {
   DerogMode,
   Mode,
-  ModeZh,
   type BaseAttrs,
   type CapabilityValue,
   type Data,
   type DeviceData,
   type DeviceDetails,
   type DevicePostDataAny,
-  type ModeString,
   type OnMode,
   type PreviousMode,
+  type SettingKey,
   type Settings,
   type Switch,
 } from '../../types'
 import { isFirstGen, isFirstPilot } from '../../utils'
 
-const DEROG_MODE_CAP_OFF = String(DerogMode.off)
+const DEROG_MODE_OFF = String(DerogMode.off)
+const ON_MODE_PREVIOUS = 'previous'
+
+const modeZh: Record<string, keyof typeof Mode> = {
+  舒适: 'cft',
+  经济: 'eco',
+  解冻: 'fro',
+  停止: 'stop',
+}
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
@@ -49,7 +56,7 @@ class HeatzyDevice extends withAPI(Device) {
 
   private set onMode(value: PreviousMode) {
     this.#onMode =
-      value === 'previous'
+      value === ON_MODE_PREVIOUS
         ? (this.getStoreValue('previousMode') as OnMode)
         : value
   }
@@ -68,7 +75,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
 
     this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
-    this.onMode = this.getSetting('on_mode') ?? 'previous'
+    this.onMode = this.getSetting('on_mode') ?? ON_MODE_PREVIOUS
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -138,7 +145,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  public getSetting<K extends keyof Settings>(setting: K): Settings[K] {
+  public getSetting<K extends SettingKey>(setting: K): Settings[K] {
     return super.getSetting(setting) as Settings[K]
   }
 
@@ -261,7 +268,7 @@ class HeatzyDevice extends withAPI(Device) {
       lock_switch: lockSwitch,
       timer_switch: timerSwitch,
     } = attr
-    await this.updateMode(mode, control)
+    await this.updateMode(mode)
     await this.updateDerog(derogMode, derogTime, control)
     if (lockSwitch !== undefined) {
       await this.setCapabilityValue('locked', Boolean(lockSwitch))
@@ -271,29 +278,19 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async updateMode(
-    mode: Mode | ModeString | undefined,
-    control: boolean,
-  ): Promise<void> {
+  private async updateMode(mode: Mode | string | undefined): Promise<void> {
     if (mode === undefined) {
       return
     }
-    let newMode: keyof typeof Mode | null = null
-    switch (true) {
-      case control:
-        newMode = Mode[mode as Mode] as keyof typeof Mode
-        break
-      case mode in Mode:
-        newMode = mode as keyof typeof Mode
-        break
-      case mode in ModeZh:
-        newMode = Mode[ModeZh[mode as keyof typeof ModeZh]] as keyof typeof Mode
-        break
-      default:
-        throw new Error(`Unknown mode: ${mode}`)
+    let newMode: string = typeof mode === 'number' ? Mode[mode] : mode
+    if (newMode in modeZh) {
+      newMode = modeZh[mode]
+    }
+    if (!(newMode in Mode)) {
+      throw new Error(`Unknown mode: ${newMode}`)
     }
     await this.setCapabilityValue(this.#mode, newMode)
-    const isOn: boolean = Mode[newMode] !== Mode.stop
+    const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
     await this.setCapabilityValue('onoff', isOn)
     if (isOn) {
       await this.setStoreValue('previousMode', newMode)
@@ -303,17 +300,15 @@ class HeatzyDevice extends withAPI(Device) {
   private async updateDerog(
     derogMode: DerogMode | undefined,
     derogTime: number | undefined,
-    control: boolean,
+    control = false,
   ): Promise<void> {
     if (derogMode === undefined || derogTime === undefined) {
       return
     }
     let currentDerogMode: DerogMode = DerogMode.off
-    if (this.getCapabilityValue('derog_time_vacation') !== DEROG_MODE_CAP_OFF) {
+    if (this.getCapabilityValue('derog_time_vacation') !== DEROG_MODE_OFF) {
       currentDerogMode = DerogMode.vacation
-    } else if (
-      this.getCapabilityValue('derog_time_boost') !== DEROG_MODE_CAP_OFF
-    ) {
+    } else if (this.getCapabilityValue('derog_time_boost') !== DEROG_MODE_OFF) {
       currentDerogMode = DerogMode.boost
     }
     const currentDerogTime = Number(
@@ -348,8 +343,8 @@ class HeatzyDevice extends withAPI(Device) {
     const time = String(derogTime)
     switch (derogMode) {
       case DerogMode.off:
-        await this.setCapabilityValue('derog_time_vacation', DEROG_MODE_CAP_OFF)
-        await this.setCapabilityValue('derog_time_boost', DEROG_MODE_CAP_OFF)
+        await this.setCapabilityValue('derog_time_vacation', DEROG_MODE_OFF)
+        await this.setCapabilityValue('derog_time_boost', DEROG_MODE_OFF)
         break
       case DerogMode.vacation:
         await this.setCapabilityValue('derog_time_vacation', time)
@@ -454,8 +449,8 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async setDisplayErrorWarning(capability: string): Promise<void> {
-    if (this.getCapabilityValue(capability) !== DEROG_MODE_CAP_OFF) {
-      await this.setCapabilityValue(capability, DEROG_MODE_CAP_OFF)
+    if (this.getCapabilityValue(capability) !== DEROG_MODE_OFF) {
+      await this.setCapabilityValue(capability, DEROG_MODE_OFF)
       await this.setWarning(this.homey.__('warnings.display_error'))
     }
   }
