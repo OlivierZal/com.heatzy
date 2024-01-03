@@ -68,7 +68,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
 
     this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
-    this.onMode = this.getSetting('on_mode') as PreviousMode
+    this.onMode = this.getSetting('on_mode') ?? 'previous'
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -85,7 +85,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
     if (
       changedKeys.includes('always_on') &&
-      newSettings.always_on === true &&
+      (newSettings.always_on ?? false) &&
       !(this.getCapabilityValue('onoff') as boolean)
     ) {
       await this.triggerCapabilityListener('onoff', true)
@@ -136,6 +136,10 @@ class HeatzyDevice extends withAPI(Device) {
     } catch (error: unknown) {
       this.error(error instanceof Error ? error.message : error)
     }
+  }
+
+  public getSetting<K extends keyof Settings>(setting: K): Settings[K] {
+    return super.getSetting(setting) as Settings[K]
   }
 
   public async setWarning(warning: string | null): Promise<void> {
@@ -384,7 +388,7 @@ class HeatzyDevice extends withAPI(Device) {
     } else {
       mode = value as keyof typeof Mode
     }
-    if (Mode[mode] === Mode.stop && (this.getSetting('always_on') as boolean)) {
+    if (Mode[mode] === Mode.stop && (this.getSetting('always_on') ?? false)) {
       mode = null
       await this.setWarning(this.homey.__('warnings.always_on'))
       this.homey.setTimeout(
