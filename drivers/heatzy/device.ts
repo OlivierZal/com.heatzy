@@ -146,8 +146,10 @@ class HeatzyDevice extends withAPI(Device) {
     key: K,
     value: Store[K],
   ): Promise<void> {
-    await super.setStoreValue(key, value)
-    this.log('Store', key, 'is', value)
+    if (value !== this.getStoreValue(key)) {
+      await super.setStoreValue(key, value)
+      this.log('Store', key, 'is', value)
+    }
   }
 
   public async setWarning(warning: string | null): Promise<void> {
