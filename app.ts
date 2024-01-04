@@ -45,7 +45,7 @@ export = class HeatzyApp extends withAPI(App) {
       }
       const { data } = await this.api.post<LoginData>(this.loginURL, postData)
       const { token, expire_at: expireAt } = data
-      this.setSettings({ username, password, token, expireAt })
+      this.setHomeySettings({ username, password, token, expireAt })
       await this.planRefreshLogin()
       return true
     } catch (error: unknown) {
@@ -93,14 +93,23 @@ export = class HeatzyApp extends withAPI(App) {
     this.homey.clearTimeout(this.#loginTimeout)
   }
 
-  private setSettings(settings: Partial<HomeySettings>): void {
+  private setHomeySettings<K extends HomeySettingKey>(
+    settings: Partial<HomeySettings>,
+  ): void {
     Object.entries(settings)
       .filter(
         ([setting, value]: [string, HomeySettingValue]) =>
           value !== this.getHomeySetting(setting as HomeySettingKey),
       )
       .forEach(([setting, value]: [string, HomeySettingValue]): void => {
-        this.homey.settings.set(setting, value)
+        this.setHomeySetting(setting as K, value)
       })
+  }
+
+  private setHomeySetting<K extends HomeySettingKey>(
+    setting: K,
+    value: HomeySettingValue,
+  ): void {
+    this.homey.settings.set(setting, value)
   }
 }
