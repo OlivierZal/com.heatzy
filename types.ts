@@ -2,12 +2,6 @@ import type { SimpleClass } from 'homey'
 import type Homey from 'homey/lib/Homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export type HomeyClass = new (...args: any[]) => SimpleClass & {
-  readonly homey: Homey
-  readonly setWarning?: (warning: string | null) => Promise<void>
-}
-
 export enum Mode {
   cft = 0,
   eco = 1,
@@ -26,6 +20,12 @@ export enum DerogMode {
 export enum Switch {
   off = 0,
   on = 1,
+}
+
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+export type HomeyClass = new (...args: any[]) => SimpleClass & {
+  readonly homey: Homey
+  readonly setWarning?: (warning: string | null) => Promise<void>
 }
 
 export type OnMode = Exclude<keyof typeof Mode, 'stop'>
