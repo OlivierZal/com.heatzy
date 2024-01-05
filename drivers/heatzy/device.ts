@@ -41,17 +41,24 @@ class HeatzyDevice extends withAPI(Device) {
 
   #attrs: BaseAttrs = {}
 
-  #id!: string
+  readonly #data: DeviceDetails['data'] =
+    this.getData() as DeviceDetails['data']
 
-  #productKey!: string
+  readonly #id: string = this.#data.id
 
-  #productName!: string
+  readonly #productKey: string = this.#data.productKey
 
-  #mode!: 'mode_3' | 'mode'
+  readonly #productName: string = this.#data.productName
 
-  #onMode!: OnMode
+  readonly #isFirstGen: boolean = isFirstGen(this.#productKey)
+
+  readonly #isFirstPilot: boolean = isFirstPilot(this.#productName)
+
+  readonly #mode: 'mode_3' | 'mode' = this.#isFirstPilot ? 'mode' : 'mode_3'
 
   #syncTimeout!: NodeJS.Timeout
+
+  #onMode!: OnMode
 
   private get onMode(): OnMode {
     return this.#onMode
@@ -66,18 +73,10 @@ class HeatzyDevice extends withAPI(Device) {
 
   public async onInit(): Promise<void> {
     await this.setWarning(null)
-
-    const { id, productKey, productName } =
-      this.getData() as DeviceDetails['data']
-    this.#id = id
-    this.#productKey = productKey
-    this.#productName = productName
     await this.handleCapabilities()
     if (!this.getStoreValue('previousMode')) {
       await this.setStoreValue('previousMode', Mode[Mode.eco] as OnMode)
     }
-
-    this.#mode = isFirstPilot(this.#productName) ? 'mode' : 'mode_3'
     this.onMode = this.getSetting('on_mode') ?? ON_MODE_PREVIOUS
     this.registerCapabilityListeners()
     await this.syncFromDevice()
@@ -427,7 +426,7 @@ class HeatzyDevice extends withAPI(Device) {
     if (!Object.keys(this.#attrs).length) {
       return null
     }
-    if (!isFirstGen(this.#productKey)) {
+    if (!this.#isFirstGen) {
       return { attrs: this.#attrs }
     }
     if (this.#attrs.mode !== undefined) {

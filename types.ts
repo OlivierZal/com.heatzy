@@ -204,7 +204,7 @@ interface DevicePostData {
 export type DevicePostDataAny = DevicePostData | FirstGenDevicePostData
 
 export interface DeviceData {
-  readonly attr: Omit<BaseAttrs, 'mode'> & { readonly mode: string }
+  readonly attr: Exclude<BaseAttrs, 'mode'> & { readonly mode: string }
 }
 
 export interface FlowArgs {
