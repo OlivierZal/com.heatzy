@@ -430,9 +430,7 @@ class HeatzyDevice extends withAPI(Device) {
       return { attrs: this.#attrs }
     }
     if (this.#attrs.mode !== undefined) {
-      return {
-        raw: [1, 1, this.#attrs.mode],
-      }
+      return { raw: [1, 1, this.#attrs.mode] }
     }
     return null
   }
