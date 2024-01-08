@@ -8,17 +8,14 @@ import {
   Mode,
   type BaseAttrs,
   type Capabilities,
-  type CapabilityKey,
   type Data,
   type DeviceData,
   type DeviceDetails,
   type DevicePostDataAny,
   type OnMode,
   type PreviousMode,
-  type SettingKey,
   type Settings,
   type Store,
-  type StoreKey,
   type Switch,
 } from '../../types'
 import { isFirstGen, isFirstPilot } from '../../utils'
@@ -117,13 +114,13 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  public getCapabilityValue<K extends CapabilityKey>(
+  public getCapabilityValue<K extends keyof Capabilities>(
     capability: K,
   ): Capabilities[K] {
     return super.getCapabilityValue(capability) as Capabilities[K]
   }
 
-  public async setCapabilityValue<K extends CapabilityKey>(
+  public async setCapabilityValue<K extends keyof Capabilities>(
     capability: K,
     value: Capabilities[K],
   ): Promise<void> {
@@ -133,15 +130,15 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  public getSetting<K extends SettingKey>(setting: K): Settings[K] {
+  public getSetting<K extends keyof Settings>(setting: K): Settings[K] {
     return super.getSetting(setting) as Settings[K]
   }
 
-  public getStoreValue<K extends StoreKey>(key: K): Store[K] {
+  public getStoreValue<K extends keyof Store>(key: K): Store[K] {
     return super.getStoreValue(key) as Store[K]
   }
 
-  public async setStoreValue<K extends StoreKey>(
+  public async setStoreValue<K extends keyof Store>(
     key: K,
     value: Store[K],
   ): Promise<void> {
@@ -158,7 +155,7 @@ class HeatzyDevice extends withAPI(Device) {
     await super.setWarning(null)
   }
 
-  private async onCapability<K extends CapabilityKey>(
+  private async onCapability<K extends keyof Capabilities>(
     capability: K,
     value: Capabilities[K],
   ): Promise<void> {
@@ -224,7 +221,7 @@ class HeatzyDevice extends withAPI(Device) {
       }, Promise.resolve())
   }
 
-  private registerCapabilityListeners<K extends CapabilityKey>(): void {
+  private registerCapabilityListeners<K extends keyof Capabilities>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.driver.manifest.capabilities as K[]).forEach(
       (capability: K): void => {

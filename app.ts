@@ -4,11 +4,10 @@ import axios from 'axios'
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
 import withAPI, { getErrorMessage } from './mixins/withAPI'
 import type {
-  HomeySettingKey,
   HomeySettings,
-  HomeySettingValue,
   LoginCredentials,
   LoginData,
+  ValueOf,
 } from './types'
 
 const MAX_INT32: number = 2 ** 31 - 1
@@ -96,10 +95,10 @@ export = class HeatzyApp extends withAPI(App) {
   private setHomeySettings(settings: Partial<HomeySettings>): void {
     Object.entries(settings)
       .filter(
-        ([setting, value]: [string, HomeySettingValue]) =>
-          value !== this.getHomeySetting(setting as HomeySettingKey),
+        ([setting, value]: [string, ValueOf<HomeySettings>]) =>
+          value !== this.getHomeySetting(setting as keyof HomeySettings),
       )
-      .forEach(([setting, value]: [string, HomeySettingValue]): void => {
+      .forEach(([setting, value]: [string, ValueOf<HomeySettings>]): void => {
         this.homey.settings.set(setting, value)
       })
   }

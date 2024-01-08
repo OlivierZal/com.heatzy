@@ -4,7 +4,7 @@ import type HeatzyApp from '../../app'
 import withAPI from '../../mixins/withAPI'
 import type {
   Bindings,
-  CapabilityKey,
+  Capabilities,
   DeviceDetails,
   FlowArgs,
   LoginCredentials,
@@ -47,7 +47,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
       return ['onoff', 'mode']
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (this.manifest.capabilities as CapabilityKey[]).filter(
+    return (this.manifest.capabilities as (keyof Capabilities)[]).filter(
       (capability: string) => {
         if (capability.startsWith('target_temperature')) {
           return isGlow(productKey)
@@ -82,8 +82,8 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   private registerFlowListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.manifest.capabilities as CapabilityKey[]).forEach(
-      (capability: CapabilityKey): void => {
+    ;(this.manifest.capabilities as (keyof Capabilities)[]).forEach(
+      (capability: keyof Capabilities): void => {
         switch (true) {
           case capability.startsWith('mode'):
             this.homey.flow

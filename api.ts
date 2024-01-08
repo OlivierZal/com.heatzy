@@ -11,9 +11,8 @@ import type {
   ManifestDriverSetting,
   ManifestDriverSettingData,
   PairSetting,
-  SettingKey,
   Settings,
-  SettingValue,
+  ValueOf,
 } from './types'
 
 const getDevices = (homey: Homey): HeatzyDevice[] =>
@@ -31,7 +30,7 @@ export = {
         acc[driverId] = {}
       }
       Object.entries(device.getSettings() as Settings).forEach(
-        ([settingId, value]: [string, SettingValue]): void => {
+        ([settingId, value]: [string, ValueOf<Settings>]): void => {
           if (!(settingId in acc[driverId])) {
             acc[driverId][settingId] = []
           }
@@ -134,25 +133,29 @@ export = {
     body: Settings
     homey: Homey
   }): Promise<void> {
-    const changedKeys: SettingKey[] = Object.keys(body) as SettingKey[]
+    const changedKeys: (keyof Settings)[] = Object.keys(
+      body,
+    ) as (keyof Settings)[]
     if (!changedKeys.length) {
       return
     }
     try {
       await Promise.all(
         getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
-          const deviceChangedKeys: SettingKey[] = changedKeys.filter(
-            (changedKey: SettingKey) =>
+          const deviceChangedKeys: (keyof Settings)[] = changedKeys.filter(
+            (changedKey: keyof Settings) =>
               body[changedKey] !== device.getSetting(changedKey),
           )
           if (!deviceChangedKeys.length) {
             return
           }
           const deviceSettings: Settings = Object.fromEntries(
-            deviceChangedKeys.map((key: SettingKey): [string, SettingValue] => [
-              key,
-              body[key],
-            ]),
+            deviceChangedKeys.map(
+              (key: keyof Settings): [string, ValueOf<Settings>] => [
+                key,
+                body[key],
+              ],
+            ),
           )
           try {
             await device.setSettings(deviceSettings)

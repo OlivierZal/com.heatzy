@@ -46,24 +46,16 @@ export interface Capabilities {
   readonly 'target_temperature.complement': number
 }
 
-export type CapabilityKey = keyof Capabilities
-
-type ValueOf<T> = T[keyof T]
+export type ValueOf<T> = T[keyof T]
 
 export interface Settings {
   readonly always_on?: boolean
   readonly on_mode?: PreviousMode
 }
 
-export type SettingKey = keyof Settings
-
-export type SettingValue = ValueOf<Settings>
-
 export interface Store {
   readonly previousMode: OnMode | null
 }
-
-export type StoreKey = keyof Store
 
 interface BaseHomeySettingValue<T1, T2> {
   readonly username: T1
@@ -78,10 +70,6 @@ export type HomeySettingsUI = BaseHomeySettingValue<
   string | undefined,
   number | undefined
 >
-
-export type HomeySettingKey = keyof HomeySettings
-
-export type HomeySettingValue = ValueOf<HomeySettings>
 
 export interface ManifestDriverSettingData {
   readonly id: string
@@ -149,7 +137,7 @@ export interface LoginDriverSetting extends DriverSetting {
   readonly id: keyof LoginCredentials
 }
 
-export type DeviceSetting = Record<string, SettingValue[]>
+export type DeviceSetting = Record<string, ValueOf<Settings>[]>
 export type DeviceSettings = Record<string, DeviceSetting>
 
 export type Data = Record<string, never>

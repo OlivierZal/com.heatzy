@@ -9,7 +9,7 @@ import type {
   LoginCredentials,
   LoginDriverSetting,
   Settings,
-  SettingValue,
+  ValueOf,
 } from '../types'
 
 async function onHomeyReady(homey: Homey): Promise<void> {
@@ -78,13 +78,13 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   ).reduce<DeviceSetting>(
     (flattenedDeviceSettings, settings: DeviceSetting) =>
       Object.entries(settings).reduce<DeviceSetting>(
-        (acc, [settingId, settingValues]: [string, SettingValue[]]) => {
+        (acc, [settingId, settingValues]: [string, ValueOf<Settings>[]]) => {
           if (!(settingId in acc)) {
             acc[settingId] = []
           }
           acc[settingId].push(
             ...settingValues.filter(
-              (settingValue: SettingValue) =>
+              (settingValue: ValueOf<Settings>) =>
                 !acc[settingId].includes(settingValue),
             ),
           )
@@ -216,7 +216,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   const processSettingValue = (
     element: HTMLInputElement | HTMLSelectElement,
-  ): SettingValue | null => {
+  ): ValueOf<Settings> | null => {
     const { value } = element
     if (!value) {
       return null
@@ -237,11 +237,11 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   ): Settings => {
     const shouldUpdate = (
       settingId: string,
-      settingValue: SettingValue,
+      settingValue: ValueOf<Settings>,
     ): boolean => {
-      const deviceSetting: SettingValue[] | undefined = flatDeviceSettings[
+      const deviceSetting: ValueOf<Settings>[] | undefined = flatDeviceSettings[
         settingId
-      ] as SettingValue[] | undefined
+      ] as ValueOf<Settings>[] | undefined
       return (
         deviceSetting !== undefined &&
         (new Set(deviceSetting).size !== 1 || settingValue !== deviceSetting[0])
@@ -253,9 +253,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         .map(
           (
             element: HTMLInputElement | HTMLSelectElement,
-          ): [null] | [string, SettingValue] => {
+          ): [null] | [string, ValueOf<Settings>] => {
             const settingId: string = element.id.split('--')[0]
-            const settingValue: SettingValue | null =
+            const settingValue: ValueOf<Settings> | null =
               processSettingValue(element)
             return settingValue !== null &&
               shouldUpdate(settingId, settingValue)
@@ -265,15 +265,15 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         )
         .filter(
           (
-            entry: [null] | [string, SettingValue],
-          ): entry is [string, SettingValue] => entry[0] !== null,
+            entry: [null] | [string, ValueOf<Settings>],
+          ): entry is [string, ValueOf<Settings>] => entry[0] !== null,
         ),
     )
   }
 
   const updateDeviceSettings = (body: Settings): void => {
     Object.entries(body).forEach(
-      ([settingId, settingValue]: [string, SettingValue]): void => {
+      ([settingId, settingValue]: [string, ValueOf<Settings>]): void => {
         Object.keys(deviceSettings).forEach((driver: string): void => {
           deviceSettings[driver][settingId] = [settingValue]
         })
@@ -339,9 +339,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   }
 
   const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
-    const values: SettingValue[] | undefined = flatDeviceSettings[
+    const values: ValueOf<Settings>[] | undefined = flatDeviceSettings[
       element.id.split('--')[0]
-    ] as SettingValue[] | undefined
+    ] as ValueOf<Settings>[] | undefined
     // eslint-disable-next-line no-param-reassign
     element.value =
       values && new Set(values).size === 1 ? String(values[0]) : ''
