@@ -94,7 +94,7 @@ class HeatzyDevice extends withAPI(Device) {
       newSettings.always_on === true &&
       !this.getCapabilityValue('onoff')
     ) {
-      await this.triggerCapabilityListener('onoff', true)
+      await this.onCapability('onoff', true)
     }
   }
 
