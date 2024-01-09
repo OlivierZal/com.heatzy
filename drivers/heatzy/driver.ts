@@ -95,10 +95,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
             this.homey.flow
               .getActionCard(`${capability}_action`)
               .registerRunListener(async (args: FlowArgs): Promise<void> => {
-                await args.device.triggerCapabilityListener(
-                  capability,
-                  args.mode,
-                )
+                await args.device.onCapability(capability, args.mode)
               })
             break
           case capability === 'derog_time_boost':
@@ -113,7 +110,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
             this.homey.flow
               .getActionCard(`${capability}_action`)
               .registerRunListener(async (args: FlowArgs): Promise<void> => {
-                await args.device.triggerCapabilityListener(
+                await args.device.onCapability(
                   capability,
                   capability === 'derog_time_boost'
                     ? args.derog_time
@@ -125,7 +122,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
             this.homey.flow
               .getActionCard(`${capability}_action`)
               .registerRunListener(async (args: FlowArgs): Promise<void> => {
-                await args.device.triggerCapabilityListener(
+                await args.device.onCapability(
                   capability,
                   args.target_temperature,
                 )

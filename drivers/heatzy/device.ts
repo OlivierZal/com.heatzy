@@ -155,7 +155,7 @@ class HeatzyDevice extends withAPI(Device) {
     await super.setWarning(null)
   }
 
-  private async onCapability<K extends keyof Capabilities>(
+  public async onCapability<K extends keyof Capabilities>(
     capability: K,
     value: Capabilities[K],
   ): Promise<void> {
