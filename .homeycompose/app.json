@@ -63,19 +63,19 @@
     },
     "login": {
       "method": "POST",
-      "path": "/login"
+      "path": "/sessions"
     },
     "getDeviceSettings": {
       "method": "GET",
-      "path": "/devices/settings"
+      "path": "/settings/devices"
     },
     "setDeviceSettings": {
-      "method": "POST",
-      "path": "/devices/settings"
+      "method": "PATCH",
+      "path": "/settings/devices"
     },
     "getDriverSettings": {
       "method": "GET",
-      "path": "/drivers/settings"
+      "path": "/settings/drivers"
     }
   }
 }

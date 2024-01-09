@@ -56,7 +56,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       // @ts-expect-error: `homey` is partially typed
       homey.api(
         'GET',
-        '/devices/settings',
+        '/settings/devices',
         async (
           error: Error | null,
           settings: DeviceSettings,
@@ -100,7 +100,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       // @ts-expect-error: `homey` is partially typed
       homey.api(
         'GET',
-        '/drivers/settings',
+        '/settings/drivers',
         async (
           error: Error | null,
           driverSettings: DriverSetting[],
@@ -285,8 +285,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   const setDeviceSettings = (body: Settings): void => {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
-      'POST',
-      '/devices/settings',
+      'PATCH',
+      '/settings/devices',
       body,
       async (error: Error | null): Promise<void> => {
         if (error) {
@@ -415,7 +415,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
       'POST',
-      '/login',
+      '/sessions',
       body,
       async (error: Error | null, loggedIn: boolean): Promise<void> => {
         if (error) {
