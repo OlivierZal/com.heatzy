@@ -10,8 +10,10 @@
     "en": "Pilot your electric radiators",
     "fr": "Pilotez vos radiateurs électriques"
   },
-  "category": ["climate"],
-  "version": "15.0.0",
+  "category": [
+    "climate"
+  ],
+  "version": "15.0.1",
   "compatibility": ">=5.0.0",
   "tags": {
     "en": [
@@ -55,7 +57,9 @@
       }
     }
   },
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "api": {
     "getLanguage": {
       "method": "GET",
