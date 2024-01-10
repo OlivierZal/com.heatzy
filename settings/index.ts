@@ -285,7 +285,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   const setDeviceSettings = (body: Settings): void => {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
-      'PATCH',
+      'PUT',
       '/settings/devices',
       body,
       async (error: Error | null): Promise<void> => {
