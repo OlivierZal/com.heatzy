@@ -57,16 +57,16 @@ export interface Store {
   readonly previousMode: OnMode | null
 }
 
-interface BaseHomeySettingValue<T1, T2> {
+interface BaseHomeySettings<T1, T2> {
   readonly username: T1
   readonly password: T1
   readonly token: T1
   readonly expireAt: T2
 }
 
-export type HomeySettings = BaseHomeySettingValue<string | null, number | null>
+export type HomeySettings = BaseHomeySettings<string | null, number | null>
 
-export type HomeySettingsUI = BaseHomeySettingValue<
+export type HomeySettingsUI = BaseHomeySettings<
   string | undefined,
   number | undefined
 >
