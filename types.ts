@@ -138,6 +138,7 @@ export interface LoginDriverSetting extends DriverSetting {
 }
 
 export type DeviceSetting = Record<string, ValueOf<Settings>[]>
+
 export type DeviceSettings = Record<string, DeviceSetting>
 
 export type Data = Record<string, never>
