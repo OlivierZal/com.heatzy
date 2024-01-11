@@ -41,7 +41,6 @@ const tsCustomRules = {
     {
       ignore: [0, 1, 2, 31, 10],
       ignoreEnums: true,
-      ignoreReadonlyClassProperties: true,
     },
   ],
   '@typescript-eslint/no-unused-vars': [
