@@ -56,24 +56,13 @@ class HeatzyDevice extends withAPI(Device) {
 
   #onMode!: OnMode
 
-  private get onMode(): OnMode {
-    return this.#onMode
-  }
-
-  private set onMode(value: PreviousMode) {
-    this.#onMode =
-      value === ON_MODE_PREVIOUS
-        ? this.getStoreValue('previousMode') ?? (Mode[Mode.eco] as OnMode)
-        : value
-  }
-
   public async onInit(): Promise<void> {
     await this.setWarning(null)
     await this.handleCapabilities()
     if (!this.getStoreValue('previousMode')) {
       await this.setStoreValue('previousMode', Mode[Mode.eco] as OnMode)
     }
-    this.onMode = this.getSetting('on_mode') ?? ON_MODE_PREVIOUS
+    this.setOnMode(this.getSetting('on_mode') ?? ON_MODE_PREVIOUS)
     this.registerCapabilityListeners()
     await this.syncFromDevice()
   }
@@ -86,7 +75,7 @@ class HeatzyDevice extends withAPI(Device) {
     changedKeys: string[]
   }): Promise<void> {
     if (changedKeys.includes('on_mode') && newSettings.on_mode) {
-      this.onMode = newSettings.on_mode
+      this.setOnMode(newSettings.on_mode)
     }
     if (
       changedKeys.includes('always_on') &&
@@ -374,7 +363,7 @@ class HeatzyDevice extends withAPI(Device) {
     let mode: keyof typeof Mode | null = null
     if (capability === 'onoff') {
       mode = (value as boolean)
-        ? this.onMode
+        ? this.#onMode
         : (Mode[Mode.stop] as keyof typeof Mode)
     } else {
       mode = value as keyof typeof Mode
@@ -452,6 +441,13 @@ class HeatzyDevice extends withAPI(Device) {
       await this.setCapabilityValue(capability, '0')
       await this.setWarning(this.homey.__('warnings.display_error'))
     }
+  }
+
+  private setOnMode(value: PreviousMode): void {
+    this.#onMode =
+      value === ON_MODE_PREVIOUS
+        ? this.getStoreValue('previousMode') ?? (Mode[Mode.eco] as OnMode)
+        : value
   }
 }
 
