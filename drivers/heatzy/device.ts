@@ -20,7 +20,6 @@ import {
 } from '../../types'
 import { isFirstGen, isFirstPilot } from '../../utils'
 
-const DEROG_MODE_OFF = String(DerogMode.off)
 const ON_MODE_PREVIOUS = 'previous'
 
 const modeZh: Record<string, keyof typeof Mode> = {
@@ -304,19 +303,17 @@ class HeatzyDevice extends withAPI(Device) {
     if (derogMode === undefined || derogTime === undefined) {
       return
     }
+    const vacationValue = Number(this.getCapabilityValue('derog_time_vacation'))
+    const boostValue = Number(this.getCapabilityValue('derog_time_boost'))
     let currentDerogMode: DerogMode = DerogMode.off
-    if (Number(this.getCapabilityValue('derog_time_vacation'))) {
+    let currentDerogTime: number = 0
+    if (vacationValue) {
       currentDerogMode = DerogMode.vacation
-    } else if (Number(this.getCapabilityValue('derog_time_boost'))) {
+      currentDerogTime = vacationValue
+    } else if (boostValue) {
       currentDerogMode = DerogMode.boost
+      currentDerogTime = boostValue
     }
-    const currentDerogTime = Number(
-      this.getCapabilityValue(
-        Number(this.getCapabilityValue('derog_time_vacation'))
-          ? 'derog_time_vacation'
-          : 'derog_time_boost',
-      ),
-    )
     if (
       control ||
       derogMode !== currentDerogMode ||
@@ -342,16 +339,16 @@ class HeatzyDevice extends withAPI(Device) {
     const time = String(derogTime)
     switch (derogMode) {
       case DerogMode.off:
-        await this.setCapabilityValue('derog_time_vacation', DEROG_MODE_OFF)
-        await this.setCapabilityValue('derog_time_boost', DEROG_MODE_OFF)
+        await this.setCapabilityValue('derog_time_vacation', '0')
+        await this.setCapabilityValue('derog_time_boost', '0')
         break
       case DerogMode.vacation:
         await this.setCapabilityValue('derog_time_vacation', time)
-        await this.setDisplayErrorWarning('derog_time_boost')
+        await this.setDerogTime('derog_time_boost')
         break
       case DerogMode.boost:
         await this.setCapabilityValue('derog_time_boost', time)
-        await this.setDisplayErrorWarning('derog_time_vacation')
+        await this.setDerogTime('derog_time_vacation')
         break
       default:
     }
@@ -448,11 +445,11 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async setDisplayErrorWarning(
+  private async setDerogTime(
     capability: 'derog_time_boost' | 'derog_time_vacation',
   ): Promise<void> {
-    if (this.getCapabilityValue(capability) !== DEROG_MODE_OFF) {
-      await this.setCapabilityValue(capability, DEROG_MODE_OFF)
+    if (Number(this.getCapabilityValue(capability))) {
+      await this.setCapabilityValue(capability, '0')
       await this.setWarning(this.homey.__('warnings.display_error'))
     }
   }
