@@ -5,7 +5,7 @@
   },
   "tokens": [
     {
-      "name": "mode_3",
+      "name": "mode3",
       "type": "string",
       "title": {
         "en": "Mode",
@@ -20,7 +20,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=heatzy&capabilities=mode_3"
+      "filter": "driver_id=heatzy&capabilities=mode3"
     }
   ]
 }

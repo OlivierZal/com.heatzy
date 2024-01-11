@@ -1,17 +1,17 @@
 {
   "title": {
-    "en": "Set the mode",
-    "fr": "Définir le mode"
+    "en": "The mode !{{is|is not}}",
+    "fr": "Le mode !{{est|n'est pas}}"
   },
   "titleFormatted": {
-    "en": "Set the mode to [[mode]]",
-    "fr": "Définir le mode à [[mode]]"
+    "en": "The mode !{{is|is not}} [[mode]]",
+    "fr": "Le mode !{{est|n'est pas}} [[mode]]"
   },
   "args": [
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=heatzy&capabilities=mode_3"
+      "filter": "driver_id=heatzy&capabilities=mode3"
     },
     {
       "name": "mode",

@@ -39,7 +39,7 @@ export interface Capabilities {
   readonly derog_time_vacation: string
   readonly locked: boolean
   readonly mode: keyof typeof Mode
-  readonly mode_3: keyof typeof Mode
+  readonly mode3: keyof typeof Mode
   readonly onoff: boolean
   readonly 'onoff.timer': boolean
   readonly target_temperature: number

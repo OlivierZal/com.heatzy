@@ -53,7 +53,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
           return isGlow(productKey)
         }
         return isFirstPilot(productName)
-          ? capability !== 'mode_3'
+          ? capability !== 'mode3'
           : capability !== 'mode'
       },
     )

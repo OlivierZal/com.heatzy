@@ -119,33 +119,6 @@
         },
         "tokens": [
           {
-            "name": "mode_3",
-            "type": "string",
-            "title": {
-              "en": "Mode",
-              "fr": "Mode"
-            },
-            "example": {
-              "en": "eco"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode_3"
-          }
-        ],
-        "id": "mode_3_changed"
-      },
-      {
-        "title": {
-          "en": "The mode has changed",
-          "fr": "Le mode a changé"
-        },
-        "tokens": [
-          {
             "name": "mode",
             "type": "string",
             "title": {
@@ -165,6 +138,33 @@
           }
         ],
         "id": "mode_changed"
+      },
+      {
+        "title": {
+          "en": "The mode has changed",
+          "fr": "Le mode a changé"
+        },
+        "tokens": [
+          {
+            "name": "mode3",
+            "type": "string",
+            "title": {
+              "en": "Mode",
+              "fr": "Mode"
+            },
+            "example": {
+              "en": "eco"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode3"
+          }
+        ],
+        "id": "mode3_changed"
       },
       {
         "title": {
@@ -223,7 +223,59 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode_3"
+            "filter": "driver_id=heatzy&capabilities=mode"
+          },
+          {
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "cft",
+                "title": {
+                  "en": "Comfort",
+                  "fr": "Confort"
+                }
+              },
+              {
+                "id": "eco",
+                "title": {
+                  "en": "Eco",
+                  "fr": "Éco"
+                }
+              },
+              {
+                "id": "fro",
+                "title": {
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
+                }
+              },
+              {
+                "id": "stop",
+                "title": {
+                  "en": "Off",
+                  "fr": "Désactivé"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "mode_condition"
+      },
+      {
+        "title": {
+          "en": "The mode !{{is|is not}}",
+          "fr": "Le mode !{{est|n'est pas}}"
+        },
+        "titleFormatted": {
+          "en": "The mode !{{is|is not}} [[mode]]",
+          "fr": "Le mode !{{est|n'est pas}} [[mode]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode3"
           },
           {
             "name": "mode",
@@ -274,59 +326,7 @@
             ]
           }
         ],
-        "id": "mode_3_condition"
-      },
-      {
-        "title": {
-          "en": "The mode !{{is|is not}}",
-          "fr": "Le mode !{{est|n'est pas}}"
-        },
-        "titleFormatted": {
-          "en": "The mode !{{is|is not}} [[mode]]",
-          "fr": "Le mode !{{est|n'est pas}} [[mode]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode"
-          },
-          {
-            "name": "mode",
-            "type": "dropdown",
-            "values": [
-              {
-                "id": "cft",
-                "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
-                }
-              },
-              {
-                "id": "eco",
-                "title": {
-                  "en": "Eco",
-                  "fr": "Éco"
-                }
-              },
-              {
-                "id": "fro",
-                "title": {
-                  "en": "Anti-frost",
-                  "fr": "Anti-gel"
-                }
-              },
-              {
-                "id": "stop",
-                "title": {
-                  "en": "Off",
-                  "fr": "Désactivé"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "mode_condition"
+        "id": "mode3_condition"
       },
       {
         "title": {
@@ -416,7 +416,59 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode_3"
+            "filter": "driver_id=heatzy&capabilities=mode"
+          },
+          {
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "cft",
+                "title": {
+                  "en": "Comfort",
+                  "fr": "Confort"
+                }
+              },
+              {
+                "id": "eco",
+                "title": {
+                  "en": "Eco",
+                  "fr": "Éco"
+                }
+              },
+              {
+                "id": "fro",
+                "title": {
+                  "en": "Anti-frost",
+                  "fr": "Anti-gel"
+                }
+              },
+              {
+                "id": "stop",
+                "title": {
+                  "en": "Off",
+                  "fr": "Désactivé"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "mode_action"
+      },
+      {
+        "title": {
+          "en": "Set the mode",
+          "fr": "Définir le mode"
+        },
+        "titleFormatted": {
+          "en": "Set the mode to [[mode]]",
+          "fr": "Définir le mode à [[mode]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=mode3"
           },
           {
             "name": "mode",
@@ -467,59 +519,7 @@
             ]
           }
         ],
-        "id": "mode_3_action"
-      },
-      {
-        "title": {
-          "en": "Set the mode",
-          "fr": "Définir le mode"
-        },
-        "titleFormatted": {
-          "en": "Set the mode to [[mode]]",
-          "fr": "Définir le mode à [[mode]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode"
-          },
-          {
-            "name": "mode",
-            "type": "dropdown",
-            "values": [
-              {
-                "id": "cft",
-                "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
-                }
-              },
-              {
-                "id": "eco",
-                "title": {
-                  "en": "Eco",
-                  "fr": "Éco"
-                }
-              },
-              {
-                "id": "fro",
-                "title": {
-                  "en": "Anti-frost",
-                  "fr": "Anti-gel"
-                }
-              },
-              {
-                "id": "stop",
-                "title": {
-                  "en": "Off",
-                  "fr": "Désactivé"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "mode_action"
+        "id": "mode3_action"
       },
       {
         "title": {
@@ -656,7 +656,7 @@
         "target_temperature",
         "target_temperature.complement",
         "mode",
-        "mode_3",
+        "mode3",
         "locked",
         "derog_end",
         "derog_time_boost",
@@ -1079,7 +1079,7 @@
         }
       ]
     },
-    "mode_3": {
+    "mode3": {
       "type": "enum",
       "title": {
         "en": "Mode",
