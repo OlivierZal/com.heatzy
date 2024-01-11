@@ -344,11 +344,11 @@ class HeatzyDevice extends withAPI(Device) {
         break
       case DerogMode.vacation:
         await this.setCapabilityValue('derog_time_vacation', time)
-        await this.setDerogTime('derog_time_boost')
+        await this.clearDerogTime('derog_time_boost')
         break
       case DerogMode.boost:
         await this.setCapabilityValue('derog_time_boost', time)
-        await this.setDerogTime('derog_time_vacation')
+        await this.clearDerogTime('derog_time_vacation')
         break
       default:
     }
@@ -445,7 +445,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async setDerogTime(
+  private async clearDerogTime(
     capability: 'derog_time_boost' | 'derog_time_vacation',
   ): Promise<void> {
     if (Number(this.getCapabilityValue(capability))) {
