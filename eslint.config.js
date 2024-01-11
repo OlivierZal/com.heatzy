@@ -30,18 +30,12 @@ const convertIntoEslintFlatConfig = (config) => {
   }
 }
 
-const customRules = {
-  'no-bitwise': 'off',
-  'no-underscore-dangle': ['error', { allow: ['__'] }],
-}
+const customRules = { 'no-underscore-dangle': ['error', { allow: ['__'] }] }
 const tsCustomRules = {
   '@typescript-eslint/naming-convention': 'off',
   '@typescript-eslint/no-magic-numbers': [
     'error',
-    {
-      ignore: [0, 1, 2, 31, 10],
-      ignoreEnums: true,
-    },
+    { ignore: [0, 1, 2, 31, 10], ignoreEnums: true },
   ],
   '@typescript-eslint/no-unused-vars': [
     'error',
