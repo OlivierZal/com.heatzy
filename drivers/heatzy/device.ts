@@ -305,9 +305,9 @@ class HeatzyDevice extends withAPI(Device) {
       return
     }
     let currentDerogMode: DerogMode = DerogMode.off
-    if (this.getCapabilityValue('derog_time_vacation') !== DEROG_MODE_OFF) {
+    if (Number(this.getCapabilityValue('derog_time_vacation'))) {
       currentDerogMode = DerogMode.vacation
-    } else if (this.getCapabilityValue('derog_time_boost') !== DEROG_MODE_OFF) {
+    } else if (Number(this.getCapabilityValue('derog_time_boost'))) {
       currentDerogMode = DerogMode.boost
     }
     const currentDerogTime = Number(
