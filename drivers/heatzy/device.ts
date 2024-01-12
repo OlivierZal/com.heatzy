@@ -6,14 +6,15 @@ import withAPI from '../../mixins/withAPI'
 import {
   DerogMode,
   Mode,
+  OnModeSetting,
+  PreviousModeValue,
   type BaseAttrs,
   type Capabilities,
   type Data,
   type DeviceData,
   type DeviceDetails,
   type DevicePostDataAny,
-  type OnMode,
-  type PreviousMode,
+  type ModeCapability,
   type Settings,
   type Store,
   type Switch,
@@ -26,7 +27,6 @@ const MODE_ZH: Record<string, keyof typeof Mode> = {
   解冻: 'fro',
   停止: 'stop',
 }
-const ON_MODE_PREVIOUS = 'previous'
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
@@ -49,19 +49,16 @@ class HeatzyDevice extends withAPI(Device) {
 
   readonly #isFirstPilot: boolean = isFirstPilot(this.#productName)
 
-  readonly #mode: 'mode' | 'mode3' = this.#isFirstPilot ? 'mode' : 'mode3'
+  readonly #mode: ModeCapability = this.#isFirstPilot ? 'mode' : 'mode3'
+
+  #onModeValue!: PreviousModeValue
 
   #syncTimeout!: NodeJS.Timeout
 
-  #onMode!: OnMode
-
   public async onInit(): Promise<void> {
     await this.setWarning(null)
+    this.setOnModeValue(this.getSetting('on_mode'))
     await this.handleCapabilities()
-    if (!this.getStoreValue('previousMode')) {
-      await this.setStoreValue('previousMode', Mode[Mode.eco] as OnMode)
-    }
-    this.setOnMode(this.getSetting('on_mode') ?? ON_MODE_PREVIOUS)
     this.registerCapabilityListeners()
     await this.updateCapabilities()
   }
@@ -73,8 +70,8 @@ class HeatzyDevice extends withAPI(Device) {
     newSettings: Settings
     changedKeys: string[]
   }): Promise<void> {
-    if (changedKeys.includes('on_mode') && newSettings.on_mode) {
-      this.setOnMode(newSettings.on_mode)
+    if (changedKeys.includes('on_mode') && newSettings.on_mode !== undefined) {
+      this.setOnModeValue(newSettings.on_mode)
     }
     if (
       changedKeys.includes('always_on') &&
@@ -117,19 +114,21 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  public getSetting<K extends keyof Settings>(setting: K): Settings[K] {
-    return super.getSetting(setting) as Settings[K]
+  public getSetting<K extends keyof Settings>(
+    setting: K,
+  ): NonNullable<Settings[K]> {
+    return super.getSetting(setting) as NonNullable<Settings[K]>
   }
 
-  public getStoreValue<K extends keyof Store>(key: K): Store[K] {
-    return super.getStoreValue(key) as Store[K]
+  public getStoreValue<K extends keyof Store>(key: K): NonNullable<Store[K]> {
+    return (super.getStoreValue(key) as Store[K]) ?? PreviousModeValue.eco
   }
 
   public async setStoreValue<K extends keyof Store>(
     key: K,
     value: Store[K],
   ): Promise<void> {
-    if (value !== this.getStoreValue(key)) {
+    if (value !== super.getStoreValue(key)) {
       await super.setStoreValue(key, value)
       this.log('Store', key, 'is', value)
     }
@@ -273,8 +272,8 @@ class HeatzyDevice extends withAPI(Device) {
     await this.setCapabilityValue(this.#mode, newMode as keyof typeof Mode)
     const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
     await this.setCapabilityValue('onoff', isOn)
-    if (isOn) {
-      await this.setStoreValue('previousMode', newMode as OnMode)
+    if (newMode in PreviousModeValue) {
+      await this.setStoreValue('previousMode', newMode as PreviousModeValue)
     }
   }
 
@@ -361,19 +360,19 @@ class HeatzyDevice extends withAPI(Device) {
     this.homey.clearTimeout(this.#syncTimeout)
   }
 
-  private async getMode<K extends 'mode' | 'mode3' | 'onoff'>(
+  private async getMode<K extends ModeCapability | 'onoff'>(
     capability: K,
     value: Capabilities[K],
   ): Promise<keyof typeof Mode | null> {
     let mode: keyof typeof Mode | null = null
     if (capability === 'onoff') {
       mode = (value as boolean)
-        ? this.#onMode
+        ? this.#onModeValue
         : (Mode[Mode.stop] as keyof typeof Mode)
     } else {
       mode = value as keyof typeof Mode
     }
-    if (Mode[mode] === Mode.stop && this.getSetting('always_on') === true) {
+    if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
       mode = null
       await this.setWarning(this.homey.__('warnings.always_on'))
       this.homey.setTimeout(
@@ -383,7 +382,7 @@ class HeatzyDevice extends withAPI(Device) {
           } else {
             await this.setCapabilityValue(
               this.#mode,
-              this.getStoreValue('previousMode') ?? (Mode[Mode.eco] as OnMode),
+              this.getStoreValue('previousMode'),
             )
           }
         },
@@ -448,11 +447,11 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private setOnMode(value: PreviousMode): void {
-    this.#onMode =
-      value === ON_MODE_PREVIOUS
-        ? this.getStoreValue('previousMode') ?? (Mode[Mode.eco] as OnMode)
-        : value
+  private setOnModeValue(value: OnModeSetting): void {
+    this.#onModeValue =
+      value === OnModeSetting.previous
+        ? this.getStoreValue('previousMode')
+        : PreviousModeValue[value]
   }
 }
 

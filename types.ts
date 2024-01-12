@@ -2,6 +2,8 @@ import type { SimpleClass } from 'homey'
 import type Homey from 'homey/lib/Homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 
+export type ModeCapability = 'mode' | 'mode3'
+
 export enum Mode {
   cft = 0,
   eco = 1,
@@ -9,6 +11,20 @@ export enum Mode {
   stop = 3,
   cft1 = 4,
   cft2 = 5,
+}
+
+export enum PreviousModeValue {
+  cft = 'cft',
+  eco = 'eco',
+  fro = 'fro',
+  cft1 = 'cft1',
+  cft2 = 'cft2',
+}
+
+export enum OnModeSetting {
+  cft = 'cft',
+  eco = 'eco',
+  previous = 'previous',
 }
 
 export enum DerogMode {
@@ -28,10 +44,6 @@ export type HomeyClass = new (...args: any[]) => SimpleClass & {
   readonly setWarning?: (warning: string | null) => Promise<void>
 }
 
-export type OnMode = Exclude<keyof typeof Mode, 'stop'>
-
-export type PreviousMode = OnMode | 'previous'
-
 export interface Capabilities {
   readonly derog_end: string | null
   readonly derog_mode: keyof typeof DerogMode
@@ -50,11 +62,11 @@ export type ValueOf<T> = T[keyof T]
 
 export interface Settings {
   readonly always_on?: boolean
-  readonly on_mode?: PreviousMode
+  readonly on_mode?: OnModeSetting
 }
 
 export interface Store {
-  readonly previousMode: OnMode | null
+  readonly previousMode: PreviousModeValue | null
 }
 
 interface BaseHomeySettings<T1, T2> {

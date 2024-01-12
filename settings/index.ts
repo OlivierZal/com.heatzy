@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import type Homey from 'homey/lib/Homey'
 import type {
-  OnMode,
   DeviceSetting,
   DeviceSettings,
   DriverSetting,
   HomeySettingsUI,
   LoginCredentials,
   LoginDriverSetting,
+  OnModeSetting,
   Settings,
   ValueOf,
 } from '../types'
@@ -229,7 +229,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     }
     return ['true', 'false'].includes(value)
       ? value === 'true'
-      : (value as OnMode)
+      : (value as OnModeSetting)
   }
 
   const buildSettingsBody = (
