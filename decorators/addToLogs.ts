@@ -22,6 +22,9 @@ const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
       private commonLog(logType: 'error' | 'log', ...args: any[]): void {
         super[logType](
           ...logs.flatMap((log: string): [any, '-'] => {
+            if (log in this) {
+              return [this[log as keyof this], '-']
+            }
             if (log.endsWith(EMPTY_FUNCTION_PARENS)) {
               const funcName: string = log.slice(
                 0,
@@ -40,7 +43,7 @@ const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
                 return [func.call(this), '-']
               }
             }
-            return log in this ? [this[log as keyof this], '-'] : [log, '-']
+            return [log, '-']
           }),
           ...args,
         )
