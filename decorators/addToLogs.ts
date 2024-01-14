@@ -34,10 +34,7 @@ const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
                 }
               }
             }
-            if (log in this) {
-              return [this[log as keyof this], '-']
-            }
-            return [log, '-']
+            return log in this ? [this[log as keyof this], '-'] : [log, '-']
           }),
           ...args,
         )
