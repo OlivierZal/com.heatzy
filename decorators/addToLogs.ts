@@ -27,15 +27,15 @@ const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
                 0,
                 -EMPTY_FUNCTION_PARENS.length,
               )
-              const func: () => any = (this as Record<any, any>)[
-                funcName
-              ] as () => any
-              if (typeof func === 'function' && !func.length) {
-                return [func.call(this), '-']
+              if ('funcName' in this) {
+                const func: unknown = this[funcName as keyof this]
+                if (typeof func === 'function' && !func.length) {
+                  return [func.call(this), '-']
+                }
               }
             }
             if (log in this) {
-              return [this[log as keyof LogsDecorator], '-']
+              return [this[log as keyof this], '-']
             }
             return [log, '-']
           }),
