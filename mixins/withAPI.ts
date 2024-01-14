@@ -57,9 +57,9 @@ const withAPI = <T extends HomeyClass>(
     }
 
     public getHomeySetting<K extends keyof HomeySettings>(
-      setting: K,
+      setting: K & string,
     ): HomeySettings[K] {
-      return this.homey.settings.get(setting as string) as HomeySettings[K]
+      return this.homey.settings.get(setting) as HomeySettings[K]
     }
 
     private setupAxiosInterceptors(): void {
