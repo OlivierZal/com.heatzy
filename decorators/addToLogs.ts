@@ -27,12 +27,13 @@ const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
                 0,
                 -EMPTY_FUNCTION_PARENS.length,
               )
-              if (!('funcName' in this)) {
-                return [log, '-']
-              }
-              const func: unknown = this[funcName as keyof this]
-              if (typeof func === 'function' && !func.length) {
-                return [func.call(this), '-']
+              if ('funcName' in this) {
+                const func: () => any = this[
+                  funcName as keyof this
+                ] as () => any
+                if (!func.length) {
+                  return [func.call(this), '-']
+                }
               }
             }
             return log in this ? [this[log as keyof this], '-'] : [log, '-']
