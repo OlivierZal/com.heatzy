@@ -28,9 +28,9 @@ const addToLogs = <T extends new (...args: any[]) => SimpleClass>(
                 -EMPTY_FUNCTION_PARENS.length,
               )
               if ('funcName' in this) {
-                const func: () => any = this[
+                const func: (...funcArgs: any[]) => any = this[
                   funcName as keyof this
-                ] as () => any
+                ] as (...funcArgs: any[]) => any
                 if (!func.length) {
                   return [func.call(this), '-']
                 }
