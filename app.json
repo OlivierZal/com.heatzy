@@ -14,7 +14,7 @@
   "category": [
     "climate"
   ],
-  "version": "15.1.0",
+  "version": "15.2.0",
   "compatibility": ">=5.0.0",
   "tags": {
     "en": [
@@ -1054,6 +1054,60 @@
           "title": {
             "en": "Comfort",
             "fr": "Confort"
+          }
+        },
+        {
+          "id": "eco",
+          "title": {
+            "en": "Eco",
+            "fr": "Éco"
+          }
+        },
+        {
+          "id": "fro",
+          "title": {
+            "en": "Anti-frost",
+            "fr": "Anti-gel"
+          }
+        },
+        {
+          "id": "stop",
+          "title": {
+            "en": "Off",
+            "fr": "Désactivé"
+          }
+        }
+      ]
+    },
+    "mode_3": {
+      "type": "enum",
+      "title": {
+        "en": "Mode",
+        "fr": "Mode"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "cft",
+          "title": {
+            "en": "Comfort",
+            "fr": "Confort"
+          }
+        },
+        {
+          "id": "cft1",
+          "title": {
+            "en": "Comfort 1",
+            "fr": "Confort 1"
+          }
+        },
+        {
+          "id": "cft2",
+          "title": {
+            "en": "Comfort 2",
+            "fr": "Confort 2"
           }
         },
         {
