@@ -83,7 +83,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
   private registerFlowListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.manifest.capabilities as (keyof Capabilities)[]).forEach(
-      (capability: keyof Capabilities): void => {
+      (capability: keyof Capabilities) => {
         switch (true) {
           case capability.startsWith('mode'):
             this.homey.flow

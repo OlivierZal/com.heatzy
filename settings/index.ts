@@ -187,7 +187,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   const disableButtons = (value = true): void => {
     ;[applySettingsElement, refreshSettingsElement].forEach(
-      (buttonElement: HTMLButtonElement): void => {
+      (buttonElement: HTMLButtonElement) => {
         if (value) {
           buttonElement.classList.add('is-disabled')
         } else {
@@ -273,8 +273,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   const updateDeviceSettings = (body: Settings): void => {
     Object.entries(body).forEach(
-      ([settingId, settingValue]: [string, ValueOf<Settings>]): void => {
-        Object.keys(deviceSettings).forEach((driver: string): void => {
+      ([settingId, settingValue]: [string, ValueOf<Settings>]) => {
+        Object.keys(deviceSettings).forEach((driver: string) => {
           deviceSettings[driver][settingId] = [settingValue]
         })
         flatDeviceSettings[settingId] = [settingValue]
@@ -367,7 +367,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       .filter((setting: DriverSetting) =>
         ['checkbox', 'dropdown'].includes(setting.type),
       )
-      .forEach((setting: DriverSetting): void => {
+      .forEach((setting: DriverSetting) => {
         const divElement: HTMLDivElement = document.createElement('div')
         divElement.className = 'homey-form-group'
         const labelElement: HTMLLabelElement = document.createElement('label')
@@ -383,7 +383,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
           ...(setting.type === 'checkbox'
             ? [{ id: 'false' }, { id: 'true' }]
             : setting.values ?? []),
-        ].forEach(({ id, label }: { id: string; label?: string }): void => {
+        ].forEach(({ id, label }: { id: string; label?: string }) => {
           const optionElement: HTMLOptionElement =
             document.createElement('option')
           optionElement.value = id

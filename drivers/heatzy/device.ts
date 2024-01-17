@@ -209,16 +209,14 @@ class HeatzyDevice extends withAPI(Device) {
 
   private registerCapabilityListeners<K extends keyof Capabilities>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.driver.manifest.capabilities as K[]).forEach(
-      (capability: K): void => {
-        this.registerCapabilityListener(
-          capability,
-          async (value: Capabilities[K]): Promise<void> => {
-            await this.onCapability(capability, value)
-          },
-        )
-      },
-    )
+    ;(this.driver.manifest.capabilities as K[]).forEach((capability: K) => {
+      this.registerCapabilityListener(
+        capability,
+        async (value: Capabilities[K]): Promise<void> => {
+          await this.onCapability(capability, value)
+        },
+      )
+    })
   }
 
   private async getDeviceData(): Promise<DeviceData['attr'] | null> {

@@ -101,7 +101,7 @@ export = class HeatzyApp extends withAPI(App) {
         ([setting, value]: [string, ValueOf<HomeySettings>]) =>
           value !== this.getHomeySetting(setting as keyof HomeySettings),
       )
-      .forEach(([setting, value]: [string, ValueOf<HomeySettings>]): void => {
+      .forEach(([setting, value]: [string, ValueOf<HomeySettings>]) => {
         this.homey.settings.set(setting, value)
       })
   }
