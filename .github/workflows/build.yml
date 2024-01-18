@@ -29,6 +29,7 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-modules-
+          save-always: true
       - name: Install dependencies
         run: npm i
       - name: Lint and fix errors
@@ -48,7 +49,7 @@ jobs:
               git checkout -b $BRANCH_NAME
               git push origin $BRANCH_NAME
               gh pr create --base main --head $BRANCH_NAME --title "Maintenance PR" --body "Automatic code maintenance: bump version, lint and format."
-              gh pr merge --auto --squash ${{ github.event.pull_request.html_url }}
+              gh pr merge --auto --squash --delete-branch ${{ github.event.pull_request.html_url }}
             else
               git pull origin ${{ github.head_ref }} --rebase
               git push origin HEAD:${{ github.head_ref }}
@@ -69,6 +70,7 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-modules-
+          save-always: true
       - name: Install dependencies
         run: npm ci
       - name: Build app # Compile TypeScript
@@ -88,6 +90,7 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-modules-
+          save-always: true
       - name: Install dependencies
         run: npm ci
       - name: Scan code
