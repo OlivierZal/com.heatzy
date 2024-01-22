@@ -1,7 +1,3 @@
-/* eslint-disable
-  @typescript-eslint/no-explicit-any,
-  @typescript-eslint/no-unsafe-argument
-*/
 import axios, {
   type AxiosError,
   type AxiosInstance,
@@ -9,14 +5,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import type HeatzyApp from '../app'
-import type { ErrorData, HomeyClass, HomeySettings } from '../types'
-
-type APIClass = new (...args: any[]) => {
-  readonly api: AxiosInstance
-  readonly getHomeySetting: <K extends keyof HomeySettings>(
-    setting: K,
-  ) => HomeySettings[K]
-}
+import type { APIClass, ErrorData, HomeyClass, HomeySettings } from '../types'
 
 const HTTP_STATUS_BAD_REQUEST = 400
 
@@ -51,7 +40,9 @@ const withAPI = <T extends HomeyClass>(
 
     public readonly api: AxiosInstance = axios.create()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public constructor(...args: any[]) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       super(...args)
       this.setupAxiosInterceptors()
     }
