@@ -5,7 +5,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import type HeatzyApp from '../app'
-import type { APIClass, ErrorData, HomeyClass, HomeySettings } from '../types'
+import type { ErrorData, HomeyClass, HomeySettings } from '../types'
 
 const HTTP_STATUS_BAD_REQUEST = 400
 
@@ -30,6 +30,14 @@ export const getErrorMessage = (error: unknown): string => {
     errorMessage = error.message
   }
   return errorMessage
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type APIClass = new (...args: any[]) => {
+  readonly api: AxiosInstance
+  readonly getHomeySetting: <K extends keyof HomeySettings>(
+    setting: K,
+  ) => HomeySettings[K]
 }
 
 const withAPI = <T extends HomeyClass>(

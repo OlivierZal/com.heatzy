@@ -1,5 +1,4 @@
 import type { SimpleClass } from 'homey'
-import type { AxiosInstance } from 'axios'
 import type Homey from 'homey/lib/Homey'
 import type HeatzyDevice from './drivers/heatzy/device'
 
@@ -43,14 +42,6 @@ export enum Switch {
 export type HomeyClass = new (...args: any[]) => SimpleClass & {
   readonly homey: Homey
   readonly setWarning?: (warning: string | null) => Promise<void>
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type APIClass = new (...args: any[]) => {
-  readonly api: AxiosInstance
-  readonly getHomeySetting: <K extends keyof HomeySettings>(
-    setting: K,
-  ) => HomeySettings[K]
 }
 
 export interface Capabilities {
