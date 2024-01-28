@@ -10,8 +10,7 @@ import withAPI, { getErrorMessage } from './mixins/withAPI'
 import { App } from 'homey'
 import axios from 'axios'
 
-// eslint-disable-next-line @typescript-eslint/no-magic-numbers
-const MAX_INT32: number = 2 ** 31 - 1
+const MAX_INT32 = 2147483647
 
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
 axios.defaults.headers.common['X-Gizwits-Application-Id'] =
