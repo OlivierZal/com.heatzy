@@ -295,7 +295,7 @@ class HeatzyDevice extends withAPI(Device) {
         currentTime = Number(this.getCapabilityValue('derog_time_boost'))
       }
       if (control || mode !== currentMode || time !== currentTime) {
-        switch (derogMode) {
+        switch (mode) {
           case DerogMode.vacation:
             await this.setCapabilityValue('derog_end', getVacationEnd(time))
             await this.setCapabilityValue('derog_time_vacation', String(time))
