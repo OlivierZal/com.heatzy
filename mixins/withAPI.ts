@@ -1,3 +1,4 @@
+import type { ErrorData, HomeyClass, HomeySettings } from '../types'
 import axios, {
   type AxiosError,
   type AxiosInstance,
@@ -5,13 +6,12 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import type HeatzyApp from '../app'
-import type { ErrorData, HomeyClass, HomeySettings } from '../types'
 
 const HTTP_STATUS_BAD_REQUEST = 400
 
 const getAPIErrorMessage = (error: AxiosError): string => {
   const { data } = error.response ?? {}
-  if (data !== undefined && data) {
+  if (typeof data !== 'undefined' && data) {
     const { error_message: message, detail_message: detailMessage } =
       data as ErrorData
     const errorMessage: string = detailMessage ?? message ?? ''
@@ -40,6 +40,7 @@ type APIClass = new (...args: any[]) => {
   ) => HomeySettings[K]
 }
 
+// eslint-disable-next-line max-lines-per-function
 const withAPI = <T extends HomeyClass>(
   base: T,
 ): APIClass & T & { readonly loginURL: string } =>

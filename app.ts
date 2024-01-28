@@ -1,15 +1,16 @@
 import 'source-map-support/register'
-import { App } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import axios from 'axios'
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
-import withAPI, { getErrorMessage } from './mixins/withAPI'
 import type {
   HomeySettings,
   LoginCredentials,
   LoginData,
   ValueOf,
 } from './types'
+import withAPI, { getErrorMessage } from './mixins/withAPI'
+import { App } from 'homey'
+import axios from 'axios'
 
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
 const MAX_INT32: number = 2 ** 31 - 1
 
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
@@ -31,31 +32,33 @@ export = class HeatzyApp extends withAPI(App) {
 
   public async login(
     postData: LoginCredentials = {
-      username: this.getHomeySetting('username') ?? '',
       password: this.getHomeySetting('password') ?? '',
+      username: this.getHomeySetting('username') ?? '',
     },
     raise = false,
   ): Promise<boolean> {
     this.clearLoginRefresh()
-    try {
-      const { username, password } = postData
-      if (!username || !password) {
-        return false
+    if (postData.username && postData.password) {
+      try {
+        const { data } = await this.api.post<LoginData>(
+          HeatzyApp.loginURL,
+          postData,
+        )
+        this.setHomeySettings({
+          expireAt: data.expire_at,
+          password: postData.password,
+          token: data.token,
+          username: postData.username,
+        })
+        await this.planRefreshLogin()
+        return true
+      } catch (error: unknown) {
+        if (raise) {
+          throw new Error(getErrorMessage(error))
+        }
       }
-      const { data } = await this.api.post<LoginData>(
-        HeatzyApp.loginURL,
-        postData,
-      )
-      const { token, expire_at: expireAt } = data
-      this.setHomeySettings({ username, password, token, expireAt })
-      await this.planRefreshLogin()
-      return true
-    } catch (error: unknown) {
-      if (raise) {
-        throw new Error(getErrorMessage(error))
-      }
-      return false
     }
+    return false
   }
 
   public getLanguage(): string {

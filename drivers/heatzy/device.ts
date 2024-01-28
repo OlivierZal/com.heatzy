@@ -1,34 +1,46 @@
-import { Device } from 'homey' // eslint-disable-line import/no-extraneous-dependencies
-import { DateTime, Duration } from 'luxon'
-import type HeatzyDriver from './driver'
-import addToLogs from '../../decorators/addToLogs'
-import withAPI from '../../mixins/withAPI'
 import {
-  DerogMode,
-  Mode,
-  OnModeSetting,
-  PreviousModeValue,
   type BaseAttrs,
   type Capabilities,
   type Data,
+  DerogMode,
   type DeviceData,
   type DeviceDetails,
   type DevicePostDataAny,
+  Mode,
   type ModeCapability,
+  OnModeSetting,
+  PreviousModeValue,
   type Settings,
   type Store,
   type Switch,
 } from '../../types'
+import { DateTime, Duration } from 'luxon'
 import { isFirstGen, isFirstPilot } from '../../utils'
+import { Device } from 'homey'
+import type HeatzyDriver from './driver'
+import addToLogs from '../../decorators/addToLogs'
+import withAPI from '../../mixins/withAPI'
 
 const MODE_ZH: Record<string, keyof typeof Mode> = {
-  舒适: 'cft',
-  经济: 'eco',
-  解冻: 'fro',
   停止: 'stop',
+  经济: 'eco',
+  舒适: 'cft',
+  解冻: 'fro',
 }
 
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
+
+const getVacationEnd = (days: number): string =>
+  DateTime.now().plus({ days }).toLocaleString({
+    day: 'numeric',
+    hour: '2-digit',
+    hour12: false,
+    minute: '2-digit',
+    month: 'short',
+  })
+
+const getBoostEnd = (minutes: number): string =>
+  DateTime.now().plus({ minutes }).toLocaleString(DateTime.TIME_24_SIMPLE)
 
 @addToLogs('getName()')
 class HeatzyDevice extends withAPI(Device) {
@@ -70,7 +82,10 @@ class HeatzyDevice extends withAPI(Device) {
     newSettings: Settings
     changedKeys: string[]
   }): Promise<void> {
-    if (changedKeys.includes('on_mode') && newSettings.on_mode !== undefined) {
+    if (
+      changedKeys.includes('on_mode') &&
+      typeof newSettings.on_mode !== 'undefined'
+    ) {
       this.setOnModeValue(newSettings.on_mode)
     }
     if (
@@ -158,6 +173,7 @@ class HeatzyDevice extends withAPI(Device) {
           this.#attrs.mode = Mode[mode]
         }
         break
+      /* eslint-disable camelcase */
       case 'derog_time_boost':
         this.#attrs.derog_mode = Number(value) ? DerogMode.boost : DerogMode.off
         this.#attrs.derog_time = Number(value)
@@ -180,6 +196,7 @@ class HeatzyDevice extends withAPI(Device) {
       case 'target_temperature.complement':
         this.#attrs.cft_tempH = (value as number) / 10
         break
+      /* eslint-enable camelcase */
       default:
     }
     this.applySyncToDevice()
@@ -221,46 +238,33 @@ class HeatzyDevice extends withAPI(Device) {
 
   private async getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
-      const { data } = await this.api.get<DeviceData>(
-        `/devdata/${this.#id}/latest`,
-      )
-      return data.attr
+      return (await this.api.get<DeviceData>(`/devdata/${this.#id}/latest`))
+        .data.attr
     } catch (error: unknown) {
       return null
     }
   }
 
   private async updateCapabilities(control = false): Promise<void> {
-    let attr: BaseAttrs | DeviceData['attr'] | null = null
-    if (control) {
-      attr = this.#attrs
-      this.#attrs = {}
-    } else {
-      attr = await this.getDeviceData()
+    const attr: BaseAttrs | DeviceData['attr'] | null = control
+      ? this.#attrs
+      : await this.getDeviceData()
+    this.#attrs = {}
+    if (attr) {
+      await this.updateMode(attr.mode)
+      await this.updateDerog(attr.derog_mode, attr.derog_time, control)
+      if (typeof attr.lock_switch !== 'undefined') {
+        await this.setCapabilityValue('locked', Boolean(attr.lock_switch))
+      }
+      if (typeof attr.timer_switch !== 'undefined') {
+        await this.setCapabilityValue('onoff.timer', Boolean(attr.timer_switch))
+      }
+      this.applySyncFromDevice()
     }
-    if (!attr) {
-      return
-    }
-    const {
-      mode,
-      derog_mode: derogMode,
-      derog_time: derogTime,
-      lock_switch: lockSwitch,
-      timer_switch: timerSwitch,
-    } = attr
-    await this.updateMode(mode)
-    await this.updateDerog(derogMode, derogTime, control)
-    if (lockSwitch !== undefined) {
-      await this.setCapabilityValue('locked', Boolean(lockSwitch))
-    }
-    if (timerSwitch !== undefined) {
-      await this.setCapabilityValue('onoff.timer', Boolean(timerSwitch))
-    }
-    this.applySyncFromDevice()
   }
 
   private async updateMode(mode: Mode | string | undefined): Promise<void> {
-    if (mode === undefined) {
+    if (typeof mode === 'undefined') {
       return
     }
     let newMode: string = typeof mode === 'number' ? Mode[mode] : mode
@@ -276,72 +280,40 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   private async updateDerog(
-    derogMode: DerogMode | undefined,
-    derogTime: number | undefined,
+    mode: DerogMode | undefined,
+    time: number | undefined,
     control = false,
   ): Promise<void> {
-    if (derogMode === undefined || derogTime === undefined) {
-      return
-    }
-    const vacationValue = Number(this.getCapabilityValue('derog_time_vacation'))
-    const boostValue = Number(this.getCapabilityValue('derog_time_boost'))
-    let currentDerogMode: DerogMode = DerogMode.off
-    let currentDerogTime = 0
-    if (vacationValue) {
-      currentDerogMode = DerogMode.vacation
-      currentDerogTime = vacationValue
-    } else if (boostValue) {
-      currentDerogMode = DerogMode.boost
-      currentDerogTime = boostValue
-    }
-    if (
-      control ||
-      derogMode !== currentDerogMode ||
-      derogTime !== currentDerogTime
-    ) {
-      const now: DateTime = DateTime.now()
-      switch (derogMode) {
-        case DerogMode.vacation:
-          await this.setCapabilityValue(
-            'derog_end',
-            now.plus({ days: derogTime }).toLocaleString({
-              day: 'numeric',
-              month: 'short',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            }),
-          )
-          break
-        case DerogMode.boost:
-          await this.setCapabilityValue(
-            'derog_end',
-            now
-              .plus({ minutes: derogTime })
-              .toLocaleString(DateTime.TIME_24_SIMPLE),
-          )
-          break
-        case DerogMode.off:
-          await this.setCapabilityValue('derog_end', null)
-          break
-        default:
+    if (typeof mode !== 'undefined' && typeof time !== 'undefined') {
+      let currentMode: DerogMode = DerogMode.off
+      let currentTime = 0
+      if (Number(this.getCapabilityValue('derog_time_vacation'))) {
+        currentMode = DerogMode.vacation
+        currentTime = Number(this.getCapabilityValue('derog_time_vacation'))
+      } else if (Number(this.getCapabilityValue('derog_time_boost'))) {
+        currentMode = DerogMode.boost
+        currentTime = Number(this.getCapabilityValue('derog_time_boost'))
       }
-    }
-    const time = String(derogTime)
-    switch (derogMode) {
-      case DerogMode.vacation:
-        await this.setCapabilityValue('derog_time_vacation', time)
-        await this.clearDerogTime('derog_time_boost')
-        break
-      case DerogMode.boost:
-        await this.setCapabilityValue('derog_time_boost', time)
-        await this.clearDerogTime('derog_time_vacation')
-        break
-      case DerogMode.off:
-        await this.setCapabilityValue('derog_time_vacation', '0')
-        await this.setCapabilityValue('derog_time_boost', '0')
-        break
-      default:
+      if (control || mode !== currentMode || time !== currentTime) {
+        switch (derogMode) {
+          case DerogMode.vacation:
+            await this.setCapabilityValue('derog_end', getVacationEnd(time))
+            await this.setCapabilityValue('derog_time_vacation', String(time))
+            await this.clearDerogTime('derog_time_boost')
+            break
+          case DerogMode.boost:
+            await this.setCapabilityValue('derog_end', getBoostEnd(time))
+            await this.setCapabilityValue('derog_time_boost', String(time))
+            await this.clearDerogTime('derog_time_vacation')
+            break
+          case DerogMode.off:
+            await this.setCapabilityValue('derog_end', null)
+            await this.setCapabilityValue('derog_time_vacation', '0')
+            await this.setCapabilityValue('derog_time_boost', '0')
+            break
+          default:
+        }
+      }
     }
   }
 
@@ -411,7 +383,7 @@ class HeatzyDevice extends withAPI(Device) {
     if (!this.#isFirstGen) {
       return { attrs: this.#attrs }
     }
-    if (this.#attrs.mode !== undefined) {
+    if (typeof this.#attrs.mode !== 'undefined') {
       return { raw: [1, 1, this.#attrs.mode] }
     }
     return null
@@ -420,20 +392,19 @@ class HeatzyDevice extends withAPI(Device) {
   private async control(
     postData: DevicePostDataAny | null,
   ): Promise<Data | null> {
-    if (!postData) {
-      return null
+    let data: Data | null = null
+    if (postData) {
+      try {
+        ;({ data } = await this.api.post<Data>(
+          `/control/${this.#id}`,
+          postData,
+        ))
+        await this.updateCapabilities(true)
+      } catch (error: unknown) {
+        await this.updateCapabilities()
+      }
     }
-    try {
-      const { data } = await this.api.post<Data>(
-        `/control/${this.#id}`,
-        postData,
-      )
-      await this.updateCapabilities(true)
-      return data
-    } catch (error: unknown) {
-      await this.updateCapabilities()
-      return null
-    }
+    return data
   }
 
   private async clearDerogTime(

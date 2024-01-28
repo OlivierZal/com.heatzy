@@ -1,7 +1,3 @@
-import type { Driver } from 'homey'
-import type Homey from 'homey/lib/Homey'
-import type HeatzyApp from './app'
-import type HeatzyDevice from './drivers/heatzy/device'
 import type {
   DeviceSettings,
   DriverSetting,
@@ -14,6 +10,10 @@ import type {
   Settings,
   ValueOf,
 } from './types'
+import type { Driver } from 'homey'
+import type HeatzyApp from './app'
+import type HeatzyDevice from './drivers/heatzy/device'
+import type Homey from 'homey/lib/Homey'
 
 const getDevices = (homey: Homey): HeatzyDevice[] =>
   Object.values(homey.drivers.getDrivers()).flatMap(
@@ -42,6 +42,7 @@ export = {
       return acc
     }, {})
   },
+  // eslint-disable-next-line max-lines-per-function
   getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
     const app: HeatzyApp = homey.app as HeatzyApp
     const language: string = getLanguage(homey)
@@ -53,11 +54,14 @@ export = {
             (setting: ManifestDriverSetting): DriverSetting[] =>
               (setting.children ?? []).map(
                 (child: ManifestDriverSettingData): DriverSetting => ({
+                  driverId: driver.id,
+                  groupId: setting.id,
+                  groupLabel: setting.label[language],
                   id: child.id,
+                  max: child.max,
+                  min: child.min,
                   title: child.label[language],
                   type: child.type,
-                  min: child.min,
-                  max: child.max,
                   units: child.units,
                   values: child.values?.map(
                     (value: {
@@ -68,9 +72,6 @@ export = {
                       label: value.label[language],
                     }),
                   ),
-                  driverId: driver.id,
-                  groupId: setting.id,
-                  groupLabel: setting.label[language],
                 }),
               ),
           ),
@@ -97,11 +98,11 @@ export = {
                 : 'username'
               if (!(key in acc)) {
                 acc[key] = {
+                  driverId: driver.id,
                   groupId: 'login',
                   id: key,
                   title: '',
                   type: isPassword ? 'password' : 'text',
-                  driverId: driver.id,
                 }
               }
               acc[key][
@@ -146,29 +147,28 @@ export = {
             (changedKey: keyof Settings) =>
               body[changedKey] !== device.getSetting(changedKey),
           )
-          if (!deviceChangedKeys.length) {
-            return
-          }
-          const deviceSettings: Settings = Object.fromEntries(
-            deviceChangedKeys.map(
-              (key: keyof Settings): [string, ValueOf<Settings>] => [
-                key,
-                body[key],
-              ],
-            ),
-          )
-          try {
-            await device.setSettings(deviceSettings)
-            device.log('Settings:', deviceSettings)
-            await device.onSettings({
-              newSettings: device.getSettings() as Settings,
-              changedKeys: deviceChangedKeys,
-            })
-          } catch (error: unknown) {
-            const errorMessage: string =
-              error instanceof Error ? error.message : String(error)
-            device.error('Settings:', errorMessage)
-            throw new Error(errorMessage)
+          if (deviceChangedKeys.length) {
+            const deviceSettings: Settings = Object.fromEntries(
+              deviceChangedKeys.map(
+                (key: keyof Settings): [string, ValueOf<Settings>] => [
+                  key,
+                  body[key],
+                ],
+              ),
+            )
+            try {
+              await device.setSettings(deviceSettings)
+              device.log('Settings:', deviceSettings)
+              await device.onSettings({
+                changedKeys: deviceChangedKeys,
+                newSettings: device.getSettings() as Settings,
+              })
+            } catch (error: unknown) {
+              const errorMessage: string =
+                error instanceof Error ? error.message : String(error)
+              device.error('Settings:', errorMessage)
+              throw new Error(errorMessage)
+            }
           }
         }),
       )

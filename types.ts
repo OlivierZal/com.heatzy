@@ -1,6 +1,6 @@
-import type { SimpleClass } from 'homey'
-import type Homey from 'homey/lib/Homey'
 import type HeatzyDevice from './drivers/heatzy/device'
+import type Homey from 'homey/lib/Homey'
+import type { SimpleClass } from 'homey'
 
 export type ModeCapability = 'mode' | 'mode3'
 

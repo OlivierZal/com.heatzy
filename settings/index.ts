@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import type Homey from 'homey/lib/Homey'
 import type {
   DeviceSetting,
   DeviceSettings,
@@ -11,7 +10,9 @@ import type {
   Settings,
   ValueOf,
 } from '../types'
+import type Homey from 'homey/lib/Homey'
 
+// eslint-disable-next-line func-style, max-lines-per-function
 async function onHomeyReady(homey: Homey): Promise<void> {
   await homey.ready()
 
@@ -243,7 +244,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
         settingId
       ] as ValueOf<Settings>[] | undefined
       return (
-        deviceSetting !== undefined &&
+        typeof deviceSetting !== 'undefined' &&
         (new Set(deviceSetting).size !== 1 || settingValue !== deviceSetting[0])
       )
     }
@@ -342,7 +343,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
     const values: ValueOf<Settings>[] | undefined = flatDeviceSettings[
       element.id.split('--')[0]
     ] as ValueOf<Settings>[] | undefined
-    // eslint-disable-next-line no-param-reassign
+
     element.value =
       values && new Set(values).size === 1 ? String(values[0]) : ''
   }
@@ -411,7 +412,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
       await homey.alert(homey.__('settings.authenticate.failure'))
       return
     }
-    const body: LoginCredentials = { username, password }
+    const body: LoginCredentials = { password, username }
     // @ts-expect-error: `homey` is partially typed
     homey.api(
       'POST',
@@ -435,7 +436,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
 
   const load = async (): Promise<void> => {
     generateCommonChildrenElements()
-    if (homeySettings.token === undefined) {
+    if (typeof homeySettings.token === 'undefined') {
       needsAuthentication()
       return
     }
