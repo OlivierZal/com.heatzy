@@ -28,6 +28,8 @@ const MODE_ZH: Record<string, keyof typeof Mode> = {
   解冻: 'fro',
 }
 
+const D_MULTIPLIER = 10
+
 const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
 
 const getVacationEnd = (days: number): string =>
@@ -191,10 +193,10 @@ class HeatzyDevice extends withAPI(Device) {
         this.#attrs.timer_switch = booleanToSwitch(value as boolean)
         break
       case 'target_temperature':
-        this.#attrs.cft_tempL = (value as number) * 10
+        this.#attrs.cft_tempL = (value as number) * D_MULTIPLIER
         break
       case 'target_temperature.complement':
-        this.#attrs.cft_tempH = (value as number) / 10
+        this.#attrs.cft_tempH = (value as number) / D_MULTIPLIER
         break
       /* eslint-enable camelcase */
       default:
