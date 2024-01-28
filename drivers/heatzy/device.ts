@@ -394,19 +394,19 @@ class HeatzyDevice extends withAPI(Device) {
   private async control(
     postData: DevicePostDataAny | null,
   ): Promise<Data | null> {
-    let data: Data | null = null
     if (postData) {
       try {
-        ;({ data } = await this.api.post<Data>(
+        const { data } = await this.api.post<Data>(
           `/control/${this.#id}`,
           postData,
-        ))
+        )
         await this.updateCapabilities(true)
+        return data
       } catch (error: unknown) {
         await this.updateCapabilities()
       }
     }
-    return data
+    return null
   }
 
   private async clearDerogTime(
