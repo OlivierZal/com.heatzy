@@ -137,42 +137,43 @@ export = {
     const changedKeys: (keyof Settings)[] = Object.keys(
       body,
     ) as (keyof Settings)[]
-    if (changedKeys.length) {
-      try {
-        await Promise.all(
-          getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
-            const deviceChangedKeys: (keyof Settings)[] = changedKeys.filter(
-              (changedKey: keyof Settings) =>
-                body[changedKey] !== device.getSetting(changedKey),
+    if (!changedKeys.length) {
+      return
+    }
+    try {
+      await Promise.all(
+        getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
+          const deviceChangedKeys: (keyof Settings)[] = changedKeys.filter(
+            (changedKey: keyof Settings) =>
+              body[changedKey] !== device.getSetting(changedKey),
+          )
+          if (deviceChangedKeys.length) {
+            const deviceSettings: Settings = Object.fromEntries(
+              deviceChangedKeys.map(
+                (key: keyof Settings): [string, ValueOf<Settings>] => [
+                  key,
+                  body[key],
+                ],
+              ),
             )
-            if (deviceChangedKeys.length) {
-              const deviceSettings: Settings = Object.fromEntries(
-                deviceChangedKeys.map(
-                  (key: keyof Settings): [string, ValueOf<Settings>] => [
-                    key,
-                    body[key],
-                  ],
-                ),
-              )
-              try {
-                await device.setSettings(deviceSettings)
-                device.log('Settings:', deviceSettings)
-                await device.onSettings({
-                  changedKeys: deviceChangedKeys,
-                  newSettings: device.getSettings() as Settings,
-                })
-              } catch (error: unknown) {
-                const errorMessage: string =
-                  error instanceof Error ? error.message : String(error)
-                device.error('Settings:', errorMessage)
-                throw new Error(errorMessage)
-              }
+            try {
+              await device.setSettings(deviceSettings)
+              device.log('Settings:', deviceSettings)
+              await device.onSettings({
+                changedKeys: deviceChangedKeys,
+                newSettings: device.getSettings() as Settings,
+              })
+            } catch (error: unknown) {
+              const errorMessage: string =
+                error instanceof Error ? error.message : String(error)
+              device.error('Settings:', errorMessage)
+              throw new Error(errorMessage)
             }
-          }),
-        )
-      } catch (error: unknown) {
-        throw new Error(error instanceof Error ? error.message : String(error))
-      }
+          }
+        }),
+      )
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : String(error))
     }
   },
 }
