@@ -29,7 +29,10 @@ module.exports = [
     },
     settings: {
       ...importPlugin.configs.typescript.settings,
-      'import/ignore': ['node_modules'],
+      'import/ignore': [
+        'node_modules',
+        '\\.(coffee|scss|css|less|hbs|svg|json)$',
+      ],
       'import/resolver': {
         ...importPlugin.configs.typescript.settings['import/resolver'],
         typescript: { alwaysTryTypes: true },
