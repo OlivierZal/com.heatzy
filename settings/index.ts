@@ -483,6 +483,7 @@ const load = async (
   homeySettings: HomeySettingsUI,
   [usernameElement, passwordElement]: (HTMLInputElement | null)[],
 ): Promise<void> => {
+  addAuthenticateEventListener(homey, [usernameElement, passwordElement])
   if (typeof homeySettings.token !== 'undefined') {
     try {
       await login(homey, [usernameElement, passwordElement])
@@ -510,7 +511,6 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   ).map((credentialKey: keyof LoginCredentials): HTMLInputElement | null =>
     createCredentialElement(credentialKey, driverSettingsAll, homeySettings),
   )
-  addAuthenticateEventListener(homey, [usernameElement, passwordElement])
   generateCommonChildrenElements(homey, driverSettingsCommon, [
     deviceSettings,
     flatDeviceSettings,
