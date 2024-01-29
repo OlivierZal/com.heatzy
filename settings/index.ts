@@ -172,7 +172,7 @@ const getCommonDriverSettings = (
     return acc
   }, [])
 
-const getCredentialElement = (
+const createCredentialElement = (
   credentialKey: keyof LoginCredentials,
   driverSettings: DriverSetting[],
   homeySettings: HomeySettingsUI,
@@ -371,6 +371,31 @@ const addSettingsEventListeners = (
   addRefreshSettingsEventListener(elements, flatDeviceSettings)
 }
 
+const createSelectElement = (
+  homey: Homey,
+  setting: DriverSetting,
+  flatDeviceSettings: DeviceSetting,
+): HTMLSelectElement => {
+  const selectElement: HTMLSelectElement = document.createElement('select')
+  selectElement.className = 'homey-form-select'
+  selectElement.id = `${setting.id}--setting`
+  ;[
+    { id: '' },
+    ...(setting.type === 'checkbox'
+      ? [{ id: 'false' }, { id: 'true' }]
+      : setting.values ?? []),
+  ].forEach(({ id, label }: { id: string; label?: string }) => {
+    const optionElement: HTMLOptionElement = document.createElement('option')
+    optionElement.value = id
+    if (id) {
+      optionElement.innerText = label ?? homey.__(`settings.boolean.${id}`)
+    }
+    selectElement.appendChild(optionElement)
+  })
+  updateCommonChildrenElement(selectElement, flatDeviceSettings)
+  return selectElement
+}
+
 const generateCommonChildrenElements = (
   homey: Homey,
   driverSettingsCommon: DriverSetting[],
@@ -386,25 +411,12 @@ const generateCommonChildrenElements = (
       const labelElement: HTMLLabelElement = document.createElement('label')
       labelElement.className = 'homey-form-label'
       labelElement.innerText = setting.title
-      const selectElement: HTMLSelectElement = document.createElement('select')
-      selectElement.className = 'homey-form-select'
-      selectElement.id = `${setting.id}--setting`
+      const selectElement: HTMLSelectElement = createSelectElement(
+        homey,
+        setting,
+        flatDeviceSettings,
+      )
       labelElement.htmlFor = selectElement.id
-      ;[
-        { id: '' },
-        ...(setting.type === 'checkbox'
-          ? [{ id: 'false' }, { id: 'true' }]
-          : setting.values ?? []),
-      ].forEach(({ id, label }: { id: string; label?: string }) => {
-        const optionElement: HTMLOptionElement =
-          document.createElement('option')
-        optionElement.value = id
-        if (id) {
-          optionElement.innerText = label ?? homey.__(`settings.boolean.${id}`)
-        }
-        selectElement.appendChild(optionElement)
-      })
-      updateCommonChildrenElement(selectElement, flatDeviceSettings)
       divElement.appendChild(labelElement)
       divElement.appendChild(selectElement)
       settingsElement.appendChild(divElement)
@@ -496,7 +508,7 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   const [usernameElement, passwordElement]: (HTMLInputElement | null)[] = (
     ['username', 'password'] as (keyof LoginCredentials)[]
   ).map((credentialKey: keyof LoginCredentials): HTMLInputElement | null =>
-    getCredentialElement(credentialKey, driverSettingsAll, homeySettings),
+    createCredentialElement(credentialKey, driverSettingsAll, homeySettings),
   )
   addAuthenticateEventListener(homey, [usernameElement, passwordElement])
   generateCommonChildrenElements(homey, driverSettingsCommon, [
