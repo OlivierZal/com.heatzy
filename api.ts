@@ -20,6 +20,70 @@ const getDevices = (homey: Homey): HeatzyDevice[] =>
     (driver: Driver): HeatzyDevice[] => driver.getDevices() as HeatzyDevice[],
   )
 
+const getDriverSettings = (
+  driver: ManifestDriver,
+  language: string,
+): DriverSetting[] =>
+  (driver.settings ?? []).flatMap(
+    (setting: ManifestDriverSetting): DriverSetting[] =>
+      (setting.children ?? []).map(
+        (child: ManifestDriverSettingData): DriverSetting => ({
+          driverId: driver.id,
+          groupId: setting.id,
+          groupLabel: setting.label[language],
+          id: child.id,
+          max: child.max,
+          min: child.min,
+          title: child.label[language],
+          type: child.type,
+          units: child.units,
+          values: child.values?.map(
+            (value: {
+              id: string
+              label: Record<string, string>
+            }): { id: string; label: string } => ({
+              id: value.id,
+              label: value.label[language],
+            }),
+          ),
+        }),
+      ),
+  )
+
+const getDriverLoginSetting = (
+  driver: ManifestDriver,
+  language: string,
+): DriverSetting[] => {
+  const driverLoginSetting: LoginSetting | undefined = driver.pair?.find(
+    (pairSetting: PairSetting): pairSetting is LoginSetting =>
+      pairSetting.id === 'login',
+  )
+  return driverLoginSetting
+    ? Object.values(
+        Object.entries(driverLoginSetting.options).reduce<
+          Record<string, DriverSetting>
+        >((acc, [option, label]: [string, Record<string, string>]) => {
+          const isPassword: boolean = option.startsWith('password')
+          const key: keyof LoginCredentials = isPassword
+            ? 'password'
+            : 'username'
+          if (!(key in acc)) {
+            acc[key] = {
+              driverId: driver.id,
+              groupId: 'login',
+              id: key,
+              title: '',
+              type: isPassword ? 'password' : 'text',
+            }
+          }
+          acc[key][option.endsWith('Placeholder') ? 'placeholder' : 'title'] =
+            label[language]
+          return acc
+        }, {}),
+      )
+    : []
+}
+
 const getLanguage = (homey: Homey): string => homey.i18n.getLanguage()
 
 export = {
@@ -42,78 +106,17 @@ export = {
       return acc
     }, {})
   },
-  // eslint-disable-next-line max-lines-per-function
   getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
     const app: HeatzyApp = homey.app as HeatzyApp
     const language: string = getLanguage(homey)
-    const settings: DriverSetting[] =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (app.manifest.drivers as ManifestDriver[]).flatMap(
-        (driver: ManifestDriver): DriverSetting[] =>
-          (driver.settings ?? []).flatMap(
-            (setting: ManifestDriverSetting): DriverSetting[] =>
-              (setting.children ?? []).map(
-                (child: ManifestDriverSettingData): DriverSetting => ({
-                  driverId: driver.id,
-                  groupId: setting.id,
-                  groupLabel: setting.label[language],
-                  id: child.id,
-                  max: child.max,
-                  min: child.min,
-                  title: child.label[language],
-                  type: child.type,
-                  units: child.units,
-                  values: child.values?.map(
-                    (value: {
-                      id: string
-                      label: Record<string, string>
-                    }): { id: string; label: string } => ({
-                      id: value.id,
-                      label: value.label[language],
-                    }),
-                  ),
-                }),
-              ),
-          ),
-      )
-    const settingsLogin: DriverSetting[] =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (app.manifest.drivers as ManifestDriver[]).flatMap(
-        (driver: ManifestDriver): DriverSetting[] => {
-          const driverLoginSetting: LoginSetting | undefined =
-            driver.pair?.find(
-              (pairSetting: PairSetting): pairSetting is LoginSetting =>
-                pairSetting.id === 'login',
-            )
-          if (!driverLoginSetting) {
-            return []
-          }
-          return Object.values(
-            Object.entries(driverLoginSetting.options).reduce<
-              Record<string, DriverSetting>
-            >((acc, [option, label]: [string, Record<string, string>]) => {
-              const isPassword: boolean = option.startsWith('password')
-              const key: keyof LoginCredentials = isPassword
-                ? 'password'
-                : 'username'
-              if (!(key in acc)) {
-                acc[key] = {
-                  driverId: driver.id,
-                  groupId: 'login',
-                  id: key,
-                  title: '',
-                  type: isPassword ? 'password' : 'text',
-                }
-              }
-              acc[key][
-                option.endsWith('Placeholder') ? 'placeholder' : 'title'
-              ] = label[language]
-              return acc
-            }, {}),
-          )
-        },
-      )
-    return [...settings, ...settingsLogin]
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return (app.manifest.drivers as ManifestDriver[]).flatMap(
+      (driver: ManifestDriver): DriverSetting[] => {
+        const settings = getDriverSettings(driver, language)
+        const loginSetting = getDriverLoginSetting(driver, language)
+        return [...settings, ...loginSetting]
+      },
+    )
   },
   getLanguage({ homey }: { homey: Homey }): string {
     return getLanguage(homey)

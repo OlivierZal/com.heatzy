@@ -12,7 +12,7 @@ import type {
 } from '../types'
 import type Homey from 'homey/lib/Homey'
 
-// eslint-disable-next-line func-style, max-lines-per-function
+// eslint-disable-next-line func-style
 async function onHomeyReady(homey: Homey): Promise<void> {
   await homey.ready()
 
