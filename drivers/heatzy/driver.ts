@@ -1,5 +1,4 @@
 import type {
-  Bindings,
   Capabilities,
   DeviceDetails,
   FlowArgs,
@@ -61,9 +60,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   private async discoverDevices(): Promise<DeviceDetails[]> {
     try {
-      const { data } = await this.api.get<Bindings>('/bindings')
-
-      return data.devices.map(
+      return (await this.apiBindings()).data.devices.map(
         ({
           dev_alias: name,
           did,

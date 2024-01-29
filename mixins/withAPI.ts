@@ -1,4 +1,14 @@
-import type { ErrorData, HomeyClass, HomeySettings } from '../types'
+import type {
+  Bindings,
+  Data,
+  DeviceData,
+  DevicePostDataAny,
+  ErrorData,
+  HomeyClass,
+  HomeySettings,
+  LoginCredentials,
+  LoginData,
+} from '../types'
 import axios, {
   type AxiosError,
   type AxiosInstance,
@@ -7,7 +17,25 @@ import axios, {
 } from 'axios'
 import type HeatzyApp from '../app'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type APIClass = new (...args: any[]) => {
+  readonly api: AxiosInstance
+  readonly apiBindings: () => Promise<{ data: Bindings }>
+  readonly apiControl: (
+    id: string,
+    postData: DevicePostDataAny,
+  ) => Promise<{ data: Data }>
+  readonly apiDeviceData: (id: string) => Promise<{ data: DeviceData }>
+  readonly apiLogin: (
+    postData: LoginCredentials,
+  ) => Promise<{ data: LoginData }>
+  readonly getHomeySetting: <K extends keyof HomeySettings>(
+    setting: K,
+  ) => HomeySettings[K]
+}
+
 const HTTP_STATUS_BAD_REQUEST = 400
+const LOGIN_URL = '/login'
 
 const getAPIErrorMessage = (error: AxiosError): string => {
   const { data } = error.response ?? {}
@@ -32,21 +60,9 @@ export const getErrorMessage = (error: unknown): string => {
   return errorMessage
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type APIClass = new (...args: any[]) => {
-  readonly api: AxiosInstance
-  readonly getHomeySetting: <K extends keyof HomeySettings>(
-    setting: K,
-  ) => HomeySettings[K]
-}
-
 // eslint-disable-next-line max-lines-per-function
-const withAPI = <T extends HomeyClass>(
-  base: T,
-): APIClass & T & { readonly loginURL: string } =>
+const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
   class WithAPI extends base {
-    public static readonly loginURL: string = '/login'
-
     public readonly api: AxiosInstance = axios.create()
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,6 +76,27 @@ const withAPI = <T extends HomeyClass>(
       setting: K & string,
     ): HomeySettings[K] {
       return this.homey.settings.get(setting) as HomeySettings[K]
+    }
+
+    public async apiLogin(
+      postData: LoginCredentials,
+    ): Promise<{ data: LoginData }> {
+      return this.api.post<LoginData>(LOGIN_URL, postData)
+    }
+
+    public async apiBindings(): Promise<{ data: Bindings }> {
+      return this.api.get<Bindings>('/bindings')
+    }
+
+    public async apiControl(
+      id: string,
+      postData: DevicePostDataAny,
+    ): Promise<{ data: Data }> {
+      return this.api.post<Data>(`/control/${id}`, postData)
+    }
+
+    public async apiDeviceData(id: string): Promise<{ data: DeviceData }> {
+      return this.api.get<DeviceData>(`/devdata/${id}/latest`)
     }
 
     private setupAxiosInterceptors(): void {
@@ -106,7 +143,7 @@ const withAPI = <T extends HomeyClass>(
       if (
         error.response?.status === HTTP_STATUS_BAD_REQUEST &&
         app.retry &&
-        error.config?.url !== WithAPI.loginURL
+        error.config?.url !== LOGIN_URL
       ) {
         app.handleRetry()
         const loggedIn: boolean = await app.login()

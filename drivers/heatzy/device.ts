@@ -240,8 +240,7 @@ class HeatzyDevice extends withAPI(Device) {
 
   private async getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
-      return (await this.api.get<DeviceData>(`/devdata/${this.#id}/latest`))
-        .data.attr
+      return (await this.apiDeviceData(this.#id)).data.attr
     } catch (error: unknown) {
       return null
     }
@@ -396,10 +395,7 @@ class HeatzyDevice extends withAPI(Device) {
   ): Promise<Data | null> {
     if (postData) {
       try {
-        const { data } = await this.api.post<Data>(
-          `/control/${this.#id}`,
-          postData,
-        )
+        const { data } = await this.apiControl(this.#id, postData)
         await this.updateCapabilities(true)
         return data
       } catch (error: unknown) {

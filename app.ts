@@ -1,11 +1,6 @@
 import 'source-map-support/register'
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
-import type {
-  HomeySettings,
-  LoginCredentials,
-  LoginData,
-  ValueOf,
-} from './types'
+import type { HomeySettings, LoginCredentials, ValueOf } from './types'
 import withAPI, { getErrorMessage } from './mixins/withAPI'
 import { App } from 'homey'
 import axios from 'axios'
@@ -39,10 +34,7 @@ export = class HeatzyApp extends withAPI(App) {
     this.clearLoginRefresh()
     if (postData.username && postData.password) {
       try {
-        const { data } = await this.api.post<LoginData>(
-          HeatzyApp.loginURL,
-          postData,
-        )
+        const { data } = await this.apiLogin(postData)
         this.setHomeySettings({
           expireAt: data.expire_at,
           password: postData.password,
