@@ -193,8 +193,9 @@ const getCredentialElement = (
     inputElement.value = homeySettings[driverSetting.id] ?? ''
     inputElement.id = driverSetting.id
     labelElement.htmlFor = inputElement.id
-    loginElement.appendChild(labelElement)
-    loginElement.appendChild(inputElement)
+    divElement.appendChild(labelElement)
+    divElement.appendChild(inputElement)
+    loginElement.appendChild(divElement)
     return inputElement
   }
   return null
