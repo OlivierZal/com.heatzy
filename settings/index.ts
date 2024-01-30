@@ -12,6 +12,21 @@ import type {
 } from '../types'
 import type Homey from 'homey/lib/Homey'
 
+let homeySettings: HomeySettingsUI = {
+  expireAt: 0,
+  password: '',
+  token: '',
+  username: '',
+}
+let deviceSettings: DeviceSettings = {}
+let flatDeviceSettings: DeviceSetting = {}
+let driverSettingsAll: DriverSetting[] = []
+let driverSettingsCommon: DriverSetting[] = []
+let [usernameElement, passwordElement]: (HTMLInputElement | null)[] = [
+  null,
+  null,
+]
+
 const applySettingsElement: HTMLButtonElement = document.getElementById(
   'apply-settings',
 ) as HTMLButtonElement
@@ -81,8 +96,8 @@ const setLanguage = async (homey: Homey): Promise<void> =>
     )
   })
 
-const getHomeySettigs = async (homey: Homey): Promise<HomeySettingsUI> =>
-  new Promise<HomeySettingsUI>((resolve, reject) => {
+const getHomeySettings = async (homey: Homey): Promise<void> =>
+  new Promise<void>((resolve, reject) => {
     // @ts-expect-error: `homey` is partially typed
     homey.get(
       async (error: Error | null, settings: HomeySettingsUI): Promise<void> => {
@@ -92,13 +107,14 @@ const getHomeySettigs = async (homey: Homey): Promise<HomeySettingsUI> =>
           reject(error)
           return
         }
-        resolve(settings)
+        homeySettings = settings
+        resolve()
       },
     )
   })
 
-const getDeviceSettings = async (homey: Homey): Promise<DeviceSettings> =>
-  new Promise<DeviceSettings>((resolve, reject) => {
+const getDeviceSettings = async (homey: Homey): Promise<void> =>
+  new Promise<void>((resolve, reject) => {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
       'GET',
@@ -110,13 +126,14 @@ const getDeviceSettings = async (homey: Homey): Promise<DeviceSettings> =>
           reject(error)
           return
         }
-        resolve(settings)
+        deviceSettings = settings
+        resolve()
       },
     )
   })
 
-const flattenDeviceSettings = (deviceSettings: DeviceSettings): DeviceSetting =>
-  Object.values(deviceSettings).reduce<DeviceSetting>(
+const flattenDeviceSettings = (): void => {
+  flatDeviceSettings = Object.values(deviceSettings).reduce<DeviceSetting>(
     (flattenedDeviceSettings, settings: DeviceSetting) =>
       Object.entries(settings).reduce<DeviceSetting>(
         (acc, [settingId, settingValues]: [string, ValueOf<Settings>[]]) => {
@@ -135,9 +152,10 @@ const flattenDeviceSettings = (deviceSettings: DeviceSettings): DeviceSetting =>
       ),
     {},
   )
+}
 
-const getDriverSettings = async (homey: Homey): Promise<DriverSetting[]> =>
-  new Promise<DriverSetting[]>((resolve, reject) => {
+const getDriverSettings = async (homey: Homey): Promise<void> =>
+  new Promise<void>((resolve, reject) => {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
       'GET',
@@ -152,25 +170,28 @@ const getDriverSettings = async (homey: Homey): Promise<DriverSetting[]> =>
           reject(error)
           return
         }
-        resolve(driverSettings)
+        driverSettingsAll = driverSettings
+        resolve()
       },
     )
   })
 
-const getCommonDriverSettings = (
-  driverSettings: DriverSetting[],
-): DriverSetting[] =>
-  driverSettings.reduce<DriverSetting[]>((acc, setting: DriverSetting) => {
-    if (setting.groupId === 'login') {
-      return acc
-    }
-    if (setting.groupId === 'options') {
-      if (!acc.some((option: DriverSetting) => option.id === setting.id)) {
-        acc.push(setting)
+const getCommonDriverSettings = (): void => {
+  driverSettingsCommon = driverSettingsAll.reduce<DriverSetting[]>(
+    (acc, setting: DriverSetting) => {
+      if (setting.groupId === 'login') {
+        return acc
       }
-    }
-    return acc
-  }, [])
+      if (setting.groupId === 'options') {
+        if (!acc.some((option: DriverSetting) => option.id === setting.id)) {
+          acc.push(setting)
+        }
+      }
+      return acc
+    },
+    [],
+  )
+}
 
 const createDivElement = (): HTMLDivElement => {
   const divElement: HTMLDivElement = document.createElement('div')
@@ -212,12 +233,10 @@ const createLabelElement = ({
   return labelElement
 }
 
-const createCredentialElement = (
+const updateCredentialElement = (
   credentialKey: keyof LoginCredentials,
-  driverSettings: DriverSetting[],
-  homeySettings: HomeySettingsUI,
 ): HTMLInputElement | null => {
-  const driverSetting: LoginDriverSetting | undefined = driverSettings.find(
+  const driverSetting: LoginDriverSetting | undefined = driverSettingsAll.find(
     (setting): setting is LoginDriverSetting => setting.id === credentialKey,
   )
   if (driverSetting) {
@@ -238,6 +257,12 @@ const createCredentialElement = (
     return inputElement
   }
   return null
+}
+
+const updateCredentialElements = (): void => {
+  ;[usernameElement, passwordElement] = (
+    ['username', 'password'] as (keyof LoginCredentials)[]
+  ).map(updateCredentialElement)
 }
 
 const processSettingValue = (
@@ -261,7 +286,6 @@ const processSettingValue = (
 const shouldUpdate = (
   settingId: string,
   settingValue: ValueOf<Settings>,
-  flatDeviceSettings: DeviceSetting,
 ): boolean => {
   const deviceSetting: ValueOf<Settings>[] | undefined = flatDeviceSettings[
     settingId
@@ -274,7 +298,6 @@ const shouldUpdate = (
 
 const buildSettingsBody = (
   elements: (HTMLInputElement | HTMLSelectElement)[],
-  flatDeviceSettings: DeviceSetting,
 ): Settings =>
   Object.fromEntries(
     elements
@@ -285,8 +308,7 @@ const buildSettingsBody = (
           const settingId: string = element.id.split('--')[0]
           const settingValue: ValueOf<Settings> | null =
             processSettingValue(element)
-          return settingValue !== null &&
-            shouldUpdate(settingId, settingValue, flatDeviceSettings)
+          return settingValue !== null && shouldUpdate(settingId, settingValue)
             ? [settingId, settingValue]
             : [null]
         },
@@ -298,10 +320,7 @@ const buildSettingsBody = (
       ),
   )
 
-const updateDeviceSettings = (
-  body: Settings,
-  [deviceSettings, flatDeviceSettings]: [DeviceSettings, DeviceSetting],
-): void => {
+const updateDeviceSettings = (body: Settings): void => {
   Object.entries(body).forEach(
     ([settingId, settingValue]: [string, ValueOf<Settings>]) => {
       Object.keys(deviceSettings).forEach((driver: string) => {
@@ -312,11 +331,7 @@ const updateDeviceSettings = (
   )
 }
 
-const setDeviceSettings = (
-  homey: Homey,
-  body: Settings,
-  [deviceSettings, flatDeviceSettings]: [DeviceSettings, DeviceSetting],
-): void => {
+const setDeviceSettings = (homey: Homey, body: Settings): void => {
   // @ts-expect-error: `homey` is partially typed
   homey.api(
     'PUT',
@@ -328,7 +343,7 @@ const setDeviceSettings = (
         await homey.alert(error.message)
         return
       }
-      updateDeviceSettings(body, [deviceSettings, flatDeviceSettings])
+      updateDeviceSettings(body)
       enableButtons()
       // @ts-expect-error: `homey` is partially typed
       await homey.alert(homey.__('settings.success'))
@@ -339,12 +354,11 @@ const setDeviceSettings = (
 const addApplySettingsEventListener = (
   homey: Homey,
   elements: HTMLSelectElement[],
-  [deviceSettings, flatDeviceSettings]: [DeviceSettings, DeviceSetting],
 ): void => {
   applySettingsElement.addEventListener('click', (): void => {
     let body: Settings = {}
     try {
-      body = buildSettingsBody(elements, flatDeviceSettings)
+      body = buildSettingsBody(elements)
     } catch (error: unknown) {
       // @ts-expect-error: `homey` is partially typed
       homey.alert(error instanceof Error ? error.message : String(error))
@@ -367,17 +381,14 @@ const addApplySettingsEventListener = (
         }
         if (ok) {
           disableButtons()
-          setDeviceSettings(homey, body, [deviceSettings, flatDeviceSettings])
+          setDeviceSettings(homey, body)
         }
       },
     )
   })
 }
 
-const updateCommonChildrenElement = (
-  element: HTMLSelectElement,
-  flatDeviceSettings: DeviceSetting,
-): void => {
+const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
   const values: ValueOf<Settings>[] | undefined = flatDeviceSettings[
     element.id.split('--')[0]
   ] as ValueOf<Settings>[] | undefined
@@ -387,13 +398,10 @@ const updateCommonChildrenElement = (
 
 const addRefreshSettingsEventListener = (
   elements: HTMLSelectElement[],
-  flatDeviceSettings: DeviceSetting,
 ): void => {
   refreshSettingsElement.addEventListener('click', (): void => {
     disableButtons()
-    elements.forEach((element: HTMLSelectElement) => {
-      updateCommonChildrenElement(element, flatDeviceSettings)
-    })
+    elements.forEach(updateCommonChildrenElement)
     enableButtons()
   })
 }
@@ -401,19 +409,14 @@ const addRefreshSettingsEventListener = (
 const addSettingsEventListeners = (
   homey: Homey,
   elements: HTMLSelectElement[],
-  [deviceSettings, flatDeviceSettings]: [DeviceSettings, DeviceSetting],
 ): void => {
-  addApplySettingsEventListener(homey, elements, [
-    deviceSettings,
-    flatDeviceSettings,
-  ])
-  addRefreshSettingsEventListener(elements, flatDeviceSettings)
+  addApplySettingsEventListener(homey, elements)
+  addRefreshSettingsEventListener(elements)
 }
 
 const createSelectElement = (
   homey: Homey,
   setting: DriverSetting,
-  flatDeviceSettings: DeviceSetting,
 ): HTMLSelectElement => {
   const selectElement: HTMLSelectElement = document.createElement('select')
   selectElement.classList.add('homey-form-select')
@@ -431,15 +434,11 @@ const createSelectElement = (
     }
     selectElement.appendChild(optionElement)
   })
-  updateCommonChildrenElement(selectElement, flatDeviceSettings)
+  updateCommonChildrenElement(selectElement)
   return selectElement
 }
 
-const generateCommonChildrenElements = (
-  homey: Homey,
-  driverSettingsCommon: DriverSetting[],
-  [deviceSettings, flatDeviceSettings]: [DeviceSettings, DeviceSetting],
-): void => {
+const generateCommonChildrenElements = (homey: Homey): void => {
   driverSettingsCommon
     .filter((setting: DriverSetting) =>
       ['checkbox', 'dropdown'].includes(setting.type),
@@ -449,7 +448,6 @@ const generateCommonChildrenElements = (
       const selectElement: HTMLSelectElement = createSelectElement(
         homey,
         setting,
-        flatDeviceSettings,
       )
       const labelElement: HTMLLabelElement = createLabelElement({
         id: selectElement.id,
@@ -462,14 +460,10 @@ const generateCommonChildrenElements = (
   addSettingsEventListeners(
     homey,
     Array.from(settingsElement.querySelectorAll('select')),
-    [deviceSettings, flatDeviceSettings],
   )
 }
 
-const login = async (
-  homey: Homey,
-  [usernameElement, passwordElement]: (HTMLInputElement | null)[],
-): Promise<void> => {
+const login = async (homey: Homey): Promise<void> => {
   const username: string = usernameElement?.value ?? ''
   const password: string = passwordElement?.value ?? ''
   if (!username || !password) {
@@ -499,13 +493,10 @@ const login = async (
   )
 }
 
-const addAuthenticateEventListener = (
-  homey: Homey,
-  [usernameElement, passwordElement]: (HTMLInputElement | null)[],
-): void => {
+const addAuthenticateEventListener = (homey: Homey): void => {
   authenticateElement.addEventListener('click', (): void => {
     authenticateElement.classList.add('is-disabled')
-    login(homey, [usernameElement, passwordElement])
+    login(homey)
       .catch(async (error: Error): Promise<void> => {
         // @ts-expect-error: `homey` is partially typed
         await homey.alert(error.message)
@@ -516,15 +507,11 @@ const addAuthenticateEventListener = (
   })
 }
 
-const load = async (
-  homey: Homey,
-  homeySettings: HomeySettingsUI,
-  [usernameElement, passwordElement]: (HTMLInputElement | null)[],
-): Promise<void> => {
-  addAuthenticateEventListener(homey, [usernameElement, passwordElement])
+const load = async (homey: Homey): Promise<void> => {
+  addAuthenticateEventListener(homey)
   if (typeof homeySettings.token !== 'undefined') {
     try {
-      await login(homey, [usernameElement, passwordElement])
+      await login(homey)
       return
     } catch (error: unknown) {
       // Pass
@@ -537,21 +524,12 @@ const load = async (
 async function onHomeyReady(homey: Homey): Promise<void> {
   await homey.ready()
   await setLanguage(homey)
-  const homeySettings: HomeySettingsUI = await getHomeySettigs(homey)
-  const deviceSettings: DeviceSettings = await getDeviceSettings(homey)
-  const flatDeviceSettings: DeviceSetting =
-    flattenDeviceSettings(deviceSettings)
-  const driverSettingsAll: DriverSetting[] = await getDriverSettings(homey)
-  const driverSettingsCommon: DriverSetting[] =
-    getCommonDriverSettings(driverSettingsAll)
-  const [usernameElement, passwordElement]: (HTMLInputElement | null)[] = (
-    ['username', 'password'] as (keyof LoginCredentials)[]
-  ).map((credentialKey: keyof LoginCredentials): HTMLInputElement | null =>
-    createCredentialElement(credentialKey, driverSettingsAll, homeySettings),
-  )
-  generateCommonChildrenElements(homey, driverSettingsCommon, [
-    deviceSettings,
-    flatDeviceSettings,
-  ])
-  await load(homey, homeySettings, [usernameElement, passwordElement])
+  await getHomeySettings(homey)
+  await getDeviceSettings(homey)
+  flattenDeviceSettings()
+  await getDriverSettings(homey)
+  getCommonDriverSettings()
+  updateCredentialElements()
+  generateCommonChildrenElements(homey)
+  await load(homey)
 }
