@@ -25,21 +25,21 @@ export = class HeatzyApp extends withAPI(App) {
   }
 
   public async login(
-    postData: LoginCredentials = {
+    { password, username }: LoginCredentials = {
       password: this.getHomeySetting('password') ?? '',
       username: this.getHomeySetting('username') ?? '',
     },
     raise = false,
   ): Promise<boolean> {
     this.clearLoginRefresh()
-    if (postData.username && postData.password) {
+    if (username && password) {
       try {
-        const { data } = await this.apiLogin(postData)
+        const { data } = await this.apiLogin({ password, username })
         this.setHomeySettings({
           expireAt: data.expire_at,
-          password: postData.password,
+          password,
           token: data.token,
-          username: postData.username,
+          username,
         })
         await this.planRefreshLogin()
         return true
