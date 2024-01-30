@@ -172,6 +172,46 @@ const getCommonDriverSettings = (
     return acc
   }, [])
 
+const createDivElement = (): HTMLDivElement => {
+  const divElement: HTMLDivElement = document.createElement('div')
+  divElement.classList.add('homey-form-group')
+  return divElement
+}
+
+const createInputElement = ({
+  id,
+  placeholder,
+  type,
+  value,
+}: {
+  id: string
+  placeholder?: string
+  type: string
+  value?: string
+}): HTMLInputElement => {
+  const inputElement: HTMLInputElement = document.createElement('input')
+  inputElement.classList.add('homey-form-input')
+  inputElement.id = id
+  inputElement.value = value ?? ''
+  inputElement.type = type
+  inputElement.placeholder = placeholder ?? ''
+  return inputElement
+}
+
+const createLabelElement = ({
+  id,
+  text,
+}: {
+  id: string
+  text: string
+}): HTMLLabelElement => {
+  const labelElement: HTMLLabelElement = document.createElement('label')
+  labelElement.classList.add('homey-form-label')
+  labelElement.htmlFor = id
+  labelElement.innerText = text
+  return labelElement
+}
+
 const createCredentialElement = (
   credentialKey: keyof LoginCredentials,
   driverSettings: DriverSetting[],
@@ -181,18 +221,17 @@ const createCredentialElement = (
     (setting): setting is LoginDriverSetting => setting.id === credentialKey,
   )
   if (driverSetting) {
-    const divElement: HTMLDivElement = document.createElement('div')
-    divElement.classList.add('homey-form-group')
-    const labelElement: HTMLLabelElement = document.createElement('label')
-    labelElement.classList.add('homey-form-label')
-    labelElement.innerText = driverSetting.title
-    const inputElement: HTMLInputElement = document.createElement('input')
-    inputElement.classList.add('homey-form-input')
-    inputElement.type = driverSetting.type
-    inputElement.placeholder = driverSetting.placeholder ?? ''
-    inputElement.value = homeySettings[driverSetting.id] ?? ''
-    inputElement.id = driverSetting.id
-    labelElement.htmlFor = inputElement.id
+    const divElement: HTMLDivElement = createDivElement()
+    const inputElement: HTMLInputElement = createInputElement({
+      id: driverSetting.id,
+      placeholder: driverSetting.placeholder,
+      type: driverSetting.type,
+      value: homeySettings[driverSetting.id],
+    })
+    const labelElement: HTMLLabelElement = createLabelElement({
+      id: inputElement.id,
+      text: driverSetting.title,
+    })
     divElement.appendChild(labelElement)
     divElement.appendChild(inputElement)
     loginElement.appendChild(divElement)
@@ -377,7 +416,7 @@ const createSelectElement = (
   flatDeviceSettings: DeviceSetting,
 ): HTMLSelectElement => {
   const selectElement: HTMLSelectElement = document.createElement('select')
-  selectElement.className = 'homey-form-select'
+  selectElement.classList.add('homey-form-select')
   selectElement.id = `${setting.id}--setting`
   ;[
     { id: '' },
@@ -406,17 +445,16 @@ const generateCommonChildrenElements = (
       ['checkbox', 'dropdown'].includes(setting.type),
     )
     .forEach((setting: DriverSetting) => {
-      const divElement: HTMLDivElement = document.createElement('div')
-      divElement.className = 'homey-form-group'
-      const labelElement: HTMLLabelElement = document.createElement('label')
-      labelElement.className = 'homey-form-label'
-      labelElement.innerText = setting.title
+      const divElement: HTMLDivElement = createDivElement()
       const selectElement: HTMLSelectElement = createSelectElement(
         homey,
         setting,
         flatDeviceSettings,
       )
-      labelElement.htmlFor = selectElement.id
+      const labelElement: HTMLLabelElement = createLabelElement({
+        id: selectElement.id,
+        text: setting.title,
+      })
       divElement.appendChild(labelElement)
       divElement.appendChild(selectElement)
       settingsElement.appendChild(divElement)
