@@ -46,8 +46,8 @@ const authenticatingElement: HTMLDivElement = document.getElementById(
 const loginElement: HTMLDivElement = document.getElementById(
   'login',
 ) as HTMLDivElement
-const settingsElement: HTMLDivElement = document.getElementById(
-  'settings',
+const settingsCommonElement: HTMLDivElement = document.getElementById(
+  'settings-common',
 ) as HTMLDivElement
 
 const disableButtons = (value = true): void => {
@@ -454,11 +454,11 @@ const generateCommonChildrenElements = (homey: Homey): void => {
       })
       divElement.appendChild(labelElement)
       divElement.appendChild(selectElement)
-      settingsElement.appendChild(divElement)
+      settingsCommonElement.appendChild(divElement)
     })
   addSettingsEventListeners(
     homey,
-    Array.from(settingsElement.querySelectorAll('select')),
+    Array.from(settingsCommonElement.querySelectorAll('select')),
   )
 }
 
