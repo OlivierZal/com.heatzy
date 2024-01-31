@@ -304,7 +304,7 @@ const buildSettingsBody = (
         (
           element: HTMLInputElement | HTMLSelectElement,
         ): [null] | [string, ValueOf<Settings>] => {
-          const settingId: string = element.id.split('--')[0]
+          const [settingId]: string[] = element.id.split('--')
           const settingValue: ValueOf<Settings> | null =
             processSettingValue(element)
           return settingValue !== null && shouldUpdate(settingId, settingValue)
