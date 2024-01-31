@@ -132,7 +132,7 @@ const getDeviceSettings = async (homey: Homey): Promise<void> =>
     )
   })
 
-const flattenDeviceSettings = (): void => {
+const getFlatDeviceSettings = (): void => {
   flatDeviceSettings = Object.values(deviceSettings).reduce<DeviceSetting>(
     (flattenedDeviceSettings, settings: DeviceSetting) =>
       Object.entries(settings).reduce<DeviceSetting>(
@@ -154,7 +154,7 @@ const flattenDeviceSettings = (): void => {
   )
 }
 
-const getDriverSettings = async (homey: Homey): Promise<void> =>
+const getDriverSettingsAll = async (homey: Homey): Promise<void> =>
   new Promise<void>((resolve, reject) => {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
@@ -176,7 +176,7 @@ const getDriverSettings = async (homey: Homey): Promise<void> =>
     )
   })
 
-const getCommonDriverSettings = (): void => {
+const getDriverSettings = (): void => {
   driverSettingsCommon = driverSettingsAll.reduce<DriverSetting[]>(
     (acc, setting: DriverSetting) => {
       if (setting.groupId === 'login') {
@@ -268,19 +268,18 @@ const updateCredentialElements = (): void => {
 const processSettingValue = (
   element: HTMLInputElement | HTMLSelectElement,
 ): ValueOf<Settings> | null => {
-  const { value } = element
-  if (!value) {
-    return null
-  }
-  if (element instanceof HTMLInputElement && element.type === 'checkbox') {
-    if (!element.indeterminate) {
-      return element.checked
+  if (element.value) {
+    if (element instanceof HTMLInputElement && element.type === 'checkbox') {
+      if (!element.indeterminate) {
+        return element.checked
+      }
+      return null
     }
-    return null
+    return ['true', 'false'].includes(element.value)
+      ? element.value === 'true'
+      : (element.value as OnModeSetting)
   }
-  return ['true', 'false'].includes(value)
-    ? value === 'true'
-    : (value as OnModeSetting)
+  return null
 }
 
 const shouldUpdate = (
@@ -526,9 +525,9 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   await setDocumentLanguage(homey)
   await getHomeySettings(homey)
   await getDeviceSettings(homey)
-  flattenDeviceSettings()
-  await getDriverSettings(homey)
-  getCommonDriverSettings()
+  getFlatDeviceSettings()
+  await getDriverSettingsAll(homey)
+  getDriverSettings()
   updateCredentialElements()
   generateCommonChildrenElements(homey)
   await load(homey)
