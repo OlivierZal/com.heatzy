@@ -137,16 +137,12 @@ export = {
     body: Settings
     homey: Homey
   }): Promise<void> {
-    const changedKeys: (keyof Settings)[] = Object.keys(
-      body,
-    ) as (keyof Settings)[]
-    if (!changedKeys.length) {
-      return
-    }
     try {
       await Promise.all(
         getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
-          const deviceChangedKeys: (keyof Settings)[] = changedKeys.filter(
+          const deviceChangedKeys: (keyof Settings)[] = (
+            Object.keys(body) as (keyof Settings)[]
+          ).filter(
             (changedKey: keyof Settings) =>
               body[changedKey] !== device.getSetting(changedKey),
           )
@@ -161,7 +157,6 @@ export = {
             )
             try {
               await device.setSettings(deviceSettings)
-              device.log('Settings:', deviceSettings)
               await device.onSettings({
                 changedKeys: deviceChangedKeys,
                 newSettings: device.getSettings() as Settings,
