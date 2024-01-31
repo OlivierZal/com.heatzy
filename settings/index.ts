@@ -79,7 +79,7 @@ const needsAuthentication = (value = true): void => {
   unhide(authenticatingElement, value)
 }
 
-const setLanguage = async (homey: Homey): Promise<void> =>
+const setDocumentLanguage = async (homey: Homey): Promise<void> =>
   new Promise<void>((resolve, reject) => {
     // @ts-expect-error: `homey` is partially typed
     homey.api(
@@ -523,7 +523,7 @@ const load = async (homey: Homey): Promise<void> => {
 // eslint-disable-next-line func-style
 async function onHomeyReady(homey: Homey): Promise<void> {
   await homey.ready()
-  await setLanguage(homey)
+  await setDocumentLanguage(homey)
   await getHomeySettings(homey)
   await getDeviceSettings(homey)
   flattenDeviceSettings()
