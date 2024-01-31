@@ -15,7 +15,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   // eslint-disable-next-line @typescript-eslint/require-await
   public async onInit(): Promise<void> {
-    this.registerFlowListeners()
+    this.registerRunListeners()
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -77,7 +77,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
     }
   }
 
-  private registerFlowListeners(): void {
+  private registerRunListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.manifest.capabilities as (keyof Capabilities)[]).forEach(
       (capability: keyof Capabilities) => {
