@@ -215,20 +215,19 @@ const createInputElement = ({
   inputElement.id = id
   inputElement.value = value ?? ''
   inputElement.type = type
-  inputElement.placeholder = placeholder ?? ''
+  if (typeof placeholder !== 'undefined') {
+    inputElement.placeholder = placeholder
+  }
   return inputElement
 }
 
-const createLabelElement = ({
-  id,
-  text,
-}: {
-  id: string
-  text: string
-}): HTMLLabelElement => {
+const createLabelElement = (
+  element: HTMLInputElement | HTMLSelectElement,
+  { text }: { text: string },
+): HTMLLabelElement => {
   const labelElement: HTMLLabelElement = document.createElement('label')
   labelElement.classList.add('homey-form-label')
-  labelElement.htmlFor = id
+  labelElement.htmlFor = element.id
   labelElement.innerText = text
   return labelElement
 }
@@ -247,8 +246,7 @@ const updateCredentialElement = (
       type: driverSetting.type,
       value: homeySettings[driverSetting.id],
     })
-    const labelElement: HTMLLabelElement = createLabelElement({
-      id: inputElement.id,
+    const labelElement: HTMLLabelElement = createLabelElement(inputElement, {
       text: driverSetting.title,
     })
     divElement.appendChild(labelElement)
@@ -391,7 +389,6 @@ const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
   const values: ValueOf<Settings>[] | undefined = flatDeviceSettings[
     element.id.split('--')[0]
   ] as ValueOf<Settings>[] | undefined
-
   element.value = values && new Set(values).size === 1 ? String(values[0]) : ''
 }
 
@@ -448,8 +445,7 @@ const generateCommonChildrenElements = (homey: Homey): void => {
         homey,
         setting,
       )
-      const labelElement: HTMLLabelElement = createLabelElement({
-        id: selectElement.id,
+      const labelElement: HTMLLabelElement = createLabelElement(selectElement, {
         text: setting.title,
       })
       divElement.appendChild(labelElement)
