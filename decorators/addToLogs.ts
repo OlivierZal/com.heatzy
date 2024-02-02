@@ -4,9 +4,9 @@
 import type { SimpleClass } from 'homey'
 
 const addToLogs =
-  <T extends abstract new (...args: any[]) => SimpleClass>(...logs: string[]) =>
+  <T extends new (...args: any[]) => SimpleClass>(...logs: string[]) =>
   (target: T, context: ClassDecoratorContext<T>): T => {
-    abstract class LogsDecorator extends target {
+    class LogsDecorator extends target {
       public error(...args: any[]): void {
         this.commonLog('error', ...args)
       }
