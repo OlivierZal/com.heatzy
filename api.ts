@@ -149,7 +149,7 @@ export = {
           if (changedKeys.length) {
             const deviceSettings: Settings = Object.fromEntries(
               changedKeys.map(
-                (key: keyof Settings): [string, Settings[keyof Settings]] => [
+                (key: keyof Settings): [string, ValueOf<Settings>] => [
                   key,
                   body[key],
                 ],
