@@ -50,20 +50,14 @@ const getAPIErrorMessage = (error: AxiosError): string => {
   return error.message
 }
 
-export const getErrorMessage = (error: unknown): string => {
-  let errorMessage = String(error)
-  if (axios.isAxiosError(error)) {
-    errorMessage = getAPIErrorMessage(error)
-  } else if (error instanceof Error) {
-    errorMessage = error.message
-  }
-  return errorMessage
-}
+export const getErrorMessage = (error: unknown): string =>
+  axios.isAxiosError(error) || error instanceof Error
+    ? error.message
+    : String(error)
 
-const getAPILogs = (
+const getAPICallData = (
   object: AxiosError | AxiosResponse | InternalAxiosRequestConfig,
-  message?: string,
-): string => {
+): string[] => {
   const isError = axios.isAxiosError(object)
   const isResponse = Boolean(
     (!isError && 'status' in object) || (isError && 'response' in object),
@@ -76,24 +70,25 @@ const getAPILogs = (
   if (isResponse) {
     response = isError ? object.response ?? null : (object as AxiosResponse)
   }
-  return [
-    `API ${isResponse ? 'response' : 'request'}:`,
-    config?.method?.toUpperCase(),
-    config?.url,
-    config?.params,
-    isResponse ? response?.headers : config?.headers,
-    response?.status,
-    isResponse ? (object as AxiosResponse).data : config?.data,
-    message,
-  ]
-    .filter(
-      (log: number | object | string | undefined) => typeof log !== 'undefined',
-    )
-    .map((log: number | object | string): number | string =>
-      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-      typeof log === 'object' ? JSON.stringify(log, null, 2) : log,
-    )
-    .join('\n')
+  return (
+    [
+      `API ${isResponse ? 'response' : 'request'}:`,
+      config?.method?.toUpperCase(),
+      config?.url,
+      config?.params,
+      isResponse ? response?.headers : config?.headers,
+      response?.status,
+      isResponse ? (object as AxiosResponse).data : config?.data,
+      isError ? getAPIErrorMessage(object) : null,
+    ]
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((log: any) => typeof log !== 'undefined' && log !== null)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((log: any): string =>
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        typeof log === 'object' ? JSON.stringify(log, null, 2) : String(log),
+      )
+  )
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -156,12 +151,12 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       const updatedConfig: InternalAxiosRequestConfig = { ...config }
       updatedConfig.headers['X-Gizwits-User-token'] =
         this.getHomeySetting('token') ?? ''
-      this.log(getAPILogs(updatedConfig))
+      this.log(getAPICallData(updatedConfig).join('\n'))
       return updatedConfig
     }
 
     private handleResponse(response: AxiosResponse): AxiosResponse {
-      this.log(getAPILogs(response))
+      this.log(getAPICallData(response).join('\n'))
       return response
     }
 
@@ -169,8 +164,8 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       type: 'request' | 'response',
       error: AxiosError,
     ): Promise<AxiosError> {
-      const errorMessage: string = getAPIErrorMessage(error)
-      this.error(getAPILogs(error), errorMessage)
+      const apiCallData: string[] = getAPICallData(error)
+      this.error(apiCallData.join('\n'))
       const app: HeatzyApp = this.homey.app as HeatzyApp
       if (
         error.response?.status === HTTP_STATUS_BAD_REQUEST &&
@@ -183,7 +178,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
           return this.api.request(error.config)
         }
       }
-      await this.setErrorWarning(errorMessage)
+      await this.setErrorWarning(apiCallData[apiCallData.length - 1])
       return Promise.reject(error)
     }
 
