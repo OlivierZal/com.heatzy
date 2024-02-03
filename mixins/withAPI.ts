@@ -14,7 +14,6 @@ import axios, {
   type AxiosInstance,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
-  isAxiosError,
 } from 'axios'
 import type HeatzyApp from '../app'
 
@@ -53,7 +52,7 @@ const getAPIErrorMessage = (error: AxiosError): string => {
 
 export const getErrorMessage = (error: unknown): string => {
   let errorMessage = String(error)
-  if (isAxiosError(error)) {
+  if (axios.isAxiosError(error)) {
     errorMessage = getAPIErrorMessage(error)
   } else if (error instanceof Error) {
     errorMessage = error.message
@@ -65,7 +64,7 @@ const getAPILogs = (
   object: AxiosError | AxiosResponse | InternalAxiosRequestConfig,
   message?: string,
 ): string => {
-  const isError = isAxiosError(object)
+  const isError = axios.isAxiosError(object)
   const isResponse = Boolean(
     (!isError && 'status' in object) || (isError && 'response' in object),
   )
