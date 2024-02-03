@@ -37,6 +37,11 @@ type APIClass = new (...args: any[]) => {
 const HTTP_STATUS_BAD_REQUEST = 400
 const LOGIN_URL = '/login'
 
+export const getErrorMessage = (error: unknown): string =>
+  axios.isAxiosError(error) || error instanceof Error
+    ? error.message
+    : String(error)
+
 const getAPIErrorMessage = (error: AxiosError): string => {
   const { data } = error.response ?? {}
   if (typeof data !== 'undefined' && data) {
@@ -50,18 +55,11 @@ const getAPIErrorMessage = (error: AxiosError): string => {
   return error.message
 }
 
-export const getErrorMessage = (error: unknown): string =>
-  axios.isAxiosError(error) || error instanceof Error
-    ? error.message
-    : String(error)
-
 const getAPICallData = (
   object: AxiosError | AxiosResponse | InternalAxiosRequestConfig,
 ): string[] => {
   const isError = axios.isAxiosError(object)
-  const isResponse = Boolean(
-    (!isError && 'status' in object) || (isError && 'response' in object),
-  )
+  const isResponse = Boolean('status' in object || 'response' in object)
   const config: InternalAxiosRequestConfig | undefined =
     isResponse || isError
       ? (object as AxiosError | AxiosResponse).config
@@ -85,7 +83,6 @@ const getAPICallData = (
       .filter((log: any) => typeof log !== 'undefined' && log !== null)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((log: any): string =>
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         typeof log === 'object' ? JSON.stringify(log, null, 2) : String(log),
       )
   )
