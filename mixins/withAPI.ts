@@ -34,7 +34,6 @@ type APIClass = new (...args: any[]) => {
   ) => HomeySettings[K]
 }
 
-const HTTP_STATUS_BAD_REQUEST = 400
 const LOGIN_URL = '/login'
 
 export const getErrorMessage = (error: unknown): string =>
@@ -164,7 +163,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       this.error(apiCallData.join('\n'))
       const app: HeatzyApp = this.homey.app as HeatzyApp
       if (
-        error.response?.status === HTTP_STATUS_BAD_REQUEST &&
+        error.response?.status === axios.HttpStatusCode.BadRequest &&
         app.retry &&
         error.config?.url !== LOGIN_URL
       ) {
