@@ -46,7 +46,7 @@ const getBoostEnd = (minutes: number): string =>
 
 @addToLogs('getName()')
 class HeatzyDevice extends withAPI(Device) {
-  public declare driver: HeatzyDriver
+  public declare readonly driver: HeatzyDriver
 
   #attrs: BaseAttrs = {}
 

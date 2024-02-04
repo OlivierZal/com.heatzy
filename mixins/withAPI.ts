@@ -90,6 +90,8 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
   class WithAPI extends base {
     public readonly api: AxiosInstance = axios.create()
 
+    public readonly app: HeatzyApp = this.homey.app as HeatzyApp
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public constructor(...args: any[]) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -153,14 +155,13 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
     private async handleError(error: AxiosError): Promise<AxiosError> {
       const apiCallData: string[] = getAPICallData(error)
       this.error(apiCallData.join('\n'))
-      const app: HeatzyApp = this.homey.app as HeatzyApp
       if (
         error.response?.status === axios.HttpStatusCode.BadRequest &&
-        app.retry &&
+        this.app.retry &&
         error.config?.url !== LOGIN_URL
       ) {
-        app.handleRetry()
-        const loggedIn: boolean = await app.login()
+        this.app.handleRetry()
+        const loggedIn: boolean = await this.app.login()
         if (loggedIn && error.config) {
           return this.api.request(error.config)
         }
