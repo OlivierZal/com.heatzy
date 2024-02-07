@@ -14,6 +14,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
+import type { APICallContextDataWithErrorMessage } from './withErrorMessage'
 import APICallRequestData from '../lib/APICallRequestData'
 import APICallResponseData from '../lib/APICallResponseData'
 import type HeatzyApp from '../app'
@@ -116,7 +117,8 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
     }
 
     private async handleError(error: AxiosError): Promise<AxiosError> {
-      const apiCallData = createAPICallErrorData(error)
+      const apiCallData: APICallContextDataWithErrorMessage =
+        createAPICallErrorData(error)
       this.error(String(apiCallData))
       if (
         error.response?.status === axios.HttpStatusCode.BadRequest &&
