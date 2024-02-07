@@ -3,6 +3,7 @@ import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
 import type { HomeySettings, LoginCredentials, ValueOf } from './types'
 import { App } from 'homey'
 import axios from 'axios'
+import { getErrorMessage } from './mixins/withErrorMessage'
 import withAPI from './mixins/withAPI'
 
 const MAX_INT32 = 2147483647
@@ -10,11 +11,6 @@ const MAX_INT32 = 2147483647
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
 axios.defaults.headers.common['X-Gizwits-Application-Id'] =
   'c70a66ff039d41b4a220e198b0fcc8b3'
-
-const getErrorMessage = (error: unknown): string =>
-  axios.isAxiosError(error) || error instanceof Error
-    ? error.message
-    : String(error)
 
 export = class HeatzyApp extends withAPI(App) {
   public retry = true

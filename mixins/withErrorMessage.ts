@@ -1,5 +1,5 @@
+import { type AxiosError, isAxiosError } from 'axios'
 import type APICallContextData from '../lib/APICallContextData'
-import type { AxiosError } from 'axios'
 import type { ErrorData } from '../types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -20,6 +20,16 @@ const getAPIErrorMessage = (error: AxiosError): string => {
     }
   }
   return error.message
+}
+
+export const getErrorMessage = (error: unknown): string => {
+  let errorMessage = String(error)
+  if (isAxiosError(error)) {
+    errorMessage = getAPIErrorMessage(error)
+  } else if (error instanceof Error) {
+    errorMessage = error.message
+  }
+  return errorMessage
 }
 
 const withErrorMessage = <T extends APICallContextClass>(
