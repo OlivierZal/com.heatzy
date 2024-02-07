@@ -4,6 +4,7 @@ import type {
   DeviceData,
   DevicePostDataAny,
   HomeyClass,
+  HomeySettings,
   LoginCredentials,
   LoginData,
 } from '../types'
@@ -30,6 +31,9 @@ type APIClass = new (...args: any[]) => {
   readonly apiLogin: (
     postData: LoginCredentials,
   ) => Promise<{ data: LoginData }>
+  readonly getHomeySetting: <K extends keyof HomeySettings>(
+    setting: K,
+  ) => HomeySettings[K]
 }
 
 const LOGIN_URL = '/login'
@@ -51,6 +55,12 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       super(...args)
       this.setupAxiosInterceptors()
+    }
+
+    public getHomeySetting<K extends keyof HomeySettings>(
+      setting: K,
+    ): HomeySettings[K] {
+      return this.homey.settings.get(setting) as HomeySettings[K]
     }
 
     public async apiLogin(
@@ -96,6 +106,10 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       updatedConfig.headers.set(
         'X-Gizwits-Application-Id',
         'c70a66ff039d41b4a220e198b0fcc8b3',
+      )
+      updatedConfig.headers.set(
+        'X-Gizwits-User-token',
+        this.getHomeySetting('token'),
       )
       this.log(String(new APICallRequestData(updatedConfig)))
       return updatedConfig

@@ -89,12 +89,6 @@ export = class HeatzyApp extends withAPI(App) {
     this.homey.clearTimeout(this.#loginTimeout)
   }
 
-  private getHomeySetting<K extends keyof HomeySettings>(
-    setting: K & string,
-  ): HomeySettings[K] {
-    return this.homey.settings.get(setting) as HomeySettings[K]
-  }
-
   private setHomeySettings(settings: Partial<HomeySettings>): void {
     Object.entries(settings)
       .filter(
