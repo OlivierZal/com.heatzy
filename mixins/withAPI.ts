@@ -3,7 +3,6 @@ import type {
   Data,
   DeviceData,
   DevicePostDataAny,
-  ErrorData,
   HomeyClass,
   LoginCredentials,
   LoginData,
@@ -14,7 +13,10 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
+import APICallRequestData from '../lib/APICallRequestData'
+import APICallResponseData from '../lib/APICallResponseData'
 import type HeatzyApp from '../app'
+import createAPICallErrorData from '../lib/APICallErrorData'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type APIClass = new (...args: any[]) => {
@@ -36,54 +38,6 @@ export const getErrorMessage = (error: unknown): string =>
   axios.isAxiosError(error) || error instanceof Error
     ? error.message
     : String(error)
-
-const getAPIErrorMessage = (error: AxiosError): string => {
-  const { data } = error.response ?? {}
-  if (typeof data !== 'undefined' && data) {
-    const { error_message: message, detail_message: detailMessage } =
-      data as ErrorData
-    const errorMessage: string = detailMessage ?? message ?? ''
-    if (errorMessage) {
-      return errorMessage
-    }
-  }
-  return error.message
-}
-
-const getAPICallData = (
-  object: AxiosError | AxiosResponse | InternalAxiosRequestConfig,
-): string[] => {
-  const isError = axios.isAxiosError(object)
-  const isResponse = Boolean(
-    'status' in object || (isError && typeof object.response !== 'undefined'),
-  )
-  const config: InternalAxiosRequestConfig | undefined =
-    isResponse || isError
-      ? (object as AxiosError | AxiosResponse).config
-      : (object as InternalAxiosRequestConfig)
-  let response: AxiosResponse | null = null
-  if (isResponse) {
-    response = isError ? object.response ?? null : (object as AxiosResponse)
-  }
-  return (
-    [
-      `API ${isResponse ? 'response' : 'request'}:`,
-      config?.method?.toUpperCase(),
-      config?.url,
-      config?.params,
-      isResponse ? response?.headers : config?.headers,
-      response?.status,
-      isResponse ? (object as AxiosResponse).data : config?.data,
-      isError ? getAPIErrorMessage(object) : null,
-    ]
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((log: any) => typeof log !== 'undefined' && log !== null)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((log: any): string =>
-        typeof log === 'object' ? JSON.stringify(log, null, 2) : String(log),
-      )
-  )
-}
 
 // eslint-disable-next-line max-lines-per-function
 const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
@@ -143,18 +97,18 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
         'X-Gizwits-Application-Id',
         'c70a66ff039d41b4a220e198b0fcc8b3',
       )
-      this.log(getAPICallData(updatedConfig).join('\n'))
+      this.log(String(new APICallRequestData(updatedConfig)))
       return updatedConfig
     }
 
     private handleResponse(response: AxiosResponse): AxiosResponse {
-      this.log(getAPICallData(response).join('\n'))
+      this.log(String(new APICallResponseData(response)))
       return response
     }
 
     private async handleError(error: AxiosError): Promise<AxiosError> {
-      const apiCallData: string[] = getAPICallData(error)
-      this.error(apiCallData.join('\n'))
+      const apiCallData = createAPICallErrorData(error)
+      this.error(String(apiCallData))
       if (
         error.response?.status === axios.HttpStatusCode.BadRequest &&
         this.app.retry &&
@@ -165,7 +119,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
           return this.api.request(error.config)
         }
       }
-      await this.setErrorWarning(apiCallData[apiCallData.length - 1])
+      await this.setErrorWarning(apiCallData.errorMessage)
       return Promise.reject(error)
     }
 
