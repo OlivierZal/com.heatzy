@@ -385,6 +385,7 @@ class HeatzyDevice extends withAPI(Device) {
       return { attrs: this.#attrs }
     }
     if (typeof this.#attrs.mode !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
       return { raw: [1, 1, this.#attrs.mode] }
     }
     return null

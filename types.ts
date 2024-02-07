@@ -185,6 +185,7 @@ export interface DeviceDetails {
 }
 
 interface FirstGenDevicePostData {
+  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
   readonly raw: [1, 1, Mode]
 }
 

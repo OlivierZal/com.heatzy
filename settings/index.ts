@@ -12,6 +12,8 @@ import type {
 } from '../types'
 import type Homey from 'homey/lib/Homey'
 
+const SIZE_1 = 1
+
 let homeySettings: HomeySettingsUI = {
   expireAt: 0,
   password: '',
@@ -287,10 +289,14 @@ const shouldUpdate = (
   const deviceSetting: ValueOf<Settings>[] | undefined = flatDeviceSettings[
     settingId
   ] as ValueOf<Settings>[] | undefined
-  return (
-    typeof deviceSetting !== 'undefined' &&
-    (new Set(deviceSetting).size !== 1 || settingValue !== deviceSetting[0])
-  )
+  if (typeof deviceSetting === 'undefined') {
+    return false
+  }
+  if (new Set(deviceSetting).size !== SIZE_1) {
+    return true
+  }
+  const [deviceSettingValue]: ValueOf<Settings>[] = deviceSetting
+  return settingValue !== deviceSettingValue
 }
 
 const buildSettingsBody = (
@@ -313,7 +319,10 @@ const buildSettingsBody = (
       .filter(
         (
           entry: [null] | [string, ValueOf<Settings>],
-        ): entry is [string, ValueOf<Settings>] => entry[0] !== null,
+        ): entry is [string, ValueOf<Settings>] => {
+          const [key]: [null] | [string, ValueOf<Settings>] = entry
+          return key !== null
+        },
       ),
   )
 
@@ -386,10 +395,16 @@ const addApplySettingsEventListener = (
 }
 
 const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
+  const [settingId]: string[] = element.id.split('--')
   const values: ValueOf<Settings>[] | undefined = flatDeviceSettings[
-    element.id.split('--')[0]
+    settingId
   ] as ValueOf<Settings>[] | undefined
-  element.value = values && new Set(values).size === 1 ? String(values[0]) : ''
+  if (values && new Set(values).size === SIZE_1) {
+    const [value]: ValueOf<Settings>[] = values
+    element.value = String(value)
+  } else {
+    element.value = ''
+  }
 }
 
 const addRefreshSettingsEventListener = (

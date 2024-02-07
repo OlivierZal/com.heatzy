@@ -6,7 +6,9 @@ import axios from 'axios'
 import { getErrorMessage } from './mixins/withErrorMessage'
 import withAPI from './mixins/withAPI'
 
+const DEFAULT_0 = 0
 const MAX_INT32 = 2147483647
+const NO_TIME_DIFF = 0
 
 axios.defaults.baseURL = 'https://euapi.gizwits.com/app'
 axios.defaults.headers.common['X-Gizwits-Application-Id'] =
@@ -69,12 +71,12 @@ export = class HeatzyApp extends withAPI(App) {
   }
 
   private async planRefreshLogin(): Promise<void> {
-    const expiredAt: number = this.getHomeySetting('expireAt') ?? 0
+    const expiredAt: number = this.getHomeySetting('expireAt') ?? DEFAULT_0
     const ms: number = DateTime.fromSeconds(expiredAt)
       .minus({ days: 1 })
       .diffNow()
       .as('milliseconds')
-    if (ms > 0) {
+    if (ms > NO_TIME_DIFF) {
       this.#loginTimeout = this.homey.setTimeout(
         async (): Promise<void> => {
           await this.login()
