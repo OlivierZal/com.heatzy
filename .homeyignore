@@ -1,5 +1,6 @@
 coverage/*
 docs/*
+tests/*
 eslint.config.js
 jest.config.ts
 LICENSE
