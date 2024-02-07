@@ -4,6 +4,8 @@ import type { SimpleClass } from 'homey'
 
 export type ModeCapability = 'mode' | 'mode3'
 
+export const NUMBER_1 = 1
+
 export enum Mode {
   cft = 0,
   eco = 1,
@@ -185,8 +187,7 @@ export interface DeviceDetails {
 }
 
 interface FirstGenDevicePostData {
-  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  readonly raw: [1, 1, Mode]
+  readonly raw: [typeof NUMBER_1, typeof NUMBER_1, Mode]
 }
 
 export interface BaseAttrs {
