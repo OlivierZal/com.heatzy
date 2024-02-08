@@ -66,6 +66,6 @@ module.exports = [
     plugins: { jest },
     rules: jest.configs.all.rules,
   },
-  { rules: { '@stylistic/lines-between-class-members': ['error', 'always'] } },
+  { rules: { '@stylistic/lines-between-class-members': 'error' } },
   prettier,
 ]
