@@ -1,5 +1,5 @@
 import 'source-map-support/register'
-import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
+import { DateTime, Settings as LuxonSettings } from 'luxon'
 import type { HomeySettings, LoginCredentials, ValueOf } from './types'
 import { App } from 'homey'
 import axios from 'axios'
@@ -15,11 +15,27 @@ axios.defaults.headers.common['X-Gizwits-Application-Id'] =
   'c70a66ff039d41b4a220e198b0fcc8b3'
 
 export = class HeatzyApp extends withAPI(App) {
-  public retry = true
-
   #loginTimeout!: NodeJS.Timeout
 
-  readonly #retryTimeout!: NodeJS.Timeout
+  #retry = true
+
+  #retryTimeout!: NodeJS.Timeout
+
+  public get retry(): boolean {
+    return this.#retry
+  }
+
+  public set retry(value: boolean) {
+    this.#retry = value
+  }
+
+  public get retryTimeout(): NodeJS.Timeout {
+    return this.#retryTimeout
+  }
+
+  public set retryTimeout(value: NodeJS.Timeout) {
+    this.#retryTimeout = value
+  }
 
   public async onInit(): Promise<void> {
     LuxonSettings.defaultLocale = this.getLanguage()
@@ -57,17 +73,6 @@ export = class HeatzyApp extends withAPI(App) {
 
   public getLanguage(): string {
     return this.homey.i18n.getLanguage()
-  }
-
-  public handleRetry(): void {
-    this.retry = false
-    this.homey.clearTimeout(this.#retryTimeout)
-    this.homey.setTimeout(
-      () => {
-        this.retry = true
-      },
-      Duration.fromObject({ minutes: 1 }).as('milliseconds'),
-    )
   }
 
   private async planRefreshLogin(): Promise<void> {

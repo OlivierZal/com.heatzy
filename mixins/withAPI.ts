@@ -17,6 +17,7 @@ import axios, {
 import type { APICallContextDataWithErrorMessage } from './withErrorMessage'
 import APICallRequestData from '../lib/APICallRequestData'
 import APICallResponseData from '../lib/APICallResponseData'
+import { Duration } from 'luxon'
 import type HeatzyApp from '../app'
 import createAPICallErrorData from '../lib/APICallErrorData'
 
@@ -125,7 +126,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
         this.app.retry &&
         error.config?.url !== LOGIN_URL
       ) {
-        this.app.handleRetry()
+        this.handleRetry()
         if ((await this.app.login()) && error.config) {
           return this.api.request(error.config)
         }
@@ -138,6 +139,17 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       if (this.setWarning) {
         await this.setWarning(warning)
       }
+    }
+
+    private handleRetry(): void {
+      this.app.retry = false
+      this.homey.clearTimeout(this.app.retryTimeout)
+      this.app.retryTimeout = this.homey.setTimeout(
+        () => {
+          this.app.retry = true
+        },
+        Duration.fromObject({ minutes: 1 }).as('milliseconds'),
+      )
     }
   }
 
