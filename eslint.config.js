@@ -7,7 +7,7 @@ const prettier = require('eslint-config-prettier')
 const stylistic = require('@stylistic/eslint-plugin')
 const tsPlugin = require('@typescript-eslint/eslint-plugin')
 
-const [eslintOverrides] = tsPlugin.configs['eslint-recommended'].overrides
+const [jsOverrides] = tsPlugin.configs['eslint-recommended'].overrides
 
 module.exports = [
   { ignores: ['.homeybuild/'] },
@@ -37,7 +37,7 @@ module.exports = [
   {
     files: ['**/*.ts'],
     rules: {
-      ...eslintOverrides.rules,
+      ...jsOverrides.rules,
       ...tsPlugin.configs.all.rules,
       ...importPlugin.configs.typescript.rules,
       '@typescript-eslint/member-ordering': 'off',
