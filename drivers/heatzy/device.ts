@@ -51,6 +51,10 @@ class HeatzyDevice extends withAPI(Device) {
 
   #attrs: BaseAttrs = {}
 
+  #onModeValue!: PreviousModeValue
+
+  #syncTimeout!: NodeJS.Timeout
+
   readonly #data: DeviceDetails['data'] =
     this.getData() as DeviceDetails['data']
 
@@ -66,16 +70,12 @@ class HeatzyDevice extends withAPI(Device) {
 
   readonly #mode: ModeCapability = this.#isFirstPilot ? 'mode' : 'mode3'
 
-  #onModeValue!: PreviousModeValue
-
-  #syncTimeout!: NodeJS.Timeout
-
   public async onInit(): Promise<void> {
     await this.setWarning(null)
-    this.setOnModeValue(this.getSetting('on_mode'))
-    await this.handleCapabilities()
-    this.registerCapabilityListeners()
-    await this.updateCapabilities()
+    this.#setOnModeValue(this.getSetting('on_mode'))
+    await this.#handleCapabilities()
+    this.#registerCapabilityListeners()
+    await this.#updateCapabilities()
   }
 
   public async onSettings({
@@ -89,7 +89,7 @@ class HeatzyDevice extends withAPI(Device) {
       changedKeys.includes('on_mode') &&
       typeof newSettings.on_mode !== 'undefined'
     ) {
-      this.setOnModeValue(newSettings.on_mode)
+      this.#setOnModeValue(newSettings.on_mode)
     }
     if (
       changedKeys.includes('always_on') &&
@@ -101,7 +101,7 @@ class HeatzyDevice extends withAPI(Device) {
   }
 
   public onDeleted(): void {
-    this.clearSync()
+    this.#clearSync()
   }
 
   public async addCapability(capability: string): Promise<void> {
@@ -163,12 +163,12 @@ class HeatzyDevice extends withAPI(Device) {
     capability: K,
     value: Capabilities[K],
   ): Promise<void> {
-    this.clearSync()
+    this.#clearSync()
     let mode: keyof typeof Mode | null = null
     switch (capability) {
       case 'onoff':
       case this.#mode:
-        mode = await this.getMode(
+        mode = await this.#getMode(
           capability,
           value as boolean | keyof typeof Mode,
         )
@@ -202,10 +202,10 @@ class HeatzyDevice extends withAPI(Device) {
       /* eslint-enable camelcase */
       default:
     }
-    this.applySyncToDevice()
+    this.#applySyncToDevice()
   }
 
-  private async handleCapabilities(): Promise<void> {
+  async #handleCapabilities(): Promise<void> {
     const requiredCapabilities: string[] = this.driver.getRequiredCapabilities(
       this.#productKey,
       this.#productName,
@@ -227,7 +227,7 @@ class HeatzyDevice extends withAPI(Device) {
       }, Promise.resolve())
   }
 
-  private registerCapabilityListeners<K extends keyof Capabilities>(): void {
+  #registerCapabilityListeners<K extends keyof Capabilities>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.driver.manifest.capabilities as K[]).forEach((capability: K) => {
       this.registerCapabilityListener(
@@ -239,7 +239,7 @@ class HeatzyDevice extends withAPI(Device) {
     })
   }
 
-  private async getDeviceData(): Promise<DeviceData['attr'] | null> {
+  async #getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
       return (await this.apiDeviceData(this.#id)).data.attr
     } catch (error: unknown) {
@@ -247,25 +247,25 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async updateCapabilities(control = false): Promise<void> {
+  async #updateCapabilities(control = false): Promise<void> {
     const attr: BaseAttrs | DeviceData['attr'] | null = control
       ? this.#attrs
-      : await this.getDeviceData()
+      : await this.#getDeviceData()
     this.#attrs = {}
     if (attr) {
-      await this.updateMode(attr.mode)
-      await this.updateDerog(attr.derog_mode, attr.derog_time, control)
+      await this.#updateMode(attr.mode)
+      await this.#updateDerog(attr.derog_mode, attr.derog_time, control)
       if (typeof attr.lock_switch !== 'undefined') {
         await this.setCapabilityValue('locked', Boolean(attr.lock_switch))
       }
       if (typeof attr.timer_switch !== 'undefined') {
         await this.setCapabilityValue('onoff.timer', Boolean(attr.timer_switch))
       }
-      this.applySyncFromDevice()
+      this.#applySyncFromDevice()
     }
   }
 
-  private async updateMode(mode: Mode | string | undefined): Promise<void> {
+  async #updateMode(mode: Mode | string | undefined): Promise<void> {
     if (typeof mode === 'undefined') {
       return
     }
@@ -281,7 +281,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private async updateDerog(
+  async #updateDerog(
     mode: DerogMode | undefined,
     time: number | undefined,
     control = false,
@@ -301,12 +301,12 @@ class HeatzyDevice extends withAPI(Device) {
           case DerogMode.vacation:
             await this.setCapabilityValue('derog_end', getVacationEnd(time))
             await this.setCapabilityValue('derog_time_vacation', String(time))
-            await this.clearDerogTime('derog_time_boost')
+            await this.#clearDerogTime('derog_time_boost')
             break
           case DerogMode.boost:
             await this.setCapabilityValue('derog_end', getBoostEnd(time))
             await this.setCapabilityValue('derog_time_boost', String(time))
-            await this.clearDerogTime('derog_time_vacation')
+            await this.#clearDerogTime('derog_time_vacation')
             break
           case DerogMode.off:
             await this.setCapabilityValue('derog_end', null)
@@ -319,20 +319,20 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private applySyncFromDevice(): void {
+  #applySyncFromDevice(): void {
     this.#syncTimeout = this.homey.setTimeout(
       async (): Promise<void> => {
-        await this.updateCapabilities()
+        await this.#updateCapabilities()
       },
       Duration.fromObject({ minutes: 1 }).as('milliseconds'),
     )
   }
 
-  private clearSync(): void {
+  #clearSync(): void {
     this.homey.clearTimeout(this.#syncTimeout)
   }
 
-  private async getMode<K extends ModeCapability | 'onoff'>(
+  async #getMode<K extends ModeCapability | 'onoff'>(
     capability: K,
     value: Capabilities[K],
   ): Promise<keyof typeof Mode | null> {
@@ -364,21 +364,21 @@ class HeatzyDevice extends withAPI(Device) {
     return mode
   }
 
-  private applySyncToDevice(): void {
+  #applySyncToDevice(): void {
     this.#syncTimeout = this.homey.setTimeout(
       async (): Promise<void> => {
-        await this.syncToDevice()
+        await this.#syncToDevice()
       },
       Duration.fromObject({ seconds: 1 }).as('milliseconds'),
     )
   }
 
-  private async syncToDevice(): Promise<void> {
-    const postData: DevicePostDataAny | null = this.buildPostData()
-    await this.control(postData)
+  async #syncToDevice(): Promise<void> {
+    const postData: DevicePostDataAny | null = this.#buildPostData()
+    await this.#control(postData)
   }
 
-  private buildPostData(): DevicePostDataAny | null {
+  #buildPostData(): DevicePostDataAny | null {
     if (!Object.keys(this.#attrs).length) {
       return null
     }
@@ -391,22 +391,20 @@ class HeatzyDevice extends withAPI(Device) {
     return null
   }
 
-  private async control(
-    postData: DevicePostDataAny | null,
-  ): Promise<Data | null> {
+  async #control(postData: DevicePostDataAny | null): Promise<Data | null> {
     if (postData) {
       try {
         const { data } = await this.apiControl(this.#id, postData)
-        await this.updateCapabilities(true)
+        await this.#updateCapabilities(true)
         return data
       } catch (error: unknown) {
-        await this.updateCapabilities()
+        await this.#updateCapabilities()
       }
     }
     return null
   }
 
-  private async clearDerogTime(
+  async #clearDerogTime(
     capability: 'derog_time_boost' | 'derog_time_vacation',
   ): Promise<void> {
     if (Number(this.getCapabilityValue(capability))) {
@@ -415,7 +413,7 @@ class HeatzyDevice extends withAPI(Device) {
     }
   }
 
-  private setOnModeValue(value: OnModeSetting): void {
+  #setOnModeValue(value: OnModeSetting): void {
     this.#onModeValue =
       value === OnModeSetting.previous
         ? this.getStoreValue('previousMode')

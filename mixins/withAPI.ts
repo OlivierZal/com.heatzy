@@ -51,7 +51,7 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
     public constructor(...args: any[]) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       super(...args)
-      this.setupAxiosInterceptors()
+      this.#setupAxiosInterceptors()
     }
 
     public getHomeySetting<K extends keyof HomeySettings>(
@@ -81,22 +81,22 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       return this.api.get<DeviceData>(`/devdata/${id}/latest`)
     }
 
-    private setupAxiosInterceptors(): void {
+    #setupAxiosInterceptors(): void {
       this.api.interceptors.request.use(
         (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig =>
-          this.handleRequest(config),
+          this.#handleRequest(config),
         async (error: AxiosError): Promise<AxiosError> =>
-          this.handleError(error),
+          this.#handleError(error),
       )
       this.api.interceptors.response.use(
         (response: AxiosResponse): AxiosResponse =>
-          this.handleResponse(response),
+          this.#handleResponse(response),
         async (error: AxiosError): Promise<AxiosError> =>
-          this.handleError(error),
+          this.#handleError(error),
       )
     }
 
-    private handleRequest(
+    #handleRequest(
       config: InternalAxiosRequestConfig,
     ): InternalAxiosRequestConfig {
       const updatedConfig: InternalAxiosRequestConfig = { ...config }
@@ -112,12 +112,12 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
       return updatedConfig
     }
 
-    private handleResponse(response: AxiosResponse): AxiosResponse {
+    #handleResponse(response: AxiosResponse): AxiosResponse {
       this.log(String(new APICallResponseData(response)))
       return response
     }
 
-    private async handleError(error: AxiosError): Promise<AxiosError> {
+    async #handleError(error: AxiosError): Promise<AxiosError> {
       const apiCallData: APICallContextDataWithErrorMessage =
         createAPICallErrorData(error)
       this.error(String(apiCallData))
@@ -126,22 +126,22 @@ const withAPI = <T extends HomeyClass>(base: T): APIClass & T =>
         this.app.retry &&
         error.config?.url !== LOGIN_URL
       ) {
-        this.handleRetry()
+        this.#handleRetry()
         if ((await this.app.login()) && error.config) {
           return this.api.request(error.config)
         }
       }
-      await this.setErrorWarning(apiCallData.errorMessage)
+      await this.#setErrorWarning(apiCallData.errorMessage)
       return Promise.reject(error)
     }
 
-    private async setErrorWarning(warning: string | null): Promise<void> {
+    async #setErrorWarning(warning: string | null): Promise<void> {
       if (this.setWarning) {
         await this.setWarning(warning)
       }
     }
 
-    private handleRetry(): void {
+    #handleRetry(): void {
       this.app.retry = false
       this.homey.clearTimeout(this.app.retryTimeout)
       this.app.retryTimeout = this.homey.setTimeout(

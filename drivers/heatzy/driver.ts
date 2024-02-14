@@ -15,7 +15,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   // eslint-disable-next-line @typescript-eslint/require-await
   public async onInit(): Promise<void> {
-    this.registerRunListeners()
+    this.#registerRunListeners()
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -26,7 +26,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
     )
     session.setHandler(
       'list_devices',
-      async (): Promise<DeviceDetails[]> => this.discoverDevices(),
+      async (): Promise<DeviceDetails[]> => this.#discoverDevices(),
     )
   }
 
@@ -58,7 +58,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
     )
   }
 
-  private async discoverDevices(): Promise<DeviceDetails[]> {
+  async #discoverDevices(): Promise<DeviceDetails[]> {
     try {
       return (await this.apiBindings()).data.devices.map(
         ({
@@ -77,7 +77,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
     }
   }
 
-  private registerRunListeners(): void {
+  #registerRunListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.manifest.capabilities as (keyof Capabilities)[]).forEach(
       (capability: keyof Capabilities) => {

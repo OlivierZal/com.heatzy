@@ -29,6 +29,7 @@ export = class HeatzyApp extends withAPI(App) {
     this.#retry = value
   }
 
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   public get retryTimeout(): NodeJS.Timeout {
     return this.#retryTimeout
   }
@@ -40,7 +41,7 @@ export = class HeatzyApp extends withAPI(App) {
   public async onInit(): Promise<void> {
     LuxonSettings.defaultLocale = this.getLanguage()
     LuxonSettings.defaultZone = this.homey.clock.getTimezone()
-    await this.planRefreshLogin()
+    await this.#planRefreshLogin()
   }
 
   public async login(
@@ -50,17 +51,17 @@ export = class HeatzyApp extends withAPI(App) {
     },
     raise = false,
   ): Promise<boolean> {
-    this.clearLoginRefresh()
+    this.#clearLoginRefresh()
     if (username && password) {
       try {
         const { data } = await this.apiLogin({ password, username })
-        this.setHomeySettings({
+        this.#setHomeySettings({
           expireAt: data.expire_at,
           password,
           token: data.token,
           username,
         })
-        await this.planRefreshLogin()
+        await this.#planRefreshLogin()
         return true
       } catch (error: unknown) {
         if (raise) {
@@ -75,7 +76,7 @@ export = class HeatzyApp extends withAPI(App) {
     return this.homey.i18n.getLanguage()
   }
 
-  private async planRefreshLogin(): Promise<void> {
+  async #planRefreshLogin(): Promise<void> {
     const expiredAt: number = this.getHomeySetting('expireAt') ?? DEFAULT_0
     const ms: number = DateTime.fromSeconds(expiredAt)
       .minus({ days: 1 })
@@ -93,11 +94,11 @@ export = class HeatzyApp extends withAPI(App) {
     await this.login()
   }
 
-  private clearLoginRefresh(): void {
+  #clearLoginRefresh(): void {
     this.homey.clearTimeout(this.#loginTimeout)
   }
 
-  private setHomeySettings(settings: Partial<HomeySettings>): void {
+  #setHomeySettings(settings: Partial<HomeySettings>): void {
     Object.entries(settings)
       .filter(
         ([setting, value]: [string, ValueOf<HomeySettings>]) =>
