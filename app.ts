@@ -21,11 +21,6 @@ export = class HeatzyApp extends App {
   public async onInit(): Promise<void> {
     LuxonSettings.defaultLocale = this.homey.i18n.getLanguage()
     LuxonSettings.defaultZone = this.homey.clock.getTimezone()
-    await this.heatzyAPI.planRefreshLogin()
-  }
-
-  // eslint-disable-next-line @typescript-eslint/require-await
-  public async onUninit(): Promise<void> {
-    this.heatzyAPI.clearLoginRefresh()
+    await this.heatzyAPI.applyLogin()
   }
 }

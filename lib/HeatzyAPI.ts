@@ -32,9 +32,6 @@ type Logger = (...args: any[]) => void
 
 const DEFAULT_0 = 0
 const LOGIN_URL = '/login'
-const MAX_INT32 = 2147483647
-const MS_PER_DAY = 86400000
-const NO_TIME_DIFF = 0
 
 const throwIfRequested = (error: unknown, raise: boolean): void => {
   if (raise) {
@@ -43,8 +40,6 @@ const throwIfRequested = (error: unknown, raise: boolean): void => {
 }
 
 export default class MELCloudAPI {
-  #loginTimeout!: NodeJS.Timeout
-
   #retry = true
 
   #retryTimeout!: NodeJS.Timeout
@@ -99,11 +94,6 @@ export default class MELCloudAPI {
     return this.#api.get<Bindings>('/bindings')
   }
 
-  public clearLoginRefresh(): void {
-    clearTimeout(this.#loginTimeout)
-    this.#logger('Login refresh has been paused')
-  }
-
   public async control(
     id: string,
     postData: DevicePostDataAny,
@@ -124,32 +114,7 @@ export default class MELCloudAPI {
     this.#settingManager.set('password', postData.password)
     this.#settingManager.set('token', response.data.token)
     this.#settingManager.set('expireAt', response.data.expire_at)
-    await this.planRefreshLogin()
     return response
-  }
-
-  public async planRefreshLogin(): Promise<boolean> {
-    this.clearLoginRefresh()
-    const expiredAt: number = this.#settingManager.get('expireAt') ?? DEFAULT_0
-    const ms: number = DateTime.fromSeconds(expiredAt)
-      .minus({ days: 1 })
-      .diffNow()
-      .as('milliseconds')
-    if (ms > NO_TIME_DIFF) {
-      const interval: number = Math.min(ms, MAX_INT32)
-      this.#loginTimeout = setTimeout((): void => {
-        this.applyLogin().catch((error: Error) => {
-          this.#errorLogger(error.message)
-        })
-      }, interval)
-      this.#logger(
-        'Login refresh will run in',
-        Math.floor(interval / MS_PER_DAY),
-        'days',
-      )
-      return true
-    }
-    return this.applyLogin()
   }
 
   async #handleError(error: AxiosError): Promise<AxiosError> {
@@ -169,9 +134,16 @@ export default class MELCloudAPI {
     return Promise.reject(new Error(apiCallData.errorMessage))
   }
 
-  #handleRequest(
+  async #handleRequest(
     config: InternalAxiosRequestConfig,
-  ): InternalAxiosRequestConfig {
+  ): Promise<InternalAxiosRequestConfig> {
+    if (config.url !== LOGIN_URL) {
+      const expiredAt: number =
+        this.#settingManager.get('expireAt') ?? DEFAULT_0
+      if (expiredAt && DateTime.fromSeconds(expiredAt) < DateTime.now()) {
+        await this.applyLogin()
+      }
+    }
     const newConfig: InternalAxiosRequestConfig = { ...config }
     if (newConfig.url !== LOGIN_URL) {
       newConfig.headers.set(
@@ -201,8 +173,9 @@ export default class MELCloudAPI {
 
   #setupAxiosInterceptors(): void {
     this.#api.interceptors.request.use(
-      (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig =>
-        this.#handleRequest(config),
+      async (
+        config: InternalAxiosRequestConfig,
+      ): Promise<InternalAxiosRequestConfig> => this.#handleRequest(config),
       async (error: AxiosError): Promise<AxiosError> =>
         this.#handleError(error),
     )
