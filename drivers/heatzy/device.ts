@@ -311,12 +311,12 @@ class HeatzyDevice extends Device {
           case DerogMode.vacation:
             await this.setCapabilityValue('derog_end', getVacationEnd(time))
             await this.setCapabilityValue('derog_time_vacation', String(time))
-            await this.#clearDerogTime('derog_time_boost')
+            await this.setCapabilityValue('derog_time_boost', '0')
             break
           case DerogMode.boost:
             await this.setCapabilityValue('derog_end', getBoostEnd(time))
             await this.setCapabilityValue('derog_time_boost', String(time))
-            await this.#clearDerogTime('derog_time_vacation')
+            await this.setCapabilityValue('derog_time_vacation', '0')
             break
           case DerogMode.off:
             await this.setCapabilityValue('derog_end', null)
@@ -408,15 +408,6 @@ class HeatzyDevice extends Device {
       }
     }
     return null
-  }
-
-  async #clearDerogTime(
-    capability: 'derog_time_boost' | 'derog_time_vacation',
-  ): Promise<void> {
-    if (Number(this.getCapabilityValue(capability))) {
-      await this.setCapabilityValue(capability, '0')
-      await this.setWarning(this.homey.__('warnings.display_error'))
-    }
   }
 
   #setOnModeValue(value: OnModeSetting): void {
