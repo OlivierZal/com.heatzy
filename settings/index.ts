@@ -200,15 +200,15 @@ const createDivElement = (): HTMLDivElement => {
 }
 
 const createInputElement = ({
-  id,
   placeholder,
-  type,
   value,
+  id,
+  type,
 }: {
-  id: string
   placeholder?: string
-  type: string
   value?: string
+  id: string
+  type: string
 }): HTMLInputElement => {
   const inputElement: HTMLInputElement = document.createElement('input')
   inputElement.classList.add('homey-form-input')
@@ -440,7 +440,7 @@ const createSelectElement = (
           label: homey.__(`settings.boolean.${id}`),
         }))
       : setting.values ?? []),
-  ].forEach(({ id, label }: { id: string; label?: string }) => {
+  ].forEach(({ id, label }: { label?: string; id: string }) => {
     const optionElement: HTMLOptionElement = document.createElement('option')
     optionElement.value = id
     if (typeof label !== 'undefined') {

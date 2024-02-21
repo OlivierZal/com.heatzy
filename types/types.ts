@@ -43,23 +43,23 @@ export interface Store {
 }
 
 export interface HomeySettingsUI {
-  readonly username?: string
+  readonly expireAt?: number
   readonly password?: string
   readonly token?: string
-  readonly expireAt?: number
+  readonly username?: string
 }
 
 export interface ManifestDriverSettingData {
-  readonly id: string
-  readonly label: Record<string, string>
   readonly max?: number
   readonly min?: number
-  readonly type: string
   readonly units?: string
   readonly values?: readonly {
     readonly id: string
     readonly label: Record<string, string>
   }[]
+  readonly id: string
+  readonly label: Record<string, string>
+  readonly type: string
 }
 
 export interface ManifestDriverSetting {
@@ -87,23 +87,23 @@ export interface ManifestDriver {
     string,
     { readonly title?: Record<string, string> }
   >
-  readonly id: string
   readonly pair?: LoginSetting & readonly PairSetting[]
   readonly settings?: readonly ManifestDriverSetting[]
+  readonly id: string
 }
 
 export interface DriverSetting {
   placeholder?: string
-  title: string
-  readonly driverId: string
   readonly groupId?: string
   readonly groupLabel?: string
-  readonly id: string
   readonly max?: number
   readonly min?: number
-  readonly type: string
   readonly units?: string
   readonly values?: readonly { readonly id: string; readonly label: string }[]
+  title: string
+  readonly driverId: string
+  readonly id: string
+  readonly type: string
 }
 
 export interface LoginCredentials {
@@ -130,8 +130,8 @@ export interface DeviceDetails {
 }
 
 export interface FlowArgs {
-  readonly device: HeatzyDevice
   readonly derog_time: string
+  readonly device: HeatzyDevice
   readonly mode: keyof typeof Mode
   readonly onoff: boolean
   readonly target_temperature: number

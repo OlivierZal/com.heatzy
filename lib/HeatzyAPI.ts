@@ -42,15 +42,15 @@ export default class MELCloudAPI {
 
   #retryTimeout!: NodeJS.Timeout
 
-  readonly #settingManager: SettingManager
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly #logger: (...args: any[]) => void
+  readonly #api: AxiosInstance
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly #errorLogger: (...args: any[]) => void
 
-  readonly #api: AxiosInstance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly #logger: (...args: any[]) => void
+
+  readonly #settingManager: SettingManager
 
   public constructor(
     settingManager: SettingManager,
@@ -70,21 +70,13 @@ export default class MELCloudAPI {
     this.#setupAxiosInterceptors()
   }
 
-  public async login(postData: LoginPostData): Promise<{ data: LoginData }> {
-    const response: AxiosResponse<LoginData> = await this.#api.post<LoginData>(
-      LOGIN_URL,
-      postData,
-    )
-    this.#settingManager.set('username', postData.username)
-    this.#settingManager.set('password', postData.password)
-    this.#settingManager.set('token', response.data.token)
-    this.#settingManager.set('expireAt', response.data.expire_at)
-    await this.planRefreshLogin()
-    return response
-  }
-
   public async bindings(): Promise<{ data: Bindings }> {
     return this.#api.get<Bindings>('/bindings')
+  }
+
+  public clearLoginRefresh(): void {
+    clearTimeout(this.#loginTimeout)
+    this.#logger('Login refresh has been paused')
   }
 
   public async control(
@@ -96,6 +88,19 @@ export default class MELCloudAPI {
 
   public async deviceData(id: string): Promise<{ data: DeviceData }> {
     return this.#api.get<DeviceData>(`/devdata/${id}/latest`)
+  }
+
+  public async login(postData: LoginPostData): Promise<{ data: LoginData }> {
+    const response: AxiosResponse<LoginData> = await this.#api.post<LoginData>(
+      LOGIN_URL,
+      postData,
+    )
+    this.#settingManager.set('username', postData.username)
+    this.#settingManager.set('password', postData.password)
+    this.#settingManager.set('token', response.data.token)
+    this.#settingManager.set('expireAt', response.data.expire_at)
+    await this.planRefreshLogin()
+    return response
   }
 
   public async planRefreshLogin(): Promise<boolean> {
@@ -122,24 +127,21 @@ export default class MELCloudAPI {
     return this.#attemptLogin()
   }
 
-  public clearLoginRefresh(): void {
-    clearTimeout(this.#loginTimeout)
-    this.#logger('Login refresh has been paused')
-  }
-
-  #setupAxiosInterceptors(): void {
-    this.#api.interceptors.request.use(
-      (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig =>
-        this.#handleRequest(config),
-      async (error: AxiosError): Promise<AxiosError> =>
-        this.#handleError(error),
-    )
-    this.#api.interceptors.response.use(
-      (response: AxiosResponse): AxiosResponse =>
-        this.#handleResponse(response),
-      async (error: AxiosError): Promise<AxiosError> =>
-        this.#handleError(error),
-    )
+  async #handleError(error: AxiosError): Promise<AxiosError> {
+    const apiCallData: APICallContextDataWithErrorMessage =
+      createAPICallErrorData(error)
+    this.#errorLogger(String(apiCallData))
+    if (
+      error.response?.status === axios.HttpStatusCode.BadRequest &&
+      this.#retry &&
+      error.config?.url !== LOGIN_URL
+    ) {
+      this.#handleRetry()
+      if ((await this.#attemptLogin()) && error.config) {
+        return this.#api.request(error.config)
+      }
+    }
+    return Promise.reject(new Error(apiCallData.errorMessage))
   }
 
   #handleRequest(
@@ -161,23 +163,6 @@ export default class MELCloudAPI {
     return response
   }
 
-  async #handleError(error: AxiosError): Promise<AxiosError> {
-    const apiCallData: APICallContextDataWithErrorMessage =
-      createAPICallErrorData(error)
-    this.#errorLogger(String(apiCallData))
-    if (
-      error.response?.status === axios.HttpStatusCode.BadRequest &&
-      this.#retry &&
-      error.config?.url !== LOGIN_URL
-    ) {
-      this.#handleRetry()
-      if ((await this.#attemptLogin()) && error.config) {
-        return this.#api.request(error.config)
-      }
-    }
-    return Promise.reject(new Error(apiCallData.errorMessage))
-  }
-
   #handleRetry(): void {
     this.#retry = false
     clearTimeout(this.#retryTimeout)
@@ -186,6 +171,21 @@ export default class MELCloudAPI {
         this.#retry = true
       },
       Duration.fromObject({ minutes: 1 }).as('milliseconds'),
+    )
+  }
+
+  #setupAxiosInterceptors(): void {
+    this.#api.interceptors.request.use(
+      (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig =>
+        this.#handleRequest(config),
+      async (error: AxiosError): Promise<AxiosError> =>
+        this.#handleError(error),
+    )
+    this.#api.interceptors.response.use(
+      (response: AxiosResponse): AxiosResponse =>
+        this.#handleResponse(response),
+      async (error: AxiosError): Promise<AxiosError> =>
+        this.#handleError(error),
     )
   }
 

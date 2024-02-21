@@ -12,6 +12,26 @@ import type PairSession from 'homey/lib/PairSession'
 export = class HeatzyDriver extends Driver {
   readonly #app: HeatzyApp = this.homey.app as HeatzyApp
 
+  public getRequiredCapabilities(
+    productKey: string,
+    productName: string,
+  ): string[] {
+    if (isFirstGen(productKey)) {
+      return ['onoff', 'mode']
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return (this.manifest.capabilities as (keyof Capabilities)[]).filter(
+      (capability: string) => {
+        if (capability.startsWith('target_temperature')) {
+          return isGlow(productKey)
+        }
+        return isFirstPilot(productName)
+          ? capability !== 'mode3'
+          : capability !== 'mode'
+      },
+    )
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public async onInit(): Promise<void> {
     this.#registerRunListeners()
@@ -34,26 +54,6 @@ export = class HeatzyDriver extends Driver {
     session.setHandler(
       'login',
       async (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
-    )
-  }
-
-  public getRequiredCapabilities(
-    productKey: string,
-    productName: string,
-  ): string[] {
-    if (isFirstGen(productKey)) {
-      return ['onoff', 'mode']
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (this.manifest.capabilities as (keyof Capabilities)[]).filter(
-      (capability: string) => {
-        if (capability.startsWith('target_temperature')) {
-          return isGlow(productKey)
-        }
-        return isFirstPilot(productName)
-          ? capability !== 'mode3'
-          : capability !== 'mode'
-      },
     )
   }
 

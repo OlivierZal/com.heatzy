@@ -1,10 +1,10 @@
 export const NUMBER_1 = 1
 
 export interface APISettings {
-  readonly username?: string | null
+  readonly expireAt?: number | null
   readonly password?: string | null
   readonly token?: string | null
-  readonly expireAt?: number | null
+  readonly username?: string | null
 }
 
 export enum Mode {
@@ -30,8 +30,8 @@ export enum Switch {
 export type Data = Record<string, never>
 
 export interface ErrorData {
-  readonly error_message: string | null
   readonly detail_message: string | null
+  readonly error_message: string | null
 }
 
 export interface LoginPostData {
@@ -58,8 +58,8 @@ interface FirstGenDevicePostData {
 }
 
 export interface BaseAttrs {
-  cft_tempL?: number
   cft_tempH?: number
+  cft_tempL?: number
   derog_mode?: DerogMode
   derog_time?: number
   lock_switch?: Switch

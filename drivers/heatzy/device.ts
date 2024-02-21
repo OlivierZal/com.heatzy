@@ -58,52 +58,22 @@ class HeatzyDevice extends Device {
 
   #syncTimeout!: NodeJS.Timeout
 
-  readonly #heatzyAPI: HeatzyAPI = (this.homey.app as HeatzyApp).heatzyAPI
-
   readonly #data: DeviceDetails['data'] =
     this.getData() as DeviceDetails['data']
 
+  readonly #heatzyAPI: HeatzyAPI = (this.homey.app as HeatzyApp).heatzyAPI
+
   readonly #id: string = this.#data.id
+
+  readonly #isFirstGen: boolean = isFirstGen(this.#data.productKey)
+
+  readonly #isFirstPilot: boolean = isFirstPilot(this.#data.productName)
+
+  readonly #mode: ModeCapability = this.#isFirstPilot ? 'mode' : 'mode3'
 
   readonly #productKey: string = this.#data.productKey
 
   readonly #productName: string = this.#data.productName
-
-  readonly #isFirstGen: boolean = isFirstGen(this.#productKey)
-
-  readonly #isFirstPilot: boolean = isFirstPilot(this.#productName)
-
-  readonly #mode: ModeCapability = this.#isFirstPilot ? 'mode' : 'mode3'
-
-  public async onInit(): Promise<void> {
-    await this.setWarning(null)
-    this.#setOnModeValue(this.getSetting('on_mode'))
-    await this.#handleCapabilities()
-    this.#registerCapabilityListeners()
-    await this.#updateCapabilities()
-  }
-
-  public async onSettings({
-    newSettings,
-    changedKeys,
-  }: {
-    newSettings: Settings
-    changedKeys: string[]
-  }): Promise<void> {
-    if (
-      changedKeys.includes('on_mode') &&
-      typeof newSettings.on_mode !== 'undefined'
-    ) {
-      this.#setOnModeValue(newSettings.on_mode)
-    }
-    if (
-      changedKeys.includes('always_on') &&
-      newSettings.always_on === true &&
-      !this.getCapabilityValue('onoff')
-    ) {
-      await this.onCapability('onoff', true)
-    }
-  }
 
   public async addCapability(capability: string): Promise<void> {
     if (!this.hasCapability(capability)) {
@@ -111,26 +81,10 @@ class HeatzyDevice extends Device {
     }
   }
 
-  public async removeCapability(capability: string): Promise<void> {
-    if (this.hasCapability(capability)) {
-      await super.removeCapability(capability)
-    }
-  }
-
   public getCapabilityValue<K extends keyof Capabilities>(
     capability: K,
   ): Capabilities[K] {
     return super.getCapabilityValue(capability) as Capabilities[K]
-  }
-
-  public async setCapabilityValue<K extends keyof Capabilities>(
-    capability: K,
-    value: Capabilities[K],
-  ): Promise<void> {
-    if (value !== this.getCapabilityValue(capability)) {
-      await super.setCapabilityValue(capability, value)
-      this.log('Capability', capability, 'is', value)
-    }
   }
 
   public getSetting<K extends keyof Settings>(
@@ -141,23 +95,6 @@ class HeatzyDevice extends Device {
 
   public getStoreValue<K extends keyof Store>(key: K): NonNullable<Store[K]> {
     return (super.getStoreValue(key) as Store[K]) ?? PreviousModeValue.eco
-  }
-
-  public async setStoreValue<K extends keyof Store>(
-    key: K,
-    value: Store[K],
-  ): Promise<void> {
-    if (value !== super.getStoreValue(key)) {
-      await super.setStoreValue(key, value)
-      this.log('Store', key, 'is', value)
-    }
-  }
-
-  public async setWarning(warning: string | null): Promise<void> {
-    if (warning !== null) {
-      await super.setWarning(warning)
-    }
-    await super.setWarning(null)
   }
 
   public async onCapability<K extends keyof Capabilities>(
@@ -210,9 +147,156 @@ class HeatzyDevice extends Device {
     this.homey.clearTimeout(this.#syncTimeout)
   }
 
+  public async onInit(): Promise<void> {
+    await this.setWarning(null)
+    this.#setOnModeValue(this.getSetting('on_mode'))
+    await this.#handleCapabilities()
+    this.#registerCapabilityListeners()
+    await this.#updateCapabilities()
+  }
+
+  public async onSettings({
+    changedKeys,
+    newSettings,
+  }: {
+    changedKeys: string[]
+    newSettings: Settings
+  }): Promise<void> {
+    if (
+      changedKeys.includes('on_mode') &&
+      typeof newSettings.on_mode !== 'undefined'
+    ) {
+      this.#setOnModeValue(newSettings.on_mode)
+    }
+    if (
+      changedKeys.includes('always_on') &&
+      newSettings.always_on === true &&
+      !this.getCapabilityValue('onoff')
+    ) {
+      await this.onCapability('onoff', true)
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public async onUninit(): Promise<void> {
     this.onDeleted()
+  }
+
+  public async removeCapability(capability: string): Promise<void> {
+    if (this.hasCapability(capability)) {
+      await super.removeCapability(capability)
+    }
+  }
+
+  public async setCapabilityValue<K extends keyof Capabilities>(
+    capability: K,
+    value: Capabilities[K],
+  ): Promise<void> {
+    if (value !== this.getCapabilityValue(capability)) {
+      await super.setCapabilityValue(capability, value)
+      this.log('Capability', capability, 'is', value)
+    }
+  }
+
+  public async setStoreValue<K extends keyof Store>(
+    key: K,
+    value: Store[K],
+  ): Promise<void> {
+    if (value !== super.getStoreValue(key)) {
+      await super.setStoreValue(key, value)
+      this.log('Store', key, 'is', value)
+    }
+  }
+
+  public async setWarning(warning: string | null): Promise<void> {
+    if (warning !== null) {
+      await super.setWarning(warning)
+    }
+    await super.setWarning(null)
+  }
+
+  #applySyncFromDevice(): void {
+    this.#syncTimeout = this.homey.setTimeout(
+      async (): Promise<void> => {
+        await this.#updateCapabilities()
+      },
+      Duration.fromObject({ minutes: 1 }).as('milliseconds'),
+    )
+  }
+
+  #applySyncToDevice(): void {
+    this.#syncTimeout = this.homey.setTimeout(
+      async (): Promise<void> => {
+        await this.#syncToDevice()
+      },
+      Duration.fromObject({ seconds: 1 }).as('milliseconds'),
+    )
+  }
+
+  #buildPostData(): DevicePostDataAny | null {
+    if (!Object.keys(this.#attrs).length) {
+      return null
+    }
+    if (!this.#isFirstGen) {
+      return { attrs: this.#attrs }
+    }
+    if (typeof this.#attrs.mode !== 'undefined') {
+      return { raw: [NUMBER_1, NUMBER_1, this.#attrs.mode] }
+    }
+    return null
+  }
+
+  async #control(postData: DevicePostDataAny | null): Promise<Data | null> {
+    if (postData) {
+      try {
+        const { data } = await this.#heatzyAPI.control(this.#id, postData)
+        await this.#updateCapabilities(true)
+        return data
+      } catch (error: unknown) {
+        await this.#updateCapabilities()
+      }
+    }
+    return null
+  }
+
+  async #getDeviceData(): Promise<DeviceData['attr'] | null> {
+    try {
+      return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
+    } catch (error: unknown) {
+      return null
+    }
+  }
+
+  async #getMode<K extends ModeCapability | 'onoff'>(
+    capability: K,
+    value: Capabilities[K],
+  ): Promise<keyof typeof Mode | null> {
+    let mode: keyof typeof Mode | null = null
+    if (capability === 'onoff') {
+      mode = (value as boolean)
+        ? this.#onModeValue
+        : (Mode[Mode.stop] as keyof typeof Mode)
+    } else {
+      mode = value as keyof typeof Mode
+    }
+    if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
+      mode = null
+      await this.setWarning(this.homey.__('warnings.always_on'))
+      this.homey.setTimeout(
+        async (): Promise<void> => {
+          if (capability === 'onoff') {
+            await this.setCapabilityValue('onoff', true)
+          } else {
+            await this.setCapabilityValue(
+              this.#mode,
+              this.getStoreValue('previousMode'),
+            )
+          }
+        },
+        Duration.fromObject({ seconds: 1 }).as('milliseconds'),
+      )
+    }
+    return mode
   }
 
   async #handleCapabilities(): Promise<void> {
@@ -249,12 +333,16 @@ class HeatzyDevice extends Device {
     })
   }
 
-  async #getDeviceData(): Promise<DeviceData['attr'] | null> {
-    try {
-      return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
-    } catch (error: unknown) {
-      return null
-    }
+  #setOnModeValue(value: OnModeSetting): void {
+    this.#onModeValue =
+      value === OnModeSetting.previous
+        ? this.getStoreValue('previousMode')
+        : PreviousModeValue[value]
+  }
+
+  async #syncToDevice(): Promise<void> {
+    const postData: DevicePostDataAny | null = this.#buildPostData()
+    await this.#control(postData)
   }
 
   async #updateCapabilities(control = false): Promise<void> {
@@ -272,22 +360,6 @@ class HeatzyDevice extends Device {
         await this.setCapabilityValue('onoff.timer', Boolean(attr.timer_switch))
       }
       this.#applySyncFromDevice()
-    }
-  }
-
-  async #updateMode(mode: Mode | string | undefined): Promise<void> {
-    if (typeof mode === 'undefined') {
-      return
-    }
-    let newMode: string = typeof mode === 'number' ? Mode[mode] : mode
-    if (newMode in MODE_ZH) {
-      newMode = MODE_ZH[mode]
-    }
-    await this.setCapabilityValue(this.#mode, newMode as keyof typeof Mode)
-    const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
-    await this.setCapabilityValue('onoff', isOn)
-    if (newMode in PreviousModeValue) {
-      await this.setStoreValue('previousMode', newMode as PreviousModeValue)
     }
   }
 
@@ -329,92 +401,20 @@ class HeatzyDevice extends Device {
     }
   }
 
-  #applySyncFromDevice(): void {
-    this.#syncTimeout = this.homey.setTimeout(
-      async (): Promise<void> => {
-        await this.#updateCapabilities()
-      },
-      Duration.fromObject({ minutes: 1 }).as('milliseconds'),
-    )
-  }
-
-  async #getMode<K extends ModeCapability | 'onoff'>(
-    capability: K,
-    value: Capabilities[K],
-  ): Promise<keyof typeof Mode | null> {
-    let mode: keyof typeof Mode | null = null
-    if (capability === 'onoff') {
-      mode = (value as boolean)
-        ? this.#onModeValue
-        : (Mode[Mode.stop] as keyof typeof Mode)
-    } else {
-      mode = value as keyof typeof Mode
+  async #updateMode(mode: Mode | string | undefined): Promise<void> {
+    if (typeof mode === 'undefined') {
+      return
     }
-    if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
-      mode = null
-      await this.setWarning(this.homey.__('warnings.always_on'))
-      this.homey.setTimeout(
-        async (): Promise<void> => {
-          if (capability === 'onoff') {
-            await this.setCapabilityValue('onoff', true)
-          } else {
-            await this.setCapabilityValue(
-              this.#mode,
-              this.getStoreValue('previousMode'),
-            )
-          }
-        },
-        Duration.fromObject({ seconds: 1 }).as('milliseconds'),
-      )
+    let newMode: string = typeof mode === 'number' ? Mode[mode] : mode
+    if (newMode in MODE_ZH) {
+      newMode = MODE_ZH[mode]
     }
-    return mode
-  }
-
-  #applySyncToDevice(): void {
-    this.#syncTimeout = this.homey.setTimeout(
-      async (): Promise<void> => {
-        await this.#syncToDevice()
-      },
-      Duration.fromObject({ seconds: 1 }).as('milliseconds'),
-    )
-  }
-
-  async #syncToDevice(): Promise<void> {
-    const postData: DevicePostDataAny | null = this.#buildPostData()
-    await this.#control(postData)
-  }
-
-  #buildPostData(): DevicePostDataAny | null {
-    if (!Object.keys(this.#attrs).length) {
-      return null
+    await this.setCapabilityValue(this.#mode, newMode as keyof typeof Mode)
+    const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
+    await this.setCapabilityValue('onoff', isOn)
+    if (newMode in PreviousModeValue) {
+      await this.setStoreValue('previousMode', newMode as PreviousModeValue)
     }
-    if (!this.#isFirstGen) {
-      return { attrs: this.#attrs }
-    }
-    if (typeof this.#attrs.mode !== 'undefined') {
-      return { raw: [NUMBER_1, NUMBER_1, this.#attrs.mode] }
-    }
-    return null
-  }
-
-  async #control(postData: DevicePostDataAny | null): Promise<Data | null> {
-    if (postData) {
-      try {
-        const { data } = await this.#heatzyAPI.control(this.#id, postData)
-        await this.#updateCapabilities(true)
-        return data
-      } catch (error: unknown) {
-        await this.#updateCapabilities()
-      }
-    }
-    return null
-  }
-
-  #setOnModeValue(value: OnModeSetting): void {
-    this.#onModeValue =
-      value === OnModeSetting.previous
-        ? this.getStoreValue('previousMode')
-        : PreviousModeValue[value]
   }
 }
 
