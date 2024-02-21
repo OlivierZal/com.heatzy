@@ -4,6 +4,7 @@ import type {
   Data,
   DeviceData,
   DevicePostDataAny,
+  LoginCredentials,
   LoginData,
   LoginPostData,
 } from '../types/HeatzyAPITypes'
@@ -34,6 +35,12 @@ const LOGIN_URL = '/login'
 const MAX_INT32 = 2147483647
 const MS_PER_DAY = 86400000
 const NO_TIME_DIFF = 0
+
+const throwIfRequested = (error: unknown, raise: boolean): void => {
+  if (raise) {
+    throw new Error(error instanceof Error ? error.message : String(error))
+  }
+}
 
 export default class MELCloudAPI {
   #loginTimeout!: NodeJS.Timeout
@@ -68,6 +75,24 @@ export default class MELCloudAPI {
       },
     })
     this.#setupAxiosInterceptors()
+  }
+
+  public async applyLogin(
+    { password, username }: LoginCredentials = {
+      password: this.#settingManager.get('password') ?? '',
+      username: this.#settingManager.get('username') ?? '',
+    },
+    raise = false,
+  ): Promise<boolean> {
+    if (username && password) {
+      try {
+        await this.login({ password, username })
+        return true
+      } catch (error: unknown) {
+        throwIfRequested(error, raise)
+      }
+    }
+    return false
   }
 
   public async bindings(): Promise<{ data: Bindings }> {
@@ -113,7 +138,7 @@ export default class MELCloudAPI {
     if (ms > NO_TIME_DIFF) {
       const interval: number = Math.min(ms, MAX_INT32)
       this.#loginTimeout = setTimeout((): void => {
-        this.#attemptLogin().catch((error: Error) => {
+        this.applyLogin().catch((error: Error) => {
           this.#errorLogger(error.message)
         })
       }, interval)
@@ -124,7 +149,7 @@ export default class MELCloudAPI {
       )
       return true
     }
-    return this.#attemptLogin()
+    return this.applyLogin()
   }
 
   async #handleError(error: AxiosError): Promise<AxiosError> {
@@ -137,7 +162,7 @@ export default class MELCloudAPI {
       error.config?.url !== LOGIN_URL
     ) {
       this.#handleRetry()
-      if ((await this.#attemptLogin()) && error.config) {
+      if ((await this.applyLogin()) && error.config) {
         return this.#api.request(error.config)
       }
     }
@@ -187,19 +212,5 @@ export default class MELCloudAPI {
       async (error: AxiosError): Promise<AxiosError> =>
         this.#handleError(error),
     )
-  }
-
-  async #attemptLogin(): Promise<boolean> {
-    const username: string = this.#settingManager.get('username') ?? ''
-    const password: string = this.#settingManager.get('password') ?? ''
-    if (username && password) {
-      try {
-        await this.login({ password, username })
-        return true
-      } catch (error: unknown) {
-        // Pass
-      }
-    }
-    return false
   }
 }

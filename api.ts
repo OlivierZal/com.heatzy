@@ -1,7 +1,6 @@
 import type {
   DeviceSettings,
   DriverSetting,
-  LoginCredentials,
   LoginSetting,
   ManifestDriver,
   ManifestDriverSetting,
@@ -14,6 +13,7 @@ import type { Driver } from 'homey'
 import type HeatzyApp from './app'
 import type HeatzyDevice from './drivers/heatzy/device'
 import type Homey from 'homey/lib/Homey'
+import type { LoginCredentials } from './types/HeatzyAPITypes'
 
 const getDevices = (homey: Homey): HeatzyDevice[] =>
   Object.values(homey.drivers.getDrivers()).flatMap(

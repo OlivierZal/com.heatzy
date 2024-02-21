@@ -34,6 +34,11 @@ export interface ErrorData {
   readonly error_message: string | null
 }
 
+export interface LoginCredentials {
+  readonly password: string
+  readonly username: string
+}
+
 export interface LoginPostData {
   readonly password: string
   readonly username: string

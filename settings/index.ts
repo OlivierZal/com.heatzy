@@ -4,13 +4,13 @@ import type {
   DeviceSettings,
   DriverSetting,
   HomeySettingsUI,
-  LoginCredentials,
   LoginDriverSetting,
   OnModeSetting,
   Settings,
   ValueOf,
 } from '../types/types'
 import type Homey from 'homey/lib/Homey'
+import type { LoginCredentials } from '../types/HeatzyAPITypes'
 
 const SIZE_1 = 1
 

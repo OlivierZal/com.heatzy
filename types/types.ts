@@ -1,4 +1,4 @@
-import type { DerogMode, Mode } from './HeatzyAPITypes'
+import type { DerogMode, LoginCredentials, Mode } from './HeatzyAPITypes'
 import type HeatzyDevice from '../drivers/heatzy/device'
 
 export type ModeCapability = 'mode' | 'mode3'
@@ -104,11 +104,6 @@ export interface DriverSetting {
   readonly driverId: string
   readonly id: string
   readonly type: string
-}
-
-export interface LoginCredentials {
-  readonly password: string
-  readonly username: string
 }
 
 export interface LoginDriverSetting extends DriverSetting {
