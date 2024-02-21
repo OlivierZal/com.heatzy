@@ -5,10 +5,10 @@ export type ModeCapability = 'mode' | 'mode3'
 
 export enum PreviousModeValue {
   cft = 'cft',
-  eco = 'eco',
-  fro = 'fro',
   cft1 = 'cft1',
   cft2 = 'cft2',
+  eco = 'eco',
+  fro = 'fro',
 }
 
 export enum OnModeSetting {
