@@ -137,14 +137,14 @@ export default class MELCloudAPI {
   async #handleRequest(
     config: InternalAxiosRequestConfig,
   ): Promise<InternalAxiosRequestConfig> {
-    if (config.url !== LOGIN_URL) {
+    const newConfig: InternalAxiosRequestConfig = { ...config }
+    if (newConfig.url !== LOGIN_URL) {
       const expiredAt: number =
         this.#settingManager.get('expireAt') ?? DEFAULT_0
       if (expiredAt && DateTime.fromSeconds(expiredAt) < DateTime.now()) {
         await this.applyLogin()
       }
     }
-    const newConfig: InternalAxiosRequestConfig = { ...config }
     if (newConfig.url !== LOGIN_URL) {
       newConfig.headers.set(
         'X-Gizwits-User-token',
