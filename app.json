@@ -282,10 +282,10 @@
             "type": "dropdown",
             "values": [
               {
-                "id": "cft",
+                "id": "cft2",
                 "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
+                  "en": "Comfort 2",
+                  "fr": "Confort 2"
                 }
               },
               {
@@ -296,10 +296,10 @@
                 }
               },
               {
-                "id": "cft2",
+                "id": "cft",
                 "title": {
-                  "en": "Comfort 2",
-                  "fr": "Confort 2"
+                  "en": "Comfort",
+                  "fr": "Confort"
                 }
               },
               {
@@ -475,10 +475,10 @@
             "type": "dropdown",
             "values": [
               {
-                "id": "cft",
+                "id": "cft2",
                 "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
+                  "en": "Comfort 2",
+                  "fr": "Confort 2"
                 }
               },
               {
@@ -489,10 +489,10 @@
                 }
               },
               {
-                "id": "cft2",
+                "id": "cft",
                 "title": {
-                  "en": "Comfort 2",
-                  "fr": "Confort 2"
+                  "en": "Comfort",
+                  "fr": "Confort"
                 }
               },
               {
@@ -1090,10 +1090,10 @@
       "uiComponent": "picker",
       "values": [
         {
-          "id": "cft",
+          "id": "cft2",
           "title": {
-            "en": "Comfort",
-            "fr": "Confort"
+            "en": "Comfort 2",
+            "fr": "Confort 2"
           }
         },
         {
@@ -1104,10 +1104,10 @@
           }
         },
         {
-          "id": "cft2",
+          "id": "cft",
           "title": {
-            "en": "Comfort 2",
-            "fr": "Confort 2"
+            "en": "Comfort",
+            "fr": "Confort"
           }
         },
         {
