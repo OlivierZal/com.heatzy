@@ -9,7 +9,7 @@ import type {
   OnModeSetting,
   Settings,
   ValueOf,
-} from '../types'
+} from '../types/types'
 import type Homey from 'homey/lib/Homey'
 
 const SIZE_1 = 1

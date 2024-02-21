@@ -1,26 +1,29 @@
 import {
   type BaseAttrs,
-  type Capabilities,
   type Data,
   DerogMode,
   type DeviceData,
-  type DeviceDetails,
   type DevicePostDataAny,
   Mode,
-  type ModeCapability,
   NUMBER_1,
+  type Switch,
+} from '../../types/HeatzyAPITypes'
+import {
+  type Capabilities,
+  type DeviceDetails,
+  type ModeCapability,
   OnModeSetting,
   PreviousModeValue,
   type Settings,
   type Store,
-  type Switch,
-} from '../../types'
+} from '../../types/types'
 import { DateTime, Duration } from 'luxon'
 import { isFirstGen, isFirstPilot } from '../../utils'
 import { Device } from 'homey'
+import type HeatzyAPI from '../../lib/HeatzyAPI'
+import type HeatzyApp from '../../app'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
-import withAPI from '../../mixins/withAPI'
 
 const MODE_ZH: Record<string, keyof typeof Mode> = {
   停止: 'stop',
@@ -46,7 +49,7 @@ const getBoostEnd = (minutes: number): string =>
   DateTime.now().plus({ minutes }).toLocaleString(DateTime.TIME_24_SIMPLE)
 
 @addToLogs('getName()')
-class HeatzyDevice extends withAPI(Device) {
+class HeatzyDevice extends Device {
   public declare readonly driver: HeatzyDriver
 
   #attrs: BaseAttrs = {}
@@ -54,6 +57,8 @@ class HeatzyDevice extends withAPI(Device) {
   #onModeValue!: PreviousModeValue
 
   #syncTimeout!: NodeJS.Timeout
+
+  readonly #heatzyAPI: HeatzyAPI = (this.homey.app as HeatzyApp).heatzyAPI
 
   readonly #data: DeviceDetails['data'] =
     this.getData() as DeviceDetails['data']
@@ -98,10 +103,6 @@ class HeatzyDevice extends withAPI(Device) {
     ) {
       await this.onCapability('onoff', true)
     }
-  }
-
-  public onDeleted(): void {
-    this.#clearSync()
   }
 
   public async addCapability(capability: string): Promise<void> {
@@ -163,7 +164,7 @@ class HeatzyDevice extends withAPI(Device) {
     capability: K,
     value: Capabilities[K],
   ): Promise<void> {
-    this.#clearSync()
+    this.homey.clearTimeout(this.#syncTimeout)
     let mode: keyof typeof Mode | null = null
     switch (capability) {
       case 'onoff':
@@ -205,6 +206,15 @@ class HeatzyDevice extends withAPI(Device) {
     this.#applySyncToDevice()
   }
 
+  public onDeleted(): void {
+    this.homey.clearTimeout(this.#syncTimeout)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  public async onUninit(): Promise<void> {
+    this.onDeleted()
+  }
+
   async #handleCapabilities(): Promise<void> {
     const requiredCapabilities: string[] = this.driver.getRequiredCapabilities(
       this.#productKey,
@@ -241,7 +251,7 @@ class HeatzyDevice extends withAPI(Device) {
 
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
-      return (await this.apiDeviceData(this.#id)).data.attr
+      return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
     } catch (error: unknown) {
       return null
     }
@@ -328,10 +338,6 @@ class HeatzyDevice extends withAPI(Device) {
     )
   }
 
-  #clearSync(): void {
-    this.homey.clearTimeout(this.#syncTimeout)
-  }
-
   async #getMode<K extends ModeCapability | 'onoff'>(
     capability: K,
     value: Capabilities[K],
@@ -394,7 +400,7 @@ class HeatzyDevice extends withAPI(Device) {
   async #control(postData: DevicePostDataAny | null): Promise<Data | null> {
     if (postData) {
       try {
-        const { data } = await this.apiControl(this.#id, postData)
+        const { data } = await this.#heatzyAPI.control(this.#id, postData)
         await this.#updateCapabilities(true)
         return data
       } catch (error: unknown) {

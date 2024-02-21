@@ -3,14 +3,13 @@ import type {
   DeviceDetails,
   FlowArgs,
   LoginCredentials,
-} from '../../types'
+} from '../../types/types'
 import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
 import { Driver } from 'homey'
 import type HeatzyApp from '../../app'
 import type PairSession from 'homey/lib/PairSession'
-import withAPI from '../../mixins/withAPI'
 
-export = class HeatzyDriver extends withAPI(Driver) {
+export = class HeatzyDriver extends Driver {
   readonly #app: HeatzyApp = this.homey.app as HeatzyApp
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -60,7 +59,7 @@ export = class HeatzyDriver extends withAPI(Driver) {
 
   async #discoverDevices(): Promise<DeviceDetails[]> {
     try {
-      return (await this.apiBindings()).data.devices.map(
+      return (await this.#app.heatzyAPI.bindings()).data.devices.map(
         ({
           dev_alias: name,
           did,

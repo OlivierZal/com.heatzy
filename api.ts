@@ -9,7 +9,7 @@ import type {
   PairSetting,
   Settings,
   ValueOf,
-} from './types'
+} from './types/types'
 import type { Driver } from 'homey'
 import type HeatzyApp from './app'
 import type HeatzyDevice from './drivers/heatzy/device'
@@ -84,8 +84,6 @@ const getDriverLoginSetting = (
     : []
 }
 
-const getLanguage = (homey: Homey): string => homey.i18n.getLanguage()
-
 export = {
   getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {
     return getDevices(homey).reduce<DeviceSettings>((acc, device) => {
@@ -108,7 +106,7 @@ export = {
   },
   getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
     const app: HeatzyApp = homey.app as HeatzyApp
-    const language: string = getLanguage(homey)
+    const language: string = homey.i18n.getLanguage()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return (app.manifest.drivers as ManifestDriver[]).flatMap(
       (driver: ManifestDriver): DriverSetting[] => {
@@ -119,7 +117,7 @@ export = {
     )
   },
   getLanguage({ homey }: { homey: Homey }): string {
-    return getLanguage(homey)
+    return homey.i18n.getLanguage()
   },
   async login({
     homey,

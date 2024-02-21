@@ -1,6 +1,6 @@
-import { type AxiosError, isAxiosError } from 'axios'
 import type APICallContextData from '../lib/APICallContextData'
-import type { ErrorData } from '../types'
+import type { AxiosError } from 'axios'
+import type { ErrorData } from '../types/HeatzyAPITypes'
 
 export interface APICallContextDataWithErrorMessage extends APICallContextData {
   readonly errorMessage: string
@@ -17,17 +17,6 @@ const getAPIErrorMessage = (error: AxiosError): string => {
     }
   }
   return error.message
-}
-
-export const getErrorMessage = (error: unknown): string => {
-  switch (true) {
-    case isAxiosError(error):
-      return getAPIErrorMessage(error)
-    case error instanceof Error:
-      return error.message
-    default:
-      return String(error)
-  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
