@@ -30,7 +30,7 @@ interface SettingManager {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Logger = (...args: any[]) => void
 
-const DEFAULT_0 = 0
+const NUMBER_0 = 0
 const LOGIN_URL = '/login'
 
 const throwIfRequested = (error: unknown, raise: boolean): void => {
@@ -139,8 +139,7 @@ export default class MELCloudAPI {
   ): Promise<InternalAxiosRequestConfig> {
     const newConfig: InternalAxiosRequestConfig = { ...config }
     if (newConfig.url !== LOGIN_URL) {
-      const expiredAt: number =
-        this.#settingManager.get('expireAt') ?? DEFAULT_0
+      const expiredAt: number = this.#settingManager.get('expireAt') ?? NUMBER_0
       if (expiredAt && DateTime.fromSeconds(expiredAt) < DateTime.now()) {
         await this.applyLogin()
       }
