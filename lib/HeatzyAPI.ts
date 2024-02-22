@@ -30,8 +30,8 @@ interface SettingManager {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Logger = (...args: any[]) => void
 
-const NUMBER_0 = 0
 const LOGIN_URL = '/login'
+const NUMBER_0 = 0
 
 const throwIfRequested = (error: unknown, raise: boolean): void => {
   if (raise) {
