@@ -37,7 +37,8 @@ export = class HeatzyDriver extends Driver {
   public async onPair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
-      async (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
+      async (data: LoginCredentials): Promise<boolean> =>
+        this.#app.applyLogin(data),
     )
     session.setHandler(
       'list_devices',
@@ -49,7 +50,8 @@ export = class HeatzyDriver extends Driver {
   public async onRepair(session: PairSession): Promise<void> {
     session.setHandler(
       'login',
-      async (data: LoginCredentials): Promise<boolean> => this.#app.login(data),
+      async (data: LoginCredentials): Promise<boolean> =>
+        this.#app.applyLogin(data),
     )
   }
 
