@@ -12,7 +12,7 @@ import type {
 import type Homey from 'homey/lib/Homey'
 import type { LoginCredentials } from '../types/HeatzyAPITypes'
 
-const SIZE_1 = 1
+const NUMBER_1 = 1
 
 let homeySettings: HomeySettingsUI = {
   expireAt: 0,
@@ -292,7 +292,7 @@ const shouldUpdate = (
   if (typeof deviceSetting === 'undefined') {
     return false
   }
-  if (new Set(deviceSetting).size !== SIZE_1) {
+  if (new Set(deviceSetting).size !== NUMBER_1) {
     return true
   }
   const [deviceSettingValue]: ValueOf<Settings>[] = deviceSetting
@@ -399,7 +399,7 @@ const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
   const values: ValueOf<Settings>[] | undefined = flatDeviceSettings[
     settingId
   ] as ValueOf<Settings>[] | undefined
-  if (values && new Set(values).size === SIZE_1) {
+  if (values && new Set(values).size === NUMBER_1) {
     const [value]: ValueOf<Settings>[] = values
     element.value = String(value)
   } else {
