@@ -710,8 +710,8 @@
               },
               "value": false,
               "hint": {
-                "en": "This setting prevents the device from being switched off from Homey, it can still be switched off manually (from a remote control or from the physical device)",
-                "fr": "Ce paramètre empêche l'appareil d'être éteint depuis Homey, il peut toujours être éteint manuellement (à partir d'une télécommande ou depuis l'appareil physique)"
+                "en": "This setting prevents the device from being switched off from Homey.\n\nIt can still be switched off manually (from a remote control or from the physical device).",
+                "fr": "Ce paramètre empêche l'appareil d'être éteint depuis Homey\n\n.Il peut toujours être éteint manuellement (à partir d'une télécommande ou depuis l'appareil physique)."
               }
             },
             {
