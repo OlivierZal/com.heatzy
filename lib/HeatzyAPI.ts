@@ -13,6 +13,7 @@ import axios, {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
+  HttpStatusCode,
   type InternalAxiosRequestConfig,
 } from 'axios'
 import type { APICallContextDataWithErrorMessage } from '../mixins/withErrorMessage'
@@ -122,7 +123,7 @@ export default class MELCloudAPI {
       createAPICallErrorData(error)
     this.#errorLogger(String(apiCallData))
     if (
-      error.response?.status === axios.HttpStatusCode.BadRequest &&
+      error.response?.status === HttpStatusCode.BadRequest &&
       this.#retry &&
       error.config?.url !== LOGIN_URL
     ) {
