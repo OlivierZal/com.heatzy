@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { App } from 'homey'
-import HeatzyAPI from './lib/HeatzyAPI'
-import type { LoginCredentials } from './types/HeatzyAPITypes'
+import HeatzyAPI from './heatzy/api'
+import type { LoginCredentials } from './heatzy/types'
 import { Settings as LuxonSettings } from 'luxon'
 
 export = class HeatzyApp extends App {

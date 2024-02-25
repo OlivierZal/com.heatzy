@@ -1,8 +1,8 @@
-import type { Capabilities, DeviceDetails, FlowArgs } from '../../types/types'
+import type { Capabilities, DeviceDetails, FlowArgs } from '../../types'
 import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
 import { Driver } from 'homey'
 import type HeatzyApp from '../../app'
-import type { LoginCredentials } from '../../types/HeatzyAPITypes'
+import type { LoginCredentials } from '../../heatzy/types'
 import type PairSession from 'homey/lib/PairSession'
 
 export = class HeatzyDriver extends Driver {

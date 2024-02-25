@@ -1,6 +1,6 @@
-import type APICallContextData from '../lib/APICallContextData'
+import type APICallContextData from './APICallContextData'
 import type { AxiosError } from 'axios'
-import type { ErrorData } from '../types/HeatzyAPITypes'
+import type { ErrorData } from '../types'
 
 export interface APICallContextDataWithErrorMessage extends APICallContextData {
   readonly errorMessage: string

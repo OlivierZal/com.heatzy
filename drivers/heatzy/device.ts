@@ -7,7 +7,7 @@ import {
   Mode,
   NUMBER_1,
   type Switch,
-} from '../../types/HeatzyAPITypes'
+} from '../../heatzy/types'
 import {
   type Capabilities,
   type DeviceDetails,
@@ -16,11 +16,11 @@ import {
   PreviousModeValue,
   type Settings,
   type Store,
-} from '../../types/types'
+} from '../../types'
 import { DateTime, Duration } from 'luxon'
 import { isFirstGen, isFirstPilot } from '../../utils'
 import { Device } from 'homey'
-import type HeatzyAPI from '../../lib/HeatzyAPI'
+import type HeatzyAPI from '../../heatzy/api'
 import type HeatzyApp from '../../app'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'

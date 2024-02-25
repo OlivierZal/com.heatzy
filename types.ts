@@ -1,5 +1,5 @@
-import type { DerogMode, LoginCredentials, Mode } from './HeatzyAPITypes'
-import type HeatzyDevice from '../drivers/heatzy/device'
+import type { DerogMode, LoginCredentials, Mode } from './heatzy/types'
+import type HeatzyDevice from './drivers/heatzy/device'
 
 export type ModeCapability = 'mode' | 'mode3'
 

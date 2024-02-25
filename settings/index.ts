@@ -8,9 +8,9 @@ import type {
   OnModeSetting,
   Settings,
   ValueOf,
-} from '../types/types'
+} from '../types'
 import type Homey from 'homey/lib/Homey'
-import type { LoginCredentials } from '../types/HeatzyAPITypes'
+import type { LoginCredentials } from '../heatzy/types'
 
 const NUMBER_1 = 1
 
