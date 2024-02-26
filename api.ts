@@ -59,10 +59,10 @@ const getDriverSettings = (
   )
 
 const getDriverLoginSetting = (
-  driver: ManifestDriver,
+  { id: driverId, pair }: ManifestDriver,
   language: string,
 ): DriverSetting[] => {
-  const driverLoginSetting: LoginSetting | undefined = driver.pair?.find(
+  const driverLoginSetting: LoginSetting | undefined = pair?.find(
     (pairSetting: PairSetting): pairSetting is LoginSetting =>
       pairSetting.id === 'login',
   )
@@ -77,7 +77,7 @@ const getDriverLoginSetting = (
             : 'username'
           if (!(key in acc)) {
             acc[key] = {
-              driverId: driver.id,
+              driverId,
               groupId: 'login',
               id: key,
               title: '',
