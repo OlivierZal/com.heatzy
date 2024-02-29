@@ -32,7 +32,7 @@ const MODE_ZH: Record<string, keyof typeof Mode> = {
   解冻: 'fro',
 }
 
-const FACTOR_10 = 10
+const NUMBER_10 = 10
 
 const getVacationEnd = (days: number): string =>
   DateTime.now().plus({ days }).toLocaleString({
@@ -130,10 +130,10 @@ class HeatzyDevice extends Device {
         this.#attrs.timer_switch = Number(value) as Switch
         break
       case 'target_temperature':
-        this.#attrs.cft_tempL = (value as number) * FACTOR_10
+        this.#attrs.cft_tempL = (value as number) * NUMBER_10
         break
       case 'target_temperature.complement':
-        this.#attrs.cft_tempH = (value as number) / FACTOR_10
+        this.#attrs.cft_tempH = (value as number) / NUMBER_10
         break
       /* eslint-enable camelcase */
       default:
