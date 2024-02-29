@@ -34,8 +34,6 @@ const MODE_ZH: Record<string, keyof typeof Mode> = {
 
 const FACTOR_10 = 10
 
-const booleanToSwitch = (value: boolean): Switch => Number(value) as Switch
-
 const getVacationEnd = (days: number): string =>
   DateTime.now().plus({ days }).toLocaleString({
     day: 'numeric',
@@ -126,10 +124,10 @@ class HeatzyDevice extends Device {
         this.#attrs.derog_time = Number(value)
         break
       case 'locked':
-        this.#attrs.lock_switch = booleanToSwitch(value as boolean)
+        this.#attrs.lock_switch = Number(value) as Switch
         break
       case 'onoff.timer':
-        this.#attrs.timer_switch = booleanToSwitch(value as boolean)
+        this.#attrs.timer_switch = Number(value) as Switch
         break
       case 'target_temperature':
         this.#attrs.cft_tempL = (value as number) * FACTOR_10
