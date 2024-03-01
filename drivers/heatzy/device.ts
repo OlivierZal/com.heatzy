@@ -200,9 +200,9 @@ class HeatzyDevice extends Device {
     key: K,
     value: Store[K],
   ): Promise<void> {
+    this.log('Store', key, 'is', value)
     if (value !== super.getStoreValue(key)) {
       await super.setStoreValue(key, value)
-      this.log('Store', key, 'is', value)
     }
   }
 
