@@ -1,4 +1,9 @@
-import type { Capabilities, DeviceDetails, FlowArgs } from '../../types'
+import type {
+  Capabilities,
+  DeviceDetails,
+  FlowArgs,
+  ModeCapability,
+} from '../../types'
 import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
 import { Driver } from 'homey'
 import type HeatzyApp from '../../app'
@@ -90,7 +95,7 @@ export = class HeatzyDriver extends Driver {
       })
   }
 
-  #registerModeRunListeners(capability: 'mode' | 'mode3'): void {
+  #registerModeRunListeners(capability: ModeCapability): void {
     this.homey.flow
       .getConditionCard(`${capability}_condition`)
       .registerRunListener(
@@ -118,27 +123,11 @@ export = class HeatzyDriver extends Driver {
   }
 
   #registerRunListeners(): void {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.manifest.capabilities as (keyof Capabilities)[]).forEach(
-      (capability: keyof Capabilities) => {
-        switch (capability) {
-          case 'derog_time_boost':
-            this.#registerDerogTimeRunListeners()
-            break
-          case 'mode':
-          case 'mode3':
-            this.#registerModeRunListeners(capability)
-            break
-          case 'onoff.timer':
-            this.#registerOnOffRunListeners()
-            break
-          case 'target_temperature.complement':
-            this.#registerTargetTemperatureRunListener()
-            break
-          default:
-        }
-      },
-    )
+    this.#registerDerogTimeRunListeners()
+    this.#registerModeRunListeners('mode')
+    this.#registerModeRunListeners('mode3')
+    this.#registerOnOffRunListeners()
+    this.#registerTargetTemperatureRunListener()
   }
 
   #registerTargetTemperatureRunListener(): void {
