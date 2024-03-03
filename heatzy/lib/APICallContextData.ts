@@ -6,7 +6,8 @@ const ORDER: string[] = [
   'url',
   'params',
   'headers',
-  'data',
+  'requestData',
+  'responseData',
   'status',
   'errorMessage',
 ]
@@ -33,7 +34,11 @@ export default abstract class APICallContextData {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const value: any = this[key as keyof this]
         if (typeof value !== 'undefined') {
-          return `${key}: ${typeof value === 'object' ? JSON.stringify(value, null, SPACE) : value}`
+          return `${key}: ${
+            typeof value === 'object'
+              ? JSON.stringify(value, null, SPACE)
+              : value
+          }`
         }
       }
       return null
