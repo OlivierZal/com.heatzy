@@ -74,53 +74,81 @@ export = class HeatzyDriver extends Driver {
     }
   }
 
+  #registerDerogTimeRunListeners(): void {
+    this.homey.flow
+      .getConditionCard('derog_time_boost_condition')
+      .registerRunListener((args: FlowArgs): boolean =>
+        Boolean(Number(args.device.getCapabilityValue('derog_time_boost'))),
+      )
+    this.homey.flow
+      .getActionCard('derog_time_boost_action')
+      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+        await args.device.triggerCapabilityListener(
+          'derog_time_boost',
+          args.derog_time,
+        )
+      })
+  }
+
+  #registerModeRunListeners(capability: 'mode' | 'mode3'): void {
+    this.homey.flow
+      .getConditionCard(`${capability}_condition`)
+      .registerRunListener(
+        (args: FlowArgs): boolean =>
+          args.device.getCapabilityValue(capability) === args.mode,
+      )
+    this.homey.flow
+      .getActionCard(`${capability}_action`)
+      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+        await args.device.triggerCapabilityListener(capability, args.mode)
+      })
+  }
+
+  #registerOnOffRunListeners(): void {
+    this.homey.flow
+      .getConditionCard('onoff.timer_condition')
+      .registerRunListener((args: FlowArgs): boolean =>
+        args.device.getCapabilityValue('onoff.timer'),
+      )
+    this.homey.flow
+      .getActionCard('onoff.timer_action')
+      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+        await args.device.triggerCapabilityListener('onoff.timer', args.onoff)
+      })
+  }
+
   #registerRunListeners(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.manifest.capabilities as (keyof Capabilities)[]).forEach(
       (capability: keyof Capabilities) => {
-        if (capability.startsWith('mode')) {
-          this.homey.flow
-            .getConditionCard(`${capability}_condition`)
-            .registerRunListener(
-              (args: FlowArgs): boolean =>
-                args.mode === args.device.getCapabilityValue(capability),
-            )
-          this.homey.flow
-            .getActionCard(`${capability}_action`)
-            .registerRunListener(async (args: FlowArgs): Promise<void> => {
-              await args.device.onCapability(capability, args.mode)
-            })
-        } else if (['derog_time_boost', 'onoff.timer'].includes(capability)) {
-          this.homey.flow
-            .getConditionCard(`${capability}_condition`)
-            .registerRunListener((args: FlowArgs): boolean =>
-              capability === 'derog_time_boost'
-                ? Boolean(
-                    Number(args.device.getCapabilityValue('derog_time_boost')),
-                  )
-                : args.device.getCapabilityValue('onoff.timer'),
-            )
-          this.homey.flow
-            .getActionCard(`${capability}_action`)
-            .registerRunListener(async (args: FlowArgs): Promise<void> => {
-              await args.device.onCapability(
-                capability,
-                capability === 'derog_time_boost'
-                  ? args.derog_time
-                  : args.onoff,
-              )
-            })
-        } else if (capability.startsWith('target_temperature.')) {
-          this.homey.flow
-            .getActionCard(`${capability}_action`)
-            .registerRunListener(async (args: FlowArgs): Promise<void> => {
-              await args.device.onCapability(
-                capability,
-                args.target_temperature,
-              )
-            })
+        switch (capability) {
+          case 'derog_time_boost':
+            this.#registerDerogTimeRunListeners()
+            break
+          case 'mode':
+          case 'mode3':
+            this.#registerModeRunListeners(capability)
+            break
+          case 'onoff.timer':
+            this.#registerOnOffRunListeners()
+            break
+          case 'target_temperature.complement':
+            this.#registerTargetTemperatureRunListener()
+            break
+          default:
         }
       },
     )
+  }
+
+  #registerTargetTemperatureRunListener(): void {
+    this.homey.flow
+      .getActionCard('target_temperature.complement_action')
+      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+        await args.device.triggerCapabilityListener(
+          'target_temperature.complement',
+          args.target_temperature,
+        )
+      })
   }
 }
