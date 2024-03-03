@@ -99,7 +99,6 @@ class HeatzyDevice extends Device {
     capability: K,
     value: Capabilities[K],
   ): Promise<void> {
-    this.homey.clearTimeout(this.#syncTimeout)
     let mode: keyof typeof Mode | null = null
     switch (capability) {
       case 'onoff':
@@ -325,6 +324,7 @@ class HeatzyDevice extends Device {
       this.registerCapabilityListener(
         capability,
         async (value: Capabilities[K]): Promise<void> => {
+          this.homey.clearTimeout(this.#syncTimeout)
           await this.onCapability(capability, value)
         },
       )
