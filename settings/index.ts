@@ -509,9 +509,9 @@ const addAuthenticateEventListener = (homey: Homey): void => {
   authenticateElement.addEventListener('click', (): void => {
     authenticateElement.classList.add('is-disabled')
     login(homey)
-      .catch(async (error: Error): Promise<void> => {
+      .catch(async ({ message }): Promise<void> => {
         // @ts-expect-error: `homey` is partially typed
-        await homey.alert(error.message)
+        await homey.alert(message)
       })
       .finally((): void => {
         authenticateElement.classList.remove('is-disabled')
