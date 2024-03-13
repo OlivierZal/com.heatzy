@@ -67,7 +67,9 @@ class HeatzyDevice extends Device {
 
   readonly #isFirstPilot: boolean = isFirstPilot(this.#data.productName)
 
-  readonly #mode: ModeCapability = this.#isFirstPilot ? 'mode' : 'mode3'
+  readonly #modeCapability: ModeCapability = this.#isFirstPilot
+    ? 'mode'
+    : 'mode3'
 
   readonly #productKey: string = this.#data.productKey
 
@@ -102,7 +104,7 @@ class HeatzyDevice extends Device {
     let mode: keyof typeof Mode | null = null
     switch (capability) {
       case 'onoff':
-      case this.#mode:
+      case this.#modeCapability:
         mode = await this.#getMode(
           capability,
           value as boolean | keyof typeof Mode,
@@ -285,7 +287,7 @@ class HeatzyDevice extends Device {
             await this.setCapabilityValue('onoff', true)
           } else {
             await this.setCapabilityValue(
-              this.#mode,
+              this.#modeCapability,
               this.getStoreValue('previousMode'),
             )
           }
@@ -407,7 +409,10 @@ class HeatzyDevice extends Device {
     if (newMode in MODE_ZH) {
       newMode = MODE_ZH[mode]
     }
-    await this.setCapabilityValue(this.#mode, newMode as keyof typeof Mode)
+    await this.setCapabilityValue(
+      this.#modeCapability,
+      newMode as keyof typeof Mode,
+    )
     const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
     await this.setCapabilityValue('onoff', isOn)
     if (newMode in PreviousModeValue) {
