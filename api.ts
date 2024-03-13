@@ -143,34 +143,22 @@ export = {
     body: Settings
     homey: Homey
   }): Promise<void> {
-    try {
-      await Promise.all(
-        getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
-          const changedKeys: K[] = (Object.keys(body) as K[]).filter(
-            (changedKey: K) =>
-              body[changedKey] !== device.getSetting(changedKey),
+    await Promise.all(
+      getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
+        const changedKeys: K[] = (Object.keys(body) as K[]).filter(
+          (changedKey: K) => body[changedKey] !== device.getSetting(changedKey),
+        )
+        if (changedKeys.length) {
+          const deviceSettings: Settings = Object.fromEntries(
+            changedKeys.map((key: K): [K, Settings[K]] => [key, body[key]]),
           )
-          if (changedKeys.length) {
-            const deviceSettings: Settings = Object.fromEntries(
-              changedKeys.map((key: K): [K, Settings[K]] => [key, body[key]]),
-            )
-            try {
-              await device.setSettings(deviceSettings)
-              await device.onSettings({
-                changedKeys,
-                newSettings: device.getSettings() as Settings,
-              })
-            } catch (error: unknown) {
-              const errorMessage: string =
-                error instanceof Error ? error.message : String(error)
-              device.error('Settings:', errorMessage)
-              throw new Error(errorMessage)
-            }
-          }
-        }),
-      )
-    } catch (error: unknown) {
-      throw new Error(error instanceof Error ? error.message : String(error))
-    }
+          await device.setSettings(deviceSettings)
+          await device.onSettings({
+            changedKeys,
+            newSettings: device.getSettings() as Settings,
+          })
+        }
+      }),
+    )
   },
 }
