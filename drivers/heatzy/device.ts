@@ -139,7 +139,6 @@ class HeatzyDevice extends Device {
       /* eslint-enable camelcase */
       default:
     }
-    this.#applySyncToDevice()
   }
 
   public onDeleted(): void {
@@ -328,6 +327,7 @@ class HeatzyDevice extends Device {
         async (value: Capabilities[K]): Promise<void> => {
           this.homey.clearTimeout(this.#syncTimeout)
           await this.onCapability(capability, value)
+          this.#applySyncToDevice()
         },
       )
     })
