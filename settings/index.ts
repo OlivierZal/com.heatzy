@@ -452,11 +452,8 @@ const createSelectElement = (
 }
 
 const generateCommonChildrenElements = (homey: Homey): void => {
-  driverSettingsCommon
-    .filter((setting: DriverSetting) =>
-      ['checkbox', 'dropdown'].includes(setting.type),
-    )
-    .forEach((setting: DriverSetting) => {
+  driverSettingsCommon.forEach((setting: DriverSetting) => {
+    if (['checkbox', 'dropdown'].includes(setting.type)) {
       const divElement: HTMLDivElement = createDivElement()
       const selectElement: HTMLSelectElement = createSelectElement(
         homey,
@@ -468,7 +465,8 @@ const generateCommonChildrenElements = (homey: Homey): void => {
       divElement.appendChild(labelElement)
       divElement.appendChild(selectElement)
       settingsCommonElement.appendChild(divElement)
-    })
+    }
+  })
   addSettingsEventListeners(
     homey,
     Array.from(settingsCommonElement.querySelectorAll('select')),
