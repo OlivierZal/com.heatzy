@@ -402,21 +402,20 @@ class HeatzyDevice extends Device {
   }
 
   async #updateMode(mode: Mode | string | undefined): Promise<void> {
-    if (typeof mode === 'undefined') {
-      return
-    }
-    let newMode: string = typeof mode === 'number' ? Mode[mode] : mode
-    if (newMode in MODE_ZH) {
-      newMode = MODE_ZH[mode]
-    }
-    await this.setCapabilityValue(
-      this.#modeCapability,
-      newMode as keyof typeof Mode,
-    )
-    const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
-    await this.setCapabilityValue('onoff', isOn)
-    if (newMode in PreviousModeValue) {
-      await this.setStoreValue('previousMode', newMode as PreviousModeValue)
+    if (typeof mode !== 'undefined') {
+      let newMode: string = typeof mode === 'number' ? Mode[mode] : mode
+      if (newMode in MODE_ZH) {
+        newMode = MODE_ZH[mode]
+      }
+      await this.setCapabilityValue(
+        this.#modeCapability,
+        newMode as keyof typeof Mode,
+      )
+      const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
+      await this.setCapabilityValue('onoff', isOn)
+      if (newMode in PreviousModeValue) {
+        await this.setStoreValue('previousMode', newMode as PreviousModeValue)
+      }
     }
   }
 }
