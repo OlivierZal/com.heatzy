@@ -55,9 +55,9 @@ const disableButtons = (value = true): void => {
     (buttonElement: HTMLButtonElement) => {
       if (value) {
         buttonElement.classList.add('is-disabled')
-      } else {
-        buttonElement.classList.remove('is-disabled')
+        return
       }
+      buttonElement.classList.remove('is-disabled')
     },
   )
 }
@@ -401,9 +401,9 @@ const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
   if (values && new Set(values).size === NUMBER_1) {
     const [value]: ValueOf<Settings>[] = values
     element.value = String(value)
-  } else {
-    element.value = ''
+    return
   }
+  element.value = ''
 }
 
 const addRefreshSettingsEventListener = (
@@ -523,12 +523,12 @@ const load = async (homey: Homey): Promise<void> => {
   addAuthenticateEventListener(homey)
   if (typeof homeySettings.token === 'undefined') {
     needsAuthentication()
-  } else {
-    try {
-      await login(homey)
-    } catch (error: unknown) {
-      needsAuthentication()
-    }
+    return
+  }
+  try {
+    await login(homey)
+  } catch (error: unknown) {
+    needsAuthentication()
   }
 }
 

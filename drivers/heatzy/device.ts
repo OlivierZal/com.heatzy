@@ -284,12 +284,12 @@ class HeatzyDevice extends Device {
         async (): Promise<void> => {
           if (capability === 'onoff') {
             await this.setCapabilityValue('onoff', true)
-          } else {
-            await this.setCapabilityValue(
-              this.#modeCapability,
-              this.getStoreValue('previousMode'),
-            )
+            return
           }
+          await this.setCapabilityValue(
+            this.#modeCapability,
+            this.getStoreValue('previousMode'),
+          )
         },
         Duration.fromObject({ seconds: 1 }).as('milliseconds'),
       )
