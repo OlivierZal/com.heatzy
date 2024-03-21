@@ -6,7 +6,6 @@ import {
   type DevicePostDataAny,
   Mode,
   NUMBER_1,
-  type Switch,
 } from '../../heatzy/types'
 import {
   type Capabilities,
@@ -125,10 +124,10 @@ class HeatzyDevice extends Device {
         this.#attrs.derog_time = Number(value)
         break
       case 'locked':
-        this.#attrs.lock_switch = Number(value) as Switch
+        this.#attrs.lock_switch = Number(value)
         break
       case 'onoff.timer':
-        this.#attrs.timer_switch = Number(value) as Switch
+        this.#attrs.timer_switch = Number(value)
         break
       case 'target_temperature':
         this.#attrs.cft_tempL = (value as number) * NUMBER_10
