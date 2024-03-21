@@ -22,7 +22,7 @@ export enum DerogMode {
   boost = 2,
 }
 
-export enum Switch {
+enum Switch {
   off = 0,
   on = 1,
 }
