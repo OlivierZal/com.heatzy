@@ -8,14 +8,15 @@ import type {
   LoginData,
   LoginPostData,
 } from './types'
-import { DateTime, Duration } from 'luxon'
-import axios, {
+import {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
   HttpStatusCode,
   type InternalAxiosRequestConfig,
+  create as createAxiosInstance,
 } from 'axios'
+import { DateTime, Duration } from 'luxon'
 import createAPICallErrorData, {
   type APICallContextDataWithErrorMessage,
 } from './lib/APICallErrorData'
@@ -63,7 +64,7 @@ export default class MELCloudAPI {
     this.#settingManager = settingManager
     this.#logger = logger
     this.#errorLogger = errorLogger
-    this.#api = axios.create({
+    this.#api = createAxiosInstance({
       baseURL: 'https://euapi.gizwits.com/app',
       headers: {
         'X-Gizwits-Application-Id': 'c70a66ff039d41b4a220e198b0fcc8b3',
