@@ -1,13 +1,3 @@
-import type {
-  APISettings,
-  Bindings,
-  Data,
-  DeviceData,
-  DevicePostDataAny,
-  LoginCredentials,
-  LoginData,
-  LoginPostData,
-} from './types'
 import {
   type AxiosError,
   type AxiosInstance,
@@ -16,6 +6,15 @@ import {
   type InternalAxiosRequestConfig,
   create as createAxiosInstance,
 } from 'axios'
+import type {
+  Bindings,
+  Data,
+  DeviceData,
+  DevicePostDataAny,
+  LoginCredentials,
+  LoginData,
+  LoginPostData,
+} from './types'
 import { DateTime, Duration } from 'luxon'
 import createAPICallErrorData, {
   type APICallContextDataWithErrorMessage,
@@ -23,15 +22,22 @@ import createAPICallErrorData, {
 import APICallRequestData from './lib/APICallRequestData'
 import APICallResponseData from './lib/APICallResponseData'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Logger = (...args: any[]) => void
+
+interface APISettings {
+  readonly expireAt?: number | null
+  readonly password?: string | null
+  readonly token?: string | null
+  readonly username?: string | null
+}
+
 interface SettingManager {
   get: <K extends keyof APISettings>(
     key: K,
   ) => APISettings[K] | null | undefined
   set: <K extends keyof APISettings>(key: K, value: APISettings[K]) => void
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Logger = (...args: any[]) => void
 
 const LOGIN_URL = '/login'
 const NUMBER_0 = 0

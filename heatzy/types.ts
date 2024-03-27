@@ -1,12 +1,5 @@
 export const NUMBER_1 = 1
 
-export interface APISettings {
-  readonly expireAt?: number | null
-  readonly password?: string | null
-  readonly token?: string | null
-  readonly username?: string | null
-}
-
 export enum Mode {
   cft = 0,
   eco = 1,
