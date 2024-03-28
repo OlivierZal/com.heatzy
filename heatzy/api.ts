@@ -16,11 +16,9 @@ import type {
   LoginPostData,
 } from './types'
 import { DateTime, Duration } from 'luxon'
-import createAPICallErrorData, {
-  type APICallContextDataWithErrorMessage,
-} from './lib/APICallErrorData'
 import APICallRequestData from './lib/APICallRequestData'
 import APICallResponseData from './lib/APICallResponseData'
+import createAPICallErrorData from './lib/APICallErrorData'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Logger = (...args: any[]) => void
@@ -122,8 +120,7 @@ export default class HeatzyAPI {
   }
 
   async #handleError(error: AxiosError): Promise<AxiosError> {
-    const apiCallData: APICallContextDataWithErrorMessage =
-      createAPICallErrorData(error)
+    const apiCallData = createAPICallErrorData(error)
     this.#errorLogger(String(apiCallData))
     if (
       error.response?.status === HttpStatusCode.BadRequest &&

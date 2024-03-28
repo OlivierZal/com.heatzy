@@ -3,7 +3,7 @@ import APICallRequestData from './APICallRequestData'
 import APICallResponseData from './APICallResponseData'
 import type { AxiosError } from 'axios'
 
-export interface APICallContextDataWithErrorMessage extends APICallContextData {
+interface APICallContextDataWithErrorMessage extends APICallContextData {
   readonly errorMessage: string
 }
 

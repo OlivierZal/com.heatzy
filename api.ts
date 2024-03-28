@@ -3,7 +3,6 @@ import type {
   DriverSetting,
   LoginSetting,
   ManifestDriver,
-  PairSetting,
   Settings,
   ValueOf,
 } from './types'
@@ -46,8 +45,7 @@ const getDriverLoginSetting = (
   language: string,
 ): DriverSetting[] => {
   const driverLoginSetting = pair?.find(
-    (pairSetting: PairSetting): pairSetting is LoginSetting =>
-      pairSetting.id === 'login',
+    (pairSetting): pairSetting is LoginSetting => pairSetting.id === 'login',
   )
   return driverLoginSetting
     ? Object.values(
