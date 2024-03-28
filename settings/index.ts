@@ -91,18 +91,16 @@ const setDocumentLanguage = async (homey: Homey): Promise<void> =>
 const getHomeySettings = async (homey: Homey): Promise<void> =>
   new Promise<void>((resolve, reject) => {
     // @ts-expect-error: `homey` is partially typed
-    homey.get(
-      async (error: Error | null, settings: HomeySettingsUI): Promise<void> => {
-        if (error) {
-          // @ts-expect-error: `homey` is partially typed
-          await homey.alert(error.message)
-          reject(error)
-          return
-        }
-        homeySettings = settings
-        resolve()
-      },
-    )
+    homey.get(async (error: Error | null, settings: HomeySettingsUI) => {
+      if (error) {
+        // @ts-expect-error: `homey` is partially typed
+        await homey.alert(error.message)
+        reject(error)
+        return
+      }
+      homeySettings = settings
+      resolve()
+    })
   })
 
 const getDeviceSettings = async (homey: Homey): Promise<void> =>
@@ -316,22 +314,17 @@ const updateDeviceSettings = (body: Settings): void => {
 
 const setDeviceSettings = (homey: Homey, body: Settings): void => {
   // @ts-expect-error: `homey` is partially typed
-  homey.api(
-    'PUT',
-    '/settings/devices',
-    body,
-    async (error: Error | null): Promise<void> => {
-      if (error) {
-        // @ts-expect-error: `homey` is partially typed
-        await homey.alert(error.message)
-        return
-      }
-      updateDeviceSettings(body)
-      enableButtons()
+  homey.api('PUT', '/settings/devices', body, async (error: Error | null) => {
+    if (error) {
       // @ts-expect-error: `homey` is partially typed
-      await homey.alert(homey.__('settings.success'))
-    },
-  )
+      await homey.alert(error.message)
+      return
+    }
+    updateDeviceSettings(body)
+    enableButtons()
+    // @ts-expect-error: `homey` is partially typed
+    await homey.alert(homey.__('settings.success'))
+  })
 }
 
 const addApplySettingsEventListener = (
@@ -462,7 +455,7 @@ const login = async (homey: Homey): Promise<void> => {
     'POST',
     '/sessions',
     body,
-    async (error: Error | null, loggedIn: boolean): Promise<void> => {
+    async (error: Error | null, loggedIn: boolean) => {
       if (error) {
         // @ts-expect-error: `homey` is partially typed
         await homey.alert(error.message)
@@ -482,7 +475,7 @@ const addAuthenticateEventListener = (homey: Homey): void => {
   authenticateElement.addEventListener('click', () => {
     authenticateElement.classList.add('is-disabled')
     login(homey)
-      .catch(async (error) => {
+      .catch(async (error: unknown) => {
         // @ts-expect-error: `homey` is partially typed
         await homey.alert(
           error instanceof Error ? error.message : String(error),
