@@ -25,10 +25,7 @@ const addToLogs =
               return [this[log as keyof this], '-']
             }
             if (log.endsWith(PARENTHESES)) {
-              const funcName = log.slice(
-                FIRST_CHAR,
-                -PARENTHESES.length,
-              )
+              const funcName = log.slice(FIRST_CHAR, -PARENTHESES.length)
               if (
                 !(funcName in this) ||
                 typeof this[funcName as keyof this] !== 'function'
