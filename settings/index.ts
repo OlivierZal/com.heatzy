@@ -482,7 +482,7 @@ const addAuthenticateEventListener = (homey: Homey): void => {
   authenticateElement.addEventListener('click', () => {
     authenticateElement.classList.add('is-disabled')
     login(homey)
-      .catch(async (error: unknown): Promise<void> => {
+      .catch(async (error) => {
         // @ts-expect-error: `homey` is partially typed
         await homey.alert(
           error instanceof Error ? error.message : String(error),
