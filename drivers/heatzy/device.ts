@@ -247,7 +247,7 @@ class HeatzyDevice extends Device {
         const { data } = await this.#heatzyAPI.control(this.#id, postData)
         await this.#updateCapabilities(true)
         return data
-      } catch (error: unknown) {
+      } catch (error) {
         await this.#updateCapabilities()
       }
     }
@@ -257,7 +257,7 @@ class HeatzyDevice extends Device {
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
       return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
-    } catch (error: unknown) {
+    } catch (error) {
       return null
     }
   }
@@ -278,7 +278,7 @@ class HeatzyDevice extends Device {
       mode = null
       await this.setWarning(this.homey.__('warnings.always_on'))
       this.homey.setTimeout(
-        async (): Promise<void> => {
+        async () => {
           if (capability === 'onoff') {
             await this.setCapabilityValue('onoff', true)
             return
@@ -300,17 +300,15 @@ class HeatzyDevice extends Device {
       this.#productName,
     )
     await requiredCapabilities.reduce<Promise<void>>(
-      async (acc, capability: string) => {
+      async (acc, capability) => {
         await acc
         return this.addCapability(capability)
       },
       Promise.resolve(),
     )
     await this.getCapabilities()
-      .filter(
-        (capability: string) => !requiredCapabilities.includes(capability),
-      )
-      .reduce<Promise<void>>(async (acc, capability: string) => {
+      .filter((capability) => !requiredCapabilities.includes(capability))
+      .reduce<Promise<void>>(async (acc, capability) => {
         await acc
         await this.removeCapability(capability)
       }, Promise.resolve())
@@ -318,10 +316,10 @@ class HeatzyDevice extends Device {
 
   #registerCapabilityListeners<K extends keyof Capabilities>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.driver.manifest.capabilities as K[]).forEach((capability: K) => {
+    ;(this.driver.manifest.capabilities as K[]).forEach((capability) => {
       this.registerCapabilityListener(
         capability,
-        async (value: Capabilities[K]): Promise<void> => {
+        async (value: Capabilities[K]) => {
           this.homey.clearTimeout(this.#syncTimeout)
           await this.onCapability(capability, value)
           this.#applySyncToDevice()

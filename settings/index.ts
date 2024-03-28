@@ -49,15 +49,13 @@ const settingsCommonElement = document.getElementById(
 ) as HTMLDivElement
 
 const disableButtons = (value = true): void => {
-  ;[applySettingsElement, refreshSettingsElement].forEach(
-    (buttonElement: HTMLButtonElement) => {
-      if (value) {
-        buttonElement.classList.add('is-disabled')
-        return
-      }
-      buttonElement.classList.remove('is-disabled')
-    },
-  )
+  ;[applySettingsElement, refreshSettingsElement].forEach((buttonElement) => {
+    if (value) {
+      buttonElement.classList.add('is-disabled')
+      return
+    }
+    buttonElement.classList.remove('is-disabled')
+  })
 }
 
 const enableButtons = (value = true): void => {
@@ -128,9 +126,9 @@ const getDeviceSettings = async (homey: Homey): Promise<void> =>
 
 const getFlatDeviceSettings = (): void => {
   flatDeviceSettings = Object.values(deviceSettings).reduce<DeviceSetting>(
-    (flattenedDeviceSettings, settings: DeviceSetting) =>
+    (flattenedDeviceSettings, settings) =>
       Object.entries(settings).reduce<DeviceSetting>(
-        (acc, [settingId, settingValues]: [string, ValueOf<Settings>[]]) => {
+        (acc, [settingId, settingValues]) => {
           if (!(settingId in acc)) {
             acc[settingId] = []
           }
@@ -168,7 +166,7 @@ const getDriverSettingsAll = async (homey: Homey): Promise<void> =>
 
 const getDriverSettings = (): void => {
   driverSettingsCommon = driverSettingsAll.reduce<DriverSetting[]>(
-    (acc, setting: DriverSetting) => {
+    (acc, setting) => {
       if (setting.groupId === 'login') {
         return acc
       }
@@ -292,18 +290,13 @@ const buildSettingsBody = (
 ): Settings =>
   Object.fromEntries(
     elements
-      .map(
-        (
-          element: HTMLInputElement | HTMLSelectElement,
-        ): [null] | [string, ValueOf<Settings>] => {
-          const [settingId] = element.id.split('--')
-          const settingValue: ValueOf<Settings> | null =
-            processSettingValue(element)
-          return settingValue !== null && shouldUpdate(settingId, settingValue)
-            ? [settingId, settingValue]
-            : [null]
-        },
-      )
+      .map((element) => {
+        const [settingId] = element.id.split('--')
+        const settingValue = processSettingValue(element)
+        return settingValue !== null && shouldUpdate(settingId, settingValue)
+          ? [settingId, settingValue]
+          : [null]
+      })
       .filter((entry): entry is [string, ValueOf<Settings>] => {
         const [key] = entry
         return key !== null
@@ -313,7 +306,7 @@ const buildSettingsBody = (
 const updateDeviceSettings = (body: Settings): void => {
   Object.entries(body).forEach(
     ([settingId, settingValue]: [string, ValueOf<Settings>]) => {
-      Object.keys(deviceSettings).forEach((driver: string) => {
+      Object.keys(deviceSettings).forEach((driver) => {
         deviceSettings[driver][settingId] = [settingValue]
       })
       flatDeviceSettings[settingId] = [settingValue]
@@ -349,7 +342,7 @@ const addApplySettingsEventListener = (
     let body: Settings = {}
     try {
       body = buildSettingsBody(elements)
-    } catch (error: unknown) {
+    } catch (error) {
       // @ts-expect-error: `homey` is partially typed
       homey.alert(error instanceof Error ? error.message : String(error))
       return
@@ -419,7 +412,7 @@ const createSelectElement = (
   ;[
     { id: '' },
     ...(setting.type === 'checkbox'
-      ? ['false', 'true'].map((id: string): { id: string; label: string } => ({
+      ? ['false', 'true'].map((id) => ({
           id,
           label: homey.__(`settings.boolean.${id}`),
         }))
@@ -437,7 +430,7 @@ const createSelectElement = (
 }
 
 const generateCommonChildrenElements = (homey: Homey): void => {
-  driverSettingsCommon.forEach((setting: DriverSetting) => {
+  driverSettingsCommon.forEach((setting) => {
     if (['checkbox', 'dropdown'].includes(setting.type)) {
       const divElement = createDivElement()
       const selectElement = createSelectElement(homey, setting)
@@ -509,7 +502,7 @@ const load = async (homey: Homey): Promise<void> => {
   }
   try {
     await login(homey)
-  } catch (error: unknown) {
+  } catch (error) {
     needsAuthentication()
   }
 }

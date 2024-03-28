@@ -3,13 +3,10 @@ import type {
   DriverSetting,
   LoginSetting,
   ManifestDriver,
-  ManifestDriverSetting,
-  ManifestDriverSettingData,
   PairSetting,
   Settings,
   ValueOf,
 } from './types'
-import type { Driver } from 'homey'
 import type HeatzyApp from './app'
 import type HeatzyDevice from './drivers/heatzy/device'
 import type Homey from 'homey/lib/Homey'
@@ -17,45 +14,31 @@ import type { LoginCredentials } from './heatzy/types'
 
 const getDevices = (homey: Homey): HeatzyDevice[] =>
   Object.values(homey.drivers.getDrivers()).flatMap(
-    (driver: Driver): HeatzyDevice[] => driver.getDevices() as HeatzyDevice[],
+    (driver) => driver.getDevices() as HeatzyDevice[],
   )
 
 const getDriverSettings = (
   driver: ManifestDriver,
   language: string,
 ): DriverSetting[] =>
-  (driver.settings ?? []).flatMap(
-    (setting: ManifestDriverSetting): DriverSetting[] =>
-      (setting.children ?? []).map(
-        ({
-          id,
-          max,
-          min,
-          label,
-          type,
-          units,
-          values,
-        }: ManifestDriverSettingData): DriverSetting => ({
-          driverId: driver.id,
-          groupId: setting.id,
-          groupLabel: setting.label[language],
-          id,
-          max,
-          min,
-          title: label[language],
-          type,
-          units,
-          values: values?.map(
-            (value: {
-              id: string
-              label: Record<string, string>
-            }): { id: string; label: string } => ({
-              id: value.id,
-              label: value.label[language],
-            }),
-          ),
-        }),
-      ),
+  (driver.settings ?? []).flatMap((setting) =>
+    (setting.children ?? []).map(
+      ({ id, max, min, label, type, units, values }) => ({
+        driverId: driver.id,
+        groupId: setting.id,
+        groupLabel: setting.label[language],
+        id,
+        max,
+        min,
+        title: label[language],
+        type,
+        units,
+        values: values?.map((value) => ({
+          id: value.id,
+          label: value.label[language],
+        })),
+      }),
+    ),
   )
 
 const getDriverLoginSetting = (
@@ -70,7 +53,7 @@ const getDriverLoginSetting = (
     ? Object.values(
         Object.entries(driverLoginSetting.options).reduce<
           Record<string, DriverSetting>
-        >((acc, [option, label]: [string, Record<string, string>]) => {
+        >((acc, [option, label]) => {
           const isPassword = option.startsWith('password')
           const key = isPassword ? 'password' : 'username'
           if (!(key in acc)) {
@@ -114,13 +97,11 @@ export = {
     const app = homey.app as HeatzyApp
     const language = homey.i18n.getLanguage()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (app.manifest.drivers as ManifestDriver[]).flatMap(
-      (driver: ManifestDriver): DriverSetting[] => {
-        const settings = getDriverSettings(driver, language)
-        const loginSetting = getDriverLoginSetting(driver, language)
-        return [...settings, ...loginSetting]
-      },
-    )
+    return (app.manifest.drivers as ManifestDriver[]).flatMap((driver) => {
+      const settings = getDriverSettings(driver, language)
+      const loginSetting = getDriverLoginSetting(driver, language)
+      return [...settings, ...loginSetting]
+    })
   },
   getLanguage({ homey }: { homey: Homey }): string {
     return homey.i18n.getLanguage()
@@ -142,13 +123,13 @@ export = {
     homey: Homey
   }): Promise<void> {
     await Promise.all(
-      getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
+      getDevices(homey).map(async (device) => {
         const changedKeys = (Object.keys(body) as K[]).filter(
-          (changedKey: K) => body[changedKey] !== device.getSetting(changedKey),
+          (changedKey) => body[changedKey] !== device.getSetting(changedKey),
         )
         if (changedKeys.length) {
           const deviceSettings = Object.fromEntries(
-            changedKeys.map((key: K): [K, Settings[K]] => [key, body[key]]),
+            changedKeys.map((key) => [key, body[key]]),
           )
           await device.setSettings(deviceSettings)
           await device.onSettings({

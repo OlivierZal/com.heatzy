@@ -90,7 +90,7 @@ export default class HeatzyAPI {
       try {
         await this.login({ password, username })
         return true
-      } catch (error: unknown) {
+      } catch (error) {
         throwIfRequested(error, raise)
       }
     }

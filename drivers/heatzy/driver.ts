@@ -22,7 +22,7 @@ export = class HeatzyDriver extends Driver {
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return (this.manifest.capabilities as (keyof Capabilities)[]).filter(
-      (capability: string) => {
+      (capability) => {
         if (capability.startsWith('target_temperature')) {
           return isGlow(productKey)
         }
@@ -68,13 +68,13 @@ export = class HeatzyDriver extends Driver {
           did,
           product_key: productKey,
           product_name: productName,
-        }): DeviceDetails => ({
+        }) => ({
           capabilities: this.getRequiredCapabilities(productKey, productName),
           data: { id: did, productKey, productName },
           name,
         }),
       )
-    } catch (error: unknown) {
+    } catch (error) {
       return []
     }
   }

@@ -20,7 +20,7 @@ const addToLogs =
 
       #commonLog(logType: 'error' | 'log', ...args: any[]): void {
         super[logType](
-          ...logs.flatMap((log: string): [any, '-'] => {
+          ...logs.flatMap((log): [any, '-'] => {
             if (log in this) {
               return [this[log as keyof this], '-']
             }
