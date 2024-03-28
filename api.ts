@@ -62,7 +62,7 @@ const getDriverLoginSetting = (
   { id: driverId, pair }: ManifestDriver,
   language: string,
 ): DriverSetting[] => {
-  const driverLoginSetting: LoginSetting | undefined = pair?.find(
+  const driverLoginSetting = pair?.find(
     (pairSetting: PairSetting): pairSetting is LoginSetting =>
       pairSetting.id === 'login',
   )
@@ -71,10 +71,8 @@ const getDriverLoginSetting = (
         Object.entries(driverLoginSetting.options).reduce<
           Record<string, DriverSetting>
         >((acc, [option, label]: [string, Record<string, string>]) => {
-          const isPassword: boolean = option.startsWith('password')
-          const key: keyof LoginCredentials = isPassword
-            ? 'password'
-            : 'username'
+          const isPassword = option.startsWith('password')
+          const key = isPassword ? 'password' : 'username'
           if (!(key in acc)) {
             acc[key] = {
               driverId,
@@ -95,7 +93,7 @@ const getDriverLoginSetting = (
 export = {
   getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {
     return getDevices(homey).reduce<DeviceSettings>((acc, device) => {
-      const driverId: string = device.driver.id
+      const driverId = device.driver.id
       if (!(driverId in acc)) {
         acc[driverId] = {}
       }
@@ -113,8 +111,8 @@ export = {
     }, {})
   },
   getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
-    const app: HeatzyApp = homey.app as HeatzyApp
-    const language: string = homey.i18n.getLanguage()
+    const app = homey.app as HeatzyApp
+    const language = homey.i18n.getLanguage()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return (app.manifest.drivers as ManifestDriver[]).flatMap(
       (driver: ManifestDriver): DriverSetting[] => {
@@ -145,11 +143,11 @@ export = {
   }): Promise<void> {
     await Promise.all(
       getDevices(homey).map(async (device: HeatzyDevice): Promise<void> => {
-        const changedKeys: K[] = (Object.keys(body) as K[]).filter(
+        const changedKeys = (Object.keys(body) as K[]).filter(
           (changedKey: K) => body[changedKey] !== device.getSetting(changedKey),
         )
         if (changedKeys.length) {
-          const deviceSettings: Settings = Object.fromEntries(
+          const deviceSettings = Object.fromEntries(
             changedKeys.map((key: K): [K, Settings[K]] => [key, body[key]]),
           )
           await device.setSettings(deviceSettings)

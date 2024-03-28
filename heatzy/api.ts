@@ -48,7 +48,7 @@ const throwIfRequested = (error: unknown, raise: boolean): void => {
   }
 }
 
-export default class MELCloudAPI {
+export default class HeatzyAPI {
   #retry = true
 
   #retryTimeout!: NodeJS.Timeout
@@ -113,10 +113,7 @@ export default class MELCloudAPI {
   }
 
   public async login(postData: LoginPostData): Promise<{ data: LoginData }> {
-    const response: AxiosResponse<LoginData> = await this.#api.post<LoginData>(
-      LOGIN_URL,
-      postData,
-    )
+    const response = await this.#api.post<LoginData>(LOGIN_URL, postData)
     this.#settingManager.set('username', postData.username)
     this.#settingManager.set('password', postData.password)
     this.#settingManager.set('token', response.data.token)
@@ -144,9 +141,9 @@ export default class MELCloudAPI {
   async #handleRequest(
     config: InternalAxiosRequestConfig,
   ): Promise<InternalAxiosRequestConfig> {
-    const newConfig: InternalAxiosRequestConfig = { ...config }
+    const newConfig = { ...config }
     if (newConfig.url !== LOGIN_URL) {
-      const expiredAt: number = this.#settingManager.get('expireAt') ?? NUMBER_0
+      const expiredAt = this.#settingManager.get('expireAt') ?? NUMBER_0
       if (expiredAt && DateTime.fromSeconds(expiredAt) < DateTime.now()) {
         await this.applyLogin()
       }

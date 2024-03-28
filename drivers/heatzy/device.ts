@@ -19,7 +19,6 @@ import {
 import { DateTime, Duration } from 'luxon'
 import { isFirstGen, isFirstPilot } from '../../utils'
 import { Device } from 'homey'
-import type HeatzyAPI from '../../heatzy/api'
 import type HeatzyApp from '../../app'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
@@ -55,24 +54,23 @@ class HeatzyDevice extends Device {
 
   #syncTimeout!: NodeJS.Timeout
 
-  readonly #data: DeviceDetails['data'] =
-    this.getData() as DeviceDetails['data']
+  readonly #data = this.getData() as DeviceDetails['data']
 
-  readonly #heatzyAPI: HeatzyAPI = (this.homey.app as HeatzyApp).heatzyAPI
+  readonly #heatzyAPI = (this.homey.app as HeatzyApp).heatzyAPI
 
-  readonly #id: string = this.#data.id
+  readonly #id = this.#data.id
 
-  readonly #isFirstGen: boolean = isFirstGen(this.#data.productKey)
+  readonly #isFirstGen = isFirstGen(this.#data.productKey)
 
-  readonly #isFirstPilot: boolean = isFirstPilot(this.#data.productName)
+  readonly #isFirstPilot = isFirstPilot(this.#data.productName)
 
   readonly #modeCapability: ModeCapability = this.#isFirstPilot
     ? 'mode'
     : 'mode3'
 
-  readonly #productKey: string = this.#data.productKey
+  readonly #productKey = this.#data.productKey
 
-  readonly #productName: string = this.#data.productName
+  readonly #productName = this.#data.productName
 
   public async addCapability(capability: string): Promise<void> {
     if (!this.hasCapability(capability)) {
@@ -297,7 +295,7 @@ class HeatzyDevice extends Device {
   }
 
   async #handleCapabilities(): Promise<void> {
-    const requiredCapabilities: string[] = this.driver.getRequiredCapabilities(
+    const requiredCapabilities = this.driver.getRequiredCapabilities(
       this.#productKey,
       this.#productName,
     )
@@ -340,14 +338,11 @@ class HeatzyDevice extends Device {
   }
 
   async #syncToDevice(): Promise<void> {
-    const postData: DevicePostDataAny | null = this.#buildPostData()
-    await this.#control(postData)
+    await this.#control(this.#buildPostData())
   }
 
   async #updateCapabilities(control = false): Promise<void> {
-    const attr: BaseAttrs | DeviceData['attr'] | null = control
-      ? this.#attrs
-      : await this.#getDeviceData()
+    const attr = control ? this.#attrs : await this.#getDeviceData()
     this.#attrs = {}
     if (attr) {
       await this.#updateMode(attr.mode)
@@ -368,7 +363,7 @@ class HeatzyDevice extends Device {
     control = false,
   ): Promise<void> {
     if (typeof mode !== 'undefined' && typeof time !== 'undefined') {
-      let currentMode: DerogMode = DerogMode.off
+      let currentMode = DerogMode.off
       let currentTime = 0
       if (Number(this.getCapabilityValue('derog_time_vacation'))) {
         currentMode = DerogMode.vacation
@@ -402,7 +397,7 @@ class HeatzyDevice extends Device {
 
   async #updateMode(mode: Mode | string | undefined): Promise<void> {
     if (typeof mode !== 'undefined') {
-      let newMode: string = typeof mode === 'number' ? Mode[mode] : mode
+      let newMode = typeof mode === 'number' ? Mode[mode] : mode
       if (newMode in MODE_ZH) {
         newMode = MODE_ZH[mode]
       }
@@ -410,7 +405,7 @@ class HeatzyDevice extends Device {
         this.#modeCapability,
         newMode as keyof typeof Mode,
       )
-      const isOn: boolean = Mode[newMode as keyof typeof Mode] !== Mode.stop
+      const isOn = Mode[newMode as keyof typeof Mode] !== Mode.stop
       await this.setCapabilityValue('onoff', isOn)
       if (newMode in PreviousModeValue) {
         await this.setStoreValue('previousMode', newMode as PreviousModeValue)

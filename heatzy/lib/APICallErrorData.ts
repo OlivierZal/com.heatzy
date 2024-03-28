@@ -14,7 +14,7 @@ const withErrorMessage = <T extends new (...args: any[]) => APICallContextData>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): new (...args: any[]) => APICallContextDataWithErrorMessage =>
   class extends base {
-    public readonly errorMessage: string = error.message
+    public readonly errorMessage = error.message
   }
 
 const createAPICallErrorData = (

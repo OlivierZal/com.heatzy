@@ -11,7 +11,7 @@ import type { LoginCredentials } from '../../heatzy/types'
 import type PairSession from 'homey/lib/PairSession'
 
 export = class HeatzyDriver extends Driver {
-  readonly #app: HeatzyApp = this.homey.app as HeatzyApp
+  readonly #app = this.homey.app as HeatzyApp
 
   public getRequiredCapabilities(
     productKey: string,

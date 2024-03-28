@@ -5,7 +5,7 @@ import type { LoginCredentials } from './heatzy/types'
 import { Settings as LuxonSettings } from 'luxon'
 
 export = class HeatzyApp extends App {
-  public readonly heatzyAPI: HeatzyAPI = new HeatzyAPI(
+  public readonly heatzyAPI = new HeatzyAPI(
     this.homey.settings,
     this.log.bind(this),
     this.error.bind(this),

@@ -1,6 +1,6 @@
 import type { InternalAxiosRequestConfig } from 'axios'
 
-const ORDER: string[] = [
+const ORDER = [
   'dataType',
   'method',
   'url',
