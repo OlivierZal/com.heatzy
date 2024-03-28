@@ -39,23 +39,16 @@ export = class HeatzyDriver extends Driver {
   }
 
   public async onPair(session: PairSession): Promise<void> {
-    session.setHandler(
-      'login',
-      async (data: LoginCredentials): Promise<boolean> =>
-        this.#app.applyLogin(data),
+    session.setHandler('login', async (data: LoginCredentials) =>
+      this.#app.applyLogin(data),
     )
-    session.setHandler(
-      'list_devices',
-      async (): Promise<DeviceDetails[]> => this.#discoverDevices(),
-    )
+    session.setHandler('list_devices', async () => this.#discoverDevices())
     return Promise.resolve()
   }
 
   public async onRepair(session: PairSession): Promise<void> {
-    session.setHandler(
-      'login',
-      async (data: LoginCredentials): Promise<boolean> =>
-        this.#app.applyLogin(data),
+    session.setHandler('login', async (data: LoginCredentials) =>
+      this.#app.applyLogin(data),
     )
     return Promise.resolve()
   }
@@ -82,12 +75,12 @@ export = class HeatzyDriver extends Driver {
   #registerDerogTimeRunListeners(): void {
     this.homey.flow
       .getConditionCard('derog_time_boost_condition')
-      .registerRunListener((args: FlowArgs): boolean =>
+      .registerRunListener((args: FlowArgs) =>
         Boolean(Number(args.device.getCapabilityValue('derog_time_boost'))),
       )
     this.homey.flow
       .getActionCard('derog_time_boost_action')
-      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+      .registerRunListener(async (args: FlowArgs) => {
         await args.device.triggerCapabilityListener(
           'derog_time_boost',
           args.derog_time,
@@ -99,12 +92,12 @@ export = class HeatzyDriver extends Driver {
     this.homey.flow
       .getConditionCard(`${capability}_condition`)
       .registerRunListener(
-        (args: FlowArgs): boolean =>
+        (args: FlowArgs) =>
           args.device.getCapabilityValue(capability) === args.mode,
       )
     this.homey.flow
       .getActionCard(`${capability}_action`)
-      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+      .registerRunListener(async (args: FlowArgs) => {
         await args.device.triggerCapabilityListener(capability, args.mode)
       })
   }
@@ -112,12 +105,12 @@ export = class HeatzyDriver extends Driver {
   #registerOnOffRunListeners(): void {
     this.homey.flow
       .getConditionCard('onoff.timer_condition')
-      .registerRunListener((args: FlowArgs): boolean =>
+      .registerRunListener((args: FlowArgs) =>
         args.device.getCapabilityValue('onoff.timer'),
       )
     this.homey.flow
       .getActionCard('onoff.timer_action')
-      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+      .registerRunListener(async (args: FlowArgs) => {
         await args.device.triggerCapabilityListener('onoff.timer', args.onoff)
       })
   }
@@ -133,7 +126,7 @@ export = class HeatzyDriver extends Driver {
   #registerTargetTemperatureRunListener(): void {
     this.homey.flow
       .getActionCard('target_temperature.complement_action')
-      .registerRunListener(async (args: FlowArgs): Promise<void> => {
+      .registerRunListener(async (args: FlowArgs) => {
         await args.device.triggerCapabilityListener(
           'target_temperature.complement',
           args.target_temperature,
