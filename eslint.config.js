@@ -26,6 +26,7 @@ module.exports = [
     rules: {
       ...js.configs.all.rules,
       ...importPlugin.configs.recommended.rules,
+      '@stylistic/lines-between-class-members': 'error',
       'max-lines': 'off',
       'no-ternary': 'off',
       'no-underscore-dangle': ['error', { allow: ['__'] }],
@@ -178,6 +179,5 @@ module.exports = [
       },
     },
   },
-  { rules: { '@stylistic/lines-between-class-members': 'error' } },
   prettier,
 ]
