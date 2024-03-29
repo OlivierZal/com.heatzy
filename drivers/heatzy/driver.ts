@@ -11,7 +11,7 @@ import type { LoginCredentials } from '../../heatzy/types'
 import type PairSession from 'homey/lib/PairSession'
 
 export = class HeatzyDriver extends Driver {
-  readonly #app = this.homey.app as HeatzyApp
+  readonly #heatzyAPI = (this.homey.app as HeatzyApp).heatzyAPI
 
   public getRequiredCapabilities(
     productKey: string,
@@ -40,7 +40,7 @@ export = class HeatzyDriver extends Driver {
 
   public async onPair(session: PairSession): Promise<void> {
     session.setHandler('login', async (data: LoginCredentials) =>
-      this.#app.applyLogin(data),
+      this.#heatzyAPI.applyLogin(data),
     )
     session.setHandler('list_devices', async () => this.#discoverDevices())
     return Promise.resolve()
@@ -48,14 +48,14 @@ export = class HeatzyDriver extends Driver {
 
   public async onRepair(session: PairSession): Promise<void> {
     session.setHandler('login', async (data: LoginCredentials) =>
-      this.#app.applyLogin(data),
+      this.#heatzyAPI.applyLogin(data),
     )
     return Promise.resolve()
   }
 
   async #discoverDevices(): Promise<DeviceDetails[]> {
     try {
-      return (await this.#app.heatzyAPI.bindings()).data.devices.map(
+      return (await this.#heatzyAPI.bindings()).data.devices.map(
         ({
           dev_alias: name,
           did,

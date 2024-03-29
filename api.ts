@@ -111,7 +111,7 @@ export = {
     body: LoginCredentials
     homey: Homey
   }): Promise<boolean> {
-    return (homey.app as HeatzyApp).applyLogin(body, true)
+    return (homey.app as HeatzyApp).heatzyAPI.applyLogin(body, true)
   },
   async setDeviceSettings<K extends keyof Settings>({
     homey,

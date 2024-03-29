@@ -29,7 +29,6 @@ const MODE_ZH: Record<string, keyof typeof Mode> = {
   舒适: 'cft',
   解冻: 'fro',
 }
-
 const NUMBER_10 = 10
 
 const getVacationEnd = (days: number): string =>
