@@ -243,12 +243,10 @@ const updateCredentialElement = (
   return null
 }
 
-const credentialKeys: (keyof LoginCredentials)[] = ['username', 'password']
-
 const updateCredentialElements = (): void => {
-  ;[usernameElement, passwordElement] = credentialKeys.map(
-    updateCredentialElement,
-  )
+  ;[usernameElement, passwordElement] = (
+    ['username', 'password'] as (keyof LoginCredentials)[]
+  ).map(updateCredentialElement)
 }
 
 const processSettingValue = (
