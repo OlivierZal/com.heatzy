@@ -480,15 +480,15 @@ const addAuthenticateEventListener = (homey: Homey): void => {
 
 const load = async (homey: Homey): Promise<void> => {
   addAuthenticateEventListener(homey)
-  if (typeof homeySettings.token === 'undefined') {
-    needsAuthentication()
-    return
+  if (typeof homeySettings.token !== 'undefined') {
+    try {
+      await login(homey)
+      return
+    } catch (error) {
+      // Skip
+    }
   }
-  try {
-    await login(homey)
-  } catch (error) {
-    needsAuthentication()
-  }
+  needsAuthentication()
 }
 
 // eslint-disable-next-line func-style
