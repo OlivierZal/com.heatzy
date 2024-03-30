@@ -239,16 +239,17 @@ class HeatzyDevice extends Device {
   }
 
   async #control(postData: DevicePostDataAny | null): Promise<Data | null> {
+    let data: Data | null = null
     if (postData) {
       try {
-        const { data } = await this.#heatzyAPI.control(this.#id, postData)
-        await this.#updateCapabilities(true)
-        return data
+        ;({ data } = await this.#heatzyAPI.control(this.#id, postData))
       } catch (error) {
-        await this.#updateCapabilities()
+        // Skip
+      } finally {
+        await this.#updateCapabilities(Boolean(data))
       }
     }
-    return null
+    return data
   }
 
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {

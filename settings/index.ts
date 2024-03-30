@@ -254,10 +254,10 @@ const processSettingValue = (
 ): ValueOf<Settings> | null => {
   if (element.value) {
     if (element instanceof HTMLInputElement && element.type === 'checkbox') {
-      if (!element.indeterminate) {
-        return element.checked
+      if (element.indeterminate) {
+        return null
       }
-      return null
+      return element.checked
     }
     return ['true', 'false'].includes(element.value)
       ? element.value === 'true'
@@ -330,14 +330,7 @@ const addApplySettingsEventListener = (
   elements: HTMLSelectElement[],
 ): void => {
   applySettingsElement.addEventListener('click', () => {
-    let body: Settings = {}
-    try {
-      body = buildSettingsBody(elements)
-    } catch (error) {
-      // @ts-expect-error: `homey` is partially typed
-      homey.alert(error instanceof Error ? error.message : String(error))
-      return
-    }
+    const body = buildSettingsBody(elements)
     if (!Object.keys(body).length) {
       // @ts-expect-error: `homey` is partially typed
       homey.alert(homey.__('settings.devices.apply.nothing'))
