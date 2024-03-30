@@ -244,7 +244,7 @@ class HeatzyDevice extends Device {
       try {
         ;({ data } = await this.#heatzyAPI.control(this.#id, postData))
       } catch (error) {
-        // Skip
+        // Error handling is delegated to the interceptor
       } finally {
         await this.#updateCapabilities(Boolean(data))
       }
