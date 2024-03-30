@@ -109,7 +109,6 @@ class HeatzyDevice extends Device {
           this.#attrs.mode = Mode[mode]
         }
         break
-      /* eslint-disable camelcase */
       case 'derog_time_boost':
         this.#attrs.derog_mode = Number(value) ? DerogMode.boost : DerogMode.off
         this.#attrs.derog_time = Number(value)
@@ -132,7 +131,6 @@ class HeatzyDevice extends Device {
       case 'target_temperature.complement':
         this.#attrs.cft_tempH = (value as number) / NUMBER_10
         break
-      /* eslint-enable camelcase */
       default:
     }
   }

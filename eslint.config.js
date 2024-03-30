@@ -27,6 +27,19 @@ module.exports = [
       ...js.configs.all.rules,
       ...importPlugin.configs.recommended.rules,
       '@stylistic/lines-between-class-members': 'error',
+      camelcase: [
+        'error',
+        {
+          allow: [
+            '^cft_tempH$',
+            '^cft_tempL$',
+            '^derog_mode$',
+            '^derog_time$',
+            '^lock_switch$',
+            '^timer_switch$',
+          ],
+        },
+      ],
       'max-lines': 'off',
       'no-ternary': 'off',
       'no-underscore-dangle': ['error', { allow: ['__'] }],
