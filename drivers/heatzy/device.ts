@@ -239,8 +239,8 @@ class HeatzyDevice extends Device {
   }
 
   async #control(postData: DevicePostDataAny | null): Promise<Data | null> {
-    let data: Data | null = null
     if (postData) {
+      let data: Data | null = null
       try {
         ;({ data } = await this.#heatzyAPI.control(this.#id, postData))
         return data
