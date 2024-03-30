@@ -243,13 +243,14 @@ class HeatzyDevice extends Device {
     if (postData) {
       try {
         ;({ data } = await this.#heatzyAPI.control(this.#id, postData))
+        return data
       } catch (error) {
-        // Error handling is delegated to the interceptor
+        return null
       } finally {
         await this.#updateCapabilities(Boolean(data))
       }
     }
-    return data
+    return null
   }
 
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
