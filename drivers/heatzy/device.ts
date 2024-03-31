@@ -247,7 +247,7 @@ class HeatzyDevice extends Device {
       } catch (error) {
         return null
       } finally {
-        await this.#updateCapabilities(Boolean(data))
+        await this.#updateCapabilities(data !== null)
       }
     }
     return null
