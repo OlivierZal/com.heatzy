@@ -93,48 +93,6 @@ class HeatzyDevice extends Device {
     return (super.getStoreValue(key) as Store[K]) ?? PreviousModeValue.eco
   }
 
-  public async onCapability<K extends keyof Capabilities>(
-    capability: K,
-    value: Capabilities[K],
-  ): Promise<void> {
-    let mode: keyof typeof Mode | null = null
-    switch (capability) {
-      case 'onoff':
-      case this.#modeCapability:
-        mode = await this.#getMode(
-          capability,
-          value as boolean | keyof typeof Mode,
-        )
-        if (mode) {
-          this.#attrs.mode = Mode[mode]
-        }
-        break
-      case 'derog_time_boost':
-        this.#attrs.derog_mode = Number(value) ? DerogMode.boost : DerogMode.off
-        this.#attrs.derog_time = Number(value)
-        break
-      case 'derog_time_vacation':
-        this.#attrs.derog_mode = Number(value)
-          ? DerogMode.vacation
-          : DerogMode.off
-        this.#attrs.derog_time = Number(value)
-        break
-      case 'locked':
-        this.#attrs.lock_switch = Number(value)
-        break
-      case 'onoff.timer':
-        this.#attrs.timer_switch = Number(value)
-        break
-      case 'target_temperature':
-        this.#attrs.cft_tempL = (value as number) * NUMBER_10
-        break
-      case 'target_temperature.complement':
-        this.#attrs.cft_tempH = (value as number) / NUMBER_10
-        break
-      default:
-    }
-  }
-
   public onDeleted(): void {
     this.homey.clearTimeout(this.#syncTimeout)
   }
@@ -313,6 +271,48 @@ class HeatzyDevice extends Device {
       }, Promise.resolve())
   }
 
+  async #onCapability<K extends keyof Capabilities>(
+    capability: K,
+    value: Capabilities[K],
+  ): Promise<void> {
+    let mode: keyof typeof Mode | null = null
+    switch (capability) {
+      case 'onoff':
+      case this.#modeCapability:
+        mode = await this.#getMode(
+          capability,
+          value as boolean | keyof typeof Mode,
+        )
+        if (mode) {
+          this.#attrs.mode = Mode[mode]
+        }
+        break
+      case 'derog_time_boost':
+        this.#attrs.derog_mode = Number(value) ? DerogMode.boost : DerogMode.off
+        this.#attrs.derog_time = Number(value)
+        break
+      case 'derog_time_vacation':
+        this.#attrs.derog_mode = Number(value)
+          ? DerogMode.vacation
+          : DerogMode.off
+        this.#attrs.derog_time = Number(value)
+        break
+      case 'locked':
+        this.#attrs.lock_switch = Number(value)
+        break
+      case 'onoff.timer':
+        this.#attrs.timer_switch = Number(value)
+        break
+      case 'target_temperature':
+        this.#attrs.cft_tempL = (value as number) * NUMBER_10
+        break
+      case 'target_temperature.complement':
+        this.#attrs.cft_tempH = (value as number) / NUMBER_10
+        break
+      default:
+    }
+  }
+
   #registerCapabilityListeners<K extends keyof Capabilities>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.driver.manifest.capabilities as K[]).forEach((capability) => {
@@ -320,7 +320,7 @@ class HeatzyDevice extends Device {
         capability,
         async (value: Capabilities[K]) => {
           this.homey.clearTimeout(this.#syncTimeout)
-          await this.onCapability(capability, value)
+          await this.#onCapability(capability, value)
           this.#applySyncToDevice()
         },
       )
