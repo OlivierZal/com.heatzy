@@ -37,12 +37,6 @@ interface SettingManager {
 const LOGIN_URL = '/login'
 const NUMBER_0 = 0
 
-const throwIfRequested = (error: unknown, raise: boolean): void => {
-  if (raise) {
-    throw new Error(error instanceof Error ? error.message : String(error))
-  }
-}
-
 export default class HeatzyAPI {
   #retry = true
 
@@ -74,19 +68,21 @@ export default class HeatzyAPI {
     this.#setupAxiosInterceptors()
   }
 
-  public async applyLogin(
-    { password, username }: LoginCredentials = {
+  public async applyLogin(data?: LoginCredentials): Promise<boolean> {
+    const { password, username } = data ?? {
       password: this.#settingManager.get('password') ?? '',
       username: this.#settingManager.get('username') ?? '',
-    },
-    raise = false,
-  ): Promise<boolean> {
+    }
     if (username && password) {
       try {
         await this.login({ password, username })
         return true
       } catch (error) {
-        throwIfRequested(error, raise)
+        if (typeof data !== 'undefined') {
+          throw new Error(
+            error instanceof Error ? error.message : String(error),
+          )
+        }
       }
     }
     return false
