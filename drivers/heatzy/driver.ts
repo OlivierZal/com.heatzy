@@ -39,6 +39,15 @@ export = class HeatzyDriver extends Driver {
   }
 
   public async onPair(session: PairSession): Promise<void> {
+    session.setHandler('showView', async (view: string) => {
+      if (view === 'loading') {
+        if (await this.#heatzyAPI.applyLogin()) {
+          await session.showView('list_devices')
+          return
+        }
+        await session.showView('login')
+      }
+    })
     session.setHandler('login', async (data: LoginCredentials) =>
       this.#heatzyAPI.applyLogin(data),
     )
