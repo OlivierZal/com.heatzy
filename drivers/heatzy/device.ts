@@ -13,6 +13,7 @@ import {
   type ModeCapability,
   OnModeSetting,
   PreviousModeValue,
+  type SetCapabilities,
   type Settings,
   type Store,
 } from '../../types'
@@ -271,9 +272,9 @@ class HeatzyDevice extends Device {
       }, Promise.resolve())
   }
 
-  async #onCapability<K extends keyof Capabilities>(
+  async #onCapability<K extends keyof SetCapabilities>(
     capability: K,
-    value: Capabilities[K],
+    value: SetCapabilities[K],
   ): Promise<void> {
     let mode: keyof typeof Mode | null = null
     switch (capability) {
@@ -313,12 +314,12 @@ class HeatzyDevice extends Device {
     }
   }
 
-  #registerCapabilityListeners<K extends keyof Capabilities>(): void {
+  #registerCapabilityListeners<K extends keyof SetCapabilities>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ;(this.driver.manifest.capabilities as K[]).forEach((capability) => {
       this.registerCapabilityListener(
         capability,
-        async (value: Capabilities[K]) => {
+        async (value: SetCapabilities[K]) => {
           this.homey.clearTimeout(this.#syncTimeout)
           await this.#onCapability(capability, value)
           this.#applySyncToDevice()

@@ -17,9 +17,7 @@ export enum OnModeSetting {
   previous = 'previous',
 }
 
-export interface Capabilities {
-  readonly derog_end: string | null
-  readonly derog_mode: keyof typeof DerogMode
+export interface SetCapabilities {
   readonly derog_time_boost: string
   readonly derog_time_vacation: string
   readonly locked: boolean
@@ -29,6 +27,11 @@ export interface Capabilities {
   readonly 'onoff.timer': boolean
   readonly target_temperature: number
   readonly 'target_temperature.complement': number
+}
+
+export interface Capabilities extends SetCapabilities {
+  readonly derog_end: string | null
+  readonly derog_mode: keyof typeof DerogMode
 }
 
 export type ValueOf<T> = T[keyof T]
