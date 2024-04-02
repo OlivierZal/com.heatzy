@@ -185,14 +185,14 @@ class HeatzyDevice extends Device {
   }
 
   #buildPostData(): DevicePostDataAny | null {
-    if (!Object.keys(this.#attrs).length) {
-      return null
-    }
-    if (!this.#isFirstGen) {
-      return { attrs: this.#attrs }
-    }
-    if (typeof this.#attrs.mode !== 'undefined') {
-      return { raw: [NUMBER_1, NUMBER_1, this.#attrs.mode] }
+    if (Object.keys(this.#attrs).length) {
+      if (this.#isFirstGen) {
+        if (typeof this.#attrs.mode !== 'undefined') {
+          return { raw: [NUMBER_1, NUMBER_1, this.#attrs.mode] }
+        }
+      } else {
+        return { attrs: this.#attrs }
+      }
     }
     return null
   }
