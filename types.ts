@@ -18,14 +18,14 @@ export enum OnModeSetting {
 }
 
 export interface SetCapabilities {
-  readonly derog_time_boost: string
-  readonly derog_time_vacation: string
-  readonly locked: boolean
-  readonly mode: keyof typeof Mode
-  readonly mode3: keyof typeof Mode
-  readonly onoff: boolean
+  readonly 'derog_time_boost': string
+  readonly 'derog_time_vacation': string
+  readonly 'locked': boolean
+  readonly 'mode': keyof typeof Mode
+  readonly 'mode3': keyof typeof Mode
+  readonly 'onoff': boolean
   readonly 'onoff.timer': boolean
-  readonly target_temperature: number
+  readonly 'target_temperature': number
   readonly 'target_temperature.complement': number
 }
 
@@ -102,7 +102,7 @@ export interface DriverSetting {
   readonly max?: number
   readonly min?: number
   readonly units?: string
-  readonly values?: readonly { readonly id: string; readonly label: string }[]
+  readonly values?: readonly { readonly id: string, readonly label: string }[]
   title: string
   readonly driverId: string
   readonly id: string

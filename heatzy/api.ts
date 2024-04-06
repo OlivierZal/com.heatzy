@@ -52,7 +52,6 @@ export default class HeatzyAPI {
 
   public constructor(
     settingManager: SettingManager,
-    // eslint-disable-next-line no-console
     logger = console.log,
     errorLogger = logger,
   ) {
@@ -77,7 +76,8 @@ export default class HeatzyAPI {
       try {
         await this.login({ password, username })
         return true
-      } catch (error) {
+      }
+      catch (error) {
         if (typeof data !== 'undefined') {
           throw new Error(
             error instanceof Error ? error.message : String(error),
@@ -116,9 +116,9 @@ export default class HeatzyAPI {
     const apiCallData = createAPICallErrorData(error)
     this.#errorLogger(String(apiCallData))
     if (
-      error.response?.status === HttpStatusCode.BadRequest &&
-      this.#retry &&
-      error.config?.url !== LOGIN_URL
+      error.response?.status === HttpStatusCode.BadRequest
+      && this.#retry
+      && error.config?.url !== LOGIN_URL
     ) {
       this.#handleRetry()
       if ((await this.applyLogin()) && error.config) {

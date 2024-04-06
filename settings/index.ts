@@ -49,7 +49,7 @@ const settingsCommonElement = document.getElementById(
 ) as HTMLDivElement
 
 const disableButtons = (value = true): void => {
-  ;[applySettingsElement, refreshSettingsElement].forEach((buttonElement) => {
+  [applySettingsElement, refreshSettingsElement].forEach((buttonElement) => {
     if (value) {
       buttonElement.classList.add('is-disabled')
       return
@@ -169,7 +169,7 @@ const getDriverSettings = (): void => {
         return acc
       }
       if (setting.groupId === 'options') {
-        if (!acc.some((option) => option.id === setting.id)) {
+        if (!acc.some(option => option.id === setting.id)) {
           acc.push(setting)
         }
       }
@@ -244,7 +244,7 @@ const updateCredentialElement = (
 }
 
 const updateCredentialElements = (): void => {
-  ;[usernameElement, passwordElement] = (
+  [usernameElement, passwordElement] = (
     ['username', 'password'] as (keyof LoginCredentials)[]
   ).map(updateCredentialElement)
 }
@@ -396,12 +396,12 @@ const createSelectElement = (
   ;[
     { id: '' },
     ...(setting.type === 'checkbox'
-      ? ['false', 'true'].map((id) => ({
+      ? ['false', 'true'].map(id => ({
           id,
           label: homey.__(`settings.boolean.${id}`),
         }))
       : setting.values ?? []),
-  ].forEach(({ id, label }: { label?: string; id: string }) => {
+  ].forEach(({ id, label }: { label?: string, id: string }) => {
     const optionElement = document.createElement('option')
     optionElement.value = id
     if (typeof label !== 'undefined') {
@@ -484,7 +484,8 @@ const load = async (homey: Homey): Promise<void> => {
     try {
       await login(homey)
       return
-    } catch (error) {
+    }
+    catch (error) {
       // Skip
     }
   }
