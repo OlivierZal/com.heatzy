@@ -114,15 +114,15 @@ class HeatzyDevice extends Device {
     newSettings: Settings
   }): Promise<void> {
     if (
-      changedKeys.includes('on_mode')
-      && typeof newSettings.on_mode !== 'undefined'
+      changedKeys.includes('on_mode') &&
+      typeof newSettings.on_mode !== 'undefined'
     ) {
       this.#setOnModeValue(newSettings.on_mode)
     }
     if (
-      changedKeys.includes('always_on')
-      && newSettings.always_on === true
-      && !this.getCapabilityValue('onoff')
+      changedKeys.includes('always_on') &&
+      newSettings.always_on === true &&
+      !this.getCapabilityValue('onoff')
     ) {
       await this.triggerCapabilityListener('onoff', true)
     }
@@ -190,8 +190,7 @@ class HeatzyDevice extends Device {
         if (typeof this.#attrs.mode !== 'undefined') {
           return { raw: [NUMBER_1, NUMBER_1, this.#attrs.mode] }
         }
-      }
-      else {
+      } else {
         return { attrs: this.#attrs }
       }
     }
@@ -202,13 +201,11 @@ class HeatzyDevice extends Device {
     if (postData) {
       let data: Data | null = null
       try {
-        ({ data } = await this.#heatzyAPI.control(this.#id, postData))
+        ;({ data } = await this.#heatzyAPI.control(this.#id, postData))
         return data
-      }
-      catch (error) {
+      } catch (error) {
         return null
-      }
-      finally {
+      } finally {
         await this.#updateCapabilities(data !== null)
       }
     }
@@ -218,8 +215,7 @@ class HeatzyDevice extends Device {
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
       return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
-    }
-    catch (error) {
+    } catch (error) {
       return null
     }
   }
@@ -233,8 +229,7 @@ class HeatzyDevice extends Device {
       mode = (value as boolean)
         ? this.#onModeValue
         : (Mode[Mode.stop] as keyof typeof Mode)
-    }
-    else {
+    } else {
       mode = value as keyof typeof Mode
     }
     if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
@@ -270,7 +265,7 @@ class HeatzyDevice extends Device {
       Promise.resolve(),
     )
     await this.getCapabilities()
-      .filter(capability => !requiredCapabilities.includes(capability))
+      .filter((capability) => !requiredCapabilities.includes(capability))
       .reduce<Promise<void>>(async (acc, capability) => {
         await acc
         await this.removeCapability(capability)
@@ -321,7 +316,7 @@ class HeatzyDevice extends Device {
 
   #registerCapabilityListeners<K extends keyof SetCapabilities>(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    (this.driver.manifest.capabilities as K[]).forEach((capability) => {
+    ;(this.driver.manifest.capabilities as K[]).forEach((capability) => {
       this.registerCapabilityListener(
         capability,
         async (value: SetCapabilities[K]) => {
@@ -334,8 +329,8 @@ class HeatzyDevice extends Device {
   }
 
   #setOnModeValue(value: OnModeSetting): void {
-    this.#onModeValue
-      = value === OnModeSetting.previous
+    this.#onModeValue =
+      value === OnModeSetting.previous
         ? this.getStoreValue('previousMode')
         : PreviousModeValue[value]
   }
@@ -371,8 +366,7 @@ class HeatzyDevice extends Device {
       if (Number(this.getCapabilityValue('derog_time_vacation'))) {
         currentMode = DerogMode.vacation
         currentTime = Number(this.getCapabilityValue('derog_time_vacation'))
-      }
-      else if (Number(this.getCapabilityValue('derog_time_boost'))) {
+      } else if (Number(this.getCapabilityValue('derog_time_boost'))) {
         currentMode = DerogMode.boost
         currentTime = Number(this.getCapabilityValue('derog_time_boost'))
       }

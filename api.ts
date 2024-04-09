@@ -13,14 +13,14 @@ import type { LoginCredentials } from './heatzy/types'
 
 const getDevices = (homey: Homey): HeatzyDevice[] =>
   Object.values(homey.drivers.getDrivers()).flatMap(
-    driver => driver.getDevices() as HeatzyDevice[],
+    (driver) => driver.getDevices() as HeatzyDevice[],
   )
 
 const getDriverSettings = (
   driver: ManifestDriver,
   language: string,
 ): DriverSetting[] =>
-  (driver.settings ?? []).flatMap(setting =>
+  (driver.settings ?? []).flatMap((setting) =>
     (setting.children ?? []).map(
       ({ id, max, min, label, type, units, values }) => ({
         driverId: driver.id,
@@ -32,7 +32,7 @@ const getDriverSettings = (
         title: label[language],
         type,
         units,
-        values: values?.map(value => ({
+        values: values?.map((value) => ({
           id: value.id,
           label: value.label[language],
         })),
@@ -49,7 +49,7 @@ const getDriverLoginSetting = (
   )
   return driverLoginSetting
     ? Object.values(
-      Object.entries(driverLoginSetting.options).reduce<
+        Object.entries(driverLoginSetting.options).reduce<
           Record<string, DriverSetting>
         >((acc, [option, label]) => {
           const isPassword = option.startsWith('password')
@@ -63,11 +63,11 @@ const getDriverLoginSetting = (
               type: isPassword ? 'password' : 'text',
             }
           }
-          acc[key][option.endsWith('Placeholder') ? 'placeholder' : 'title']
-            = label[language]
+          acc[key][option.endsWith('Placeholder') ? 'placeholder' : 'title'] =
+            label[language]
           return acc
         }, {}),
-    )
+      )
     : []
 }
 
@@ -123,11 +123,11 @@ export = {
     await Promise.all(
       getDevices(homey).map(async (device) => {
         const changedKeys = (Object.keys(body) as K[]).filter(
-          changedKey => body[changedKey] !== device.getSetting(changedKey),
+          (changedKey) => body[changedKey] !== device.getSetting(changedKey),
         )
         if (changedKeys.length) {
           const deviceSettings = Object.fromEntries(
-            changedKeys.map(key => [key, body[key]]),
+            changedKeys.map((key) => [key, body[key]]),
           )
           await device.setSettings(deviceSettings)
           await device.onSettings({
