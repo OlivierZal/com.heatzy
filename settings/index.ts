@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-call, max-lines */
 import type {
   DeviceSetting,
   DeviceSettings,

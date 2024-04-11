@@ -6,11 +6,22 @@ const prettier = require('eslint-config-prettier')
 const stylistic = require('@stylistic/eslint-plugin')
 const tsEslint = require('typescript-eslint')
 
+const eslintConfig = (function filteredEslintConfig() {
+  'use strict'
+  return {
+    ...eslint.configs.all,
+    rules: Object.fromEntries(
+      Object.entries(eslint.configs.all.rules).filter(
+        ([rule]) => rule !== 'no-useless-assignment',
+      ),
+    ),
+  }
+})()
+
 module.exports = tsEslint.config(
   { ignores: ['.homeybuild/'] },
-  eslint.configs.recommended,
-  ...tsEslint.configs.strictTypeChecked,
-  ...tsEslint.configs.stylisticTypeChecked,
+  eslintConfig,
+  ...tsEslint.configs.all,
   ...markdown.configs.recommended,
   {
     languageOptions: { parserOptions: { project: true } },
@@ -141,13 +152,29 @@ module.exports = tsEslint.config(
           },
         },
       ],
+      '@typescript-eslint/naming-convention': 'off',
+      '@typescript-eslint/no-magic-numbers': ['error', { ignoreEnums: true }],
       '@typescript-eslint/no-unused-vars': [
         'error',
         { varsIgnorePattern: 'onHomeyReady' },
       ],
-      'func-style': 'error',
+      '@typescript-eslint/prefer-readonly-parameter-types': 'off',
+      camelcase: [
+        'error',
+        {
+          allow: [
+            '^cft_tempH$',
+            '^cft_tempL$',
+            '^derog_mode$',
+            '^derog_time$',
+            '^lock_switch$',
+            '^timer_switch$',
+          ],
+        },
+      ],
+      'no-ternary': 'off',
       'no-underscore-dangle': ['error', { allow: ['__'] }],
-      'sort-imports': 'error',
+      'one-var': 'off',
       'sort-keys': ['error', 'asc', { natural: true }],
     },
   },
@@ -174,6 +201,8 @@ module.exports = tsEslint.config(
     },
     rules: {
       ...tsEslint.configs.disableTypeChecked.rules,
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-var-requires': 'off',
     },
   },

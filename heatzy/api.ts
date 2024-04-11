@@ -52,6 +52,7 @@ export default class HeatzyAPI {
 
   public constructor(
     settingManager: SettingManager,
+    // eslint-disable-next-line no-console
     logger = console.log,
     errorLogger = logger,
   ) {
