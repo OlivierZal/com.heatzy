@@ -45,6 +45,7 @@ const addToLogs =
         )
       }
     }
+
     Object.defineProperty(LogsDecorator, 'name', { value: context.name })
     return LogsDecorator
   }
