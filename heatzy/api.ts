@@ -125,7 +125,7 @@ export default class HeatzyAPI {
         return this.#api.request(error.config)
       }
     }
-    return Promise.reject(new Error(apiCallData.errorMessage))
+    throw new Error(apiCallData.errorMessage)
   }
 
   async #handleRequest(
