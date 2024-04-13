@@ -259,8 +259,8 @@ const processSettingValue = (
       }
       return element.checked
     }
-    return ['true', 'false'].includes(element.value)
-      ? element.value === 'true'
+    return ['true', 'false'].includes(element.value) ?
+        element.value === 'true'
       : (element.value as OnModeSetting)
   }
   return null
@@ -289,8 +289,8 @@ const buildSettingsBody = (
       .map((element) => {
         const [settingId] = element.id.split('--')
         const settingValue = processSettingValue(element)
-        return settingValue !== null && shouldUpdate(settingId, settingValue)
-          ? [settingId, settingValue]
+        return settingValue !== null && shouldUpdate(settingId, settingValue) ?
+            [settingId, settingValue]
           : [null]
       })
       .filter((entry): entry is [string, ValueOf<Settings>] => {
@@ -395,12 +395,12 @@ const createSelectElement = (
   selectElement.id = `${setting.id}--setting`
   ;[
     { id: '' },
-    ...(setting.type === 'checkbox'
-      ? ['false', 'true'].map((id) => ({
-          id,
-          label: homey.__(`settings.boolean.${id}`),
-        }))
-      : setting.values ?? []),
+    ...(setting.type === 'checkbox' ?
+      ['false', 'true'].map((id) => ({
+        id,
+        label: homey.__(`settings.boolean.${id}`),
+      }))
+    : setting.values ?? []),
   ].forEach(({ id, label }: { label?: string; id: string }) => {
     const optionElement = document.createElement('option')
     optionElement.value = id

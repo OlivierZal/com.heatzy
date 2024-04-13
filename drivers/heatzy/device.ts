@@ -65,9 +65,8 @@ class HeatzyDevice extends Device {
 
   readonly #isFirstPilot = isFirstPilot(this.#data.productName)
 
-  readonly #modeCapability: ModeCapability = this.#isFirstPilot
-    ? 'mode'
-    : 'mode3'
+  readonly #modeCapability: ModeCapability =
+    this.#isFirstPilot ? 'mode' : 'mode3'
 
   readonly #productKey = this.#data.productKey
 
@@ -227,8 +226,9 @@ class HeatzyDevice extends Device {
   ): Promise<keyof typeof Mode | null> {
     let mode: keyof typeof Mode | null = null
     if (capability === 'onoff') {
-      mode = (value as boolean)
-        ? this.#onModeValue
+      mode =
+        (value as boolean) ?
+          this.#onModeValue
         : (Mode[Mode.stop] as keyof typeof Mode)
     } else {
       mode = value as keyof typeof Mode
@@ -294,9 +294,8 @@ class HeatzyDevice extends Device {
         this.#attrs.derog_time = Number(value)
         break
       case 'derog_time_vacation':
-        this.#attrs.derog_mode = Number(value)
-          ? DerogMode.vacation
-          : DerogMode.off
+        this.#attrs.derog_mode =
+          Number(value) ? DerogMode.vacation : DerogMode.off
         this.#attrs.derog_time = Number(value)
         break
       case 'locked':
@@ -331,9 +330,9 @@ class HeatzyDevice extends Device {
 
   #setOnModeValue(value: OnModeSetting): void {
     this.#onModeValue =
-      value === OnModeSetting.previous
-        ? this.getStoreValue('previousMode')
-        : PreviousModeValue[value]
+      value === OnModeSetting.previous ?
+        this.getStoreValue('previousMode')
+      : PreviousModeValue[value]
   }
 
   async #syncToDevice(): Promise<void> {

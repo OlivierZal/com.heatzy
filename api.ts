@@ -47,8 +47,8 @@ const getDriverLoginSetting = (
   const driverLoginSetting = pair?.find(
     (pairSetting): pairSetting is LoginSetting => pairSetting.id === 'login',
   )
-  return driverLoginSetting
-    ? Object.values(
+  return driverLoginSetting ?
+      Object.values(
         Object.entries(driverLoginSetting.options).reduce<
           Record<string, DriverSetting>
         >((acc, [option, label]) => {

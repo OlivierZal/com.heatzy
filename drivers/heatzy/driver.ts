@@ -26,8 +26,8 @@ export = class HeatzyDriver extends Driver {
         if (capability.startsWith('target_temperature')) {
           return isGlow(productKey)
         }
-        return isFirstPilot(productName)
-          ? capability !== 'mode3'
+        return isFirstPilot(productName) ?
+            capability !== 'mode3'
           : capability !== 'mode'
       },
     )
