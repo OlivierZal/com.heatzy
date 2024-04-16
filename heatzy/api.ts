@@ -76,9 +76,7 @@ export default class HeatzyAPI {
         return true
       } catch (error) {
         if (typeof data !== 'undefined') {
-          throw new Error(
-            error instanceof Error ? error.message : String(error),
-          )
+          throw error
         }
       }
     }
