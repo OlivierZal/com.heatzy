@@ -27,6 +27,11 @@ interface APISettings {
   readonly username?: string | null
 }
 
+interface Logger {
+  readonly error: Console['error']
+  readonly log: Console['log']
+}
+
 interface SettingManager {
   get: <K extends keyof APISettings>(
     key: K,
@@ -44,21 +49,13 @@ export default class HeatzyAPI {
 
   readonly #api: AxiosInstance
 
-  readonly #errorLogger
-
-  readonly #logger
+  readonly #logger: Logger
 
   readonly #settingManager: SettingManager
 
-  public constructor(
-    settingManager: SettingManager,
-    // eslint-disable-next-line no-console
-    logger = console.log,
-    errorLogger = logger,
-  ) {
+  public constructor(settingManager: SettingManager, logger: Logger = console) {
     this.#settingManager = settingManager
     this.#logger = logger
-    this.#errorLogger = errorLogger
     this.#api = createAxiosInstance({
       baseURL: 'https://euapi.gizwits.com/app',
       headers: {
@@ -114,7 +111,7 @@ export default class HeatzyAPI {
 
   async #handleError(error: AxiosError): Promise<AxiosError> {
     const apiCallData = createAPICallErrorData(error)
-    this.#errorLogger(String(apiCallData))
+    this.#logger.error(String(apiCallData))
     if (
       error.response?.status === HttpStatusCode.BadRequest &&
       this.#retry &&
@@ -144,12 +141,12 @@ export default class HeatzyAPI {
         this.#settingManager.get('token'),
       )
     }
-    this.#logger(String(new APICallRequestData(newConfig)))
+    this.#logger.log(String(new APICallRequestData(newConfig)))
     return newConfig
   }
 
   #handleResponse(response: AxiosResponse): AxiosResponse {
-    this.#logger(String(new APICallResponseData(response)))
+    this.#logger.log(String(new APICallResponseData(response)))
     return response
   }
 
