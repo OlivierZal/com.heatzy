@@ -108,7 +108,8 @@ export default class HeatzyAPI {
   }
 
   async #handleError(error: AxiosError): Promise<AxiosError> {
-    this.#logger.error(String(createAPICallErrorData(error)))
+    const errorData = createAPICallErrorData(error)
+    this.#logger.error(String(errorData))
     if (
       error.response?.status === HttpStatusCode.BadRequest &&
       this.#retry &&
@@ -119,7 +120,7 @@ export default class HeatzyAPI {
         return this.#api.request(error.config)
       }
     }
-    throw error
+    throw new Error(errorData.errorMessage)
   }
 
   async #handleRequest(
