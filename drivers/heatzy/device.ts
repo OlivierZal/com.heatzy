@@ -11,6 +11,7 @@ import {
 import {
   type Capabilities,
   type DeviceDetails,
+  type ManifestDriver,
   type ModeCapability,
   OnModeSetting,
   PreviousModeValue,
@@ -315,8 +316,11 @@ class HeatzyDevice extends Device {
   }
 
   #registerCapabilityListeners<K extends keyof SetCapabilities>(): void {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ;(this.driver.manifest.capabilities as K[]).forEach((capability) => {
+    ;(
+      (this.driver.manifest as ManifestDriver).capabilities.filter(
+        (capability) => !['derog_end', 'derog_mode'].includes(capability),
+      ) as K[]
+    ).forEach((capability) => {
       this.registerCapabilityListener(
         capability,
         async (value: SetCapabilities[K]) => {

@@ -2,6 +2,7 @@ import type {
   DeviceSettings,
   DriverSetting,
   LoginSetting,
+  Manifest,
   ManifestDriver,
   Settings,
   ValueOf,
@@ -94,8 +95,7 @@ export = {
   getDriverSettings({ homey }: { homey: Homey }): DriverSetting[] {
     const app = homey.app as HeatzyApp
     const language = homey.i18n.getLanguage()
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (app.manifest.drivers as ManifestDriver[]).flatMap((driver) => {
+    return (app.manifest as Manifest).drivers.flatMap((driver) => {
       const settings = getDriverSettings(driver, language)
       const loginSetting = getDriverLoginSetting(driver, language)
       return [...settings, ...loginSetting]

@@ -1,7 +1,7 @@
 import type {
-  Capabilities,
   DeviceDetails,
   FlowArgs,
+  ManifestDriver,
   ModeCapability,
 } from '../../types'
 import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
@@ -20,8 +20,7 @@ export = class HeatzyDriver extends Driver {
     if (isFirstGen(productKey)) {
       return ['onoff', 'mode']
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (this.manifest.capabilities as (keyof Capabilities)[]).filter(
+    return (this.manifest as ManifestDriver).capabilities.filter(
       (capability) => {
         if (capability.startsWith('target_temperature')) {
           return isGlow(productKey)
