@@ -8,7 +8,7 @@ interface APICallContextDataWithErrorMessage extends APICallContextData {
   readonly errorMessage: string
 }
 
-const getErrorMessage = (error: AxiosError): string => {
+const getMessage = (error: AxiosError): string => {
   const data = error.response?.data as ErrorData | null | undefined
   if (typeof data !== 'undefined' && data) {
     const { error_message: errorMessage, detail_message: detailMessage } = data
@@ -27,7 +27,7 @@ const withErrorMessage = <T extends new (...args: any[]) => APICallContextData>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): new (...args: any[]) => APICallContextDataWithErrorMessage =>
   class extends base {
-    public readonly errorMessage = getErrorMessage(error)
+    public readonly errorMessage = getMessage(error)
   }
 
 const createAPICallErrorData = (
