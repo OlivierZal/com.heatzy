@@ -120,7 +120,7 @@ export default class HeatzyAPI {
         return this.#api.request(error.config)
       }
     }
-    throw new Error(apiCallErrorData.errorMessage)
+    throw error
   }
 
   async #handleRequest(
