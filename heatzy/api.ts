@@ -108,8 +108,7 @@ export default class HeatzyAPI {
   }
 
   async #handleError(error: AxiosError): Promise<AxiosError> {
-    const apiCallErrorData = createAPICallErrorData(error)
-    this.#logger.error(String(apiCallErrorData))
+    this.#logger.error(String(createAPICallErrorData(error)))
     if (
       error.response?.status === HttpStatusCode.BadRequest &&
       this.#retry &&
