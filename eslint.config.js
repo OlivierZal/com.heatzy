@@ -180,7 +180,7 @@ module.exports = tsEslint.config(
   },
   {
     rules: {
-      ...importPlugin.configs.recommended.rules,
+      // ...importPlugin.configs.recommended.rules,
       ...importPlugin.configs.typescript.rules,
       'import/no-duplicates': ['error', { 'prefer-inline': true }],
     },
