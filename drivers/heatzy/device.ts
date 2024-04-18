@@ -225,15 +225,10 @@ class HeatzyDevice extends Device {
     capability: K,
     value: Capabilities[K],
   ): Promise<keyof typeof Mode | null> {
-    let mode: keyof typeof Mode | null = null
-    if (capability === 'onoff') {
-      mode =
-        (value as boolean) ?
-          this.#onModeValue
-        : (Mode[Mode.stop] as keyof typeof Mode)
-    } else {
-      mode = value as keyof typeof Mode
-    }
+    let mode: keyof typeof Mode | null =
+      capability === 'onoff' ?
+        this.#getModeFromOnoff(value as boolean)
+      : (value as keyof typeof Mode)
     if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
       mode = null
       await this.setWarning(this.homey.__('warnings.always_on'))
@@ -252,6 +247,10 @@ class HeatzyDevice extends Device {
       )
     }
     return mode
+  }
+
+  #getModeFromOnoff(value: boolean): keyof typeof Mode {
+    return value ? this.#onModeValue : (Mode[Mode.stop] as keyof typeof Mode)
   }
 
   async #handleCapabilities(): Promise<void> {
