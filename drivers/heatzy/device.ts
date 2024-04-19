@@ -221,34 +221,6 @@ class HeatzyDevice extends Device {
     }
   }
 
-  async #getMode<K extends ModeCapability | 'onoff'>(
-    capability: K,
-    value: Capabilities[K],
-  ): Promise<keyof typeof Mode | null> {
-    let mode: keyof typeof Mode | null =
-      capability === 'onoff' ?
-        this.#getModeFromOnoff(value as boolean)
-      : (value as keyof typeof Mode)
-    if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
-      mode = null
-      await this.setWarning(this.homey.__('warnings.always_on'))
-      this.homey.setTimeout(
-        async () => {
-          if (capability === 'onoff') {
-            await this.setCapabilityValue('onoff', true)
-            return
-          }
-          await this.setCapabilityValue(
-            this.#modeCapability,
-            this.getStoreValue('previousMode'),
-          )
-        },
-        Duration.fromObject({ seconds: 1 }).as('milliseconds'),
-      )
-    }
-    return mode
-  }
-
   #getModeFromOnoff(value: boolean): keyof typeof Mode {
     return value ? this.#onModeValue : (Mode[Mode.stop] as keyof typeof Mode)
   }
@@ -273,21 +245,42 @@ class HeatzyDevice extends Device {
       }, Promise.resolve())
   }
 
+  async #handleMode<K extends ModeCapability | 'onoff'>(
+    capability: K,
+    value: Capabilities[K],
+  ): Promise<void> {
+    const mode =
+      capability === 'onoff' ?
+        this.#getModeFromOnoff(value as boolean)
+      : (value as keyof typeof Mode)
+    if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
+      await this.setWarning(this.homey.__('warnings.always_on'))
+      this.homey.setTimeout(
+        async () => {
+          if (capability === 'onoff') {
+            await this.setCapabilityValue('onoff', true)
+            return
+          }
+          await this.setCapabilityValue(
+            this.#modeCapability,
+            this.getStoreValue('previousMode'),
+          )
+        },
+        Duration.fromObject({ seconds: 1 }).as('milliseconds'),
+      )
+      return
+    }
+    this.#attrs.mode = Mode[mode]
+  }
+
   async #onCapability<K extends keyof SetCapabilities>(
     capability: K,
     value: SetCapabilities[K],
   ): Promise<void> {
-    let mode: keyof typeof Mode | null = null
     switch (capability) {
       case 'onoff':
       case this.#modeCapability:
-        mode = await this.#getMode(
-          capability,
-          value as boolean | keyof typeof Mode,
-        )
-        if (mode) {
-          this.#attrs.mode = Mode[mode]
-        }
+        await this.#handleMode(capability, value as boolean | keyof typeof Mode)
         break
       case 'derog_time_boost':
         this.#attrs.derog_mode = Number(value) ? DerogMode.boost : DerogMode.off
