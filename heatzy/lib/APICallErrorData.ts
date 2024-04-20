@@ -24,8 +24,9 @@ const getMessage = (error: AxiosError): string => {
 const withErrorMessage = <T extends new (...args: any[]) => APICallContextData>(
   base: T,
   error: AxiosError,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): new (...args: any[]) => APICallContextDataWithErrorMessage =>
+): new (
+  ...args: ConstructorParameters<T>
+) => APICallContextDataWithErrorMessage =>
   class extends base {
     public readonly errorMessage = getMessage(error)
   }
