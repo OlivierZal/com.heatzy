@@ -181,7 +181,6 @@ module.exports = tsEslint.config(
     },
     settings: {
       ...importPlugin.configs.typescript.settings,
-      'import/ignore': ['node_modules'],
       'import/resolver': {
         ...importPlugin.configs.typescript.settings['import/resolver'],
         typescript: { alwaysTryTypes: true },
