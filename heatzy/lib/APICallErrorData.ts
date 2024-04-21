@@ -20,7 +20,6 @@ const getMessage = (error: AxiosError): string => {
   return error.message
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const withErrorMessage = <T extends new (...args: any[]) => APICallContextData>(
   base: T,
   error: AxiosError,

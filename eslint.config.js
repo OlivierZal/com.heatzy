@@ -142,12 +142,21 @@ module.exports = tsEslint.config(
         },
       ],
       '@typescript-eslint/naming-convention': 'off',
+      '@typescript-eslint/no-explicit-any': ['error', { ignoreRestArgs: true }],
       '@typescript-eslint/no-magic-numbers': ['error', { ignoreEnums: true }],
       '@typescript-eslint/no-unused-vars': [
         'error',
         { varsIgnorePattern: 'onHomeyReady' },
       ],
       '@typescript-eslint/prefer-readonly-parameter-types': 'off',
+      'no-ternary': 'off',
+      'no-underscore-dangle': ['error', { allow: ['__'] }],
+      'one-var': 'off',
+      'sort-keys': ['error', 'asc', { natural: true }],
+    },
+  },
+  {
+    rules: {
       camelcase: [
         'error',
         {
@@ -161,10 +170,6 @@ module.exports = tsEslint.config(
           ],
         },
       ],
-      'no-ternary': 'off',
-      'no-underscore-dangle': ['error', { allow: ['__'] }],
-      'one-var': 'off',
-      'sort-keys': ['error', 'asc', { natural: true }],
     },
   },
   {
