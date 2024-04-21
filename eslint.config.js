@@ -141,7 +141,6 @@ module.exports = tsEslint.config(
           },
         },
       ],
-      '@typescript-eslint/naming-convention': 'off',
       '@typescript-eslint/no-explicit-any': ['error', { ignoreRestArgs: true }],
       '@typescript-eslint/no-magic-numbers': ['error', { ignoreEnums: true }],
       '@typescript-eslint/no-unused-vars': [
@@ -156,7 +155,9 @@ module.exports = tsEslint.config(
     },
   },
   {
+    files: ['**/*.ts'],
     rules: {
+      '@typescript-eslint/naming-convention': 'off',
       camelcase: [
         'error',
         {
