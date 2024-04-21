@@ -39,9 +39,9 @@ interface SettingManager {
   set: <K extends keyof APISettings>(key: K, value: APISettings[K]) => void
 }
 
+const APPLICATION_ID = 'X-Gizwits-Application-Id'
 const LOGIN_URL = '/login'
 const NUMBER_0 = 0
-const USER_TOKEN = 'X-Gizwits-User-token'
 
 export default class HeatzyAPI {
   #retry = true
@@ -59,7 +59,7 @@ export default class HeatzyAPI {
     this.#logger = logger
     this.#api = createAxiosInstance({
       baseURL: 'https://euapi.gizwits.com/app',
-      headers: { [USER_TOKEN]: 'c70a66ff039d41b4a220e198b0fcc8b3' },
+      headers: { [APPLICATION_ID]: 'c70a66ff039d41b4a220e198b0fcc8b3' },
     })
     this.#setupAxiosInterceptors()
   }
@@ -133,7 +133,10 @@ export default class HeatzyAPI {
       }
     }
     if (newConfig.url !== LOGIN_URL) {
-      newConfig.headers.set(USER_TOKEN, this.#settingManager.get('token'))
+      newConfig.headers.set(
+        'X-Gizwits-User-token',
+        this.#settingManager.get('token'),
+      )
     }
     this.#logger.log(String(new APICallRequestData(newConfig)))
     return newConfig
