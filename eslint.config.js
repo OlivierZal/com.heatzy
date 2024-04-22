@@ -141,6 +141,7 @@ module.exports = tsEslint.config(
           },
         },
       ],
+      '@typescript-eslint/naming-convention': 'off',
       '@typescript-eslint/no-explicit-any': ['error', { ignoreRestArgs: true }],
       '@typescript-eslint/no-magic-numbers': ['error', { ignoreEnums: true }],
       '@typescript-eslint/no-unused-vars': [
@@ -148,29 +149,11 @@ module.exports = tsEslint.config(
         { varsIgnorePattern: 'onHomeyReady' },
       ],
       '@typescript-eslint/prefer-readonly-parameter-types': 'off',
+      camelcase: 'off',
       'no-ternary': 'off',
       'no-underscore-dangle': ['error', { allow: ['__'] }],
       'one-var': 'off',
       'sort-keys': ['error', 'asc', { natural: true }],
-    },
-  },
-  {
-    files: ['**/*.ts'],
-    rules: {
-      '@typescript-eslint/naming-convention': 'off',
-      camelcase: [
-        'error',
-        {
-          allow: [
-            '^cft_tempH$',
-            '^cft_tempL$',
-            '^derog_mode$',
-            '^derog_time$',
-            '^lock_switch$',
-            '^timer_switch$',
-          ],
-        },
-      ],
     },
   },
   {
