@@ -146,8 +146,7 @@ module.exports = tsEslint.config(
         {
           filter: {
             match: true,
-            regex:
-              '^(cft_temp.|[a-z]+(?:_[a-z0-9]+)*(?:\\.[a-z]+(?:_[a-z0-9]+)*)*)$',
+            regex: '^(cft_temp.|[a-z]+(?:_[a-z]+)*(?:\\.[a-z]+(?:_[a-z]+)*)?)$',
           },
           format: null,
           selector: 'typeProperty',
