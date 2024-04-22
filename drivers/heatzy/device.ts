@@ -73,33 +73,35 @@ class HeatzyDevice extends Device {
 
   readonly #productName = this.#data.productName
 
-  public async addCapability(capability: string): Promise<void> {
+  public override async addCapability(capability: string): Promise<void> {
     if (!this.hasCapability(capability)) {
       await super.addCapability(capability)
     }
   }
 
-  public getCapabilityValue<K extends keyof Capabilities>(
+  public override getCapabilityValue<K extends keyof Capabilities>(
     capability: K,
   ): Capabilities[K] {
     return super.getCapabilityValue(capability) as Capabilities[K]
   }
 
-  public getSetting<K extends keyof Settings>(
+  public override getSetting<K extends keyof Settings>(
     setting: K,
   ): NonNullable<Settings[K]> {
     return super.getSetting(setting) as NonNullable<Settings[K]>
   }
 
-  public getStoreValue<K extends keyof Store>(key: K): NonNullable<Store[K]> {
+  public override getStoreValue<K extends keyof Store>(
+    key: K,
+  ): NonNullable<Store[K]> {
     return (super.getStoreValue(key) as Store[K]) ?? PreviousModeValue.eco
   }
 
-  public onDeleted(): void {
+  public override onDeleted(): void {
     this.homey.clearTimeout(this.#syncTimeout)
   }
 
-  public async onInit(): Promise<void> {
+  public override async onInit(): Promise<void> {
     await this.setWarning(null)
     this.#setOnModeValue(this.getSetting('on_mode'))
     await this.#handleCapabilities()
@@ -107,7 +109,7 @@ class HeatzyDevice extends Device {
     await this.#updateCapabilities()
   }
 
-  public async onSettings({
+  public override async onSettings({
     changedKeys,
     newSettings,
   }: {
@@ -129,18 +131,18 @@ class HeatzyDevice extends Device {
     }
   }
 
-  public async onUninit(): Promise<void> {
+  public override async onUninit(): Promise<void> {
     this.onDeleted()
     return Promise.resolve()
   }
 
-  public async removeCapability(capability: string): Promise<void> {
+  public override async removeCapability(capability: string): Promise<void> {
     if (this.hasCapability(capability)) {
       await super.removeCapability(capability)
     }
   }
 
-  public async setCapabilityValue<K extends keyof Capabilities>(
+  public override async setCapabilityValue<K extends keyof Capabilities>(
     capability: K,
     value: Capabilities[K],
   ): Promise<void> {
@@ -150,7 +152,7 @@ class HeatzyDevice extends Device {
     }
   }
 
-  public async setStoreValue<K extends keyof Store>(
+  public override async setStoreValue<K extends keyof Store>(
     key: K,
     value: Store[K],
   ): Promise<void> {
@@ -160,7 +162,7 @@ class HeatzyDevice extends Device {
     }
   }
 
-  public async setWarning(warning: string | null): Promise<void> {
+  public override async setWarning(warning: string | null): Promise<void> {
     if (warning !== null) {
       await super.setWarning(warning)
     }

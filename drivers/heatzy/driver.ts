@@ -32,12 +32,12 @@ export = class HeatzyDriver extends Driver {
     )
   }
 
-  public async onInit(): Promise<void> {
+  public override async onInit(): Promise<void> {
     this.#registerRunListeners()
     return Promise.resolve()
   }
 
-  public async onPair(session: PairSession): Promise<void> {
+  public override async onPair(session: PairSession): Promise<void> {
     session.setHandler('showView', async (view) => {
       if (view === 'loading') {
         if (await this.#heatzyAPI.applyLogin()) {
@@ -54,7 +54,7 @@ export = class HeatzyDriver extends Driver {
     return Promise.resolve()
   }
 
-  public async onRepair(session: PairSession): Promise<void> {
+  public override async onRepair(session: PairSession): Promise<void> {
     session.setHandler('login', async (data: LoginCredentials) =>
       this.#heatzyAPI.applyLogin(data),
     )
