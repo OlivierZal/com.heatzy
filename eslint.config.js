@@ -141,7 +141,51 @@ module.exports = tsEslint.config(
           },
         },
       ],
-      '@typescript-eslint/naming-convention': 'off',
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          filter: {
+            match: true,
+            regex:
+              '^(cft_tempH|cft_tempL|[a-z]+(?:_[a-z0-9]+)*\\.[a-z]+(?:_[a-z0-9]+)*)$',
+          },
+          format: null,
+          selector: 'typeProperty',
+        },
+        {
+          format: ['camelCase', 'snake_case'],
+          selector: 'typeProperty',
+        },
+        {
+          format: ['camelCase', 'PascalCase'],
+          selector: 'import',
+        },
+        {
+          format: ['PascalCase'],
+          prefix: ['can', 'did', 'has', 'is', 'should', 'will'],
+          selector: 'variable',
+          types: ['boolean'],
+        },
+        {
+          format: ['camelCase'],
+          modifiers: ['global'],
+          selector: 'variable',
+          types: ['function'],
+        },
+        {
+          format: ['camelCase', 'UPPER_CASE'],
+          modifiers: ['global'],
+          selector: 'variable',
+        },
+        {
+          format: ['PascalCase'],
+          selector: 'typeLike',
+        },
+        {
+          format: ['camelCase'],
+          selector: 'default',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': ['error', { ignoreRestArgs: true }],
       '@typescript-eslint/no-magic-numbers': ['error', { ignoreEnums: true }],
       '@typescript-eslint/no-unused-vars': [
