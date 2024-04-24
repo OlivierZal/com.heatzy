@@ -253,12 +253,6 @@ const processSettingValue = (
   element: HTMLInputElement | HTMLSelectElement,
 ): ValueOf<Settings> | null => {
   if (element.value) {
-    if (element instanceof HTMLInputElement && element.type === 'checkbox') {
-      if (element.indeterminate) {
-        return null
-      }
-      return element.checked
-    }
     return ['true', 'false'].includes(element.value) ?
         element.value === 'true'
       : (element.value as OnModeSetting)
