@@ -281,23 +281,19 @@ const shouldUpdate = (
   return false
 }
 
-const buildSettingsBody = (
+const buildSettingsBody = <K extends keyof Settings>(
   elements: (HTMLInputElement | HTMLSelectElement)[],
-): Settings =>
-  Object.fromEntries(
-    elements
-      .map((element) => {
-        const [settingId] = element.id.split('--')
-        const settingValue = processSettingValue(element)
-        return settingValue !== null && shouldUpdate(settingId, settingValue) ?
-            [settingId, settingValue]
-          : [null]
-      })
-      .filter((entry): entry is [string, ValueOf<Settings>] => {
-        const [key] = entry
-        return key !== null
-      }),
-  )
+): Settings => {
+  const settings: Settings = {}
+  elements.forEach((element) => {
+    const [settingId] = element.id.split('--') as [K]
+    const settingValue = processSettingValue(element)
+    if (settingValue !== null && shouldUpdate(settingId, settingValue)) {
+      settings[settingId] = settingValue as Settings[K]
+    }
+  })
+  return settings
+}
 
 const updateDeviceSettings = (body: Settings): void => {
   Object.entries(body).forEach(
