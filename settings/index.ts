@@ -271,14 +271,14 @@ const shouldUpdate = (
   settingValue: ValueOf<Settings>,
 ): boolean => {
   const deviceSetting = flatDeviceSettings[settingId]
-  if (typeof deviceSetting === 'undefined') {
-    return false
-  }
-  if (new Set(deviceSetting).size !== NUMBER_1) {
+  if (typeof deviceSetting !== 'undefined') {
+    if (new Set(deviceSetting).size === NUMBER_1) {
+      const [deviceSettingValue] = deviceSetting
+      return settingValue !== deviceSettingValue
+    }
     return true
   }
-  const [deviceSettingValue] = deviceSetting
-  return settingValue !== deviceSettingValue
+  return false
 }
 
 const buildSettingsBody = (
