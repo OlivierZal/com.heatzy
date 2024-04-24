@@ -18,13 +18,13 @@ const getDevices = (homey: Homey): HeatzyDevice[] =>
   )
 
 const getDriverSettings = (
-  driver: ManifestDriver,
+  { settings, id: driverId }: ManifestDriver,
   language: string,
 ): DriverSetting[] =>
-  (driver.settings ?? []).flatMap((setting) =>
+  (settings ?? []).flatMap((setting) =>
     (setting.children ?? []).map(
       ({ id, max, min, label, type, units, values }) => ({
-        driverId: driver.id,
+        driverId,
         groupId: setting.id,
         groupLabel: setting.label[language],
         id,
@@ -33,9 +33,9 @@ const getDriverSettings = (
         title: label[language],
         type,
         units,
-        values: values?.map((value) => ({
-          id: value.id,
-          label: value.label[language],
+        values: values?.map(({ id: valueId, label: valueLabel }) => ({
+          id: valueId,
+          label: valueLabel[language],
         })),
       }),
     ),
