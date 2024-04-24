@@ -262,15 +262,17 @@ const processSettingValue = (
 
 const shouldUpdate = (
   settingId: string,
-  settingValue: ValueOf<Settings>,
+  settingValue: ValueOf<Settings> | null,
 ): boolean => {
-  const deviceSetting = flatDeviceSettings[settingId]
-  if (typeof deviceSetting !== 'undefined') {
-    if (new Set(deviceSetting).size === NUMBER_1) {
-      const [deviceSettingValue] = deviceSetting
-      return settingValue !== deviceSettingValue
+  if (settingValue !== null) {
+    const deviceSetting = flatDeviceSettings[settingId]
+    if (typeof deviceSetting !== 'undefined') {
+      if (new Set(deviceSetting).size === NUMBER_1) {
+        const [deviceSettingValue] = deviceSetting
+        return settingValue !== deviceSettingValue
+      }
+      return true
     }
-    return true
   }
   return false
 }
@@ -282,7 +284,7 @@ const buildSettingsBody = <K extends keyof Settings>(
   elements.forEach((element) => {
     const [settingId] = element.id.split('--') as [K]
     const settingValue = processSettingValue(element)
-    if (settingValue !== null && shouldUpdate(settingId, settingValue)) {
+    if (shouldUpdate(settingId, settingValue)) {
       settings[settingId] = settingValue as Settings[K]
     }
   })
