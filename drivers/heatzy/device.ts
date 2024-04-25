@@ -215,7 +215,7 @@ class HeatzyDevice extends Device {
     return null
   }
 
-  #getCurrent(): { currentMode: DerogMode; currentTime: number } {
+  #getCurrentDerog(): { currentMode: DerogMode; currentTime: number } {
     let currentTime = 0
     let currentMode = DerogMode.off
     if (Number(this.getCapabilityValue('derog_time_vacation'))) {
@@ -372,7 +372,7 @@ class HeatzyDevice extends Device {
     control = false,
   ): Promise<void> {
     if (typeof mode !== 'undefined' && typeof time !== 'undefined') {
-      const { currentMode, currentTime } = this.#getCurrent()
+      const { currentMode, currentTime } = this.#getCurrentDerog()
       if (control || mode !== currentMode || time !== currentTime) {
         switch (mode) {
           case DerogMode.vacation:
