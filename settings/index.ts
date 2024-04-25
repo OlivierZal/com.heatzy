@@ -304,17 +304,22 @@ const updateDeviceSettings = (body: Settings): void => {
 
 const setDeviceSettings = (homey: Homey, body: Settings): void => {
   // @ts-expect-error: `homey` is partially typed
-  homey.api('PUT', '/settings/devices', body, async (error: Error | null) => {
-    if (error) {
+  homey.api(
+    'PUT',
+    '/settings/devices',
+    body satisfies Settings,
+    async (error: Error | null) => {
+      if (error) {
+        // @ts-expect-error: `homey` is partially typed
+        await homey.alert(error.message)
+        return
+      }
+      updateDeviceSettings(body)
+      enableButtons()
       // @ts-expect-error: `homey` is partially typed
-      await homey.alert(error.message)
-      return
-    }
-    updateDeviceSettings(body)
-    enableButtons()
-    // @ts-expect-error: `homey` is partially typed
-    await homey.alert(homey.__('settings.success'))
-  })
+      await homey.alert(homey.__('settings.success'))
+    },
+  )
 }
 
 const addApplySettingsEventListener = (
@@ -432,12 +437,11 @@ const login = async (homey: Homey): Promise<void> => {
     await homey.alert(homey.__('settings.authenticate.failure'))
     return
   }
-  const body: LoginCredentials = { password, username }
   // @ts-expect-error: `homey` is partially typed
   homey.api(
     'POST',
     '/sessions',
-    body,
+    { password, username } satisfies LoginCredentials,
     async (error: Error | null, loggedIn: boolean) => {
       if (error) {
         // @ts-expect-error: `homey` is partially typed
