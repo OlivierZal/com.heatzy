@@ -300,10 +300,10 @@ class HeatzyDevice extends Device {
         this.#attrs.timer_switch = Number(value)
         break
       case 'target_temperature':
-        this.#attrs.cft_tempL = (value as number) * NUMBER_10
+        this.#attrs.cft_tempL = Number(value) * NUMBER_10
         break
       case 'target_temperature.complement':
-        this.#attrs.cft_tempH = (value as number) / NUMBER_10
+        this.#attrs.cft_tempH = Number(value) / NUMBER_10
         break
       default:
     }
