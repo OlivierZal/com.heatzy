@@ -215,6 +215,19 @@ class HeatzyDevice extends Device {
     return null
   }
 
+  #getCurrent(): { currentMode: DerogMode; currentTime: number } {
+    let currentTime = 0
+    let currentMode = DerogMode.off
+    if (Number(this.getCapabilityValue('derog_time_vacation'))) {
+      currentTime = Number(this.getCapabilityValue('derog_time_vacation'))
+      currentMode = DerogMode.vacation
+    } else if (Number(this.getCapabilityValue('derog_time_boost'))) {
+      currentTime = Number(this.getCapabilityValue('derog_time_boost'))
+      currentMode = DerogMode.boost
+    }
+    return { currentMode, currentTime }
+  }
+
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
       return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
@@ -359,15 +372,7 @@ class HeatzyDevice extends Device {
     control = false,
   ): Promise<void> {
     if (typeof mode !== 'undefined' && typeof time !== 'undefined') {
-      let currentTime = 0
-      let currentMode = DerogMode.off
-      if (Number(this.getCapabilityValue('derog_time_vacation'))) {
-        currentTime = Number(this.getCapabilityValue('derog_time_vacation'))
-        currentMode = DerogMode.vacation
-      } else if (Number(this.getCapabilityValue('derog_time_boost'))) {
-        currentTime = Number(this.getCapabilityValue('derog_time_boost'))
-        currentMode = DerogMode.boost
-      }
+      const { currentMode, currentTime } = this.#getCurrent()
       if (control || mode !== currentMode || time !== currentTime) {
         switch (mode) {
           case DerogMode.vacation:
