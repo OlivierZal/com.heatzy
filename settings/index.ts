@@ -433,6 +433,7 @@ const login = async (homey: Homey): Promise<void> => {
   if (!username || !password) {
     // @ts-expect-error: `homey` is partially typed
     await homey.alert(homey.__('settings.authenticate.failure'))
+    needsAuthentication()
     return
   }
   // @ts-expect-error: `homey` is partially typed
