@@ -215,16 +215,16 @@ class HeatzyDevice extends Device {
     return null
   }
 
-  #getDerog(): { mode: DerogMode; time: number } {
+  #getDerog(): { derogMode: DerogMode; time: number } {
     let time = Number(this.getCapabilityValue('derog_time_vacation'))
     if (time) {
-      return { mode: DerogMode.vacation, time }
+      return { derogMode: DerogMode.vacation, time }
     }
     time = Number(this.getCapabilityValue('derog_time_boost'))
     if (time) {
-      return { mode: DerogMode.boost, time }
+      return { derogMode: DerogMode.boost, time }
     }
-    return { mode: DerogMode.off, time: 0 }
+    return { derogMode: DerogMode.off, time: 0 }
   }
 
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
@@ -366,14 +366,14 @@ class HeatzyDevice extends Device {
   }
 
   async #updateDerog(
-    mode: DerogMode | undefined,
+    derogMode: DerogMode | undefined,
     time: number | undefined,
     control = false,
   ): Promise<void> {
-    if (typeof mode !== 'undefined' && typeof time !== 'undefined') {
-      const { mode: currentMode, time: currentTime } = this.#getDerog()
-      if (control || mode !== currentMode || time !== currentTime) {
-        switch (mode) {
+    if (typeof derogMode !== 'undefined' && typeof time !== 'undefined') {
+      const { derogMode: currentMode, time: currentTime } = this.#getDerog()
+      if (control || derogMode !== currentMode || time !== currentTime) {
+        switch (derogMode) {
           case DerogMode.vacation:
             await this.setCapabilityValue('derog_end', getVacationEnd(time))
             await this.setCapabilityValue('derog_time_vacation', String(time))
