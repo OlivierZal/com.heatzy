@@ -441,15 +441,11 @@ const login = async (homey: Homey): Promise<void> => {
     'POST',
     '/sessions',
     { password, username } satisfies LoginCredentials,
-    async (error: Error | null, loggedIn: boolean) => {
+    async (error: Error | null) => {
       if (error) {
         // @ts-expect-error: `homey` is partially typed
         await homey.alert(error.message)
-        return
-      }
-      if (!loggedIn) {
-        // @ts-expect-error: `homey` is partially typed
-        await homey.alert(homey.__('settings.authenticate.failure'))
+        needsAuthentication()
         return
       }
       needsAuthentication(false)
