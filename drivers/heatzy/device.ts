@@ -7,7 +7,7 @@ import {
   type DevicePostDataAny,
   Mode,
   NUMBER_1,
-} from '../../heatzy/types'
+} from 'heatzy-api'
 import {
   type Capabilities,
   type DeviceDetails,
@@ -22,7 +22,7 @@ import {
 import { DateTime, Duration } from 'luxon'
 import { isFirstGen, isFirstPilot } from '../../utils'
 import { Device } from 'homey'
-import type HeatzyApp from '../../app'
+import type HeatzyApp from '../..'
 import type HeatzyDriver from './driver'
 import addToLogs from '../../decorators/addToLogs'
 

@@ -10,7 +10,7 @@ import type {
   ValueOf,
 } from '../types'
 import type Homey from 'homey/lib/Homey'
-import type { LoginCredentials } from '../heatzy/types'
+import type { LoginCredentials } from 'heatzy-api'
 
 const NUMBER_1 = 1
 

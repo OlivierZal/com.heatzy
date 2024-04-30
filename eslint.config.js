@@ -1,7 +1,6 @@
 const eslint = require('@eslint/js')
 const globals = require('globals')
 const importPlugin = require('eslint-plugin-import')
-const markdown = require('eslint-plugin-markdown')
 const prettier = require('eslint-config-prettier')
 const stylistic = require('@stylistic/eslint-plugin')
 const tsEslint = require('typescript-eslint')
@@ -10,7 +9,6 @@ module.exports = tsEslint.config(
   { ignores: ['.homeybuild/'] },
   eslint.configs.all,
   ...tsEslint.configs.all,
-  ...markdown.configs.recommended,
   {
     languageOptions: { parserOptions: { project: true } },
     linterOptions: { reportUnusedDisableDirectives: true },

@@ -7,10 +7,10 @@ import type {
   Settings,
   ValueOf,
 } from './types'
-import type HeatzyApp from './app'
+import type HeatzyApp from '.'
 import type HeatzyDevice from './drivers/heatzy/device'
 import type Homey from 'homey/lib/Homey'
-import type { LoginCredentials } from './heatzy/types'
+import type { LoginCredentials } from 'heatzy-api'
 
 const getDevices = (homey: Homey): HeatzyDevice[] =>
   Object.values(homey.drivers.getDrivers()).flatMap(
