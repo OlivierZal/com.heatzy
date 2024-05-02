@@ -7,7 +7,7 @@ import type {
 import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
 import { Driver } from 'homey'
 import type HeatzyApp from '../..'
-import type { LoginCredentials } from 'heatzy-api'
+import type { LoginCredentials } from '@olivierzal/heatzy-api'
 import type PairSession from 'homey/lib/PairSession'
 
 export = class HeatzyDriver extends Driver {

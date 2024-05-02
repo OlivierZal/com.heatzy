@@ -7,7 +7,7 @@ import {
   type DevicePostDataAny,
   Mode,
   NUMBER_1,
-} from 'heatzy-api'
+} from '@olivierzal/heatzy-api'
 import {
   type Capabilities,
   type DeviceDetails,
