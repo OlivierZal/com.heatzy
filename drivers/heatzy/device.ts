@@ -259,32 +259,24 @@ class HeatzyDevice extends Device {
       }, Promise.resolve())
   }
 
-  async #handleMode<K extends ModeCapability | 'onoff'>(
-    capability: K,
-    value: Capabilities[K],
+  async #handleMode(
+    value: keyof typeof Mode,
+    capability: ModeCapability | 'onoff',
   ): Promise<void> {
-    const mode =
-      capability === 'onoff' ?
-        this.#getModeFromOnoff(value as boolean)
-      : (value as keyof typeof Mode)
-    if (Mode[mode] === Mode.stop && this.getSetting('always_on')) {
-      await this.setWarning(this.homey.__('warnings.always_on'))
-      this.homey.setTimeout(
-        async () => {
-          if (capability === 'onoff') {
-            await this.setCapabilityValue('onoff', true)
-            return
-          }
-          await this.setCapabilityValue(
-            this.#modeCapability,
-            this.getStoreValue('previousMode'),
-          )
-        },
-        Duration.fromObject({ seconds: 1 }).as('milliseconds'),
-      )
+    if (Mode[value] !== Mode.stop || !this.getSetting('always_on')) {
+      this.#attrs.mode = Mode[value]
       return
     }
-    this.#attrs.mode = Mode[mode]
+    await this.setWarning(this.homey.__('warnings.always_on'))
+    this.homey.setTimeout(
+      async () => {
+        await this.setCapabilityValue(
+          capability,
+          capability === 'onoff' || this.getStoreValue('previousMode'),
+        )
+      },
+      Duration.fromObject({ seconds: 1 }).as('milliseconds'),
+    )
   }
 
   async #onCapability<K extends keyof SetCapabilities>(
@@ -294,7 +286,12 @@ class HeatzyDevice extends Device {
     switch (capability) {
       case 'onoff':
       case this.#modeCapability:
-        await this.#handleMode(capability, value as boolean | keyof typeof Mode)
+        await this.#handleMode(
+          capability === 'onoff' ?
+            this.#getModeFromOnoff(value as boolean)
+          : (value as keyof typeof Mode),
+          capability,
+        )
         break
       case 'derog_time_boost':
         this.#attrs.derog_mode = Number(value) ? DerogMode.boost : DerogMode.off
