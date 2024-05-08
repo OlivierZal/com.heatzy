@@ -52,5 +52,8 @@
   },
   "18.0.0": {
     "en": "Various improvements."
+  },
+  "19.0.0": {
+    "en": "Modularized API management."
   }
 }
