@@ -482,7 +482,6 @@ const load = async (homey: Homey): Promise<void> => {
 
 // eslint-disable-next-line func-style
 async function onHomeyReady(homey: Homey): Promise<void> {
-  await homey.ready()
   await setDocumentLanguage(homey)
   await getHomeySettings(homey)
   await getDeviceSettings(homey)
@@ -492,4 +491,5 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   updateCredentialElements()
   generateCommonChildrenElements(homey)
   await load(homey)
+  await homey.ready()
 }
