@@ -205,7 +205,7 @@ class HeatzyDevice extends Device {
       try {
         ;({ data } = await this.#heatzyAPI.control(this.#id, postData))
         return data
-      } catch (error) {
+      } catch (_error) {
         return null
       } finally {
         await this.#updateCapabilities(data !== null)
@@ -229,7 +229,7 @@ class HeatzyDevice extends Device {
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
       return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
-    } catch (error) {
+    } catch (_error) {
       return null
     }
   }

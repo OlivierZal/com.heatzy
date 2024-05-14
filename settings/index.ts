@@ -475,9 +475,7 @@ const load = async (homey: Homey): Promise<void> => {
     try {
       await login(homey)
       return
-    } catch (error) {
-      // Skip
-    }
+    } catch (_error) {}
   }
   needsAuthentication()
 }

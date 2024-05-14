@@ -75,7 +75,7 @@ export = class HeatzyDriver extends Driver {
           name,
         }),
       )
-    } catch (error) {
+    } catch (_error) {
       return []
     }
   }
