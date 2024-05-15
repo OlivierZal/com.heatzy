@@ -170,7 +170,7 @@ module.exports = tsEslint.config(
         {
           filter: {
             match: true,
-            regex: '^(cft_temp.|[a-z]+(?:_[a-z]+)*(\\.[a-z]+(?:_[a-z]+)*)?)$',
+            regex: '^[a-z]+(?:_[a-z]+)*(\\.[a-z]+(?:_[a-z]+)*)?$',
           },
           format: null,
           selector: 'typeProperty',
