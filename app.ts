@@ -3,7 +3,7 @@ import { App } from 'homey'
 import HeatzyAPI from '@olivierzal/heatzy-api'
 import { Settings as LuxonSettings } from 'luxon'
 
-export = class HeatzyApp extends App {
+export = class extends App {
   public readonly heatzyAPI = new HeatzyAPI(this.homey.settings, {
     error: (...args): void => {
       this.error(...args)
