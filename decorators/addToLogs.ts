@@ -6,8 +6,8 @@ const PARENTHESES = '()'
 export default <T extends new (...args: any[]) => SimpleClass>(
     ...logs: string[]
   ) =>
-  (target: T, context: ClassDecoratorContext<T>): T => {
-    class LogsDecorator extends target {
+  (target: T): T =>
+    class extends target {
       public override error(...args: unknown[]): void {
         this.#commonLog('error', ...args)
       }
@@ -42,7 +42,3 @@ export default <T extends new (...args: any[]) => SimpleClass>(
         )
       }
     }
-
-    Object.defineProperty(LogsDecorator, 'name', { value: context.name })
-    return LogsDecorator
-  }
