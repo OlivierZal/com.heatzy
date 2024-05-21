@@ -6,7 +6,7 @@ const PARENTHESES = '()'
 export default <T extends new (...args: any[]) => SimpleClass>(
     ...logs: string[]
   ) =>
-  (target: T): T =>
+  (target: T, _context: ClassDecoratorContext): T =>
     class extends target {
       public override error(...args: unknown[]): void {
         this.#commonLog('error', ...args)
