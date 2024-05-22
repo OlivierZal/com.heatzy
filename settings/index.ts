@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import type {
   DeviceSetting,
   DeviceSettings,
@@ -9,7 +8,7 @@ import type {
   Settings,
   ValueOf,
 } from '../types'
-import type Homey from 'homey/lib/Homey'
+import type Homey from 'homey/lib/HomeySettings'
 import type { LoginCredentials } from '@olivierzal/heatzy-api'
 
 const NUMBER_1 = 1
@@ -77,7 +76,6 @@ const needsAuthentication = (value = true): void => {
 
 const setDocumentLanguage = async (homey: Homey): Promise<void> =>
   new Promise<void>((resolve, reject) => {
-    // @ts-expect-error: `homey` is partially typed
     homey.api('GET', '/language', (error: Error | null, language: string) => {
       if (error) {
         reject(error)
@@ -90,10 +88,8 @@ const setDocumentLanguage = async (homey: Homey): Promise<void> =>
 
 const getHomeySettings = async (homey: Homey): Promise<void> =>
   new Promise<void>((resolve, reject) => {
-    // @ts-expect-error: `homey` is partially typed
     homey.get(async (error: Error | null, settings: HomeySettingsUI) => {
       if (error) {
-        // @ts-expect-error: `homey` is partially typed
         await homey.alert(error.message)
         reject(error)
         return
@@ -105,13 +101,11 @@ const getHomeySettings = async (homey: Homey): Promise<void> =>
 
 const getDeviceSettings = async (homey: Homey): Promise<void> =>
   new Promise<void>((resolve, reject) => {
-    // @ts-expect-error: `homey` is partially typed
     homey.api(
       'GET',
       '/settings/devices',
       async (error: Error | null, settings: DeviceSettings) => {
         if (error) {
-          // @ts-expect-error: `homey` is partially typed
           await homey.alert(error.message)
           reject(error)
           return
@@ -143,13 +137,11 @@ const getFlatDeviceSettings = (): void => {
 
 const getDriverSettingsAll = async (homey: Homey): Promise<void> =>
   new Promise<void>((resolve, reject) => {
-    // @ts-expect-error: `homey` is partially typed
     homey.api(
       'GET',
       '/settings/drivers',
       async (error: Error | null, driverSettings: DriverSetting[]) => {
         if (error) {
-          // @ts-expect-error: `homey` is partially typed
           await homey.alert(error.message)
           reject(error)
           return
@@ -301,20 +293,17 @@ const updateDeviceSettings = (body: Settings): void => {
 }
 
 const setDeviceSettings = (homey: Homey, body: Settings): void => {
-  // @ts-expect-error: `homey` is partially typed
   homey.api(
     'PUT',
     '/settings/devices',
     body satisfies Settings,
     async (error: Error | null) => {
       if (error) {
-        // @ts-expect-error: `homey` is partially typed
         await homey.alert(error.message)
         return
       }
       updateDeviceSettings(body)
       enableButtons()
-      // @ts-expect-error: `homey` is partially typed
       await homey.alert(homey.__('settings.success'))
     },
   )
@@ -327,17 +316,20 @@ const addApplySettingsEventListener = (
   applySettingsElement.addEventListener('click', () => {
     const body = buildSettingsBody(elements)
     if (!Object.keys(body).length) {
-      // @ts-expect-error: `homey` is partially typed
-      homey.alert(homey.__('settings.devices.apply.nothing'))
+      homey
+        .alert(homey.__('settings.devices.apply.nothing'))
+        .catch(async (error: unknown) => {
+          await homey.alert(
+            error instanceof Error ? error.message : String(error),
+          )
+        })
       return
     }
-    // @ts-expect-error: `homey` is partially typed
     homey.confirm(
       homey.__('settings.devices.apply.confirm'),
       null,
       async (error: Error | null, ok: boolean) => {
         if (error) {
-          // @ts-expect-error: `homey` is partially typed
           await homey.alert(error.message)
           return
         }
@@ -431,19 +423,16 @@ const login = async (homey: Homey): Promise<void> => {
   const username = usernameElement?.value ?? ''
   const password = passwordElement?.value ?? ''
   if (!username || !password) {
-    // @ts-expect-error: `homey` is partially typed
     await homey.alert(homey.__('settings.authenticate.failure'))
     needsAuthentication()
     return
   }
-  // @ts-expect-error: `homey` is partially typed
   homey.api(
     'POST',
     '/sessions',
     { password, username } satisfies LoginCredentials,
     async (error: Error | null) => {
       if (error) {
-        // @ts-expect-error: `homey` is partially typed
         await homey.alert(error.message)
         needsAuthentication()
         return
@@ -458,7 +447,6 @@ const addAuthenticateEventListener = (homey: Homey): void => {
     authenticateElement.classList.add('is-disabled')
     login(homey)
       .catch(async (error: unknown) => {
-        // @ts-expect-error: `homey` is partially typed
         await homey.alert(
           error instanceof Error ? error.message : String(error),
         )
