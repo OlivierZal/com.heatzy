@@ -318,10 +318,8 @@ const addApplySettingsEventListener = (
     if (!Object.keys(body).length) {
       homey
         .alert(homey.__('settings.devices.apply.nothing'))
-        .catch(async (error: unknown) => {
-          await homey.alert(
-            error instanceof Error ? error.message : String(error),
-          )
+        .catch(async (err: unknown) => {
+          await homey.alert(err instanceof Error ? err.message : String(err))
         })
       return
     }
@@ -446,10 +444,8 @@ const addAuthenticateEventListener = (homey: Homey): void => {
   authenticateElement.addEventListener('click', () => {
     authenticateElement.classList.add('is-disabled')
     login(homey)
-      .catch(async (error: unknown) => {
-        await homey.alert(
-          error instanceof Error ? error.message : String(error),
-        )
+      .catch(async (err: unknown) => {
+        await homey.alert(err instanceof Error ? err.message : String(err))
       })
       .finally(() => {
         authenticateElement.classList.remove('is-disabled')
