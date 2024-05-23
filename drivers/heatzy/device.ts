@@ -13,7 +13,7 @@ import {
   type ManifestDriver,
   type ModeCapability,
   OnModeSetting,
-  PreviousModeValue,
+  OnModeValue,
   type SetCapabilities,
   type Settings,
   type Store,
@@ -51,7 +51,7 @@ class HeatzyDevice extends Device {
 
   #attrs: BaseAttrs = {}
 
-  #onModeValue!: PreviousModeValue
+  #onModeValue!: OnModeValue
 
   #syncTimeout!: NodeJS.Timeout
 
@@ -71,6 +71,17 @@ class HeatzyDevice extends Device {
   readonly #productKey = this.#data.productKey
 
   readonly #productName = this.#data.productName
+
+  private get onModeValue(): OnModeValue {
+    return this.#onModeValue
+  }
+
+  private set onModeValue(value: OnModeSetting) {
+    this.#onModeValue =
+      value === OnModeSetting.previous ?
+        this.getStoreValue('previousMode')
+      : OnModeValue[value]
+  }
 
   public override async addCapability(capability: string): Promise<void> {
     if (!this.hasCapability(capability)) {
@@ -93,7 +104,7 @@ class HeatzyDevice extends Device {
   public override getStoreValue<K extends keyof Store>(
     key: K,
   ): NonNullable<Store[K]> {
-    return (super.getStoreValue(key) as Store[K]) ?? PreviousModeValue.eco
+    return (super.getStoreValue(key) as Store[K]) ?? OnModeValue.eco
   }
 
   public override onDeleted(): void {
@@ -102,7 +113,7 @@ class HeatzyDevice extends Device {
 
   public override async onInit(): Promise<void> {
     await this.setWarning(null)
-    this.#setOnModeValue(this.getSetting('on_mode'))
+    this.onModeValue = this.getSetting('on_mode')
     await this.#handleCapabilities()
     this.#registerCapabilityListeners()
     await this.#updateCapabilities()
@@ -119,7 +130,7 @@ class HeatzyDevice extends Device {
       changedKeys.includes('on_mode') &&
       typeof newSettings.on_mode !== 'undefined'
     ) {
-      this.#setOnModeValue(newSettings.on_mode)
+      this.onModeValue = newSettings.on_mode
     }
     if (
       changedKeys.includes('always_on') &&
@@ -235,7 +246,7 @@ class HeatzyDevice extends Device {
   }
 
   #getModeFromOnoff(value: boolean): keyof typeof Mode {
-    return value ? this.#onModeValue : (Mode[Mode.stop] as keyof typeof Mode)
+    return value ? this.onModeValue : (Mode[Mode.stop] as keyof typeof Mode)
   }
 
   async #handleCapabilities(): Promise<void> {
@@ -334,13 +345,6 @@ class HeatzyDevice extends Device {
     })
   }
 
-  #setOnModeValue(value: OnModeSetting): void {
-    this.#onModeValue =
-      value === OnModeSetting.previous ?
-        this.getStoreValue('previousMode')
-      : PreviousModeValue[value]
-  }
-
   async #syncToDevice(): Promise<void> {
     await this.#control(this.#buildPostData())
   }
@@ -403,8 +407,8 @@ class HeatzyDevice extends Device {
       )
       const isOn = Mode[newMode as keyof typeof Mode] !== Mode.stop
       await this.setCapabilityValue('onoff', isOn)
-      if (newMode in PreviousModeValue) {
-        await this.setStoreValue('previousMode', newMode as PreviousModeValue)
+      if (newMode in OnModeValue) {
+        await this.setStoreValue('previousMode', newMode as OnModeValue)
       }
     }
   }

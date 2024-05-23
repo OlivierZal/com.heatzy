@@ -3,7 +3,7 @@ import type HeatzyDevice from './drivers/heatzy/device'
 
 export type ModeCapability = 'mode' | 'mode3'
 
-export enum PreviousModeValue {
+export enum OnModeValue {
   cft = 'cft',
   cft1 = 'cft1',
   cft2 = 'cft2',
@@ -42,7 +42,7 @@ export interface Settings {
 }
 
 export interface Store {
-  readonly previousMode: PreviousModeValue | null
+  readonly previousMode: OnModeValue | null
 }
 
 export interface HomeySettingsUI {
