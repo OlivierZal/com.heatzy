@@ -219,8 +219,9 @@ class HeatzyDevice extends Device {
         await this.setWarning(
           error instanceof Error ? error.message : String(error),
         )
+      } finally {
+        await this.#updateCapabilities(data !== null)
       }
-      await this.#updateCapabilities(data !== null)
     }
     return data
   }
