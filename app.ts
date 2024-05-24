@@ -4,13 +4,16 @@ import HeatzyAPI from '@olivierzal/heatzy-api'
 import { Settings as LuxonSettings } from 'luxon'
 
 export = class HeatzyApp extends App {
-  public readonly heatzyAPI = new HeatzyAPI(this.homey.settings, {
-    error: (...args): void => {
-      this.error(...args)
+  public readonly heatzyAPI = new HeatzyAPI({
+    logger: {
+      error: (...args): void => {
+        this.error(...args)
+      },
+      log: (...args): void => {
+        this.log(...args)
+      },
     },
-    log: (...args): void => {
-      this.log(...args)
-    },
+    settingManager: this.homey.settings,
   })
 
   public override async onInit(): Promise<void> {

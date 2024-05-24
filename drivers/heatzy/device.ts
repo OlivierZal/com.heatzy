@@ -211,18 +211,18 @@ class HeatzyDevice extends Device {
   }
 
   async #control(postData: DevicePostDataAny | null): Promise<Data | null> {
+    let data: Data | null = null
     if (postData) {
-      let data: Data | null = null
       try {
         ;({ data } = await this.#heatzyAPI.control(this.#id, postData))
-        return data
-      } catch (_error) {
-        return null
-      } finally {
-        await this.#updateCapabilities(data !== null)
+      } catch (error) {
+        await this.setWarning(
+          error instanceof Error ? error.message : String(error),
+        )
       }
+      await this.#updateCapabilities(data !== null)
     }
-    return null
+    return data
   }
 
   #getDerog(): { derogMode: DerogMode; time: number } {
@@ -240,7 +240,10 @@ class HeatzyDevice extends Device {
   async #getDeviceData(): Promise<DeviceData['attr'] | null> {
     try {
       return (await this.#heatzyAPI.deviceData(this.#id)).data.attr
-    } catch (_error) {
+    } catch (error) {
+      await this.setWarning(
+        error instanceof Error ? error.message : String(error),
+      )
       return null
     }
   }
