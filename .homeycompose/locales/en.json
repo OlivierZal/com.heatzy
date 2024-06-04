@@ -5,10 +5,6 @@
       "failure": "Authentication failed.",
       "legend": "Credentials"
     },
-    "boolean": {
-      "false": "No",
-      "true": "Yes"
-    },
     "devices": {
       "apply": {
         "button": "Apply to all devices",
@@ -17,7 +13,6 @@
       },
       "legend": "Device settings"
     },
-    "int_error": "__name__: must be an integer between __min__ and __max__.",
     "refresh": "Refresh",
     "success": "Update succeeded.",
     "title": "Heatzy settings"
