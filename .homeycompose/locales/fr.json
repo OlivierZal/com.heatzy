@@ -5,6 +5,10 @@
       "failure": "L'authentification a échoué.",
       "legend": "Identifiants"
     },
+    "boolean": {
+      "false": "Non",
+      "true": "Oui"
+    },
     "devices": {
       "apply": {
         "button": "Appliquer à tous les appareils",

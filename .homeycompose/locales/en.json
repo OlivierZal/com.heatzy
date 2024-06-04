@@ -5,6 +5,10 @@
       "failure": "Authentication failed.",
       "legend": "Credentials"
     },
+    "boolean": {
+      "false": "No",
+      "true": "Yes"
+    },
     "devices": {
       "apply": {
         "button": "Apply to all devices",
