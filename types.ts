@@ -96,7 +96,9 @@ export interface ManifestDriver {
   readonly id: string
 }
 
-export type Manifest = object & { readonly drivers: readonly ManifestDriver[] }
+export interface Manifest {
+  readonly drivers: readonly ManifestDriver[]
+}
 
 export interface DriverSetting {
   placeholder?: string
