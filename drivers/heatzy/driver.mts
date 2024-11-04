@@ -1,36 +1,19 @@
-import type {
-  DeviceDetails,
-  FlowArgs,
-  ManifestDriver,
-  ModeCapability,
-} from '../../types'
-import { isFirstGen, isFirstPilot, isGlow } from '../../utils'
-import { Driver } from 'homey'
-import type HeatzyApp from '../..'
-import type { LoginCredentials } from '@olivierzal/heatzy-api'
+import { DeviceModel, type LoginPostData } from '@olivierzal/heatzy-api'
+
+import { Homey } from '../../homey.mjs'
+import {
+  getCapabilitiesOptions,
+  type DeviceDetails,
+  type FlowArgs,
+  type ManifestDriver,
+} from '../../types.mjs'
+
 import type PairSession from 'homey/lib/PairSession'
 
-export = class extends Driver {
-  readonly #heatzyAPI = (this.homey.app as HeatzyApp).heatzyAPI
+import type HeatzyApp from '../../app.mjs'
 
-  public getRequiredCapabilities(
-    productKey: string,
-    productName: string,
-  ): string[] {
-    if (isFirstGen(productKey)) {
-      return ['onoff', 'mode']
-    }
-    return (this.manifest as ManifestDriver).capabilities.filter(
-      (capability) => {
-        if (capability.startsWith('target_temperature')) {
-          return isGlow(productKey)
-        }
-        return isFirstPilot(productName) ?
-            capability !== 'mode3'
-          : capability !== 'mode'
-      },
-    )
-  }
+export default class HeatzyDriver extends Homey.Driver {
+  public capabilities = (this.manifest as ManifestDriver).capabilities ?? []
 
   public override async onInit(): Promise<void> {
     this.#registerRunListeners()
@@ -40,44 +23,58 @@ export = class extends Driver {
   public override async onPair(session: PairSession): Promise<void> {
     session.setHandler('showView', async (view) => {
       if (view === 'loading') {
-        if (await this.#heatzyAPI.applyLogin()) {
+        if (await this.#login()) {
           await session.showView('list_devices')
           return
         }
         await session.showView('login')
       }
     })
-    session.setHandler('login', async (data: LoginCredentials) =>
-      this.#heatzyAPI.applyLogin(data),
-    )
+    this.#handleLogin(session)
     session.setHandler('list_devices', async () => this.#discoverDevices())
     return Promise.resolve()
   }
 
   public override async onRepair(session: PairSession): Promise<void> {
-    session.setHandler('login', async (data: LoginCredentials) =>
-      this.#heatzyAPI.applyLogin(data),
-    )
+    this.#handleLogin(session)
     return Promise.resolve()
   }
 
+  public getRequiredCapabilities({
+    isFirstGen,
+    isGlow,
+  }: {
+    isFirstGen: boolean
+    isGlow: boolean
+  }): string[] {
+    return this.capabilities.filter((capability) =>
+      isFirstGen ?
+        ['onoff', 'thermostat_mode'].includes(capability)
+      : isGlow || !capability.startsWith('target_temperature'),
+    )
+  }
+
   async #discoverDevices(): Promise<DeviceDetails[]> {
-    try {
-      return (await this.#heatzyAPI.bindings()).data.devices.map(
-        ({
-          dev_alias: name,
-          did,
-          product_key: productKey,
-          product_name: productName,
-        }) => ({
-          capabilities: this.getRequiredCapabilities(productKey, productName),
-          data: { id: did, productKey, productName },
+    return Promise.resolve(
+      DeviceModel.getAll().map(
+        ({ id, isFirstGen, isFirstPilot, isGlow, name }) => ({
+          capabilities: this.getRequiredCapabilities({ isFirstGen, isGlow }),
+          capabilitiesOptions: getCapabilitiesOptions(isFirstPilot),
+          data: { id },
           name,
         }),
-      )
-    } catch (_error) {
-      return []
-    }
+      ),
+    )
+  }
+
+  #handleLogin(session: PairSession): void {
+    session.setHandler('login', async (data: LoginPostData) =>
+      this.#login(data),
+    )
+  }
+
+  async #login(data?: LoginPostData): Promise<boolean> {
+    return (this.homey.app as HeatzyApp).api.authenticate(data)
   }
 
   #registerDerogTimeRunListeners(): void {
@@ -96,20 +93,6 @@ export = class extends Driver {
       })
   }
 
-  #registerModeRunListeners(capability: ModeCapability): void {
-    this.homey.flow
-      .getConditionCard(`${capability}_condition`)
-      .registerRunListener(
-        (args: FlowArgs) =>
-          args.device.getCapabilityValue(capability) === args.mode,
-      )
-    this.homey.flow
-      .getActionCard(`${capability}_action`)
-      .registerRunListener(async (args: FlowArgs) => {
-        await args.device.triggerCapabilityListener(capability, args.mode)
-      })
-  }
-
   #registerOnOffRunListeners(): void {
     this.homey.flow
       .getConditionCard('onoff.timer_condition')
@@ -125,8 +108,6 @@ export = class extends Driver {
 
   #registerRunListeners(): void {
     this.#registerDerogTimeRunListeners()
-    this.#registerModeRunListeners('mode')
-    this.#registerModeRunListeners('mode3')
     this.#registerOnOffRunListeners()
     this.#registerTargetTemperatureRunListener()
   }

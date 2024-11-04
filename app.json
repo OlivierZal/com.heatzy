@@ -15,7 +15,7 @@
     "climate"
   ],
   "version": "19.0.0",
-  "compatibility": ">=5.0.0",
+  "compatibility": ">=12.0.1",
   "tags": {
     "en": [
       "acova",
@@ -83,6 +83,7 @@
       "path": "/settings/drivers"
     }
   },
+  "esm": true,
   "flow": {
     "triggers": [
       {
@@ -111,60 +112,6 @@
           }
         ],
         "id": "derog_time_boost_changed"
-      },
-      {
-        "title": {
-          "en": "The mode has changed",
-          "fr": "Le mode a changé"
-        },
-        "tokens": [
-          {
-            "name": "mode",
-            "type": "string",
-            "title": {
-              "en": "Mode",
-              "fr": "Mode"
-            },
-            "example": {
-              "en": "eco"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode"
-          }
-        ],
-        "id": "mode_changed"
-      },
-      {
-        "title": {
-          "en": "The mode has changed",
-          "fr": "Le mode a changé"
-        },
-        "tokens": [
-          {
-            "name": "mode3",
-            "type": "string",
-            "title": {
-              "en": "Mode",
-              "fr": "Mode"
-            },
-            "example": {
-              "en": "eco"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode3"
-          }
-        ],
-        "id": "mode3_changed"
       },
       {
         "title": {
@@ -209,124 +156,6 @@
           }
         ],
         "id": "derog_time_boost_condition"
-      },
-      {
-        "title": {
-          "en": "The mode !{{is|is not}}",
-          "fr": "Le mode !{{est|n'est pas}}"
-        },
-        "titleFormatted": {
-          "en": "The mode !{{is|is not}} [[mode]]",
-          "fr": "Le mode !{{est|n'est pas}} [[mode]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode"
-          },
-          {
-            "name": "mode",
-            "type": "dropdown",
-            "values": [
-              {
-                "id": "cft",
-                "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
-                }
-              },
-              {
-                "id": "eco",
-                "title": {
-                  "en": "Eco",
-                  "fr": "Éco"
-                }
-              },
-              {
-                "id": "fro",
-                "title": {
-                  "en": "Anti-frost",
-                  "fr": "Anti-gel"
-                }
-              },
-              {
-                "id": "stop",
-                "title": {
-                  "en": "Off",
-                  "fr": "Désactivé"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "mode_condition"
-      },
-      {
-        "title": {
-          "en": "The mode !{{is|is not}}",
-          "fr": "Le mode !{{est|n'est pas}}"
-        },
-        "titleFormatted": {
-          "en": "The mode !{{is|is not}} [[mode]]",
-          "fr": "Le mode !{{est|n'est pas}} [[mode]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode3"
-          },
-          {
-            "name": "mode",
-            "type": "dropdown",
-            "values": [
-              {
-                "id": "cft2",
-                "title": {
-                  "en": "Comfort 2",
-                  "fr": "Confort 2"
-                }
-              },
-              {
-                "id": "cft1",
-                "title": {
-                  "en": "Comfort 1",
-                  "fr": "Confort 1"
-                }
-              },
-              {
-                "id": "cft",
-                "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
-                }
-              },
-              {
-                "id": "eco",
-                "title": {
-                  "en": "Eco",
-                  "fr": "Éco"
-                }
-              },
-              {
-                "id": "fro",
-                "title": {
-                  "en": "Anti-frost",
-                  "fr": "Anti-gel"
-                }
-              },
-              {
-                "id": "stop",
-                "title": {
-                  "en": "Off",
-                  "fr": "Désactivé"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "mode3_condition"
       },
       {
         "title": {
@@ -402,124 +231,6 @@
           }
         ],
         "id": "derog_time_boost_action"
-      },
-      {
-        "title": {
-          "en": "Set the mode",
-          "fr": "Définir le mode"
-        },
-        "titleFormatted": {
-          "en": "Set the mode to [[mode]]",
-          "fr": "Définir le mode à [[mode]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode"
-          },
-          {
-            "name": "mode",
-            "type": "dropdown",
-            "values": [
-              {
-                "id": "cft",
-                "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
-                }
-              },
-              {
-                "id": "eco",
-                "title": {
-                  "en": "Eco",
-                  "fr": "Éco"
-                }
-              },
-              {
-                "id": "fro",
-                "title": {
-                  "en": "Anti-frost",
-                  "fr": "Anti-gel"
-                }
-              },
-              {
-                "id": "stop",
-                "title": {
-                  "en": "Off",
-                  "fr": "Désactivé"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "mode_action"
-      },
-      {
-        "title": {
-          "en": "Set the mode",
-          "fr": "Définir le mode"
-        },
-        "titleFormatted": {
-          "en": "Set the mode to [[mode]]",
-          "fr": "Définir le mode à [[mode]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=mode3"
-          },
-          {
-            "name": "mode",
-            "type": "dropdown",
-            "values": [
-              {
-                "id": "cft2",
-                "title": {
-                  "en": "Comfort 2",
-                  "fr": "Confort 2"
-                }
-              },
-              {
-                "id": "cft1",
-                "title": {
-                  "en": "Comfort 1",
-                  "fr": "Confort 1"
-                }
-              },
-              {
-                "id": "cft",
-                "title": {
-                  "en": "Comfort",
-                  "fr": "Confort"
-                }
-              },
-              {
-                "id": "eco",
-                "title": {
-                  "en": "Eco",
-                  "fr": "Éco"
-                }
-              },
-              {
-                "id": "fro",
-                "title": {
-                  "en": "Anti-frost",
-                  "fr": "Anti-gel"
-                }
-              },
-              {
-                "id": "stop",
-                "title": {
-                  "en": "Off",
-                  "fr": "Désactivé"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "mode3_action"
       },
       {
         "title": {
@@ -656,8 +367,7 @@
         "onoff.timer",
         "target_temperature",
         "target_temperature.complement",
-        "mode",
-        "mode3",
+        "thermostat_mode",
         "locked",
         "derog_end",
         "derog_time_boost",

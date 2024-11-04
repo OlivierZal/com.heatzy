@@ -1,7 +1,13 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["DOM", "ESNext"],
+    "module": "Preserve",
+    "noImplicitOverride": true,
+    "noUncheckedSideEffectImports": true,
     "outDir": ".homeybuild",
-    "target": "ES2022"
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2023"
   }
 }

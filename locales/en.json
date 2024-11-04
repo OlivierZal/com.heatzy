@@ -24,5 +24,8 @@
   },
   "warnings": {
     "always_on": "Shutdown from Homey has been disabled."
+  },
+  "errors": {
+    "deviceNotFound": "Appareil introuvable."
   }
 }
