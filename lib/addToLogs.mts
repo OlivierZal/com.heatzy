@@ -3,11 +3,10 @@ import type { SimpleClass } from 'homey'
 const FIRST_CHAR = 0
 const PARENTHESES = '()'
 
-export default <T extends new (...args: any[]) => SimpleClass>(
-    ...logs: string[]
-  ) =>
-  (target: T, _context: ClassDecoratorContext): T =>
-    class extends target {
+export const addToLogs =
+  <T extends abstract new (...args: any[]) => SimpleClass>(...logs: string[]) =>
+  (target: T, _context: ClassDecoratorContext): T => {
+    abstract class LogDecorator extends target {
       public override error(...args: unknown[]): void {
         this.#commonLog('error', ...args)
       }
@@ -19,9 +18,8 @@ export default <T extends new (...args: any[]) => SimpleClass>(
       #commonLog(logType: 'error' | 'log', ...args: unknown[]): void {
         super[logType](
           ...logs.flatMap((log) => {
-            let arg: unknown = log
             if (log in this) {
-              arg = this[log as keyof this]
+              return [this[log as keyof this], '-']
             } else if (log.endsWith(PARENTHESES)) {
               const funcName = log.slice(FIRST_CHAR, -PARENTHESES.length)
               if (
@@ -32,13 +30,15 @@ export default <T extends new (...args: any[]) => SimpleClass>(
                   ...funcArgs: unknown[]
                 ) => unknown
                 if (!func.length) {
-                  arg = func.call(this)
+                  return [func.call(this), '-']
                 }
               }
             }
-            return [arg, '-']
+            return [log, '-']
           }),
           ...args,
         )
       }
     }
+    return LogDecorator
+  }

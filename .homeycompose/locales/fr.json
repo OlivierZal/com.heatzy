@@ -1,4 +1,7 @@
 {
+  "errors": {
+    "deviceNotFound": "Device not found."
+  },
   "settings": {
     "authenticate": {
       "button": "Se connecter",
@@ -20,8 +23,5 @@
     "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",
     "title": "Paramètres Heatzy"
-  },
-  "warnings": {
-    "always_on": "L'extinction depuis Homey a été désactivée."
   }
 }

@@ -24,5 +24,8 @@
   },
   "warnings": {
     "always_on": "L'extinction depuis Homey a été désactivée."
+  },
+  "errors": {
+    "deviceNotFound": "Device not found."
   }
 }

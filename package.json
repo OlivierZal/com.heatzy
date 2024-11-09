@@ -1,41 +1,46 @@
 {
   "name": "com.heatzy",
   "version": "19.0.0",
-  "main": "app.ts",
-  "prettier": {
-    "experimentalTernaries": true,
-    "semi": false,
-    "singleQuote": true
-  },
+  "type": "module",
   "scripts": {
-    "build": "homey app validate --level publish && tsc -p 'tsconfig.checkjs.json'",
-    "deploy": "homey app install",
+    "build": "npm run prepare && homey app validate --level publish",
+    "deploy": "npm run prepare && homey app install",
     "format": "prettier . --check",
+    "format:docs": "prettier README.md --ignore-path --write",
     "format:fix": "prettier . --write",
-    "lint": "eslint .",
+    "lint": "eslint . --flag unstable_ts_config",
     "lint:fix": "npm run lint -- --fix",
+    "prepare": "npm run format:docs && npm run lint:fix && npm run format:fix",
     "publish": "homey app publish"
   },
+  "dependencies": {
+    "@olivierzal/heatzy-api": "^3.0.5",
+    "luxon": "^3.5.0",
+    "source-map-support": "^0.5.21"
+  },
   "devDependencies": {
-    "@eslint/js": "^9.13.0",
+    "@eslint/js": "^9.14.0",
+    "@eslint/json": "^0.6.0",
+    "@eslint/markdown": "^6.2.1",
+    "@html-eslint/eslint-plugin": "^0.27.0",
+    "@html-eslint/parser": "^0.27.0",
     "@stylistic/eslint-plugin": "^2.10.1",
-    "@types/eslint__js": "^8.42.3",
     "@types/eslint-config-prettier": "^6.11.3",
-    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.6",
+    "@types/eslint__js": "^8.42.3",
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.9",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.9.0",
     "eslint": "^9.14.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.31.0",
-    "homey": "^3.7.11",
+    "eslint-plugin-package-json": "^0.15.5",
+    "eslint-plugin-perfectionist": "^3.9.1",
+    "jiti": "^2.4.0",
+    "jsonc-eslint-parser": "^2.4.0",
     "prettier": "^3.3.3",
+    "prettier-plugin-packagejson": "^2.5.3",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.13.0"
-  },
-  "dependencies": {
-    "@olivierzal/heatzy-api": "^2.0.0",
-    "luxon": "^3.5.0",
-    "source-map-support": "^0.5.21"
   }
 }

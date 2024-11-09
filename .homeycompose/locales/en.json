@@ -1,4 +1,7 @@
 {
+  "errors": {
+    "deviceNotFound": "Appareil introuvable."
+  },
   "settings": {
     "authenticate": {
       "button": "Log in",
@@ -20,8 +23,5 @@
     "refresh": "Refresh",
     "success": "Update succeeded.",
     "title": "Heatzy settings"
-  },
-  "warnings": {
-    "always_on": "Shutdown from Homey has been disabled."
   }
 }

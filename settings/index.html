@@ -1,65 +1,56 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Heatzy Settings</title>
-    <link rel="stylesheet" type="text/css" href="styles.css" />
-    <script
-      type="text/javascript"
-      src="/homey.js"
-      data-origin="settings"
-    ></script>
-    <script>
-      const exports = {}
-    </script>
-    <script src="index.js" defer></script>
-  </head>
-  <body>
-    <header class="homey-header">
-      <h1 class="homey-title" data-i18n="settings.title" />
-    </header>
-    <div id="authenticating" class="hidden">
-      <fieldset class="homey-form-fieldset">
-        <legend
-          class="homey-form-legend"
-          data-i18n="settings.authenticate.legend"
-        ></legend>
-        <div id="login"></div>
-        <div class="homey-form-group">
-          <button
-            id="authenticate"
-            aria-label="Authenticate"
-            class="homey-button-primary-full"
-            data-i18n="settings.authenticate.button"
-          ></button>
+    <head>
+        <meta charset="utf-8">
+        <meta content="Heatzy settings" name="description">
+        <meta content="width=device-width, initial-scale=1.0, user-scalable=0" name="viewport">
+        <title>Heatzy Settings</title>
+        <link href="styles.css" rel="stylesheet">
+        <script data-origin="settings" src="/homey.js"></script>
+    </head>
+    <body>
+        <header class="homey-header">
+            <h1 class="homey-title" data-i18n="settings.title"></h1>
+        </header>
+        <div id="authenticating" class="hidden">
+            <fieldset class="homey-form-fieldset">
+                <legend class="homey-form-legend" data-i18n="settings.authenticate.legend"></legend>
+                <div id="login"></div>
+                <div class="homey-form-group">
+                    <button
+                        id="authenticate"
+                        type="button"
+                        class="homey-button-primary-full"
+                        aria-label="Authenticate"
+                        data-i18n="settings.authenticate.button"
+                    ></button>
+                </div>
+            </fieldset>
         </div>
-      </fieldset>
-    </div>
-    <div id="authenticated" class="hidden">
-      <fieldset class="homey-form-fieldset">
-        <legend
-          class="homey-form-legend"
-          data-i18n="settings.devices.legend"
-        ></legend>
-        <div id="settings-common"></div>
-        <div class="homey-form-group">
-          <button
-            id="refresh-settings"
-            aria-label="Refresh"
-            class="homey-button-secondary-shadow-full"
-            data-i18n="settings.refresh"
-          ></button>
+        <div id="authenticated" class="hidden">
+            <fieldset class="homey-form-fieldset">
+                <legend class="homey-form-legend" data-i18n="settings.devices.legend"></legend>
+                <div id="settings_common"></div>
+                <div class="homey-form-group">
+                    <button
+                        id="refresh_settings_common"
+                        type="button"
+                        class="homey-button-secondary-shadow-full"
+                        aria-label="Refresh"
+                        data-i18n="settings.refresh"
+                    ></button>
+                </div>
+                <div class="homey-form-group">
+                    <button
+                        id="apply_settings_common"
+                        type="button"
+                        class="homey-button-danger-shadow-full"
+                        aria-label="Apply"
+                        data-i18n="settings.devices.apply.button"
+                    ></button>
+                </div>
+            </fieldset>
         </div>
-        <div class="homey-form-group">
-          <button
-            id="apply-settings"
-            aria-label="Apply"
-            class="homey-button-danger-shadow-full"
-            data-i18n="settings.devices.apply.button"
-          ></button>
-        </div>
-      </fieldset>
-    </div>
-  </body>
+        <script defer src="index.mjs"></script>
+    </body>
 </html>
