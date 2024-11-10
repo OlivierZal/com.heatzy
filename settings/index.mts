@@ -418,9 +418,6 @@ const generateCommonSettings = (homey: Homey): void => {
 }
 
 const needsAuthentication = (value = true): void => {
-  if (!loginElement.childElementCount) {
-    generateCredentials()
-  }
   hide(authenticatedElement, value)
   unhide(authenticatingElement, value)
 }
@@ -472,7 +469,8 @@ const addAuthenticateEventListener = (homey: Homey): void => {
 }
 
 const load = async (homey: Homey): Promise<void> => {
-  if (typeof homeySettings.token !== 'undefined') {
+  generateCredentials()
+  if (homeySettings.token !== undefined) {
     try {
       await login(homey)
       return
