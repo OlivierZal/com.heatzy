@@ -21,7 +21,6 @@ let homeySettings: HomeySettingsUI = {
   token: '',
   username: '',
 }
-let driverSettings: Partial<Record<string, DriverSetting[]>> = {}
 
 let deviceSettings: Partial<DeviceSettings> = {}
 let flatDeviceSettings: Partial<DeviceSetting> = {}
@@ -145,34 +144,12 @@ const fetchDeviceSettings = async (homey: Homey): Promise<void> =>
     )
   })
 
-const fetchDriverSettings = async (homey: Homey): Promise<void> =>
-  new Promise((resolve) => {
-    homey.api(
-      'GET',
-      '/settings/drivers',
-      async (
-        error: Error | null,
-        settings: Partial<Record<string, DriverSetting[]>>,
-      ) => {
-        if (error) {
-          await homey.alert(error.message)
-        } else {
-          driverSettings = settings
-        }
-        resolve()
-      },
-    )
-  })
-
 const createLabelElement = (
   valueElement: HTMLValueElement,
   text: string,
 ): HTMLLabelElement => {
-  const isCheckbox = valueElement.type === 'checkbox'
   const labelElement = document.createElement('label')
-  labelElement.classList.add(
-    isCheckbox ? 'homey-form-checkbox' : 'homey-form-label',
-  )
+  labelElement.classList.add('homey-form-label')
   ;({ id: labelElement.htmlFor } = valueElement)
   labelElement.innerText = text
   labelElement.append(valueElement)
@@ -258,6 +235,7 @@ const createSelectElement = (
 
 const generateCredential = (
   credentialKey: keyof LoginPostData,
+  driverSettings: Partial<Record<string, DriverSetting[]>>,
 ): HTMLInputElement | null => {
   const loginSetting = (driverSettings.login as LoginDriverSetting[]).find(
     ({ id }) => id === credentialKey,
@@ -276,9 +254,11 @@ const generateCredential = (
   return null
 }
 
-const fetchCredentials = (): void => {
+const generateCredentials = (
+  driverSettings: Partial<Record<string, DriverSetting[]>>,
+): void => {
   ;[usernameElement, passwordElement] = (['username', 'password'] as const).map(
-    generateCredential,
+    (element) => generateCredential(element, driverSettings),
   )
 }
 
@@ -290,7 +270,7 @@ const shouldUpdate = (id: string, value: ValueOf<Settings>): boolean => {
   return false
 }
 
-const processValue = (element: HTMLValueElement): ValueOf<Settings> => {
+const processValue = (element: HTMLSelectElement): ValueOf<Settings> => {
   if (element.value) {
     return ['false', 'true'].includes(element.value) ?
         element.value === 'true'
@@ -299,7 +279,7 @@ const processValue = (element: HTMLValueElement): ValueOf<Settings> => {
   return null
 }
 
-const buildSettingsBody = (elements: HTMLValueElement[]): Settings => {
+const buildSettingsBody = (elements: HTMLSelectElement[]): Settings => {
   const errors: string[] = []
   const settings: Settings = {}
   elements.forEach((element) => {
@@ -329,23 +309,23 @@ const updateDeviceSettings = (body: Settings): void => {
   })
 }
 
-const updateCommonChildrenElement = (element: HTMLSelectElement): void => {
+const updateCommonSetting = (element: HTMLSelectElement): void => {
   const [id] = element.id.split('__')
   const { [id]: value } = flatDeviceSettings
   element.value = value === null ? '' : String(value)
 }
 
-const refreshSettingsCommon = (elements: HTMLSelectElement[]): void => {
-  elements.forEach(updateCommonChildrenElement)
+const refreshCommonSettings = (elements: HTMLSelectElement[]): void => {
+  elements.forEach(updateCommonSetting)
 }
 
 const setDeviceSettings = async (
   homey: Homey,
-  elements: HTMLValueElement[],
+  elements: HTMLSelectElement[],
 ): Promise<void> => {
   const body = buildSettingsBody(elements)
   if (!Object.keys(body).length) {
-    refreshSettingsCommon(elements as HTMLSelectElement[])
+    refreshCommonSettings(elements)
     homey.alert(homey.__('settings.devices.apply.nothing')).catch(() => {
       //
     })
@@ -374,7 +354,7 @@ const setDeviceSettings = async (
 
 const addApplySettingsEventListener = (
   homey: Homey,
-  elements: HTMLValueElement[],
+  elements: HTMLSelectElement[],
 ): void => {
   applySettingsElement.addEventListener('click', () => {
     setDeviceSettings(homey, elements).catch(() => {
@@ -384,22 +364,25 @@ const addApplySettingsEventListener = (
 }
 
 const addRefreshSettingsEventListener = (
-  elements: HTMLValueElement[],
+  elements: HTMLSelectElement[],
 ): void => {
   refreshSettingsElement.addEventListener('click', () => {
-    refreshSettingsCommon(elements as HTMLSelectElement[])
+    refreshCommonSettings(elements)
   })
 }
 
 const addSettingsEventListeners = (
   homey: Homey,
-  elements: HTMLValueElement[],
+  elements: HTMLSelectElement[],
 ): void => {
   addApplySettingsEventListener(homey, elements)
   addRefreshSettingsEventListener(elements)
 }
 
-const fetchCommonSettings = (homey: Homey): void => {
+const generateCommonSettings = (
+  homey: Homey,
+  driverSettings: Partial<Record<string, DriverSetting[]>>,
+): void => {
   ;(driverSettings.options ?? []).forEach(({ id, title, type, values }) => {
     const settingId = `${id}__setting`
     if (
@@ -408,7 +391,7 @@ const fetchCommonSettings = (homey: Homey): void => {
     ) {
       const valueElement = createSelectElement(homey, settingId, values)
       createValueElement(settingsCommonElement, { title, valueElement })
-      updateCommonChildrenElement(valueElement)
+      updateCommonSetting(valueElement)
     }
   })
   addSettingsEventListeners(
@@ -416,6 +399,26 @@ const fetchCommonSettings = (homey: Homey): void => {
     Array.from(settingsCommonElement.querySelectorAll('select')),
   )
 }
+
+const fetchDriverSettings = async (homey: Homey): Promise<void> =>
+  new Promise((resolve) => {
+    homey.api(
+      'GET',
+      '/settings/drivers',
+      async (
+        error: Error | null,
+        settings: Partial<Record<string, DriverSetting[]>>,
+      ) => {
+        if (error) {
+          await homey.alert(error.message)
+        } else {
+          generateCommonSettings(homey, settings)
+          generateCredentials(settings)
+        }
+        resolve()
+      },
+    )
+  })
 
 const needsAuthentication = (value = true): void => {
   hide(authenticatedElement, value)
@@ -484,8 +487,6 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   await fetchHomeySettings(homey)
   await fetchDeviceSettings(homey)
   await fetchDriverSettings(homey)
-  fetchCommonSettings(homey)
-  fetchCredentials()
   addAuthenticateEventListener(homey)
   await load(homey)
   homey.ready()
