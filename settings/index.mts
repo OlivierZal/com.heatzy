@@ -276,7 +276,7 @@ const generateCredential = (
   return null
 }
 
-const generateCredentials = (): void => {
+const fetchCredentials = (): void => {
   ;[usernameElement, passwordElement] = (['username', 'password'] as const).map(
     generateCredential,
   )
@@ -399,7 +399,7 @@ const addSettingsEventListeners = (
   addRefreshSettingsEventListener(elements)
 }
 
-const generateCommonSettings = (homey: Homey): void => {
+const fetchCommonSettings = (homey: Homey): void => {
   ;(driverSettings.options ?? []).forEach(({ id, title, type, values }) => {
     const settingId = `${id}__setting`
     if (
@@ -469,7 +469,6 @@ const addAuthenticateEventListener = (homey: Homey): void => {
 }
 
 const load = async (homey: Homey): Promise<void> => {
-  generateCredentials()
   if (homeySettings.token !== undefined) {
     try {
       await login(homey)
@@ -485,7 +484,8 @@ async function onHomeyReady(homey: Homey): Promise<void> {
   await fetchHomeySettings(homey)
   await fetchDeviceSettings(homey)
   await fetchDriverSettings(homey)
-  generateCommonSettings(homey)
+  fetchCommonSettings(homey)
+  fetchCredentials()
   addAuthenticateEventListener(homey)
   await load(homey)
   homey.ready()

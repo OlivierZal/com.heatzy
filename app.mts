@@ -8,7 +8,6 @@ import {
   type DeviceFacade,
   type LoginPostData,
 } from '@olivierzal/heatzy-api'
-import { Settings as LuxonSettings } from 'luxon'
 
 import { Homey } from './homey.mjs'
 import { changelog } from './jsonFiles.mjs'
@@ -85,9 +84,6 @@ export default class HeatzyApp extends Homey.App {
   }
 
   public override async onInit(): Promise<void> {
-    const timezone = this.homey.clock.getTimezone()
-    LuxonSettings.defaultZone = timezone
-    LuxonSettings.defaultLocale = this.#language
     this.#api = await HeatzyAPI.create({
       language: this.#language,
       logger: {
@@ -100,7 +96,7 @@ export default class HeatzyApp extends Homey.App {
       },
       onSync: async () => this.#syncFromDevices(),
       settingManager: this.homey.settings,
-      timezone,
+      timezone: this.homey.clock.getTimezone(),
     })
     this.#facadeManager = new FacadeManager(this.#api)
     this.#createNotification()
