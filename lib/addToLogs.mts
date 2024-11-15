@@ -7,7 +7,7 @@ export const addToLogs =
   <T extends abstract new (...args: any[]) => SimpleClass>(...logs: string[]) =>
   (target: T, _context: ClassDecoratorContext): T => {
     abstract class LogDecorator extends target {
-      public override error(...args: unknown[]): void {
+          public override error(...args: unknown[]): void {
         this.#commonLog('error', ...args)
       }
 
