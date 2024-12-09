@@ -1,0 +1,25 @@
+{
+  "title": {
+    "en": "Set the open window detection",
+    "fr": "Définir la détection de fenêtre ouverte"
+  },
+  "titleFormatted": {
+    "en": "Set the open window detection to [[onoff]]",
+    "fr": "Définir la détection de fenêtre ouverte à [[onoff]]"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
+    },
+    {
+      "name": "onoff",
+      "type": "checkbox",
+      "title": {
+        "en": "Open window detection",
+        "fr": "Détection de fenêtre ouverte"
+      }
+    }
+  ]
+}

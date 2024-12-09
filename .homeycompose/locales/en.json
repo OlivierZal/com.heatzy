@@ -1,4 +1,5 @@
 {
+  "derogEnd": "__derogMode__ until: __derogEnd__",
   "errors": {
     "deviceNotFound": "Appareil introuvable."
   },

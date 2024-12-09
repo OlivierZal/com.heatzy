@@ -3,10 +3,7 @@
   "id": "com.heatzy",
   "sdk": 3,
   "brandColor": "#153f35",
-  "name": {
-    "en": "Heatzy",
-    "fr": "Heatzy"
-  },
+  "name": "Heatzy",
   "description": {
     "en": "Pilot your electric radiators",
     "fr": "Pilotez vos radiateurs électriques"
@@ -15,7 +12,7 @@
     "climate"
   ],
   "version": "19.0.0",
-  "compatibility": ">=12.0.1",
+  "compatibility": ">=12.2.0",
   "tags": {
     "en": [
       "acova",
@@ -88,41 +85,39 @@
     "triggers": [
       {
         "title": {
-          "en": "The boost has changed",
-          "fr": "Le boost a changé"
+          "en": "The derogation duration changed",
+          "fr": "Le durée de dérogation a changé"
         },
         "tokens": [
           {
-            "name": "derog_time_boost",
+            "name": "derog_time",
             "type": "string",
             "title": {
-              "en": "Boost",
-              "fr": "Boost"
+              "en": "Derogation duration",
+              "fr": "Durée de dérogation"
             },
-            "example": {
-              "en": "30"
-            }
+            "example": "15"
           }
         ],
         "args": [
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy"
+            "filter": "driver_id=heatzy&capabilities=derog_time"
           }
         ],
-        "id": "derog_time_boost_changed"
+        "id": "derog_time_changed"
       },
       {
         "title": {
           "en": "Timer turned off",
-          "fr": "Programmateur désactivé"
+          "fr": "Programmation désactivée"
         },
         "args": [
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy"
+            "filter": "driver_id=heatzy&capabilities=onoff.timer"
           }
         ],
         "id": "onoff.timer_false"
@@ -130,63 +125,61 @@
       {
         "title": {
           "en": "Timer turned on",
-          "fr": "Programmateur activé"
+          "fr": "Programmation activée"
         },
         "args": [
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy"
+            "filter": "driver_id=heatzy&capabilities=onoff.timer"
           }
         ],
         "id": "onoff.timer_true"
+      },
+      {
+        "title": {
+          "en": "Open window detection turned off",
+          "fr": "Détection de fenêtre ouverte désactivée"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
+          }
+        ],
+        "id": "onoff.window_detection_false"
+      },
+      {
+        "title": {
+          "en": "Open window detection turned on",
+          "fr": "Détection de fenêtre ouverte désactivé"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
+          }
+        ],
+        "id": "onoff.window_detection_true"
       }
     ],
     "conditions": [
       {
         "title": {
-          "en": "The boost is turned !{{on|off}}",
-          "fr": "Le boost est !{{activé|désactivé}}"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy"
-          }
-        ],
-        "id": "derog_time_boost_condition"
-      },
-      {
-        "title": {
-          "en": "The timer is turned !{{on|off}}",
-          "fr": "Le programmateur est !{{activé|désactivé}}"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy"
-          }
-        ],
-        "id": "onoff.timer_condition"
-      }
-    ],
-    "actions": [
-      {
-        "title": {
-          "en": "Set the boost",
-          "fr": "Définir le boost"
+          "en": "The derogation duration !{{is|is not}}",
+          "fr": "La durée de dérogation !{{est|n'est pas}}"
         },
         "titleFormatted": {
-          "en": "Set the boost to [[derog_time]]",
-          "fr": "Définir le boost à [[derog_time]]"
+          "en": "The derogation duration !{{is|is not}} [[derog_time]]",
+          "fr": "La durée de dérogation !{{est|n'est pas}} [[derog_time]]"
         },
         "args": [
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy"
+            "filter": "driver_id=heatzy&capabilities=derog_time"
           },
           {
             "name": "derog_time",
@@ -195,64 +188,559 @@
               {
                 "id": "0",
                 "title": {
-                  "en": "Off",
-                  "fr": "Désactivé"
+                  "en": "0 minute / day",
+                  "fr": "0 minute / jour"
+                }
+              },
+              {
+                "id": "1",
+                "title": {
+                  "en": "1 minute / day",
+                  "fr": "1 minute / jour"
+                }
+              },
+              {
+                "id": "2",
+                "title": {
+                  "en": "2 minutes / days",
+                  "fr": "2 minutes / jours"
+                }
+              },
+              {
+                "id": "3",
+                "title": {
+                  "en": "3 minutes / days",
+                  "fr": "3 minutes / jours"
+                }
+              },
+              {
+                "id": "4",
+                "title": {
+                  "en": "4 minutes / days",
+                  "fr": "4 minutes / jours"
+                }
+              },
+              {
+                "id": "5",
+                "title": {
+                  "en": "5 minutes / days",
+                  "fr": "5 minutes / jours"
+                }
+              },
+              {
+                "id": "6",
+                "title": {
+                  "en": "6 minutes / days",
+                  "fr": "6 minutes / jours"
+                }
+              },
+              {
+                "id": "7",
+                "title": {
+                  "en": "7 minutes / days",
+                  "fr": "7 minutes / jours"
+                }
+              },
+              {
+                "id": "8",
+                "title": {
+                  "en": "8 minutes / days",
+                  "fr": "8 minutes / jours"
+                }
+              },
+              {
+                "id": "9",
+                "title": {
+                  "en": "9 minutes / days",
+                  "fr": "9 minutes / jours"
+                }
+              },
+              {
+                "id": "10",
+                "title": {
+                  "en": "10 minutes / days",
+                  "fr": "10 minutes / jours"
+                }
+              },
+              {
+                "id": "11",
+                "title": {
+                  "en": "11 minutes / days",
+                  "fr": "11 minutes / jours"
+                }
+              },
+              {
+                "id": "12",
+                "title": {
+                  "en": "12 minutes / days",
+                  "fr": "12 minutes / jours"
+                }
+              },
+              {
+                "id": "13",
+                "title": {
+                  "en": "13 minutes / days",
+                  "fr": "13 minutes / jours"
+                }
+              },
+              {
+                "id": "14",
+                "title": {
+                  "en": "14 minutes / days",
+                  "fr": "14 minutes / jours"
+                }
+              },
+              {
+                "id": "15",
+                "title": {
+                  "en": "15 minutes / days",
+                  "fr": "15 minutes / jours"
+                }
+              },
+              {
+                "id": "16",
+                "title": {
+                  "en": "16 minutes / days",
+                  "fr": "16 minutes / jours"
+                }
+              },
+              {
+                "id": "17",
+                "title": {
+                  "en": "17 minutes / days",
+                  "fr": "17 minutes / jours"
+                }
+              },
+              {
+                "id": "18",
+                "title": {
+                  "en": "18 minutes / days",
+                  "fr": "18 minutes / jours"
+                }
+              },
+              {
+                "id": "19",
+                "title": {
+                  "en": "19 minutes / days",
+                  "fr": "19 minutes / jours"
+                }
+              },
+              {
+                "id": "20",
+                "title": {
+                  "en": "20 minutes / days",
+                  "fr": "20 minutes / jours"
+                }
+              },
+              {
+                "id": "21",
+                "title": {
+                  "en": "21 minutes / days",
+                  "fr": "21 minutes / jours"
+                }
+              },
+              {
+                "id": "22",
+                "title": {
+                  "en": "22 minutes / days",
+                  "fr": "22 minutes / jours"
+                }
+              },
+              {
+                "id": "23",
+                "title": {
+                  "en": "23 minutes / days",
+                  "fr": "23 minutes / jours"
+                }
+              },
+              {
+                "id": "24",
+                "title": {
+                  "en": "24 minutes / days",
+                  "fr": "24 minutes / jours"
+                }
+              },
+              {
+                "id": "25",
+                "title": {
+                  "en": "25 minutes / days",
+                  "fr": "25 minutes / jours"
+                }
+              },
+              {
+                "id": "26",
+                "title": {
+                  "en": "26 minutes / days",
+                  "fr": "26 minutes / jours"
+                }
+              },
+              {
+                "id": "27",
+                "title": {
+                  "en": "27 minutes / days",
+                  "fr": "27 minutes / jours"
+                }
+              },
+              {
+                "id": "28",
+                "title": {
+                  "en": "28 minutes / days",
+                  "fr": "28 minutes / jours"
+                }
+              },
+              {
+                "id": "29",
+                "title": {
+                  "en": "29 minutes / days",
+                  "fr": "29 minutes / jours"
                 }
               },
               {
                 "id": "30",
                 "title": {
-                  "en": "30 minutes",
-                  "fr": "30 minutes"
+                  "en": "30 minutes / days",
+                  "fr": "30 minutes / jours"
                 }
               },
               {
                 "id": "60",
                 "title": {
-                  "en": "60 minutes",
-                  "fr": "60 minutes"
+                  "en": "60 minutes / days",
+                  "fr": "60 minutes / jours"
                 }
               },
               {
                 "id": "90",
                 "title": {
-                  "en": "90 minutes",
-                  "fr": "90 minutes"
+                  "en": "90 minutes / days",
+                  "fr": "90 minutes / jours"
                 }
               },
               {
                 "id": "120",
                 "title": {
-                  "en": "120 minutes",
-                  "fr": "120 minutes"
+                  "en": "120 minutes / days",
+                  "fr": "120 minutes / jours"
                 }
               }
             ]
           }
         ],
-        "id": "derog_time_boost_action"
+        "id": "derog_time_condition"
       },
       {
         "title": {
-          "en": "Set the timer",
-          "fr": "Définir le programmateur"
-        },
-        "titleFormatted": {
-          "en": "Set the timer to [[onoff]]",
-          "fr": "Définir le programmateur à [[onoff]]"
+          "en": "The timer is turned !{{on|off}}",
+          "fr": "La programmation est !{{activée|désactivée}}"
         },
         "args": [
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy"
+            "filter": "driver_id=heatzy&capabilities=onoff.timer"
+          }
+        ],
+        "id": "onoff.timer_condition"
+      },
+      {
+        "title": {
+          "en": "The open window detection is turned !{{on|off}}",
+          "fr": "La détection de fenêtre ouverte est !{{activée|désactivée}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
+          }
+        ],
+        "id": "onoff.window_detection_condition"
+      }
+    ],
+    "actions": [
+      {
+        "title": {
+          "en": "Set the derogation duration",
+          "fr": "Définir la durée de dérogation"
+        },
+        "titleFormatted": {
+          "en": "Set the derogation duration to [[derog_time]]",
+          "fr": "Définir la durée de dérogation à [[derog_time]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=derog_time"
+          },
+          {
+            "name": "derog_time",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "0",
+                "title": {
+                  "en": "0 minute / day",
+                  "fr": "0 minute / jour"
+                }
+              },
+              {
+                "id": "1",
+                "title": {
+                  "en": "1 minute / day",
+                  "fr": "1 minute / jour"
+                }
+              },
+              {
+                "id": "2",
+                "title": {
+                  "en": "2 minutes / days",
+                  "fr": "2 minutes / jours"
+                }
+              },
+              {
+                "id": "3",
+                "title": {
+                  "en": "3 minutes / days",
+                  "fr": "3 minutes / jours"
+                }
+              },
+              {
+                "id": "4",
+                "title": {
+                  "en": "4 minutes / days",
+                  "fr": "4 minutes / jours"
+                }
+              },
+              {
+                "id": "5",
+                "title": {
+                  "en": "5 minutes / days",
+                  "fr": "5 minutes / jours"
+                }
+              },
+              {
+                "id": "6",
+                "title": {
+                  "en": "6 minutes / days",
+                  "fr": "6 minutes / jours"
+                }
+              },
+              {
+                "id": "7",
+                "title": {
+                  "en": "7 minutes / days",
+                  "fr": "7 minutes / jours"
+                }
+              },
+              {
+                "id": "8",
+                "title": {
+                  "en": "8 minutes / days",
+                  "fr": "8 minutes / jours"
+                }
+              },
+              {
+                "id": "9",
+                "title": {
+                  "en": "9 minutes / days",
+                  "fr": "9 minutes / jours"
+                }
+              },
+              {
+                "id": "10",
+                "title": {
+                  "en": "10 minutes / days",
+                  "fr": "10 minutes / jours"
+                }
+              },
+              {
+                "id": "11",
+                "title": {
+                  "en": "11 minutes / days",
+                  "fr": "11 minutes / jours"
+                }
+              },
+              {
+                "id": "12",
+                "title": {
+                  "en": "12 minutes / days",
+                  "fr": "12 minutes / jours"
+                }
+              },
+              {
+                "id": "13",
+                "title": {
+                  "en": "13 minutes / days",
+                  "fr": "13 minutes / jours"
+                }
+              },
+              {
+                "id": "14",
+                "title": {
+                  "en": "14 minutes / days",
+                  "fr": "14 minutes / jours"
+                }
+              },
+              {
+                "id": "15",
+                "title": {
+                  "en": "15 minutes / days",
+                  "fr": "15 minutes / jours"
+                }
+              },
+              {
+                "id": "16",
+                "title": {
+                  "en": "16 minutes / days",
+                  "fr": "16 minutes / jours"
+                }
+              },
+              {
+                "id": "17",
+                "title": {
+                  "en": "17 minutes / days",
+                  "fr": "17 minutes / jours"
+                }
+              },
+              {
+                "id": "18",
+                "title": {
+                  "en": "18 minutes / days",
+                  "fr": "18 minutes / jours"
+                }
+              },
+              {
+                "id": "19",
+                "title": {
+                  "en": "19 minutes / days",
+                  "fr": "19 minutes / jours"
+                }
+              },
+              {
+                "id": "20",
+                "title": {
+                  "en": "20 minutes / days",
+                  "fr": "20 minutes / jours"
+                }
+              },
+              {
+                "id": "21",
+                "title": {
+                  "en": "21 minutes / days",
+                  "fr": "21 minutes / jours"
+                }
+              },
+              {
+                "id": "22",
+                "title": {
+                  "en": "22 minutes / days",
+                  "fr": "22 minutes / jours"
+                }
+              },
+              {
+                "id": "23",
+                "title": {
+                  "en": "23 minutes / days",
+                  "fr": "23 minutes / jours"
+                }
+              },
+              {
+                "id": "24",
+                "title": {
+                  "en": "24 minutes / days",
+                  "fr": "24 minutes / jours"
+                }
+              },
+              {
+                "id": "25",
+                "title": {
+                  "en": "25 minutes / days",
+                  "fr": "25 minutes / jours"
+                }
+              },
+              {
+                "id": "26",
+                "title": {
+                  "en": "26 minutes / days",
+                  "fr": "26 minutes / jours"
+                }
+              },
+              {
+                "id": "27",
+                "title": {
+                  "en": "27 minutes / days",
+                  "fr": "27 minutes / jours"
+                }
+              },
+              {
+                "id": "28",
+                "title": {
+                  "en": "28 minutes / days",
+                  "fr": "28 minutes / jours"
+                }
+              },
+              {
+                "id": "29",
+                "title": {
+                  "en": "29 minutes / days",
+                  "fr": "29 minutes / jours"
+                }
+              },
+              {
+                "id": "30",
+                "title": {
+                  "en": "30 minutes / days",
+                  "fr": "30 minutes / jours"
+                }
+              },
+              {
+                "id": "60",
+                "title": {
+                  "en": "60 minutes / days",
+                  "fr": "60 minutes / jours"
+                }
+              },
+              {
+                "id": "90",
+                "title": {
+                  "en": "90 minutes / days",
+                  "fr": "90 minutes / jours"
+                }
+              },
+              {
+                "id": "120",
+                "title": {
+                  "en": "120 minutes / days",
+                  "fr": "120 minutes / jours"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "derog_time_action"
+      },
+      {
+        "title": {
+          "en": "Set the timer",
+          "fr": "Définir la programmation"
+        },
+        "titleFormatted": {
+          "en": "Set the timer to [[onoff]]",
+          "fr": "Définir la programmation à [[onoff]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=heatzy&capabilities=onoff.timer"
           },
           {
             "name": "onoff",
             "type": "checkbox",
             "title": {
               "en": "Timer",
-              "fr": "Programmateur"
+              "fr": "Programmation"
             }
           }
         ],
@@ -260,28 +748,54 @@
       },
       {
         "title": {
-          "en": "Set the thermal complement (comfort mode)",
-          "fr": "Définir le complément thermique (mode confort)"
+          "en": "Set the open window detection",
+          "fr": "Définir la détection de fenêtre ouverte"
         },
         "titleFormatted": {
-          "en": "Set the thermal complement (comfort mode) to [[target_temperature]]",
-          "fr": "Définir le complément thermique (mode confort) à [[target_temperature]]"
+          "en": "Set the open window detection to [[onoff]]",
+          "fr": "Définir la détection de fenêtre ouverte à [[onoff]]"
         },
         "args": [
           {
             "type": "device",
             "name": "device",
-            "filter": "driver_id=heatzy&capabilities=target_temperature.complement"
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
           },
           {
-            "name": "target_temperature",
-            "type": "range",
-            "min": 0,
-            "max": 10,
-            "step": 1
+            "name": "onoff",
+            "type": "checkbox",
+            "title": {
+              "en": "Open window detection",
+              "fr": "Détection de fenêtre ouverte"
+            }
           }
         ],
-        "id": "target_temperature.complement_action"
+        "id": "onoff.window_detection_action"
+      },
+      {
+        "args": [
+          {
+            "filter": "driver_id=melcloud_atw&capabilities=target_temperature.eco",
+            "name": "device",
+            "type": "device"
+          },
+          {
+            "max": 19,
+            "min": 10,
+            "name": "target_temperature",
+            "step": 1,
+            "type": "range"
+          }
+        ],
+        "title": {
+          "en": "Set the eco mode temperature",
+          "fr": "Définir la température du mode éco"
+        },
+        "titleFormatted": {
+          "en": "Set the eco mode temperature to [[target_temperature]]",
+          "fr": "Définir la température du mode éco à [[target_temperature]]"
+        },
+        "id": "target_temperature.eco_action"
       }
     ]
   },
@@ -358,47 +872,64 @@
           }
         }
       ],
-      "name": {
-        "en": "Heatzy Pilote",
-        "fr": "Heatzy Pilote"
-      },
+      "name": "Heatzy",
       "capabilities": [
+        "alarm_presence",
+        "locked",
         "onoff",
         "onoff.timer",
+        "onoff.window_detection",
+        "operational_state",
+        "measure_humidity",
+        "measure_temperature",
         "target_temperature",
-        "target_temperature.complement",
+        "target_temperature.eco",
         "thermostat_mode",
-        "locked",
         "derog_end",
-        "derog_time_boost",
-        "derog_time_vacation"
+        "heater_operation_mode",
+        "derog_time"
       ],
       "capabilitiesOptions": {
         "onoff.timer": {
           "title": {
             "en": "Timer",
-            "fr": "Programmateur"
+            "fr": "Programmation"
           },
           "insightsTitleTrue": {
-            "en": "Scheduled",
-            "fr": "Programmation activé"
+            "en": "Timer turned on",
+            "fr": "Programmation activée"
           },
           "insightsTitleFalse": {
-            "en": "Unscheduled",
-            "fr": "Programmation désactivé"
+            "en": "Timer turned off",
+            "fr": "Programmation désactivée"
+          }
+        },
+        "onoff.window_detection": {
+          "title": {
+            "en": "Open window detection",
+            "fr": "Détection de fenêtre ouverte"
+          },
+          "insightsTitleTrue": {
+            "en": "Open window detection turned on",
+            "fr": "Détection de fenêtre ouverte activée"
+          },
+          "insightsTitleFalse": {
+            "en": "Open window detection turned off",
+            "fr": "Détection de fenêtre ouverte désactivée"
           }
         },
         "target_temperature": {
-          "min": 0,
-          "max": 25.5
+          "max": 30,
+          "min": 15,
+          "step": 1
         },
-        "target_temperature.complement": {
+        "target_temperature.eco": {
           "title": {
-            "en": "Thermal complement (comfort mode)",
-            "fr": "Complément thermique (mode confort)"
+            "en": "Target temperature - eco mode",
+            "fr": "Température cible - mode éco"
           },
-          "min": 0,
-          "max": 10,
+          "max": 19,
+          "min": 10,
           "step": 1
         }
       },
@@ -467,19 +998,266 @@
       "type": "string",
       "title": {
         "en": "End of derogation",
-        "fr": "Fin de la dérogation"
+        "fr": "Fin de dérogation"
       },
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/derog_end.svg"
     },
-    "derog_time_boost": {
+    "derog_time": {
       "type": "enum",
       "title": {
-        "en": "Boost",
-        "fr": "Boost"
+        "en": "Derogation duration",
+        "fr": "Durée de dérogation"
       },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "0 minute / day",
+            "fr": "0 minute / jour"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "1 minute / day",
+            "fr": "1 minute / jour"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "2 minutes / days",
+            "fr": "2 minutes / jours"
+          }
+        },
+        {
+          "id": "3",
+          "title": {
+            "en": "3 minutes / days",
+            "fr": "3 minutes / jours"
+          }
+        },
+        {
+          "id": "4",
+          "title": {
+            "en": "4 minutes / days",
+            "fr": "4 minutes / jours"
+          }
+        },
+        {
+          "id": "5",
+          "title": {
+            "en": "5 minutes / days",
+            "fr": "5 minutes / jours"
+          }
+        },
+        {
+          "id": "6",
+          "title": {
+            "en": "6 minutes / days",
+            "fr": "6 minutes / jours"
+          }
+        },
+        {
+          "id": "7",
+          "title": {
+            "en": "7 minutes / days",
+            "fr": "7 minutes / jours"
+          }
+        },
+        {
+          "id": "8",
+          "title": {
+            "en": "8 minutes / days",
+            "fr": "8 minutes / jours"
+          }
+        },
+        {
+          "id": "9",
+          "title": {
+            "en": "9 minutes / days",
+            "fr": "9 minutes / jours"
+          }
+        },
+        {
+          "id": "10",
+          "title": {
+            "en": "10 minutes / days",
+            "fr": "10 minutes / jours"
+          }
+        },
+        {
+          "id": "11",
+          "title": {
+            "en": "11 minutes / days",
+            "fr": "11 minutes / jours"
+          }
+        },
+        {
+          "id": "12",
+          "title": {
+            "en": "12 minutes / days",
+            "fr": "12 minutes / jours"
+          }
+        },
+        {
+          "id": "13",
+          "title": {
+            "en": "13 minutes / days",
+            "fr": "13 minutes / jours"
+          }
+        },
+        {
+          "id": "14",
+          "title": {
+            "en": "14 minutes / days",
+            "fr": "14 minutes / jours"
+          }
+        },
+        {
+          "id": "15",
+          "title": {
+            "en": "15 minutes / days",
+            "fr": "15 minutes / jours"
+          }
+        },
+        {
+          "id": "16",
+          "title": {
+            "en": "16 minutes / days",
+            "fr": "16 minutes / jours"
+          }
+        },
+        {
+          "id": "17",
+          "title": {
+            "en": "17 minutes / days",
+            "fr": "17 minutes / jours"
+          }
+        },
+        {
+          "id": "18",
+          "title": {
+            "en": "18 minutes / days",
+            "fr": "18 minutes / jours"
+          }
+        },
+        {
+          "id": "19",
+          "title": {
+            "en": "19 minutes / days",
+            "fr": "19 minutes / jours"
+          }
+        },
+        {
+          "id": "20",
+          "title": {
+            "en": "20 minutes / days",
+            "fr": "20 minutes / jours"
+          }
+        },
+        {
+          "id": "21",
+          "title": {
+            "en": "21 minutes / days",
+            "fr": "21 minutes / jours"
+          }
+        },
+        {
+          "id": "22",
+          "title": {
+            "en": "22 minutes / days",
+            "fr": "22 minutes / jours"
+          }
+        },
+        {
+          "id": "23",
+          "title": {
+            "en": "23 minutes / days",
+            "fr": "23 minutes / jours"
+          }
+        },
+        {
+          "id": "24",
+          "title": {
+            "en": "24 minutes / days",
+            "fr": "24 minutes / jours"
+          }
+        },
+        {
+          "id": "25",
+          "title": {
+            "en": "25 minutes / days",
+            "fr": "25 minutes / jours"
+          }
+        },
+        {
+          "id": "26",
+          "title": {
+            "en": "26 minutes / days",
+            "fr": "26 minutes / jours"
+          }
+        },
+        {
+          "id": "27",
+          "title": {
+            "en": "27 minutes / days",
+            "fr": "27 minutes / jours"
+          }
+        },
+        {
+          "id": "28",
+          "title": {
+            "en": "28 minutes / days",
+            "fr": "28 minutes / jours"
+          }
+        },
+        {
+          "id": "29",
+          "title": {
+            "en": "29 minutes / days",
+            "fr": "29 minutes / jours"
+          }
+        },
+        {
+          "id": "30",
+          "title": {
+            "en": "30 minutes / days",
+            "fr": "30 minutes / jours"
+          }
+        },
+        {
+          "id": "60",
+          "title": {
+            "en": "60 minutes / days",
+            "fr": "60 minutes / jours"
+          }
+        },
+        {
+          "id": "90",
+          "title": {
+            "en": "90 minutes / days",
+            "fr": "90 minutes / jours"
+          }
+        },
+        {
+          "id": "120",
+          "title": {
+            "en": "120 minutes / days",
+            "fr": "120 minutes / jours"
+          }
+        }
+      ]
+    },
+    "derog_time_boost": {
+      "type": "enum",
+      "title": "Boost",
       "getable": true,
       "setable": true,
       "uiComponent": "picker",
@@ -493,843 +1271,483 @@
         },
         {
           "id": "1",
-          "title": {
-            "en": "1 minute",
-            "fr": "1 minute"
-          }
+          "title": "1 minute"
         },
         {
           "id": "2",
-          "title": {
-            "en": "2 minutes",
-            "fr": "2 minutes"
-          }
+          "title": "2 minutes"
         },
         {
           "id": "3",
-          "title": {
-            "en": "3 minutes",
-            "fr": "3 minutes"
-          }
+          "title": "3 minutes"
         },
         {
           "id": "4",
-          "title": {
-            "en": "4 minutes",
-            "fr": "4 minutes"
-          }
+          "title": "4 minutes"
         },
         {
           "id": "5",
-          "title": {
-            "en": "5 minutes",
-            "fr": "5 minutes"
-          }
+          "title": "5 minutes"
         },
         {
           "id": "6",
-          "title": {
-            "en": "6 minutes",
-            "fr": "6 minutes"
-          }
+          "title": "6 minutes"
         },
         {
           "id": "7",
-          "title": {
-            "en": "7 minutes",
-            "fr": "7 minutes"
-          }
+          "title": "7 minutes"
         },
         {
           "id": "8",
-          "title": {
-            "en": "8 minutes",
-            "fr": "8 minutes"
-          }
+          "title": "8 minutes"
         },
         {
           "id": "9",
-          "title": {
-            "en": "9 minutes",
-            "fr": "9 minutes"
-          }
+          "title": "9 minutes"
         },
         {
           "id": "10",
-          "title": {
-            "en": "10 minutes",
-            "fr": "10 minutes"
-          }
+          "title": "10 minutes"
         },
         {
           "id": "11",
-          "title": {
-            "en": "11 minutes",
-            "fr": "11 minutes"
-          }
+          "title": "11 minutes"
         },
         {
           "id": "12",
-          "title": {
-            "en": "12 minutes",
-            "fr": "12 minutes"
-          }
+          "title": "12 minutes"
         },
         {
           "id": "13",
-          "title": {
-            "en": "13 minutes",
-            "fr": "13 minutes"
-          }
+          "title": "13 minutes"
         },
         {
           "id": "14",
-          "title": {
-            "en": "14 minutes",
-            "fr": "14 minutes"
-          }
+          "title": "14 minutes"
         },
         {
           "id": "15",
-          "title": {
-            "en": "15 minutes",
-            "fr": "15 minutes"
-          }
+          "title": "15 minutes"
         },
         {
           "id": "16",
-          "title": {
-            "en": "16 minutes",
-            "fr": "16 minutes"
-          }
+          "title": "16 minutes"
         },
         {
           "id": "17",
-          "title": {
-            "en": "17 minutes",
-            "fr": "17 minutes"
-          }
+          "title": "17 minutes"
         },
         {
           "id": "18",
-          "title": {
-            "en": "18 minutes",
-            "fr": "18 minutes"
-          }
+          "title": "18 minutes"
         },
         {
           "id": "19",
-          "title": {
-            "en": "19 minutes",
-            "fr": "19 minutes"
-          }
+          "title": "19 minutes"
         },
         {
           "id": "20",
-          "title": {
-            "en": "20 minutes",
-            "fr": "20 minutes"
-          }
+          "title": "20 minutes"
         },
         {
           "id": "21",
-          "title": {
-            "en": "21 minutes",
-            "fr": "21 minutes"
-          }
+          "title": "21 minutes"
         },
         {
           "id": "22",
-          "title": {
-            "en": "22 minutes",
-            "fr": "22 minutes"
-          }
+          "title": "22 minutes"
         },
         {
           "id": "23",
-          "title": {
-            "en": "23 minutes",
-            "fr": "23 minutes"
-          }
+          "title": "23 minutes"
         },
         {
           "id": "24",
-          "title": {
-            "en": "24 minutes",
-            "fr": "24 minutes"
-          }
+          "title": "24 minutes"
         },
         {
           "id": "25",
-          "title": {
-            "en": "25 minutes",
-            "fr": "25 minutes"
-          }
+          "title": "25 minutes"
         },
         {
           "id": "26",
-          "title": {
-            "en": "26 minutes",
-            "fr": "26 minutes"
-          }
+          "title": "26 minutes"
         },
         {
           "id": "27",
-          "title": {
-            "en": "27 minutes",
-            "fr": "27 minutes"
-          }
+          "title": "27 minutes"
         },
         {
           "id": "28",
-          "title": {
-            "en": "28 minutes",
-            "fr": "28 minutes"
-          }
+          "title": "28 minutes"
         },
         {
           "id": "29",
-          "title": {
-            "en": "29 minutes",
-            "fr": "29 minutes"
-          }
+          "title": "29 minutes"
         },
         {
           "id": "30",
-          "title": {
-            "en": "30 minutes",
-            "fr": "30 minutes"
-          }
+          "title": "30 minutes"
         },
         {
           "id": "31",
-          "title": {
-            "en": "31 minutes",
-            "fr": "31 minutes"
-          }
+          "title": "31 minutes"
         },
         {
           "id": "32",
-          "title": {
-            "en": "32 minutes",
-            "fr": "32 minutes"
-          }
+          "title": "32 minutes"
         },
         {
           "id": "33",
-          "title": {
-            "en": "33 minutes",
-            "fr": "33 minutes"
-          }
+          "title": "33 minutes"
         },
         {
           "id": "34",
-          "title": {
-            "en": "34 minutes",
-            "fr": "34 minutes"
-          }
+          "title": "34 minutes"
         },
         {
           "id": "35",
-          "title": {
-            "en": "35 minutes",
-            "fr": "35 minutes"
-          }
+          "title": "35 minutes"
         },
         {
           "id": "36",
-          "title": {
-            "en": "36 minutes",
-            "fr": "36 minutes"
-          }
+          "title": "36 minutes"
         },
         {
           "id": "37",
-          "title": {
-            "en": "37 minutes",
-            "fr": "37 minutes"
-          }
+          "title": "37 minutes"
         },
         {
           "id": "38",
-          "title": {
-            "en": "38 minutes",
-            "fr": "38 minutes"
-          }
+          "title": "38 minutes"
         },
         {
           "id": "39",
-          "title": {
-            "en": "39 minutes",
-            "fr": "39 minutes"
-          }
+          "title": "39 minutes"
         },
         {
           "id": "40",
-          "title": {
-            "en": "40 minutes",
-            "fr": "40 minutes"
-          }
+          "title": "40 minutes"
         },
         {
           "id": "41",
-          "title": {
-            "en": "41 minutes",
-            "fr": "41 minutes"
-          }
+          "title": "41 minutes"
         },
         {
           "id": "42",
-          "title": {
-            "en": "42 minutes",
-            "fr": "42 minutes"
-          }
+          "title": "42 minutes"
         },
         {
           "id": "43",
-          "title": {
-            "en": "43 minutes",
-            "fr": "43 minutes"
-          }
+          "title": "43 minutes"
         },
         {
           "id": "44",
-          "title": {
-            "en": "44 minutes",
-            "fr": "44 minutes"
-          }
+          "title": "44 minutes"
         },
         {
           "id": "45",
-          "title": {
-            "en": "45 minutes",
-            "fr": "45 minutes"
-          }
+          "title": "45 minutes"
         },
         {
           "id": "46",
-          "title": {
-            "en": "46 minutes",
-            "fr": "46 minutes"
-          }
+          "title": "46 minutes"
         },
         {
           "id": "47",
-          "title": {
-            "en": "47 minutes",
-            "fr": "47 minutes"
-          }
+          "title": "47 minutes"
         },
         {
           "id": "48",
-          "title": {
-            "en": "48 minutes",
-            "fr": "48 minutes"
-          }
+          "title": "48 minutes"
         },
         {
           "id": "49",
-          "title": {
-            "en": "49 minutes",
-            "fr": "49 minutes"
-          }
+          "title": "49 minutes"
         },
         {
           "id": "50",
-          "title": {
-            "en": "50 minutes",
-            "fr": "50 minutes"
-          }
+          "title": "50 minutes"
         },
         {
           "id": "51",
-          "title": {
-            "en": "51 minutes",
-            "fr": "51 minutes"
-          }
+          "title": "51 minutes"
         },
         {
           "id": "52",
-          "title": {
-            "en": "52 minutes",
-            "fr": "52 minutes"
-          }
+          "title": "52 minutes"
         },
         {
           "id": "53",
-          "title": {
-            "en": "53 minutes",
-            "fr": "53 minutes"
-          }
+          "title": "53 minutes"
         },
         {
           "id": "54",
-          "title": {
-            "en": "54 minutes",
-            "fr": "54 minutes"
-          }
+          "title": "54 minutes"
         },
         {
           "id": "55",
-          "title": {
-            "en": "55 minutes",
-            "fr": "55 minutes"
-          }
+          "title": "55 minutes"
         },
         {
           "id": "56",
-          "title": {
-            "en": "56 minutes",
-            "fr": "56 minutes"
-          }
+          "title": "56 minutes"
         },
         {
           "id": "57",
-          "title": {
-            "en": "57 minutes",
-            "fr": "57 minutes"
-          }
+          "title": "57 minutes"
         },
         {
           "id": "58",
-          "title": {
-            "en": "58 minutes",
-            "fr": "58 minutes"
-          }
+          "title": "58 minutes"
         },
         {
           "id": "59",
-          "title": {
-            "en": "59 minutes",
-            "fr": "59 minutes"
-          }
+          "title": "59 minutes"
         },
         {
           "id": "60",
-          "title": {
-            "en": "60 minutes",
-            "fr": "60 minutes"
-          }
+          "title": "60 minutes"
         },
         {
           "id": "61",
-          "title": {
-            "en": "61 minutes",
-            "fr": "61 minutes"
-          }
+          "title": "61 minutes"
         },
         {
           "id": "62",
-          "title": {
-            "en": "62 minutes",
-            "fr": "62 minutes"
-          }
+          "title": "62 minutes"
         },
         {
           "id": "63",
-          "title": {
-            "en": "63 minutes",
-            "fr": "63 minutes"
-          }
+          "title": "63 minutes"
         },
         {
           "id": "64",
-          "title": {
-            "en": "64 minutes",
-            "fr": "64 minutes"
-          }
+          "title": "64 minutes"
         },
         {
           "id": "65",
-          "title": {
-            "en": "65 minutes",
-            "fr": "65 minutes"
-          }
+          "title": "65 minutes"
         },
         {
           "id": "66",
-          "title": {
-            "en": "66 minutes",
-            "fr": "66 minutes"
-          }
+          "title": "66 minutes"
         },
         {
           "id": "67",
-          "title": {
-            "en": "67 minutes",
-            "fr": "67 minutes"
-          }
+          "title": "67 minutes"
         },
         {
           "id": "68",
-          "title": {
-            "en": "68 minutes",
-            "fr": "68 minutes"
-          }
+          "title": "68 minutes"
         },
         {
           "id": "69",
-          "title": {
-            "en": "69 minutes",
-            "fr": "69 minutes"
-          }
+          "title": "69 minutes"
         },
         {
           "id": "70",
-          "title": {
-            "en": "70 minutes",
-            "fr": "70 minutes"
-          }
+          "title": "70 minutes"
         },
         {
           "id": "71",
-          "title": {
-            "en": "71 minutes",
-            "fr": "71 minutes"
-          }
+          "title": "71 minutes"
         },
         {
           "id": "72",
-          "title": {
-            "en": "72 minutes",
-            "fr": "72 minutes"
-          }
+          "title": "72 minutes"
         },
         {
           "id": "73",
-          "title": {
-            "en": "73 minutes",
-            "fr": "73 minutes"
-          }
+          "title": "73 minutes"
         },
         {
           "id": "74",
-          "title": {
-            "en": "74 minutes",
-            "fr": "74 minutes"
-          }
+          "title": "74 minutes"
         },
         {
           "id": "75",
-          "title": {
-            "en": "75 minutes",
-            "fr": "75 minutes"
-          }
+          "title": "75 minutes"
         },
         {
           "id": "76",
-          "title": {
-            "en": "76 minutes",
-            "fr": "76 minutes"
-          }
+          "title": "76 minutes"
         },
         {
           "id": "77",
-          "title": {
-            "en": "77 minutes",
-            "fr": "77 minutes"
-          }
+          "title": "77 minutes"
         },
         {
           "id": "78",
-          "title": {
-            "en": "78 minutes",
-            "fr": "78 minutes"
-          }
+          "title": "78 minutes"
         },
         {
           "id": "79",
-          "title": {
-            "en": "79 minutes",
-            "fr": "79 minutes"
-          }
+          "title": "79 minutes"
         },
         {
           "id": "80",
-          "title": {
-            "en": "80 minutes",
-            "fr": "80 minutes"
-          }
+          "title": "80 minutes"
         },
         {
           "id": "81",
-          "title": {
-            "en": "81 minutes",
-            "fr": "81 minutes"
-          }
+          "title": "81 minutes"
         },
         {
           "id": "82",
-          "title": {
-            "en": "82 minutes",
-            "fr": "82 minutes"
-          }
+          "title": "82 minutes"
         },
         {
           "id": "83",
-          "title": {
-            "en": "83 minutes",
-            "fr": "83 minutes"
-          }
+          "title": "83 minutes"
         },
         {
           "id": "84",
-          "title": {
-            "en": "84 minutes",
-            "fr": "84 minutes"
-          }
+          "title": "84 minutes"
         },
         {
           "id": "85",
-          "title": {
-            "en": "85 minutes",
-            "fr": "85 minutes"
-          }
+          "title": "85 minutes"
         },
         {
           "id": "86",
-          "title": {
-            "en": "86 minutes",
-            "fr": "86 minutes"
-          }
+          "title": "86 minutes"
         },
         {
           "id": "87",
-          "title": {
-            "en": "87 minutes",
-            "fr": "87 minutes"
-          }
+          "title": "87 minutes"
         },
         {
           "id": "88",
-          "title": {
-            "en": "88 minutes",
-            "fr": "88 minutes"
-          }
+          "title": "88 minutes"
         },
         {
           "id": "89",
-          "title": {
-            "en": "89 minutes",
-            "fr": "89 minutes"
-          }
+          "title": "89 minutes"
         },
         {
           "id": "90",
-          "title": {
-            "en": "90 minutes",
-            "fr": "90 minutes"
-          }
+          "title": "90 minutes"
         },
         {
           "id": "91",
-          "title": {
-            "en": "91 minutes",
-            "fr": "91 minutes"
-          }
+          "title": "91 minutes"
         },
         {
           "id": "92",
-          "title": {
-            "en": "92 minutes",
-            "fr": "92 minutes"
-          }
+          "title": "92 minutes"
         },
         {
           "id": "93",
-          "title": {
-            "en": "93 minutes",
-            "fr": "93 minutes"
-          }
+          "title": "93 minutes"
         },
         {
           "id": "94",
-          "title": {
-            "en": "94 minutes",
-            "fr": "94 minutes"
-          }
+          "title": "94 minutes"
         },
         {
           "id": "95",
-          "title": {
-            "en": "95 minutes",
-            "fr": "95 minutes"
-          }
+          "title": "95 minutes"
         },
         {
           "id": "96",
-          "title": {
-            "en": "96 minutes",
-            "fr": "96 minutes"
-          }
+          "title": "96 minutes"
         },
         {
           "id": "97",
-          "title": {
-            "en": "97 minutes",
-            "fr": "97 minutes"
-          }
+          "title": "97 minutes"
         },
         {
           "id": "98",
-          "title": {
-            "en": "98 minutes",
-            "fr": "98 minutes"
-          }
+          "title": "98 minutes"
         },
         {
           "id": "99",
-          "title": {
-            "en": "99 minutes",
-            "fr": "99 minutes"
-          }
+          "title": "99 minutes"
         },
         {
           "id": "100",
-          "title": {
-            "en": "100 minutes",
-            "fr": "100 minutes"
-          }
+          "title": "100 minutes"
         },
         {
           "id": "101",
-          "title": {
-            "en": "101 minutes",
-            "fr": "101 minutes"
-          }
+          "title": "101 minutes"
         },
         {
           "id": "102",
-          "title": {
-            "en": "102 minutes",
-            "fr": "102 minutes"
-          }
+          "title": "102 minutes"
         },
         {
           "id": "103",
-          "title": {
-            "en": "103 minutes",
-            "fr": "103 minutes"
-          }
+          "title": "103 minutes"
         },
         {
           "id": "104",
-          "title": {
-            "en": "104 minutes",
-            "fr": "104 minutes"
-          }
+          "title": "104 minutes"
         },
         {
           "id": "105",
-          "title": {
-            "en": "105 minutes",
-            "fr": "105 minutes"
-          }
+          "title": "105 minutes"
         },
         {
           "id": "106",
-          "title": {
-            "en": "106 minutes",
-            "fr": "106 minutes"
-          }
+          "title": "106 minutes"
         },
         {
           "id": "107",
-          "title": {
-            "en": "107 minutes",
-            "fr": "107 minutes"
-          }
+          "title": "107 minutes"
         },
         {
           "id": "108",
-          "title": {
-            "en": "108 minutes",
-            "fr": "108 minutes"
-          }
+          "title": "108 minutes"
         },
         {
           "id": "109",
-          "title": {
-            "en": "109 minutes",
-            "fr": "109 minutes"
-          }
+          "title": "109 minutes"
         },
         {
           "id": "110",
-          "title": {
-            "en": "110 minutes",
-            "fr": "110 minutes"
-          }
+          "title": "110 minutes"
         },
         {
           "id": "111",
-          "title": {
-            "en": "111 minutes",
-            "fr": "111 minutes"
-          }
+          "title": "111 minutes"
         },
         {
           "id": "112",
-          "title": {
-            "en": "112 minutes",
-            "fr": "112 minutes"
-          }
+          "title": "112 minutes"
         },
         {
           "id": "113",
-          "title": {
-            "en": "113 minutes",
-            "fr": "113 minutes"
-          }
+          "title": "113 minutes"
         },
         {
           "id": "114",
-          "title": {
-            "en": "114 minutes",
-            "fr": "114 minutes"
-          }
+          "title": "114 minutes"
         },
         {
           "id": "115",
-          "title": {
-            "en": "115 minutes",
-            "fr": "115 minutes"
-          }
+          "title": "115 minutes"
         },
         {
           "id": "116",
-          "title": {
-            "en": "116 minutes",
-            "fr": "116 minutes"
-          }
+          "title": "116 minutes"
         },
         {
           "id": "117",
-          "title": {
-            "en": "117 minutes",
-            "fr": "117 minutes"
-          }
+          "title": "117 minutes"
         },
         {
           "id": "118",
-          "title": {
-            "en": "118 minutes",
-            "fr": "118 minutes"
-          }
+          "title": "118 minutes"
         },
         {
           "id": "119",
-          "title": {
-            "en": "119 minutes",
-            "fr": "119 minutes"
-          }
+          "title": "119 minutes"
         },
         {
           "id": "120",
-          "title": {
-            "en": "120 minutes",
-            "fr": "120 minutes"
-          }
+          "title": "120 minutes"
         }
       ]
     },

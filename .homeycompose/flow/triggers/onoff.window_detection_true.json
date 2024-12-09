@@ -1,0 +1,13 @@
+{
+  "title": {
+    "en": "Open window detection turned on",
+    "fr": "Détection de fenêtre ouverte désactivé"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "title": {
+    "en": "The derogation duration changed",
+    "fr": "Le durée de dérogation a changé"
+  },
+  "tokens": [
+    {
+      "name": "derog_time",
+      "type": "string",
+      "title": {
+        "en": "Derogation duration",
+        "fr": "Durée de dérogation"
+      },
+      "example": "15"
+    }
+  ],
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=heatzy&capabilities=derog_time"
+    }
+  ]
+}

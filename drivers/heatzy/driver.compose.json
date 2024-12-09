@@ -1,46 +1,63 @@
 {
   "$extends": ["defaults"],
-  "name": {
-    "en": "Heatzy Pilote",
-    "fr": "Heatzy Pilote"
-  },
+  "name": "Heatzy",
   "capabilities": [
+    "alarm_presence",
+    "locked",
     "onoff",
     "onoff.timer",
+    "onoff.window_detection",
+    "operational_state",
+    "measure_humidity",
+    "measure_temperature",
     "target_temperature",
-    "target_temperature.complement",
+    "target_temperature.eco",
     "thermostat_mode",
-    "locked",
     "derog_end",
-    "derog_time_boost",
-    "derog_time_vacation"
+    "heater_operation_mode",
+    "derog_time"
   ],
   "capabilitiesOptions": {
     "onoff.timer": {
       "title": {
         "en": "Timer",
-        "fr": "Programmateur"
+        "fr": "Programmation"
       },
       "insightsTitleTrue": {
-        "en": "Scheduled",
-        "fr": "Programmation activé"
+        "en": "Timer turned on",
+        "fr": "Programmation activée"
       },
       "insightsTitleFalse": {
-        "en": "Unscheduled",
-        "fr": "Programmation désactivé"
+        "en": "Timer turned off",
+        "fr": "Programmation désactivée"
+      }
+    },
+    "onoff.window_detection": {
+      "title": {
+        "en": "Open window detection",
+        "fr": "Détection de fenêtre ouverte"
+      },
+      "insightsTitleTrue": {
+        "en": "Open window detection turned on",
+        "fr": "Détection de fenêtre ouverte activée"
+      },
+      "insightsTitleFalse": {
+        "en": "Open window detection turned off",
+        "fr": "Détection de fenêtre ouverte désactivée"
       }
     },
     "target_temperature": {
-      "min": 0,
-      "max": 25.5
+      "max": 30,
+      "min": 15,
+      "step": 1
     },
-    "target_temperature.complement": {
+    "target_temperature.eco": {
       "title": {
-        "en": "Thermal complement (comfort mode)",
-        "fr": "Complément thermique (mode confort)"
+        "en": "Target temperature - eco mode",
+        "fr": "Température cible - mode éco"
       },
-      "min": 0,
-      "max": 10,
+      "max": 19,
+      "min": 10,
       "step": 1
     }
   }

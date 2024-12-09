@@ -1,24 +1,24 @@
 {
   "title": {
     "en": "Set the timer",
-    "fr": "Définir le programmateur"
+    "fr": "Définir la programmation"
   },
   "titleFormatted": {
     "en": "Set the timer to [[onoff]]",
-    "fr": "Définir le programmateur à [[onoff]]"
+    "fr": "Définir la programmation à [[onoff]]"
   },
   "args": [
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=heatzy"
+      "filter": "driver_id=heatzy&capabilities=onoff.timer"
     },
     {
       "name": "onoff",
       "type": "checkbox",
       "title": {
         "en": "Timer",
-        "fr": "Programmateur"
+        "fr": "Programmation"
       }
     }
   ]

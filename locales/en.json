@@ -27,5 +27,6 @@
   },
   "errors": {
     "deviceNotFound": "Appareil introuvable."
-  }
+  },
+  "derogEnd": "__derogMode__ until: __derogEnd__"
 }

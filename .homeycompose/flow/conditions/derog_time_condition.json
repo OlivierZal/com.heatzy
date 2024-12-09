@@ -1,0 +1,261 @@
+{
+  "title": {
+    "en": "The derogation duration !{{is|is not}}",
+    "fr": "La durée de dérogation !{{est|n'est pas}}"
+  },
+  "titleFormatted": {
+    "en": "The derogation duration !{{is|is not}} [[derog_time]]",
+    "fr": "La durée de dérogation !{{est|n'est pas}} [[derog_time]]"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=heatzy&capabilities=derog_time"
+    },
+    {
+      "name": "derog_time",
+      "type": "dropdown",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "0 minute / day",
+            "fr": "0 minute / jour"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "1 minute / day",
+            "fr": "1 minute / jour"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "2 minutes / days",
+            "fr": "2 minutes / jours"
+          }
+        },
+        {
+          "id": "3",
+          "title": {
+            "en": "3 minutes / days",
+            "fr": "3 minutes / jours"
+          }
+        },
+        {
+          "id": "4",
+          "title": {
+            "en": "4 minutes / days",
+            "fr": "4 minutes / jours"
+          }
+        },
+        {
+          "id": "5",
+          "title": {
+            "en": "5 minutes / days",
+            "fr": "5 minutes / jours"
+          }
+        },
+        {
+          "id": "6",
+          "title": {
+            "en": "6 minutes / days",
+            "fr": "6 minutes / jours"
+          }
+        },
+        {
+          "id": "7",
+          "title": {
+            "en": "7 minutes / days",
+            "fr": "7 minutes / jours"
+          }
+        },
+        {
+          "id": "8",
+          "title": {
+            "en": "8 minutes / days",
+            "fr": "8 minutes / jours"
+          }
+        },
+        {
+          "id": "9",
+          "title": {
+            "en": "9 minutes / days",
+            "fr": "9 minutes / jours"
+          }
+        },
+        {
+          "id": "10",
+          "title": {
+            "en": "10 minutes / days",
+            "fr": "10 minutes / jours"
+          }
+        },
+        {
+          "id": "11",
+          "title": {
+            "en": "11 minutes / days",
+            "fr": "11 minutes / jours"
+          }
+        },
+        {
+          "id": "12",
+          "title": {
+            "en": "12 minutes / days",
+            "fr": "12 minutes / jours"
+          }
+        },
+        {
+          "id": "13",
+          "title": {
+            "en": "13 minutes / days",
+            "fr": "13 minutes / jours"
+          }
+        },
+        {
+          "id": "14",
+          "title": {
+            "en": "14 minutes / days",
+            "fr": "14 minutes / jours"
+          }
+        },
+        {
+          "id": "15",
+          "title": {
+            "en": "15 minutes / days",
+            "fr": "15 minutes / jours"
+          }
+        },
+        {
+          "id": "16",
+          "title": {
+            "en": "16 minutes / days",
+            "fr": "16 minutes / jours"
+          }
+        },
+        {
+          "id": "17",
+          "title": {
+            "en": "17 minutes / days",
+            "fr": "17 minutes / jours"
+          }
+        },
+        {
+          "id": "18",
+          "title": {
+            "en": "18 minutes / days",
+            "fr": "18 minutes / jours"
+          }
+        },
+        {
+          "id": "19",
+          "title": {
+            "en": "19 minutes / days",
+            "fr": "19 minutes / jours"
+          }
+        },
+        {
+          "id": "20",
+          "title": {
+            "en": "20 minutes / days",
+            "fr": "20 minutes / jours"
+          }
+        },
+        {
+          "id": "21",
+          "title": {
+            "en": "21 minutes / days",
+            "fr": "21 minutes / jours"
+          }
+        },
+        {
+          "id": "22",
+          "title": {
+            "en": "22 minutes / days",
+            "fr": "22 minutes / jours"
+          }
+        },
+        {
+          "id": "23",
+          "title": {
+            "en": "23 minutes / days",
+            "fr": "23 minutes / jours"
+          }
+        },
+        {
+          "id": "24",
+          "title": {
+            "en": "24 minutes / days",
+            "fr": "24 minutes / jours"
+          }
+        },
+        {
+          "id": "25",
+          "title": {
+            "en": "25 minutes / days",
+            "fr": "25 minutes / jours"
+          }
+        },
+        {
+          "id": "26",
+          "title": {
+            "en": "26 minutes / days",
+            "fr": "26 minutes / jours"
+          }
+        },
+        {
+          "id": "27",
+          "title": {
+            "en": "27 minutes / days",
+            "fr": "27 minutes / jours"
+          }
+        },
+        {
+          "id": "28",
+          "title": {
+            "en": "28 minutes / days",
+            "fr": "28 minutes / jours"
+          }
+        },
+        {
+          "id": "29",
+          "title": {
+            "en": "29 minutes / days",
+            "fr": "29 minutes / jours"
+          }
+        },
+        {
+          "id": "30",
+          "title": {
+            "en": "30 minutes / days",
+            "fr": "30 minutes / jours"
+          }
+        },
+        {
+          "id": "60",
+          "title": {
+            "en": "60 minutes / days",
+            "fr": "60 minutes / jours"
+          }
+        },
+        {
+          "id": "90",
+          "title": {
+            "en": "90 minutes / days",
+            "fr": "90 minutes / jours"
+          }
+        },
+        {
+          "id": "120",
+          "title": {
+            "en": "120 minutes / days",
+            "fr": "120 minutes / jours"
+          }
+        }
+      ]
+    }
+  ]
+}
