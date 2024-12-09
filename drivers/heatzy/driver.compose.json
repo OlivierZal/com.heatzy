@@ -1,14 +1,12 @@
 {
   "$extends": ["defaults"],
-  "name": {
-    "en": "Heatzy Pilote",
-    "fr": "Heatzy Pilote"
-  },
+  "name": "Heatzy",
   "capabilities": [
     "onoff",
     "onoff.timer",
+    "measure_temperature",
     "target_temperature",
-    "target_temperature.complement",
+    "target_temperature.eco",
     "thermostat_mode",
     "locked",
     "derog_end",

@@ -2,10 +2,7 @@
   "id": "com.heatzy",
   "sdk": 3,
   "brandColor": "#153f35",
-  "name": {
-    "en": "Heatzy",
-    "fr": "Heatzy"
-  },
+  "name": "Heatzy",
   "description": {
     "en": "Pilot your electric radiators",
     "fr": "Pilotez vos radiateurs électriques"

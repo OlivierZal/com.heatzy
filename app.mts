@@ -5,24 +5,29 @@ import {
   DeviceModel,
   FacadeManager,
   HeatzyAPI,
-  type DeviceFacade,
+  type IDeviceFacadeAny,
   type LoginPostData,
 } from '@olivierzal/heatzy-api'
+// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+import Homey from 'homey'
 
-import { Homey } from './homey.mjs'
-import { changelog } from './jsonFiles.mjs'
+import { changelog } from './json-files.mts'
 
-import type HeatzyDevice from './drivers/heatzy/device.mjs'
+import type HeatzyDevice from './drivers/heatzy/device.mts'
 import type {
   DeviceSettings,
   DriverSetting,
   LoginSetting,
-  Manifest,
   ManifestDriver,
   Settings,
-} from './types.mjs'
+} from './types.mts'
 
 const NOTIFICATION_DELAY = 10000
+
+const hasChangelogLanguage = (
+  versionChangelog: object,
+  language: string,
+): language is keyof typeof versionChangelog => language in versionChangelog
 
 const getDriverSettings = (
   { id: driverId, settings }: ManifestDriver,
@@ -72,8 +77,9 @@ const getDriverLoginSetting = (
     }, {}),
   )
 
+// eslint-disable-next-line import/no-named-as-default-member
 export default class HeatzyApp extends Homey.App {
-  readonly #language = this.homey.i18n.getLanguage()
+  declare public readonly homey: Homey.Homey
 
   #api!: HeatzyAPI
 
@@ -84,8 +90,9 @@ export default class HeatzyApp extends Homey.App {
   }
 
   public override async onInit(): Promise<void> {
+    const language = this.homey.i18n.getLanguage()
     this.#api = await HeatzyAPI.create({
-      language: this.#language,
+      language,
       logger: {
         error: (...args) => {
           this.error(...args)
@@ -94,12 +101,12 @@ export default class HeatzyApp extends Homey.App {
           this.log(...args)
         },
       },
-      onSync: async () => this.#syncFromDevices(),
+      onSync: async (params) => this.#syncFromDevices(params),
       settingManager: this.homey.settings,
       timezone: this.homey.clock.getTimezone(),
     })
     this.#facadeManager = new FacadeManager(this.#api)
-    this.#createNotification()
+    this.#createNotification(language)
   }
 
   public override async onUninit(): Promise<void> {
@@ -113,9 +120,7 @@ export default class HeatzyApp extends Homey.App {
         driver: { id: driverId },
       } = device
       acc[driverId] ??= {}
-      for (const [id, value] of Object.entries(
-        device.getSettings() as Settings,
-      )) {
+      for (const [id, value] of Object.entries(device.getSettings())) {
         if (!(id in acc[driverId])) {
           acc[driverId][id] = value
         } else if (acc[driverId][id] !== value) {
@@ -128,16 +133,17 @@ export default class HeatzyApp extends Homey.App {
   }
 
   public getDriverSettings(): Partial<Record<string, DriverSetting[]>> {
+    const language = this.homey.i18n.getLanguage()
     return Object.groupBy(
-      (this.homey.manifest as Manifest).drivers.flatMap((driver) => [
-        ...getDriverSettings(driver, this.#language),
-        ...getDriverLoginSetting(driver, this.#language),
+      this.homey.manifest.drivers.flatMap((driver) => [
+        ...getDriverSettings(driver, language),
+        ...getDriverLoginSetting(driver, language),
       ]),
       ({ driverId, groupId }) => groupId ?? driverId,
     )
   }
 
-  public getFacade(id: string): DeviceFacade {
+  public getFacade(id: string): IDeviceFacadeAny {
     const instance = DeviceModel.getById(id)
     if (!instance) {
       throw new Error(this.homey.__('errors.deviceNotFound'))
@@ -162,46 +168,56 @@ export default class HeatzyApp extends Homey.App {
           )
           await device.onSettings({
             changedKeys,
-            newSettings: device.getSettings() as Settings,
+            newSettings: device.getSettings(),
           })
         }
       }),
     )
   }
 
-  #createNotification(): void {
-    const { version } = this.homey.manifest as Manifest
-    if (
-      this.homey.settings.get('notifiedVersion') !== version &&
-      version in changelog
-    ) {
-      const { [version as keyof typeof changelog]: versionChangelog } =
-        changelog
-      this.homey.setTimeout(async () => {
-        try {
-          await this.homey.notifications.createNotification({
-            excerpt:
-              versionChangelog[
-                this.#language in versionChangelog ?
-                  (this.#language as keyof typeof versionChangelog)
-                : 'en'
-              ],
-          })
-          this.homey.settings.set('notifiedVersion', version)
-        } catch {}
-      }, NOTIFICATION_DELAY)
+  #createNotification(language: string): void {
+    const {
+      homey: {
+        manifest: { version },
+      },
+    } = this
+    if (this.homey.settings.get('notifiedVersion') !== version) {
+      const { [version]: versionChangelog } = changelog
+      if (language in versionChangelog) {
+        this.homey.setTimeout(async () => {
+          try {
+            if (hasChangelogLanguage(versionChangelog, language)) {
+              await this.homey.notifications.createNotification({
+                excerpt: versionChangelog[language],
+              })
+              this.homey.settings.set('notifiedVersion', version)
+            }
+          } catch {}
+        }, NOTIFICATION_DELAY)
+      }
     }
   }
 
-  #getDevices(): HeatzyDevice[] {
-    return Object.values(this.homey.drivers.getDrivers()).flatMap(
-      (driver) => driver.getDevices() as HeatzyDevice[],
-    )
+  #getDevices({
+    ids,
+  }: {
+    ids?: string[]
+  } = {}): HeatzyDevice[] {
+    return Object.values(this.homey.drivers.getDrivers()).flatMap((driver) => {
+      const devices = driver.getDevices()
+      return ids === undefined ? devices : (
+          devices.filter(({ id }) => ids.includes(id))
+        )
+    })
   }
 
-  async #syncFromDevices(): Promise<void> {
+  async #syncFromDevices({
+    ids,
+  }: {
+    ids?: string[]
+  } = {}): Promise<void> {
     await Promise.all(
-      this.#getDevices().map(async (device) => device.syncFromDevice()),
+      this.#getDevices({ ids }).map(async (device) => device.syncFromDevice()),
     )
   }
 }

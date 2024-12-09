@@ -1,16 +1,15 @@
 import {
   DerogMode,
   type Attrs,
-  type BaseAttrs,
   type DerogSettings,
-  type DeviceFacade,
+  type IDeviceFacadeAny,
   type Mode,
   type Switch,
 } from '@olivierzal/heatzy-api'
+// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+import Homey from 'homey'
 
-import { Homey } from '../../homey.mjs'
-import { addToLogs } from '../../lib/addToLogs.mjs'
-import { getErrorMessage } from '../../lib/getErrorMessage.mjs'
+import { addToLogs } from '../../decorators/add-to-logs.mts'
 import {
   getCapabilitiesOptions,
   type Capabilities,
@@ -20,24 +19,73 @@ import {
   type SetCapabilities,
   type Settings,
   type Store,
-} from '../../types.mjs'
+} from '../../types.mts'
 
-import type HeatzyApp from '../../app.mjs'
-
-import type HeatzyDriver from './driver.mjs'
+import type HeatzyDriver from './driver.mts'
 
 const TEMPERATURE_SCALE_FACTOR = 10
 const DEBOUNCE_DELAY = 1000
 
+const getErrorMessage = (error: unknown): string | null => {
+  if (error !== null) {
+    return error instanceof Error ? error.message : String(error)
+  }
+  return null
+}
+
 @addToLogs('getName()')
+// eslint-disable-next-line import/no-named-as-default-member
 export default class HeatzyDevice extends Homey.Device {
-  public declare readonly driver: HeatzyDriver
+  declare public readonly driver: HeatzyDriver
 
-  readonly #app = this.homey.app as HeatzyApp
+  declare public readonly getCapabilityOptions: <
+    K extends keyof CapabilitiesOptions,
+  >(
+    capability: K,
+  ) => CapabilitiesOptions[K]
 
-  readonly #id = (this.getData() as DeviceDetails['data']).id
+  declare public readonly getCapabilityValue: <K extends keyof Capabilities>(
+    capability: K,
+  ) => Capabilities[K]
 
-  #device?: DeviceFacade
+  declare public readonly getData: () => DeviceDetails['data']
+
+  declare public readonly getSetting: <K extends keyof Settings>(
+    setting: K,
+  ) => NonNullable<Settings[K]>
+
+  declare public readonly getSettings: () => Settings
+
+  declare public readonly getStoreValue: <K extends keyof Store>(
+    key: K,
+  ) => Store[K]
+
+  declare public readonly homey: Homey.Homey
+
+  declare public readonly setCapabilityOptions: <
+    K extends keyof CapabilitiesOptions,
+  >(
+    capability: K,
+    options: CapabilitiesOptions[K] & Record<string, unknown>,
+  ) => Promise<void>
+
+  declare public readonly setCapabilityValue: <K extends keyof Capabilities>(
+    capability: K,
+    value: Capabilities[K],
+  ) => Promise<void>
+
+  declare public readonly setSettings: (settings: Settings) => Promise<void>
+
+  declare public setStoreValue: <K extends keyof Store>(
+    key: K,
+    value: Store[K],
+  ) => Promise<void>
+
+  #device?: IDeviceFacadeAny
+
+  public get id(): string {
+    return this.getData().id
+  }
 
   get #offValue(): keyof typeof Mode {
     return this.getSetting('always_on') ? this.#onValue : 'stop'
@@ -75,51 +123,10 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  public override getCapabilityValue<K extends keyof Capabilities>(
-    capability: K,
-  ): Capabilities[K] {
-    return super.getCapabilityValue(capability) as Capabilities[K]
-  }
-
-  public override getSetting<K extends string & keyof Settings>(
-    setting: K,
-  ): NonNullable<Settings[K]> {
-    return super.getSetting(setting) as NonNullable<Settings[K]>
-  }
-
-  public override getStoreValue<K extends keyof Store>(key: K): Store[K] {
-    return super.getStoreValue(key) as Store[K]
-  }
-
   public override async removeCapability(capability: string): Promise<void> {
     if (this.hasCapability(capability)) {
       await super.removeCapability(capability)
     }
-  }
-
-  public override async setCapabilityOptions<
-    K extends keyof CapabilitiesOptions,
-  >(
-    capability: K,
-    options: CapabilitiesOptions[K] & Record<string, unknown>,
-  ): Promise<void> {
-    await super.setCapabilityOptions(capability, options)
-  }
-
-  public override async setCapabilityValue<K extends keyof Capabilities>(
-    capability: K,
-    value: Capabilities[K],
-  ): Promise<void> {
-    await super.setCapabilityValue(capability, value)
-    this.log('Capability', capability, 'is', value)
-  }
-
-  public override async setStoreValue<K extends keyof Store>(
-    key: K,
-    value: Store[K],
-  ): Promise<void> {
-    await super.setStoreValue(key, value)
-    this.log('Store', key, 'is', value)
   }
 
   public override async setWarning(error: unknown): Promise<void> {
@@ -130,7 +137,7 @@ export default class HeatzyDevice extends Homey.Device {
     await super.setWarning(null)
   }
 
-  public async syncFromDevice(device?: DeviceFacade): Promise<void> {
+  public async syncFromDevice(device?: IDeviceFacadeAny): Promise<void> {
     try {
       const newDevice = device ?? (await this.#fetchDevice())
       if (newDevice) {
@@ -155,7 +162,7 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  async #buildUpdateData(values: Partial<SetCapabilities>): Promise<BaseAttrs> {
+  async #buildUpdateData(values: Partial<SetCapabilities>): Promise<Attrs> {
     this.log('Requested data:', values)
     return (
       await Promise.all(
@@ -201,10 +208,12 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  async #fetchDevice(): Promise<DeviceFacade | undefined> {
+  async #fetchDevice(): Promise<IDeviceFacadeAny | undefined> {
     try {
       if (!this.#device) {
-        this.#device = this.#app.getFacade(this.#id) as DeviceFacade | undefined
+        this.#device = this.homey.app.getFacade(this.id) as
+          | IDeviceFacadeAny
+          | undefined
         if (this.#device) {
           await this.#init(this.#device)
         }
@@ -215,7 +224,7 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  async #init(device: DeviceFacade): Promise<void> {
+  async #init(device: IDeviceFacadeAny): Promise<void> {
     await this.#setCapabilities(device)
     await this.#setCapabilityOptions(device.isFirstPilot)
     await this.syncFromDevice(device)
@@ -223,7 +232,7 @@ export default class HeatzyDevice extends Homey.Device {
 
   #registerCapabilityListeners(): void {
     this.registerMultipleCapabilityListener(
-      this.driver.capabilities.filter(
+      (this.driver.manifest.capabilities ?? []).filter(
         (capability) => !['derog_end', 'derog_mode'].includes(capability),
       ),
       async (values) => this.#set(values),
@@ -237,7 +246,7 @@ export default class HeatzyDevice extends Homey.Device {
       const updateData = await this.#buildUpdateData(values)
       if (Object.keys(updateData).length) {
         try {
-          await device.set(updateData)
+          await device.setValues(updateData)
         } catch (error) {
           await this.setWarning(error)
         }
