@@ -154,7 +154,7 @@ export type DeviceSettings = Record<string, DeviceSetting>
 
 export type OnMode = 'previous' | PreviousMode
 
-export type PreviousMode = Exclude<keyof typeof Mode, 'stop'>
+export type PreviousMode = Exclude<Mode, Mode.stop>
 
 export type ValueOf<T> = T[keyof T]
 
