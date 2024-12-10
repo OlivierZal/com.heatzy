@@ -1,19 +1,34 @@
 import { DeviceModel, type LoginPostData } from '@olivierzal/heatzy-api'
+// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+import Homey from 'homey'
 
-import { Homey } from '../../homey.mjs'
 import {
   getCapabilitiesOptions,
   type DeviceDetails,
   type FlowArgs,
   type ManifestDriver,
-} from '../../types.mjs'
+} from '../../types.mts'
 
 import type PairSession from 'homey/lib/PairSession'
 
-import type HeatzyApp from '../../app.mjs'
+import type HeatzyDevice from './device.mts'
 
+const discoverDevices = async (): Promise<DeviceDetails[]> =>
+  Promise.resolve(
+    DeviceModel.getAll().map(({ doesNotSupportExtendedMode, id, name }) => ({
+      capabilitiesOptions: getCapabilitiesOptions(doesNotSupportExtendedMode),
+      data: { id },
+      name,
+    })),
+  )
+
+// eslint-disable-next-line import/no-named-as-default-member
 export default class HeatzyDriver extends Homey.Driver {
-  public capabilities = (this.manifest as ManifestDriver).capabilities ?? []
+  declare public readonly getDevices: () => HeatzyDevice[]
+
+  declare public readonly homey: Homey.Homey
+
+  declare public readonly manifest: ManifestDriver
 
   public override async onInit(): Promise<void> {
     this.#registerRunListeners()
@@ -31,40 +46,13 @@ export default class HeatzyDriver extends Homey.Driver {
       }
     })
     this.#handleLogin(session)
-    session.setHandler('list_devices', async () => this.#discoverDevices())
+    session.setHandler('list_devices', async () => discoverDevices())
     return Promise.resolve()
   }
 
   public override async onRepair(session: PairSession): Promise<void> {
     this.#handleLogin(session)
     return Promise.resolve()
-  }
-
-  public getRequiredCapabilities({
-    isFirstGen,
-    isGlow,
-  }: {
-    isFirstGen: boolean
-    isGlow: boolean
-  }): string[] {
-    return this.capabilities.filter((capability) =>
-      isFirstGen ?
-        ['onoff', 'thermostat_mode'].includes(capability)
-      : isGlow || !capability.startsWith('target_temperature'),
-    )
-  }
-
-  async #discoverDevices(): Promise<DeviceDetails[]> {
-    return Promise.resolve(
-      DeviceModel.getAll().map(
-        ({ id, isFirstGen, isFirstPilot, isGlow, name }) => ({
-          capabilities: this.getRequiredCapabilities({ isFirstGen, isGlow }),
-          capabilitiesOptions: getCapabilitiesOptions(isFirstPilot),
-          data: { id },
-          name,
-        }),
-      ),
-    )
   }
 
   #handleLogin(session: PairSession): void {
@@ -74,7 +62,7 @@ export default class HeatzyDriver extends Homey.Driver {
   }
 
   async #login(data?: LoginPostData): Promise<boolean> {
-    return (this.homey.app as HeatzyApp).api.authenticate(data)
+    return this.homey.app.api.authenticate(data)
   }
 
   #registerDerogTimeRunListeners(): void {
