@@ -3,15 +3,20 @@
   "name": "Heatzy",
   "capabilities": [
     "onoff",
-    "onoff.timer",
     "measure_temperature",
     "target_temperature",
     "target_temperature.eco",
     "thermostat_mode",
+    "operational_state",
+    "operational_state.signal",
+    "measure_humidity",
+    "onoff.timer",
+    "onoff.window_detection",
     "locked",
     "derog_end",
     "derog_time_boost",
-    "derog_time_vacation"
+    "derog_time_vacation",
+    "alarm_heat"
   ],
   "capabilitiesOptions": {
     "onoff.timer": {
@@ -29,17 +34,12 @@
       }
     },
     "target_temperature": {
-      "min": 0,
-      "max": 25.5
+      "min": 15,
+      "max": 30
     },
-    "target_temperature.complement": {
-      "title": {
-        "en": "Thermal complement (comfort mode)",
-        "fr": "Complément thermique (mode confort)"
-      },
-      "min": 0,
-      "max": 10,
-      "step": 1
+    "target_temperature.eco": {
+      "min": 10,
+      "max": 19
     }
   }
 }

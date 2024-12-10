@@ -1,4 +1,4 @@
-import type { DerogMode, LoginPostData, Mode } from '@olivierzal/heatzy-api'
+import type { LoginPostData, Mode } from '@olivierzal/heatzy-api'
 
 import type HeatzyDevice from './drivers/heatzy/device.mts'
 
