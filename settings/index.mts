@@ -307,7 +307,8 @@ const updateDeviceSettings = (body: Settings): void => {
 const updateCommonSetting = (element: HTMLSelectElement): void => {
   const [id] = element.id.split('__')
   const { [id]: value } = flatDeviceSettings
-  element.value = value === null ? '' : String(value)
+  element.value =
+    ['boolean', 'number', 'string'].includes(typeof value) ? String(value) : ''
 }
 
 const refreshCommonSettings = (elements: HTMLSelectElement[]): void => {
