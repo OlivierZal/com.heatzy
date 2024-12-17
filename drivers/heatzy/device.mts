@@ -1,53 +1,126 @@
 import {
   DerogMode,
-  type Attrs,
-  type BaseAttrs,
-  type DerogSettings,
-  type DeviceFacade,
-  type Mode,
-  type Switch,
+  getTargetTemperature,
+  Mode,
+  Product,
+  supportsGlow,
+  supportsPro,
+  supportsV2,
+  type IDeviceFacadeAny,
+  type PostAttrs,
 } from '@olivierzal/heatzy-api'
+// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+import Homey from 'homey'
 
-import { Homey } from '../../homey.mjs'
-import { addToLogs } from '../../lib/addToLogs.mjs'
-import { getErrorMessage } from '../../lib/getErrorMessage.mjs'
+import { addToLogs } from '../../decorators/add-to-logs.mts'
 import {
   getCapabilitiesOptions,
+  getRequiredCapabilities,
   type Capabilities,
   type CapabilitiesOptions,
   type DeviceDetails,
-  type PreviousMode,
   type SetCapabilities,
   type Settings,
   type Store,
-} from '../../types.mjs'
+} from '../../types.mts'
 
-import type HeatzyApp from '../../app.mjs'
+import type HeatzyDriver from './driver.mts'
 
-import type HeatzyDriver from './driver.mjs'
-
-const TEMPERATURE_SCALE_FACTOR = 10
 const DEBOUNCE_DELAY = 1000
 
+const isDerogMode = (value: string): value is keyof typeof DerogMode =>
+  value in DerogMode
+
+const getErrorMessage = (error: unknown): string | null => {
+  if (error !== null) {
+    if (error instanceof Error) {
+      return error.message
+    }
+    if (typeof error === 'string') {
+      return error
+    }
+  }
+  return null
+}
+
 @addToLogs('getName()')
+// eslint-disable-next-line import/no-named-as-default-member
 export default class HeatzyDevice extends Homey.Device {
-  public declare readonly driver: HeatzyDriver
+  declare public readonly driver: HeatzyDriver
 
-  readonly #app = this.homey.app as HeatzyApp
+  declare public readonly getCapabilities: () => (keyof Capabilities)[]
 
-  readonly #id = (this.getData() as DeviceDetails['data']).id
+  declare public readonly getCapabilityOptions: <
+    K extends keyof CapabilitiesOptions,
+  >(
+    capability: K,
+  ) => CapabilitiesOptions[K]
 
-  #device?: DeviceFacade
+  declare public readonly getCapabilityValue: <K extends keyof Capabilities>(
+    capability: K,
+  ) => Capabilities[K]
 
-  get #offValue(): keyof typeof Mode {
-    return this.getSetting('always_on') ? this.#onValue : 'stop'
+  declare public readonly getData: () => DeviceDetails['data']
+
+  declare public readonly getSetting: <K extends keyof Settings>(
+    setting: K,
+  ) => NonNullable<Settings[K]>
+
+  declare public readonly getSettings: () => Settings
+
+  declare public readonly getStoreValue: <K extends keyof Store>(
+    key: K,
+  ) => Store[K]
+
+  declare public readonly homey: Homey.Homey
+
+  declare public readonly registerMultipleCapabilityListener: (
+    capabilityIds: (keyof SetCapabilities)[],
+    listener: Homey.Device.MultipleCapabilityCallback,
+    timeout?: number,
+  ) => void
+
+  declare public readonly setCapabilityOptions: <
+    K extends keyof CapabilitiesOptions,
+  >(
+    capability: K,
+    options: CapabilitiesOptions[K] & Record<string, unknown>,
+  ) => Promise<void>
+
+  declare public readonly setCapabilityValue: <K extends keyof Capabilities>(
+    capability: K,
+    value: Capabilities[K],
+  ) => Promise<void>
+
+  declare public readonly setSettings: (settings: Settings) => Promise<void>
+
+  declare public readonly setStoreValue: <K extends keyof Store>(
+    key: K,
+    value: Store[K],
+  ) => Promise<void>
+
+  declare public readonly triggerCapabilityListener: <
+    K extends keyof Capabilities,
+  >(
+    capability: K,
+    value: Capabilities[K],
+  ) => Promise<void>
+
+  #device?: IDeviceFacadeAny
+
+  public get id(): string {
+    return this.getData().id
   }
 
-  get #onValue(): keyof typeof Mode {
+  get #offValue(): Mode {
+    return this.getSetting('always_on') ? this.#onValue : Mode.stop
+  }
+
+  get #onValue(): Mode {
+    const onMode = this.getSetting('on_mode')
     return (
-      (this.getSetting('on_mode') === 'previous' ?
-        this.getStoreValue('previousMode')
-      : (this.getSetting('on_mode') as PreviousMode | undefined)) ?? 'eco'
+      (onMode === 'previous' ? this.getStoreValue('previousMode') : onMode) ??
+      Mode.eco
     )
   }
 
@@ -75,51 +148,10 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  public override getCapabilityValue<K extends keyof Capabilities>(
-    capability: K,
-  ): Capabilities[K] {
-    return super.getCapabilityValue(capability) as Capabilities[K]
-  }
-
-  public override getSetting<K extends string & keyof Settings>(
-    setting: K,
-  ): NonNullable<Settings[K]> {
-    return super.getSetting(setting) as NonNullable<Settings[K]>
-  }
-
-  public override getStoreValue<K extends keyof Store>(key: K): Store[K] {
-    return super.getStoreValue(key) as Store[K]
-  }
-
   public override async removeCapability(capability: string): Promise<void> {
     if (this.hasCapability(capability)) {
       await super.removeCapability(capability)
     }
-  }
-
-  public override async setCapabilityOptions<
-    K extends keyof CapabilitiesOptions,
-  >(
-    capability: K,
-    options: CapabilitiesOptions[K] & Record<string, unknown>,
-  ): Promise<void> {
-    await super.setCapabilityOptions(capability, options)
-  }
-
-  public override async setCapabilityValue<K extends keyof Capabilities>(
-    capability: K,
-    value: Capabilities[K],
-  ): Promise<void> {
-    await super.setCapabilityValue(capability, value)
-    this.log('Capability', capability, 'is', value)
-  }
-
-  public override async setStoreValue<K extends keyof Store>(
-    key: K,
-    value: Store[K],
-  ): Promise<void> {
-    await super.setStoreValue(key, value)
-    this.log('Store', key, 'is', value)
   }
 
   public override async setWarning(error: unknown): Promise<void> {
@@ -130,23 +162,15 @@ export default class HeatzyDevice extends Homey.Device {
     await super.setWarning(null)
   }
 
-  public async syncFromDevice(device?: DeviceFacade): Promise<void> {
+  public async syncFromDevice(device?: IDeviceFacadeAny): Promise<void> {
     try {
       const newDevice = device ?? (await this.#fetchDevice())
       if (newDevice) {
-        const {
-          cftTempH,
-          cftTempL,
-          derogSettings,
-          lockSwitch,
-          mode,
-          timerSwitch,
-        } = newDevice
-        await this.#setDerog(derogSettings)
-        await this.#setTemperature({ tempH: cftTempH, tempL: cftTempL })
-        await this.#setMode(mode)
-        await this.#setLock(lockSwitch)
-        await this.#setTimer(timerSwitch)
+        await this.#setV1CapabilityValues(newDevice)
+        await this.#setV2CapabilityValues(newDevice)
+        await this.#setGlowCapabilityValues(newDevice)
+        await this.#setProCapabilityValues(newDevice)
+        await this.setStoreValue('previousMode', newDevice.previousMode)
       }
     } catch {
       await this.setWarning(
@@ -155,59 +179,69 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  async #buildUpdateData(values: Partial<SetCapabilities>): Promise<BaseAttrs> {
+  async #buildUpdateData(
+    device: IDeviceFacadeAny,
+    values: Partial<SetCapabilities>,
+  ): Promise<PostAttrs> {
     this.log('Requested data:', values)
     return (
       await Promise.all(
         Object.entries(values).map(([capability, value]) =>
-          this.#convertToDevice(capability as keyof SetCapabilities, value),
+          this.#convertToDevice(
+            device.product,
+            capability as keyof SetCapabilities,
+            value,
+          ),
         ),
       )
     ).reduce((acc, data) => ({ ...acc, ...data }), {})
   }
 
   #convertToDevice<K extends keyof SetCapabilities>(
+    product: Product,
     capability: K,
     value: SetCapabilities[K],
-  ): Partial<Attrs> {
-    switch (capability) {
-      case 'derog_time_boost':
-        return {
-          derog_mode: Number(value) ? DerogMode.boost : DerogMode.off,
-          derog_time: Number(value),
-        }
-      case 'derog_time_vacation':
-        return {
-          derog_mode: Number(value) ? DerogMode.vacation : DerogMode.off,
-          derog_time: Number(value),
-        }
-      case 'locked':
-        return { lock_switch: Number(value) }
-      case 'onoff':
-        return { mode: (value as boolean) ? this.#onValue : this.#offValue }
-      case 'onoff.timer':
-        return { timer_switch: Number(value) }
-      case 'target_temperature':
-        return { cft_tempL: (value as number) * TEMPERATURE_SCALE_FACTOR }
-      case 'target_temperature.complement':
-        return { cft_tempH: (value as number) / TEMPERATURE_SCALE_FACTOR }
-      case 'thermostat_mode':
-        return {
-          mode:
-            value === 'stop' ? this.#offValue : (value as keyof typeof Mode),
-        }
-      default:
-        return {}
+  ): PostAttrs {
+    try {
+      switch (capability) {
+        case 'derog_time':
+          return { derog_time: Number(value) }
+        case 'heater_operation_mode':
+          return { derog_mode: DerogMode[value as keyof typeof DerogMode] }
+        case 'locked':
+          return {
+            [product === Product.glow ? 'lock_c' : 'lock_switch']:
+              Number(value),
+          }
+        case 'onoff':
+          return product === Product.glow ?
+              { on_off: Number(value) }
+            : { mode: (value as boolean) ? this.#onValue : this.#offValue }
+        case 'onoff.timer':
+          return { timer_switch: Number(value) }
+        case 'onoff.window_detection':
+          return { window_switch: Number(value) }
+        case 'target_temperature':
+          return getTargetTemperature(product, 'cft_temp', value as number)
+        case 'target_temperature.eco':
+          return getTargetTemperature(product, 'eco_temp', value as number)
+        case 'thermostat_mode':
+          return {
+            mode: value === Mode.stop ? this.#offValue : (value as Mode),
+          }
+        default:
+      }
+    } catch {
+      //
     }
+    return {}
   }
 
-  async #fetchDevice(): Promise<DeviceFacade | undefined> {
+  async #fetchDevice(): Promise<IDeviceFacadeAny | undefined> {
     try {
       if (!this.#device) {
-        this.#device = this.#app.getFacade(this.#id) as DeviceFacade | undefined
-        if (this.#device) {
-          await this.#init(this.#device)
-        }
+        this.#device = this.homey.app.getFacade(this.id)
+        await this.#init(this.#device)
       }
       return this.#device
     } catch (error) {
@@ -215,17 +249,26 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  async #init(device: DeviceFacade): Promise<void> {
-    await this.#setCapabilities(device)
-    await this.#setCapabilityOptions(device.isFirstPilot)
+  async #init(device: IDeviceFacadeAny): Promise<void> {
+    const { product } = device
+    await this.#setCapabilities(product)
+    await this.#setCapabilityOptions(product)
     await this.syncFromDevice(device)
   }
 
   #registerCapabilityListeners(): void {
     this.registerMultipleCapabilityListener(
-      this.driver.capabilities.filter(
-        (capability) => !['derog_end', 'derog_mode'].includes(capability),
-      ),
+      [
+        'heater_operation_mode',
+        'derog_time',
+        'locked',
+        'onoff',
+        'onoff.timer',
+        'onoff.window_detection',
+        'target_temperature',
+        'target_temperature.eco',
+        'thermostat_mode',
+      ],
       async (values) => this.#set(values),
       DEBOUNCE_DELAY,
     )
@@ -234,10 +277,10 @@ export default class HeatzyDevice extends Homey.Device {
   async #set(values: Partial<SetCapabilities>): Promise<void> {
     const device = await this.#fetchDevice()
     if (device) {
-      const updateData = await this.#buildUpdateData(values)
+      const updateData = await this.#buildUpdateData(device, values)
       if (Object.keys(updateData).length) {
         try {
-          await device.set(updateData)
+          await device.setValues(updateData)
         } catch (error) {
           await this.setWarning(error)
         }
@@ -245,17 +288,8 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  async #setCapabilities({
-    isFirstGen,
-    isGlow,
-  }: {
-    isFirstGen: boolean
-    isGlow: boolean
-  }): Promise<void> {
-    const capabilities = this.driver.getRequiredCapabilities({
-      isFirstGen,
-      isGlow,
-    })
+  async #setCapabilities(product: Product): Promise<void> {
+    const capabilities = getRequiredCapabilities(product)
     await capabilities.reduce<Promise<void>>(async (acc, capability) => {
       await acc
       return this.addCapability(capability)
@@ -268,74 +302,65 @@ export default class HeatzyDevice extends Homey.Device {
       }, Promise.resolve())
   }
 
-  async #setCapabilityOptions(isFirstPilot: boolean): Promise<void> {
-    await this.setCapabilityOptions(
-      'thermostat_mode',
-      getCapabilitiesOptions(isFirstPilot).thermostat_mode,
+  async #setCapabilityOptions(product: Product): Promise<void> {
+    await Object.entries(getCapabilitiesOptions(product)).reduce(
+      async (acc, capabilityOptions) => {
+        await acc
+        await this.setCapabilityOptions(
+          ...(capabilityOptions as [
+            keyof CapabilitiesOptions,
+            CapabilitiesOptions[keyof CapabilitiesOptions],
+          ]),
+        )
+      },
+      Promise.resolve(),
     )
   }
 
-  async #setDerog(derogSettings?: DerogSettings): Promise<void> {
-    if (derogSettings !== undefined) {
-      const { derogEnd, derogTimeBoost, derogTimeVacation } = derogSettings
-      if (
-        String(derogTimeBoost) !==
-          this.getCapabilityValue('derog_time_boost') ||
-        String(derogTimeVacation) !==
-          this.getCapabilityValue('derog_time_vacation')
-      ) {
-        await this.setCapabilityValue('derog_end', derogEnd)
-        await this.setCapabilityValue(
-          'derog_time_boost',
-          String(derogTimeBoost),
-        )
-        await this.setCapabilityValue(
-          'derog_time_vacation',
-          String(derogTimeVacation),
-        )
-      }
+  async #setGlowCapabilityValues(device: IDeviceFacadeAny): Promise<void> {
+    if (supportsGlow(device)) {
+      const { comfortTemperature, currentTemperature, ecoTemperature } = device
+      await this.setCapabilityValue('measure_temperature', currentTemperature)
+      await this.setCapabilityValue('target_temperature', comfortTemperature)
+      await this.setCapabilityValue('target_temperature.eco', ecoTemperature)
     }
   }
 
-  async #setLock(value?: Switch): Promise<void> {
-    if (value !== undefined) {
-      await this.setCapabilityValue('locked', Boolean(value))
+  async #setProCapabilityValues(device: IDeviceFacadeAny): Promise<void> {
+    if (supportsPro(device)) {
+      const {
+        currentHumidity,
+        currentMode,
+        isDetectingOpenWindow,
+        isPresence,
+      } = device
+      await this.setCapabilityValue('alarm_presence', isPresence)
+      await this.setCapabilityValue('measure_humidity', currentHumidity)
+      await this.setCapabilityValue(
+        'onoff.window_detection',
+        isDetectingOpenWindow,
+      )
+      await this.setCapabilityValue('operational_state', currentMode)
     }
   }
 
-  async #setMode(mode: keyof typeof Mode): Promise<void> {
-    const isOn = mode !== 'stop'
-    await this.setCapabilityValue('thermostat_mode', mode)
+  async #setV1CapabilityValues(device: IDeviceFacadeAny): Promise<void> {
+    const { isOn, mode } = device
     await this.setCapabilityValue('onoff', isOn)
-    if (isOn) {
-      await this.setStoreValue('previousMode', mode)
-    }
+    await this.setCapabilityValue('thermostat_mode', mode)
   }
 
-  async #setTemperature({
-    tempH,
-    tempL,
-  }: {
-    tempH?: number
-    tempL?: number
-  }): Promise<void> {
-    if (tempH !== undefined) {
-      await this.setCapabilityValue(
-        'target_temperature',
-        tempH * TEMPERATURE_SCALE_FACTOR,
-      )
-    }
-    if (tempL !== undefined) {
-      await this.setCapabilityValue(
-        'target_temperature',
-        tempL / TEMPERATURE_SCALE_FACTOR,
-      )
-    }
-  }
-
-  async #setTimer(value?: Switch): Promise<void> {
-    if (value !== undefined) {
-      await this.setCapabilityValue('onoff.timer', Boolean(value))
+  async #setV2CapabilityValues(device: IDeviceFacadeAny): Promise<void> {
+    if (supportsV2(device)) {
+      const { derogEndString, derogMode, derogTime, isLocked, isTimer } = device
+      const { [derogMode]: keyofDerogMode } = DerogMode
+      await this.setCapabilityValue('derog_end', derogEndString)
+      if (isDerogMode(keyofDerogMode)) {
+        await this.setCapabilityValue('heater_operation_mode', keyofDerogMode)
+      }
+      await this.setCapabilityValue('derog_time', String(derogTime))
+      await this.setCapabilityValue('locked', isLocked)
+      await this.setCapabilityValue('onoff.timer', isTimer)
     }
   }
 }

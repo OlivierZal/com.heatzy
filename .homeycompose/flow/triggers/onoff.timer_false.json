@@ -1,13 +1,13 @@
 {
   "title": {
     "en": "Timer turned off",
-    "fr": "Programmateur désactivé"
+    "fr": "Programmation désactivée"
   },
   "args": [
     {
       "type": "device",
       "name": "device",
-      "filter": "driver_id=heatzy"
+      "filter": "driver_id=heatzy&capabilities=onoff.timer"
     }
   ]
 }

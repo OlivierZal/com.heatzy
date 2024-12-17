@@ -1,21 +1,18 @@
 import type { LoginPostData } from '@olivierzal/heatzy-api'
-import type Homey from 'homey/lib/Homey'
+import type { Homey } from 'homey/lib/Homey'
 
-import type HeatzyApp from './app.mjs'
-import type { DeviceSettings, DriverSetting, Settings } from './types.mjs'
-
-const getApp = (homey: Homey): HeatzyApp => homey.app as HeatzyApp
+import type { DeviceSettings, DriverSetting, Settings } from './types.mts'
 
 const api = {
   getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {
-    return getApp(homey).getDeviceSettings()
+    return homey.app.getDeviceSettings()
   },
   getDriverSettings({
     homey,
   }: {
     homey: Homey
   }): Partial<Record<string, DriverSetting[]>> {
-    return getApp(homey).getDriverSettings()
+    return homey.app.getDriverSettings()
   },
   getLanguage({ homey }: { homey: Homey }): string {
     return homey.i18n.getLanguage()
@@ -27,7 +24,7 @@ const api = {
     body: LoginPostData
     homey: Homey
   }): Promise<boolean> {
-    return getApp(homey).login(body)
+    return homey.app.login(body)
   },
   async setDeviceSettings({
     body,
@@ -36,7 +33,7 @@ const api = {
     body: Settings
     homey: Homey
   }): Promise<void> {
-    return getApp(homey).setDeviceSettings(body)
+    return homey.app.setDeviceSettings(body)
   },
 }
 

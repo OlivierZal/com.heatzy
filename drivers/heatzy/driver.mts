@@ -1,19 +1,36 @@
 import { DeviceModel, type LoginPostData } from '@olivierzal/heatzy-api'
+// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+import Homey from 'homey'
 
-import { Homey } from '../../homey.mjs'
 import {
   getCapabilitiesOptions,
+  getRequiredCapabilities,
   type DeviceDetails,
   type FlowArgs,
   type ManifestDriver,
-} from '../../types.mjs'
+} from '../../types.mts'
 
 import type PairSession from 'homey/lib/PairSession'
 
-import type HeatzyApp from '../../app.mjs'
+import type HeatzyDevice from './device.mts'
 
+const discoverDevices = async (): Promise<DeviceDetails[]> =>
+  Promise.resolve(
+    DeviceModel.getAll().map(({ id, name, product }) => ({
+      capabilities: getRequiredCapabilities(product),
+      capabilitiesOptions: getCapabilitiesOptions(product),
+      data: { id },
+      name,
+    })),
+  )
+
+// eslint-disable-next-line import/no-named-as-default-member
 export default class HeatzyDriver extends Homey.Driver {
-  public capabilities = (this.manifest as ManifestDriver).capabilities ?? []
+  declare public readonly getDevices: () => HeatzyDevice[]
+
+  declare public readonly homey: Homey.Homey
+
+  declare public readonly manifest: ManifestDriver
 
   public override async onInit(): Promise<void> {
     this.#registerRunListeners()
@@ -31,40 +48,13 @@ export default class HeatzyDriver extends Homey.Driver {
       }
     })
     this.#handleLogin(session)
-    session.setHandler('list_devices', async () => this.#discoverDevices())
+    session.setHandler('list_devices', async () => discoverDevices())
     return Promise.resolve()
   }
 
   public override async onRepair(session: PairSession): Promise<void> {
     this.#handleLogin(session)
     return Promise.resolve()
-  }
-
-  public getRequiredCapabilities({
-    isFirstGen,
-    isGlow,
-  }: {
-    isFirstGen: boolean
-    isGlow: boolean
-  }): string[] {
-    return this.capabilities.filter((capability) =>
-      isFirstGen ?
-        ['onoff', 'thermostat_mode'].includes(capability)
-      : isGlow || !capability.startsWith('target_temperature'),
-    )
-  }
-
-  async #discoverDevices(): Promise<DeviceDetails[]> {
-    return Promise.resolve(
-      DeviceModel.getAll().map(
-        ({ id, isFirstGen, isFirstPilot, isGlow, name }) => ({
-          capabilities: this.getRequiredCapabilities({ isFirstGen, isGlow }),
-          capabilitiesOptions: getCapabilitiesOptions(isFirstPilot),
-          data: { id },
-          name,
-        }),
-      ),
-    )
   }
 
   #handleLogin(session: PairSession): void {
@@ -74,36 +64,41 @@ export default class HeatzyDriver extends Homey.Driver {
   }
 
   async #login(data?: LoginPostData): Promise<boolean> {
-    return (this.homey.app as HeatzyApp).api.authenticate(data)
+    return this.homey.app.api.authenticate(data)
   }
 
   #registerDerogTimeRunListeners(): void {
     this.homey.flow
-      .getConditionCard('derog_time_boost_condition')
-      .registerRunListener((args: FlowArgs) =>
-        Boolean(Number(args.device.getCapabilityValue('derog_time_boost'))),
+      .getConditionCard('derog_time_condition')
+      .registerRunListener(
+        (args: FlowArgs) =>
+          args.device.getCapabilityValue('derog_time') === args.derog_time,
       )
     this.homey.flow
-      .getActionCard('derog_time_boost_action')
+      .getActionCard('derog_time_action')
       .registerRunListener(async (args: FlowArgs) => {
         await args.device.triggerCapabilityListener(
-          'derog_time_boost',
+          'derog_time',
           args.derog_time,
         )
       })
   }
 
   #registerOnOffRunListeners(): void {
-    this.homey.flow
-      .getConditionCard('onoff.timer_condition')
-      .registerRunListener((args: FlowArgs) =>
-        args.device.getCapabilityValue('onoff.timer'),
-      )
-    this.homey.flow
-      .getActionCard('onoff.timer_action')
-      .registerRunListener(async (args: FlowArgs) => {
-        await args.device.triggerCapabilityListener('onoff.timer', args.onoff)
-      })
+    ;(['onoff.timer', 'onoff.window_detection'] as const).forEach(
+      (capability) => {
+        this.homey.flow
+          .getConditionCard(`${capability}_condition`)
+          .registerRunListener((args: FlowArgs) =>
+            args.device.getCapabilityValue(capability),
+          )
+        this.homey.flow
+          .getActionCard(`${capability}_action`)
+          .registerRunListener(async (args: FlowArgs) => {
+            await args.device.triggerCapabilityListener(capability, args.onoff)
+          })
+      },
+    )
   }
 
   #registerRunListeners(): void {
@@ -113,13 +108,15 @@ export default class HeatzyDriver extends Homey.Driver {
   }
 
   #registerTargetTemperatureRunListener(): void {
-    this.homey.flow
-      .getActionCard('target_temperature.complement_action')
-      .registerRunListener(async (args: FlowArgs) => {
-        await args.device.triggerCapabilityListener(
-          'target_temperature.complement',
-          args.target_temperature,
-        )
-      })
+    ;(['target_temperature.eco'] as const).forEach((capability) => {
+      this.homey.flow
+        .getActionCard(`${capability}_action`)
+        .registerRunListener(async (args: FlowArgs) => {
+          await args.device.triggerCapabilityListener(
+            capability,
+            args.target_temperature,
+          )
+        })
+    })
   }
 }

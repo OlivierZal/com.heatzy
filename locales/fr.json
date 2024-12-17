@@ -27,5 +27,6 @@
   },
   "errors": {
     "deviceNotFound": "Device not found."
-  }
+  },
+  "derogEnd": "__derogMode__ jusque : __derogEnd__"
 }

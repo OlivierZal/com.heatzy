@@ -5,22 +5,14 @@ import type {
   DeviceSetting,
   DeviceSettings,
   DriverSetting,
-  HomeySettingsUI,
-  LoginDriverSetting,
+  HomeySettings,
   Settings,
   ValueOf,
-} from '../types.mjs'
+} from '../types.mts'
 
 type HTMLValueElement = HTMLInputElement | HTMLSelectElement
 
 const SIZE_ONE = 1
-
-let homeySettings: HomeySettingsUI = {
-  expireAt: '',
-  password: '',
-  token: '',
-  username: '',
-}
 
 let deviceSettings: Partial<DeviceSettings> = {}
 let flatDeviceSettings: Partial<DeviceSetting> = {}
@@ -28,26 +20,30 @@ let flatDeviceSettings: Partial<DeviceSetting> = {}
 let usernameElement: HTMLInputElement | null = null
 let passwordElement: HTMLInputElement | null = null
 
-const applySettingsElement = document.getElementById(
-  'apply_settings_common',
-) as HTMLButtonElement
-const authenticateElement = document.getElementById(
-  'authenticate',
-) as HTMLButtonElement
-const refreshSettingsElement = document.getElementById(
-  'refresh_settings_common',
-) as HTMLButtonElement
+const getButtonElement = (id: string): HTMLButtonElement => {
+  const element = document.getElementById(id)
+  if (!(element instanceof HTMLButtonElement)) {
+    throw new Error('Element is not a button')
+  }
+  return element
+}
 
-const authenticatedElement = document.getElementById(
-  'authenticated',
-) as HTMLDivElement
-const authenticatingElement = document.getElementById(
-  'authenticating',
-) as HTMLDivElement
-const loginElement = document.getElementById('login') as HTMLDivElement
-const settingsCommonElement = document.getElementById(
-  'settings_common',
-) as HTMLDivElement
+const getDivElement = (id: string): HTMLDivElement => {
+  const element = document.getElementById(id)
+  if (!(element instanceof HTMLDivElement)) {
+    throw new Error('Element is not a div')
+  }
+  return element
+}
+
+const applySettingsElement = getButtonElement('apply_settings_common')
+const authenticateElement = getButtonElement('authenticate')
+const refreshSettingsElement = getButtonElement('refresh_settings_common')
+
+const authenticatedElement = getDivElement('authenticated')
+const authenticatingElement = getDivElement('authenticating')
+const loginElement = getDivElement('login')
+const settingsCommonElement = getDivElement('settings_common')
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)
@@ -96,15 +92,15 @@ const setDocumentLanguage = async (homey: Homey): Promise<void> =>
     })
   })
 
-const fetchHomeySettings = async (homey: Homey): Promise<void> =>
+const fetchHomeySettings = async (homey: Homey): Promise<HomeySettings> =>
   new Promise((resolve) => {
-    homey.get(async (error: Error | null, settings: HomeySettingsUI) => {
+    homey.get(async (error: Error | null, settings: HomeySettings) => {
       if (error) {
         await homey.alert(error.message)
-      } else {
-        homeySettings = settings
+        resolve({})
+        return
       }
-      resolve()
+      resolve(settings)
     })
   })
 
@@ -188,7 +184,7 @@ const createInputElement = ({
   max?: number
   min?: number
   placeholder?: string
-  value?: string
+  value?: string | null
 }): HTMLInputElement => {
   const inputElement = document.createElement('input')
   inputElement.classList.add('homey-form-input')
@@ -236,18 +232,14 @@ const createSelectElement = (
 const generateCredential = (
   credentialKey: keyof LoginPostData,
   driverSettings: Partial<Record<string, DriverSetting[]>>,
+  value?: string | null,
 ): HTMLInputElement | null => {
-  const loginSetting = (driverSettings.login as LoginDriverSetting[]).find(
+  const loginSetting = driverSettings.login?.find(
     ({ id }) => id === credentialKey,
   )
   if (loginSetting) {
     const { id, placeholder, title, type } = loginSetting
-    const valueElement = createInputElement({
-      id,
-      placeholder,
-      type,
-      value: homeySettings[id],
-    })
+    const valueElement = createInputElement({ id, placeholder, type, value })
     createValueElement(loginElement, { title, valueElement })
     return valueElement
   }
@@ -256,9 +248,11 @@ const generateCredential = (
 
 const generateCredentials = (
   driverSettings: Partial<Record<string, DriverSetting[]>>,
+  credentials: { password?: string | null; username?: string | null },
 ): void => {
   ;[usernameElement, passwordElement] = (['username', 'password'] as const).map(
-    (element) => generateCredential(element, driverSettings),
+    (element) =>
+      generateCredential(element, driverSettings, credentials[element]),
   )
 }
 
@@ -312,7 +306,8 @@ const updateDeviceSettings = (body: Settings): void => {
 const updateCommonSetting = (element: HTMLSelectElement): void => {
   const [id] = element.id.split('__')
   const { [id]: value } = flatDeviceSettings
-  element.value = value === null ? '' : String(value)
+  element.value =
+    ['boolean', 'number', 'string'].includes(typeof value) ? String(value) : ''
 }
 
 const refreshCommonSettings = (elements: HTMLSelectElement[]): void => {
@@ -400,7 +395,10 @@ const generateCommonSettings = (
   )
 }
 
-const fetchDriverSettings = async (homey: Homey): Promise<void> =>
+const fetchDriverSettings = async (
+  homey: Homey,
+  credentials: { password?: string | null; username?: string | null },
+): Promise<void> =>
   new Promise((resolve) => {
     homey.api(
       'GET',
@@ -413,7 +411,7 @@ const fetchDriverSettings = async (homey: Homey): Promise<void> =>
           await homey.alert(error.message)
         } else {
           generateCommonSettings(homey, settings)
-          generateCredentials(settings)
+          generateCredentials(settings, credentials)
         }
         resolve()
       },
@@ -471,8 +469,8 @@ const addAuthenticateEventListener = (homey: Homey): void => {
   })
 }
 
-const load = async (homey: Homey): Promise<void> => {
-  if (homeySettings.token !== undefined) {
+const load = async (homey: Homey, token?: string | null): Promise<void> => {
+  if (token !== undefined) {
     try {
       await login(homey)
       return
@@ -483,11 +481,11 @@ const load = async (homey: Homey): Promise<void> => {
 
 // eslint-disable-next-line func-style
 async function onHomeyReady(homey: Homey): Promise<void> {
+  const { password, token, username } = await fetchHomeySettings(homey)
   await setDocumentLanguage(homey)
-  await fetchHomeySettings(homey)
   await fetchDeviceSettings(homey)
-  await fetchDriverSettings(homey)
+  await fetchDriverSettings(homey, { password, username })
   addAuthenticateEventListener(homey)
-  await load(homey)
+  await load(homey, token)
   homey.ready()
 }
