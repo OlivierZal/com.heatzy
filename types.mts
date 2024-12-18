@@ -176,11 +176,11 @@ export const getRequiredCapabilities = (
   'thermostat_mode',
   ...(product >= Product.v2 ?
     ([
-      'derog_end',
-      'derog_time',
-      'heater_operation_mode',
       'locked',
       'onoff.timer',
+      'heater_operation_mode',
+      'derog_end',
+      'derog_time',
     ] as const)
   : []),
   ...(product >= Product.glow ?
@@ -205,12 +205,12 @@ export const getCapabilitiesOptions = (
 ): CapabilitiesOptions => {
   const values = [
     { id: Mode.cft, title: { en: 'Comfort', fr: 'Confort' } },
-    ...(product < Product.v4 ?
-      []
-    : [
+    ...(product >= Product.v4 ?
+      [
         { id: Mode.cft1, title: { en: 'Comfort -1°C', fr: 'Confort -1°C' } },
         { id: Mode.cft2, title: { en: 'Comfort -2°C', fr: 'Confort -2°C' } },
-      ]),
+      ]
+    : []),
     { id: Mode.eco, title: { en: 'Eco', fr: 'Éco' } },
     { id: Mode.fro, title: { en: 'Anti-frost', fr: 'Anti-gel' } },
     { id: Mode.stop, title: { en: 'Off', fr: 'Désactivé' } },

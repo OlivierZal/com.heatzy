@@ -13,8 +13,8 @@
     "target_temperature",
     "target_temperature.eco",
     "thermostat_mode",
-    "derog_end",
     "heater_operation_mode",
+    "derog_end",
     "derog_time"
   ],
   "capabilitiesOptions": {
