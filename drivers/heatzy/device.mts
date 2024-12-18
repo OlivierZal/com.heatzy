@@ -290,13 +290,13 @@ export default class HeatzyDevice extends Homey.Device {
 
   async #setCapabilities(product: Product): Promise<void> {
     const capabilities = getRequiredCapabilities(product)
-    await capabilities.reduce<Promise<void>>(async (acc, capability) => {
+    await capabilities.reduce(async (acc, capability) => {
       await acc
       return this.addCapability(capability)
     }, Promise.resolve())
     await this.getCapabilities()
       .filter((capability) => !capabilities.includes(capability))
-      .reduce<Promise<void>>(async (acc, capability) => {
+      .reduce(async (acc, capability) => {
         await acc
         await this.removeCapability(capability)
       }, Promise.resolve())
