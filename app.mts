@@ -182,7 +182,7 @@ export default class HeatzyApp extends Homey.App {
       },
     } = this
     if (this.homey.settings.get('notifiedVersion') !== version) {
-      const { [version]: versionChangelog } = changelog
+      const { [version]: versionChangelog = {} } = changelog
       if (language in versionChangelog) {
         this.homey.setTimeout(async () => {
           try {

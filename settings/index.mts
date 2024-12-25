@@ -234,7 +234,7 @@ const generateCredential = (
   driverSettings: Partial<Record<string, DriverSetting[]>>,
   value?: string | null,
 ): HTMLInputElement | null => {
-  const loginSetting = driverSettings.login?.find(
+  const loginSetting = driverSettings['login']?.find(
     ({ id }) => id === credentialKey,
   )
   if (loginSetting) {
@@ -248,12 +248,13 @@ const generateCredential = (
 
 const generateCredentials = (
   driverSettings: Partial<Record<string, DriverSetting[]>>,
-  credentials: { password?: string | null; username?: string | null },
+  {
+    password,
+    username,
+  }: { password?: string | null; username?: string | null },
 ): void => {
-  ;[usernameElement, passwordElement] = (['username', 'password'] as const).map(
-    (element) =>
-      generateCredential(element, driverSettings, credentials[element]),
-  )
+  usernameElement = generateCredential('username', driverSettings, username)
+  passwordElement = generateCredential('password', driverSettings, password)
 }
 
 const shouldUpdate = (id: string, value: ValueOf<Settings>): boolean => {
@@ -279,9 +280,11 @@ const buildSettingsBody = (elements: HTMLSelectElement[]): Settings => {
   elements.forEach((element) => {
     try {
       const [id] = element.id.split('__')
-      const value = processValue(element)
-      if (shouldUpdate(id, value)) {
-        settings[id] = value
+      if (id !== undefined) {
+        const value = processValue(element)
+        if (shouldUpdate(id, value)) {
+          settings[id] = value
+        }
       }
     } catch (error) {
       errors.push(getErrorMessage(error))
@@ -305,9 +308,13 @@ const updateDeviceSettings = (body: Settings): void => {
 
 const updateCommonSetting = (element: HTMLSelectElement): void => {
   const [id] = element.id.split('__')
-  const { [id]: value } = flatDeviceSettings
-  element.value =
-    ['boolean', 'number', 'string'].includes(typeof value) ? String(value) : ''
+  if (id !== undefined) {
+    const { [id]: value } = flatDeviceSettings
+    element.value =
+      ['boolean', 'number', 'string'].includes(typeof value) ?
+        String(value)
+      : ''
+  }
 }
 
 const refreshCommonSettings = (elements: HTMLSelectElement[]): void => {
@@ -378,7 +385,7 @@ const generateCommonSettings = (
   homey: Homey,
   driverSettings: Partial<Record<string, DriverSetting[]>>,
 ): void => {
-  ;(driverSettings.options ?? []).forEach(({ id, title, type, values }) => {
+  ;(driverSettings['options'] ?? []).forEach(({ id, title, type, values }) => {
     const settingId = `${id}__setting`
     if (
       !settingsCommonElement.querySelector(`select[id="${settingId}"]`) &&
@@ -479,6 +486,7 @@ const load = async (homey: Homey, token?: string | null): Promise<void> => {
   needsAuthentication()
 }
 
+// @ts-expect-error: read by another script in `./index.html`
 // eslint-disable-next-line func-style
 async function onHomeyReady(homey: Homey): Promise<void> {
   const { password, token, username } = await fetchHomeySettings(homey)
