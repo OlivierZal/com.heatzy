@@ -242,8 +242,10 @@ export default class HeatzyDevice extends Homey.Device {
 
   async #fetchDevice(): Promise<IDeviceFacadeAny | null> {
     try {
-      this.#device ??= this.homey.app.getFacade(this.id)
-      await this.#init(this.#device)
+      if (!this.#device) {
+        this.#device = this.homey.app.getFacade(this.id)
+        await this.#init(this.#device)
+      }
       return this.#device
     } catch (error) {
       await this.setWarning(error)
