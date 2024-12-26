@@ -1,7 +1,7 @@
 import {
   Mode,
   Product,
-  type DerogMode,
+  type DerogationMode,
   type LoginPostData,
   type PreviousMode,
 } from '@olivierzal/heatzy-api'
@@ -28,7 +28,7 @@ export interface Capabilities extends SetCapabilities {
 export interface CapabilitiesOptions {
   readonly heater_operation_mode: {
     readonly values: readonly CapabilitiesOptionsValues<
-      keyof typeof DerogMode
+      keyof typeof DerogationMode
     >[]
   }
   readonly operational_state: {
@@ -142,7 +142,7 @@ export interface PairSetting {
 
 export interface SetCapabilities {
   readonly derog_time: string
-  readonly heater_operation_mode: keyof typeof DerogMode
+  readonly heater_operation_mode: keyof typeof DerogationMode
   readonly locked: boolean
   readonly onoff: boolean
   readonly 'onoff.timer': boolean

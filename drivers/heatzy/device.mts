@@ -1,5 +1,5 @@
 import {
-  DerogMode,
+  DerogationMode,
   getTargetTemperature,
   Mode,
   Product,
@@ -28,8 +28,9 @@ import type HeatzyDriver from './driver.mts'
 
 const DEBOUNCE_DELAY = 1000
 
-const isDerogMode = (value: string): value is keyof typeof DerogMode =>
-  value in DerogMode
+const isDerogationMode = (
+  value: string,
+): value is keyof typeof DerogationMode => value in DerogationMode
 
 const getErrorMessage = (error: unknown): string | null => {
   if (error !== null) {
@@ -207,7 +208,9 @@ export default class HeatzyDevice extends Homey.Device {
         case 'derog_time':
           return { derog_time: Number(value) }
         case 'heater_operation_mode':
-          return { derog_mode: DerogMode[value as keyof typeof DerogMode] }
+          return {
+            derog_mode: DerogationMode[value as keyof typeof DerogationMode],
+          }
         case 'locked':
           return {
             [product === Product.glow ? 'lock_c' : 'lock_switch']:
@@ -351,13 +354,22 @@ export default class HeatzyDevice extends Homey.Device {
 
   async #setV2CapabilityValues(device: IDeviceFacadeAny): Promise<void> {
     if (supportsV2(device)) {
-      const { derogEndString, derogMode, derogTime, isLocked, isTimer } = device
-      const { [derogMode]: keyofDerogMode } = DerogMode
-      await this.setCapabilityValue('derog_end', derogEndString)
-      if (isDerogMode(keyofDerogMode)) {
-        await this.setCapabilityValue('heater_operation_mode', keyofDerogMode)
+      const {
+        derogationEndString,
+        derogationMode,
+        derogationTime,
+        isLocked,
+        isTimer,
+      } = device
+      const { [derogationMode]: keyofDerogationMode } = DerogationMode
+      await this.setCapabilityValue('derog_end', derogationEndString)
+      if (isDerogationMode(keyofDerogationMode)) {
+        await this.setCapabilityValue(
+          'heater_operation_mode',
+          keyofDerogationMode,
+        )
       }
-      await this.setCapabilityValue('derog_time', String(derogTime))
+      await this.setCapabilityValue('derog_time', String(derogationTime))
       await this.setCapabilityValue('locked', isLocked)
       await this.setCapabilityValue('onoff.timer', isTimer)
     }

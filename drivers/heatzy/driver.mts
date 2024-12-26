@@ -67,7 +67,7 @@ export default class HeatzyDriver extends Homey.Driver {
     return this.homey.app.api.authenticate(data)
   }
 
-  #registerDerogTimeRunListeners(): void {
+  #registerDerogationTimeRunListeners(): void {
     this.homey.flow
       .getConditionCard('derog_time_condition')
       .registerRunListener(
@@ -102,7 +102,7 @@ export default class HeatzyDriver extends Homey.Driver {
   }
 
   #registerRunListeners(): void {
-    this.#registerDerogTimeRunListeners()
+    this.#registerDerogationTimeRunListeners()
     this.#registerOnOffRunListeners()
     this.#registerTargetTemperatureRunListener()
   }
