@@ -80,6 +80,7 @@
       "path": "/settings/drivers"
     }
   },
+  "esm": true,
   "flow": {
     "triggers": [
       {
