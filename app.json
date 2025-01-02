@@ -11,7 +11,7 @@
   "category": [
     "climate"
   ],
-  "version": "19.0.0",
+  "version": "20.0.0",
   "compatibility": ">=12.2.0",
   "tags": {
     "en": [
@@ -80,7 +80,6 @@
       "path": "/settings/drivers"
     }
   },
-  "esm": true,
   "flow": {
     "triggers": [
       {

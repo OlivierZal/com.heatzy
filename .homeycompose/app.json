@@ -7,8 +7,10 @@
     "en": "Pilot your electric radiators",
     "fr": "Pilotez vos radiateurs électriques"
   },
-  "category": ["climate"],
-  "version": "19.0.0",
+  "category": [
+    "climate"
+  ],
+  "version": "20.0.0",
   "compatibility": ">=12.2.0",
   "tags": {
     "en": [
@@ -52,7 +54,9 @@
       }
     }
   },
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "api": {
     "getLanguage": {
       "method": "GET",
