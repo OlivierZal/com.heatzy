@@ -8,4 +8,5 @@ Supported devices:
 - Heatzy Pilote of 4th generation;
 - Heatzy Pilote Pro;
 - Heatzy Glow;
-- Heatzy Shine.
+- Heatzy Shine;
+- Heatzy Onyx.
