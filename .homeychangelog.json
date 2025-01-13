@@ -59,5 +59,8 @@
   "20.0.0": {
     "en": "Heatzy Pro & Glow/Shine are now fully supported!\nSome flows may need updating due to related breaking changes.",
     "fr": "Heatzy Pro et Glow/Shine sont désormais entièrement pris en charge !\nCertains flows peuvent nécessiter une mise à jour en raison de changements majeurs liés à cette intégration."
+  },
+  "21.0.0": {
+    "en": "Added Onyx support"
   }
 }

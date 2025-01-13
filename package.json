@@ -1,6 +1,6 @@
 {
   "name": "com.heatzy",
-  "version": "20.0.0",
+  "version": "21.0.0",
   "type": "module",
   "scripts": {
     "format": "prettier . --check",

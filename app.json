@@ -12,7 +12,7 @@
     "climate"
   ],
   "esm": true,
-  "version": "20.0.0",
+  "version": "21.0.0",
   "compatibility": ">=12.2.0",
   "tags": {
     "en": [
