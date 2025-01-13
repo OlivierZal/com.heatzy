@@ -225,9 +225,9 @@ export default class HeatzyDevice extends Homey.Device {
         case 'onoff.window_detection':
           return { window_switch: Number(value) }
         case 'target_temperature':
-          return getTargetTemperature(product, 'cft_temp', value as number)
+          return getTargetTemperature(product, Mode.cft, value as number)
         case 'target_temperature.eco':
-          return getTargetTemperature(product, 'eco_temp', value as number)
+          return getTargetTemperature(product, Mode.eco, value as number)
         case 'thermostat_mode':
           return {
             mode: value === Mode.stop ? this.#offValue : (value as Mode),
