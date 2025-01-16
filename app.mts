@@ -71,8 +71,11 @@ const getDriverLoginSetting = (
         title: '',
         type: isPassword ? 'password' : 'text',
       }
-      acc[key][option.endsWith('Placeholder') ? 'placeholder' : 'title'] =
-        label[language] ?? label.en
+      acc[key] = {
+        ...acc[key],
+        [option.endsWith('Placeholder') ? 'placeholder' : 'title']:
+          label[language] ?? label.en,
+      }
       return acc
     }, {}),
   )

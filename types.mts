@@ -54,13 +54,13 @@ export interface DriverCapabilitiesOptions {
 export interface DriverSetting {
   readonly driverId: string
   readonly id: string
-  title: string
+  readonly title: string
   readonly type: string
   readonly groupId?: string
   readonly groupLabel?: string
   readonly max?: number
   readonly min?: number
-  placeholder?: string
+  readonly placeholder?: string
   readonly units?: string
   readonly values?: readonly { readonly id: string; readonly label: string }[]
 }
