@@ -104,9 +104,9 @@ export default class HeatzyApp extends Homey.App {
           this.log(...args)
         },
       },
-      onSync: async (params) => this.#syncFromDevices(params),
       settingManager: this.homey.settings,
       timezone: this.homey.clock.getTimezone(),
+      onSync: async (params) => this.#syncFromDevices(params),
     })
     this.#facadeManager = new FacadeManager(this.#api)
     this.#createNotification(language)
