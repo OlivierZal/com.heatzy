@@ -1,17 +1,9 @@
 {
-  "title": {
-    "en": "The derogation duration !{{is|is not}}",
-    "fr": "La durée de dérogation !{{est|n'est pas}}"
-  },
-  "titleFormatted": {
-    "en": "The derogation duration !{{is|is not}} [[derog_time]]",
-    "fr": "La durée de dérogation !{{est|n'est pas}} [[derog_time]]"
-  },
   "args": [
     {
-      "type": "device",
+      "filter": "driver_id=heatzy&capabilities=derog_time",
       "name": "device",
-      "filter": "driver_id=heatzy&capabilities=derog_time"
+      "type": "device"
     },
     {
       "name": "derog_time",
@@ -257,5 +249,13 @@
         }
       ]
     }
-  ]
+  ],
+  "title": {
+    "en": "The derogation duration !{{is|is not}}",
+    "fr": "La durée de dérogation !{{est|n'est pas}}"
+  },
+  "titleFormatted": {
+    "en": "The derogation duration !{{is|is not}} [[derog_time]]",
+    "fr": "La durée de dérogation !{{est|n'est pas}} [[derog_time]]"
+  }
 }

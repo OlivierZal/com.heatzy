@@ -418,6 +418,16 @@ const config = [
     ],
     language: 'json/json',
     ...json.configs.recommended,
+    rules: {
+      ...json.configs.recommended.rules,
+      'json/sort-keys': [
+        'error',
+        'asc',
+        {
+          natural: true,
+        },
+      ],
+    },
   },
   {
     files: ['**/*.md'],

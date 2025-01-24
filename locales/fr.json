@@ -1,4 +1,7 @@
 {
+  "errors": {
+    "deviceNotFound": "Device not found."
+  },
   "settings": {
     "authenticate": {
       "button": "Se connecter",
@@ -12,21 +15,12 @@
     "devices": {
       "apply": {
         "button": "Appliquer à tous les appareils",
-        "confirm": "Êtes-vous sûr de vouloir appliquer ces paramètres à tous vos appareils ?",
         "nothing": "Aucun changement à appliquer."
       },
       "legend": "Paramètres des appareils"
     },
-    "int_error": "__name__ : doit être un entier compris entre __min__ et __max__.",
     "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",
     "title": "Paramètres Heatzy"
-  },
-  "warnings": {
-    "always_on": "L'extinction depuis Homey a été désactivée."
-  },
-  "errors": {
-    "deviceNotFound": "Device not found."
-  },
-  "derogEnd": "__derogMode__ jusque : __derogEnd__"
+  }
 }

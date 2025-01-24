@@ -1,6 +1,5 @@
 {
   "$extends": ["defaults"],
-  "name": "Heatzy",
   "capabilities": [
     "alarm_presence",
     "locked",
@@ -19,31 +18,31 @@
   ],
   "capabilitiesOptions": {
     "onoff.timer": {
-      "title": {
-        "en": "Timer",
-        "fr": "Programmation"
+      "insightsTitleFalse": {
+        "en": "Timer turned off",
+        "fr": "Programmation désactivée"
       },
       "insightsTitleTrue": {
         "en": "Timer turned on",
         "fr": "Programmation activée"
       },
-      "insightsTitleFalse": {
-        "en": "Timer turned off",
-        "fr": "Programmation désactivée"
+      "title": {
+        "en": "Timer",
+        "fr": "Programmation"
       }
     },
     "onoff.window_detection": {
-      "title": {
-        "en": "Open window detection",
-        "fr": "Détection de fenêtre ouverte"
+      "insightsTitleFalse": {
+        "en": "Open window detection turned off",
+        "fr": "Détection de fenêtre ouverte désactivée"
       },
       "insightsTitleTrue": {
         "en": "Open window detection turned on",
         "fr": "Détection de fenêtre ouverte activée"
       },
-      "insightsTitleFalse": {
-        "en": "Open window detection turned off",
-        "fr": "Détection de fenêtre ouverte désactivée"
+      "title": {
+        "en": "Open window detection",
+        "fr": "Détection de fenêtre ouverte"
       }
     },
     "target_temperature": {
@@ -52,13 +51,14 @@
       "step": 1
     },
     "target_temperature.eco": {
+      "max": 19,
+      "min": 10,
+      "step": 1,
       "title": {
         "en": "Target temperature - eco mode",
         "fr": "Température cible - mode éco"
-      },
-      "max": 19,
-      "min": 10,
-      "step": 1
+      }
     }
-  }
+  },
+  "name": "Heatzy"
 }

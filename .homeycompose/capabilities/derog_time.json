@@ -1,11 +1,11 @@
 {
-  "type": "enum",
+  "getable": true,
+  "setable": true,
   "title": {
     "en": "Derogation duration",
     "fr": "Durée de dérogation"
   },
-  "getable": true,
-  "setable": true,
+  "type": "enum",
   "uiComponent": "picker",
   "values": [
     {

@@ -1,17 +1,9 @@
 {
-  "title": {
-    "en": "Set the derogation duration",
-    "fr": "Définir la durée de dérogation"
-  },
-  "titleFormatted": {
-    "en": "Set the derogation duration to [[derog_time]]",
-    "fr": "Définir la durée de dérogation à [[derog_time]]"
-  },
   "args": [
     {
-      "type": "device",
+      "filter": "driver_id=heatzy&capabilities=derog_time",
       "name": "device",
-      "filter": "driver_id=heatzy&capabilities=derog_time"
+      "type": "device"
     },
     {
       "name": "derog_time",
@@ -257,5 +249,13 @@
         }
       ]
     }
-  ]
+  ],
+  "title": {
+    "en": "Set the derogation duration",
+    "fr": "Définir la durée de dérogation"
+  },
+  "titleFormatted": {
+    "en": "Set the derogation duration to [[derog_time]]",
+    "fr": "Définir la durée de dérogation à [[derog_time]]"
+  }
 }

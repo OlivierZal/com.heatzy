@@ -1,11 +1,11 @@
 {
-  "type": "string",
+  "getable": true,
+  "icon": "/assets/derog_end.svg",
+  "setable": false,
   "title": {
     "en": "End of derogation",
     "fr": "Fin de dérogation"
   },
-  "getable": true,
-  "setable": false,
-  "uiComponent": "sensor",
-  "icon": "/assets/derog_end.svg"
+  "type": "string",
+  "uiComponent": "sensor"
 }

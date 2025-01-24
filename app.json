@@ -1,19 +1,65 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
-  "id": "com.heatzy",
-  "sdk": 3,
+  "api": {
+    "getDeviceSettings": {
+      "method": "GET",
+      "path": "/settings/devices"
+    },
+    "getDriverSettings": {
+      "method": "GET",
+      "path": "/settings/drivers"
+    },
+    "getLanguage": {
+      "method": "GET",
+      "path": "/language"
+    },
+    "login": {
+      "method": "POST",
+      "path": "/sessions"
+    },
+    "setDeviceSettings": {
+      "method": "PUT",
+      "path": "/settings/devices"
+    }
+  },
+  "author": {
+    "email": "olivier.zalmanski@me.com",
+    "name": "Olivier Zalmanski"
+  },
   "brandColor": "#153f35",
-  "name": "Heatzy",
-  "description": {
-    "en": "Pilot your electric radiators",
-    "fr": "Pilotez vos radiateurs électriques"
+  "bugs": {
+    "url": "https://github.com/OlivierZal/com.heatzy/issues"
   },
   "category": [
     "climate"
   ],
-  "esm": true,
-  "version": "21.0.1",
   "compatibility": ">=12.2.0",
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "OlivierZalmanski"
+      }
+    }
+  },
+  "description": {
+    "en": "Pilot your electric radiators",
+    "fr": "Pilotez vos radiateurs électriques"
+  },
+  "esm": true,
+  "homeyCommunityTopicId": 76406,
+  "id": "com.heatzy",
+  "images": {
+    "large": "/assets/images/large.png",
+    "small": "/assets/images/small.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "name": "Heatzy",
+  "platforms": [
+    "local"
+  ],
+  "sdk": 3,
+  "source": "https://github.com/OlivierZal/com.heatzy",
+  "support": "https://github.com/OlivierZal/com.heatzy/issues",
   "tags": {
     "en": [
       "acova",
@@ -34,139 +80,344 @@
       "sèche serviette"
     ]
   },
-  "images": {
-    "small": "/assets/images/small.png",
-    "large": "/assets/images/large.png",
-    "xlarge": "/assets/images/xlarge.png"
-  },
-  "author": {
-    "name": "Olivier Zalmanski",
-    "email": "olivier.zalmanski@me.com"
-  },
-  "bugs": {
-    "url": "https://github.com/OlivierZal/com.heatzy/issues"
-  },
-  "source": "https://github.com/OlivierZal/com.heatzy",
-  "support": "https://github.com/OlivierZal/com.heatzy/issues",
-  "homeyCommunityTopicId": 76406,
-  "contributing": {
-    "donate": {
-      "paypal": {
-        "username": "OlivierZalmanski"
-      }
-    }
-  },
-  "platforms": [
-    "local"
-  ],
-  "api": {
-    "getLanguage": {
-      "method": "GET",
-      "path": "/language"
-    },
-    "login": {
-      "method": "POST",
-      "path": "/sessions"
-    },
-    "getDeviceSettings": {
-      "method": "GET",
-      "path": "/settings/devices"
-    },
-    "setDeviceSettings": {
-      "method": "PUT",
-      "path": "/settings/devices"
-    },
-    "getDriverSettings": {
-      "method": "GET",
-      "path": "/settings/drivers"
-    }
-  },
+  "version": "21.0.1",
   "flow": {
     "triggers": [
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=derog_time",
+            "name": "device",
+            "type": "device"
+          }
+        ],
         "title": {
           "en": "The derogation duration changed",
           "fr": "Le durée de dérogation a changé"
         },
         "tokens": [
           {
+            "example": "15",
             "name": "derog_time",
-            "type": "string",
             "title": {
               "en": "Derogation duration",
               "fr": "Durée de dérogation"
             },
-            "example": "15"
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=derog_time"
+            "type": "string"
           }
         ],
         "id": "derog_time_changed"
       },
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=onoff.timer",
+            "name": "device",
+            "type": "device"
+          }
+        ],
         "title": {
           "en": "Timer turned off",
           "fr": "Programmation désactivée"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.timer"
-          }
-        ],
         "id": "onoff.timer_false"
       },
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=onoff.timer",
+            "name": "device",
+            "type": "device"
+          }
+        ],
         "title": {
           "en": "Timer turned on",
           "fr": "Programmation activée"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.timer"
-          }
-        ],
         "id": "onoff.timer_true"
       },
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection",
+            "name": "device",
+            "type": "device"
+          }
+        ],
         "title": {
           "en": "Open window detection turned off",
           "fr": "Détection de fenêtre ouverte désactivée"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
-          }
-        ],
         "id": "onoff.window_detection_false"
       },
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection",
+            "name": "device",
+            "type": "device"
+          }
+        ],
         "title": {
           "en": "Open window detection turned on",
           "fr": "Détection de fenêtre ouverte désactivé"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
-          }
-        ],
         "id": "onoff.window_detection_true"
       }
     ],
     "conditions": [
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=derog_time",
+            "name": "device",
+            "type": "device"
+          },
+          {
+            "name": "derog_time",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "0",
+                "title": {
+                  "en": "0 minute / day",
+                  "fr": "0 minute / jour"
+                }
+              },
+              {
+                "id": "1",
+                "title": {
+                  "en": "1 minute / day",
+                  "fr": "1 minute / jour"
+                }
+              },
+              {
+                "id": "2",
+                "title": {
+                  "en": "2 minutes / days",
+                  "fr": "2 minutes / jours"
+                }
+              },
+              {
+                "id": "3",
+                "title": {
+                  "en": "3 minutes / days",
+                  "fr": "3 minutes / jours"
+                }
+              },
+              {
+                "id": "4",
+                "title": {
+                  "en": "4 minutes / days",
+                  "fr": "4 minutes / jours"
+                }
+              },
+              {
+                "id": "5",
+                "title": {
+                  "en": "5 minutes / days",
+                  "fr": "5 minutes / jours"
+                }
+              },
+              {
+                "id": "6",
+                "title": {
+                  "en": "6 minutes / days",
+                  "fr": "6 minutes / jours"
+                }
+              },
+              {
+                "id": "7",
+                "title": {
+                  "en": "7 minutes / days",
+                  "fr": "7 minutes / jours"
+                }
+              },
+              {
+                "id": "8",
+                "title": {
+                  "en": "8 minutes / days",
+                  "fr": "8 minutes / jours"
+                }
+              },
+              {
+                "id": "9",
+                "title": {
+                  "en": "9 minutes / days",
+                  "fr": "9 minutes / jours"
+                }
+              },
+              {
+                "id": "10",
+                "title": {
+                  "en": "10 minutes / days",
+                  "fr": "10 minutes / jours"
+                }
+              },
+              {
+                "id": "11",
+                "title": {
+                  "en": "11 minutes / days",
+                  "fr": "11 minutes / jours"
+                }
+              },
+              {
+                "id": "12",
+                "title": {
+                  "en": "12 minutes / days",
+                  "fr": "12 minutes / jours"
+                }
+              },
+              {
+                "id": "13",
+                "title": {
+                  "en": "13 minutes / days",
+                  "fr": "13 minutes / jours"
+                }
+              },
+              {
+                "id": "14",
+                "title": {
+                  "en": "14 minutes / days",
+                  "fr": "14 minutes / jours"
+                }
+              },
+              {
+                "id": "15",
+                "title": {
+                  "en": "15 minutes / days",
+                  "fr": "15 minutes / jours"
+                }
+              },
+              {
+                "id": "16",
+                "title": {
+                  "en": "16 minutes / days",
+                  "fr": "16 minutes / jours"
+                }
+              },
+              {
+                "id": "17",
+                "title": {
+                  "en": "17 minutes / days",
+                  "fr": "17 minutes / jours"
+                }
+              },
+              {
+                "id": "18",
+                "title": {
+                  "en": "18 minutes / days",
+                  "fr": "18 minutes / jours"
+                }
+              },
+              {
+                "id": "19",
+                "title": {
+                  "en": "19 minutes / days",
+                  "fr": "19 minutes / jours"
+                }
+              },
+              {
+                "id": "20",
+                "title": {
+                  "en": "20 minutes / days",
+                  "fr": "20 minutes / jours"
+                }
+              },
+              {
+                "id": "21",
+                "title": {
+                  "en": "21 minutes / days",
+                  "fr": "21 minutes / jours"
+                }
+              },
+              {
+                "id": "22",
+                "title": {
+                  "en": "22 minutes / days",
+                  "fr": "22 minutes / jours"
+                }
+              },
+              {
+                "id": "23",
+                "title": {
+                  "en": "23 minutes / days",
+                  "fr": "23 minutes / jours"
+                }
+              },
+              {
+                "id": "24",
+                "title": {
+                  "en": "24 minutes / days",
+                  "fr": "24 minutes / jours"
+                }
+              },
+              {
+                "id": "25",
+                "title": {
+                  "en": "25 minutes / days",
+                  "fr": "25 minutes / jours"
+                }
+              },
+              {
+                "id": "26",
+                "title": {
+                  "en": "26 minutes / days",
+                  "fr": "26 minutes / jours"
+                }
+              },
+              {
+                "id": "27",
+                "title": {
+                  "en": "27 minutes / days",
+                  "fr": "27 minutes / jours"
+                }
+              },
+              {
+                "id": "28",
+                "title": {
+                  "en": "28 minutes / days",
+                  "fr": "28 minutes / jours"
+                }
+              },
+              {
+                "id": "29",
+                "title": {
+                  "en": "29 minutes / days",
+                  "fr": "29 minutes / jours"
+                }
+              },
+              {
+                "id": "30",
+                "title": {
+                  "en": "30 minutes / days",
+                  "fr": "30 minutes / jours"
+                }
+              },
+              {
+                "id": "60",
+                "title": {
+                  "en": "60 minutes / days",
+                  "fr": "60 minutes / jours"
+                }
+              },
+              {
+                "id": "90",
+                "title": {
+                  "en": "90 minutes / days",
+                  "fr": "90 minutes / jours"
+                }
+              },
+              {
+                "id": "120",
+                "title": {
+                  "en": "120 minutes / days",
+                  "fr": "120 minutes / jours"
+                }
+              }
+            ]
+          }
+        ],
         "title": {
           "en": "The derogation duration !{{is|is not}}",
           "fr": "La durée de dérogation !{{est|n'est pas}}"
@@ -175,11 +426,44 @@
           "en": "The derogation duration !{{is|is not}} [[derog_time]]",
           "fr": "La durée de dérogation !{{est|n'est pas}} [[derog_time]]"
         },
+        "id": "derog_time_condition"
+      },
+      {
         "args": [
           {
-            "type": "device",
+            "filter": "driver_id=heatzy&capabilities=onoff.timer",
             "name": "device",
-            "filter": "driver_id=heatzy&capabilities=derog_time"
+            "type": "device"
+          }
+        ],
+        "title": {
+          "en": "The timer is turned !{{on|off}}",
+          "fr": "La programmation est !{{activée|désactivée}}"
+        },
+        "id": "onoff.timer_condition"
+      },
+      {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection",
+            "name": "device",
+            "type": "device"
+          }
+        ],
+        "title": {
+          "en": "The open window detection is turned !{{on|off}}",
+          "fr": "La détection de fenêtre ouverte est !{{activée|désactivée}}"
+        },
+        "id": "onoff.window_detection_condition"
+      }
+    ],
+    "actions": [
+      {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=derog_time",
+            "name": "device",
+            "type": "device"
           },
           {
             "name": "derog_time",
@@ -426,39 +710,6 @@
             ]
           }
         ],
-        "id": "derog_time_condition"
-      },
-      {
-        "title": {
-          "en": "The timer is turned !{{on|off}}",
-          "fr": "La programmation est !{{activée|désactivée}}"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.timer"
-          }
-        ],
-        "id": "onoff.timer_condition"
-      },
-      {
-        "title": {
-          "en": "The open window detection is turned !{{on|off}}",
-          "fr": "La détection de fenêtre ouverte est !{{activée|désactivée}}"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
-          }
-        ],
-        "id": "onoff.window_detection_condition"
-      }
-    ],
-    "actions": [
-      {
         "title": {
           "en": "Set the derogation duration",
           "fr": "Définir la durée de dérogation"
@@ -467,260 +718,24 @@
           "en": "Set the derogation duration to [[derog_time]]",
           "fr": "Définir la durée de dérogation à [[derog_time]]"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=derog_time"
-          },
-          {
-            "name": "derog_time",
-            "type": "dropdown",
-            "values": [
-              {
-                "id": "0",
-                "title": {
-                  "en": "0 minute / day",
-                  "fr": "0 minute / jour"
-                }
-              },
-              {
-                "id": "1",
-                "title": {
-                  "en": "1 minute / day",
-                  "fr": "1 minute / jour"
-                }
-              },
-              {
-                "id": "2",
-                "title": {
-                  "en": "2 minutes / days",
-                  "fr": "2 minutes / jours"
-                }
-              },
-              {
-                "id": "3",
-                "title": {
-                  "en": "3 minutes / days",
-                  "fr": "3 minutes / jours"
-                }
-              },
-              {
-                "id": "4",
-                "title": {
-                  "en": "4 minutes / days",
-                  "fr": "4 minutes / jours"
-                }
-              },
-              {
-                "id": "5",
-                "title": {
-                  "en": "5 minutes / days",
-                  "fr": "5 minutes / jours"
-                }
-              },
-              {
-                "id": "6",
-                "title": {
-                  "en": "6 minutes / days",
-                  "fr": "6 minutes / jours"
-                }
-              },
-              {
-                "id": "7",
-                "title": {
-                  "en": "7 minutes / days",
-                  "fr": "7 minutes / jours"
-                }
-              },
-              {
-                "id": "8",
-                "title": {
-                  "en": "8 minutes / days",
-                  "fr": "8 minutes / jours"
-                }
-              },
-              {
-                "id": "9",
-                "title": {
-                  "en": "9 minutes / days",
-                  "fr": "9 minutes / jours"
-                }
-              },
-              {
-                "id": "10",
-                "title": {
-                  "en": "10 minutes / days",
-                  "fr": "10 minutes / jours"
-                }
-              },
-              {
-                "id": "11",
-                "title": {
-                  "en": "11 minutes / days",
-                  "fr": "11 minutes / jours"
-                }
-              },
-              {
-                "id": "12",
-                "title": {
-                  "en": "12 minutes / days",
-                  "fr": "12 minutes / jours"
-                }
-              },
-              {
-                "id": "13",
-                "title": {
-                  "en": "13 minutes / days",
-                  "fr": "13 minutes / jours"
-                }
-              },
-              {
-                "id": "14",
-                "title": {
-                  "en": "14 minutes / days",
-                  "fr": "14 minutes / jours"
-                }
-              },
-              {
-                "id": "15",
-                "title": {
-                  "en": "15 minutes / days",
-                  "fr": "15 minutes / jours"
-                }
-              },
-              {
-                "id": "16",
-                "title": {
-                  "en": "16 minutes / days",
-                  "fr": "16 minutes / jours"
-                }
-              },
-              {
-                "id": "17",
-                "title": {
-                  "en": "17 minutes / days",
-                  "fr": "17 minutes / jours"
-                }
-              },
-              {
-                "id": "18",
-                "title": {
-                  "en": "18 minutes / days",
-                  "fr": "18 minutes / jours"
-                }
-              },
-              {
-                "id": "19",
-                "title": {
-                  "en": "19 minutes / days",
-                  "fr": "19 minutes / jours"
-                }
-              },
-              {
-                "id": "20",
-                "title": {
-                  "en": "20 minutes / days",
-                  "fr": "20 minutes / jours"
-                }
-              },
-              {
-                "id": "21",
-                "title": {
-                  "en": "21 minutes / days",
-                  "fr": "21 minutes / jours"
-                }
-              },
-              {
-                "id": "22",
-                "title": {
-                  "en": "22 minutes / days",
-                  "fr": "22 minutes / jours"
-                }
-              },
-              {
-                "id": "23",
-                "title": {
-                  "en": "23 minutes / days",
-                  "fr": "23 minutes / jours"
-                }
-              },
-              {
-                "id": "24",
-                "title": {
-                  "en": "24 minutes / days",
-                  "fr": "24 minutes / jours"
-                }
-              },
-              {
-                "id": "25",
-                "title": {
-                  "en": "25 minutes / days",
-                  "fr": "25 minutes / jours"
-                }
-              },
-              {
-                "id": "26",
-                "title": {
-                  "en": "26 minutes / days",
-                  "fr": "26 minutes / jours"
-                }
-              },
-              {
-                "id": "27",
-                "title": {
-                  "en": "27 minutes / days",
-                  "fr": "27 minutes / jours"
-                }
-              },
-              {
-                "id": "28",
-                "title": {
-                  "en": "28 minutes / days",
-                  "fr": "28 minutes / jours"
-                }
-              },
-              {
-                "id": "29",
-                "title": {
-                  "en": "29 minutes / days",
-                  "fr": "29 minutes / jours"
-                }
-              },
-              {
-                "id": "30",
-                "title": {
-                  "en": "30 minutes / days",
-                  "fr": "30 minutes / jours"
-                }
-              },
-              {
-                "id": "60",
-                "title": {
-                  "en": "60 minutes / days",
-                  "fr": "60 minutes / jours"
-                }
-              },
-              {
-                "id": "90",
-                "title": {
-                  "en": "90 minutes / days",
-                  "fr": "90 minutes / jours"
-                }
-              },
-              {
-                "id": "120",
-                "title": {
-                  "en": "120 minutes / days",
-                  "fr": "120 minutes / jours"
-                }
-              }
-            ]
-          }
-        ],
         "id": "derog_time_action"
       },
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=onoff.timer",
+            "name": "device",
+            "type": "device"
+          },
+          {
+            "name": "onoff",
+            "title": {
+              "en": "Timer",
+              "fr": "Programmation"
+            },
+            "type": "checkbox"
+          }
+        ],
         "title": {
           "en": "Set the timer",
           "fr": "Définir la programmation"
@@ -729,24 +744,24 @@
           "en": "Set the timer to [[onoff]]",
           "fr": "Définir la programmation à [[onoff]]"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.timer"
-          },
-          {
-            "name": "onoff",
-            "type": "checkbox",
-            "title": {
-              "en": "Timer",
-              "fr": "Programmation"
-            }
-          }
-        ],
         "id": "onoff.timer_action"
       },
       {
+        "args": [
+          {
+            "filter": "driver_id=heatzy&capabilities=onoff.window_detection",
+            "name": "device",
+            "type": "device"
+          },
+          {
+            "name": "onoff",
+            "title": {
+              "en": "Open window detection",
+              "fr": "Détection de fenêtre ouverte"
+            },
+            "type": "checkbox"
+          }
+        ],
         "title": {
           "en": "Set the open window detection",
           "fr": "Définir la détection de fenêtre ouverte"
@@ -755,21 +770,6 @@
           "en": "Set the open window detection to [[onoff]]",
           "fr": "Définir la détection de fenêtre ouverte à [[onoff]]"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=heatzy&capabilities=onoff.window_detection"
-          },
-          {
-            "name": "onoff",
-            "type": "checkbox",
-            "title": {
-              "en": "Open window detection",
-              "fr": "Détection de fenêtre ouverte"
-            }
-          }
-        ],
         "id": "onoff.window_detection_action"
       },
       {
@@ -801,12 +801,12 @@
   },
   "drivers": [
     {
+      "class": "thermostat",
+      "icon": "/drivers/heatzy/assets/icon.svg",
       "images": {
         "large": "/drivers/heatzy/assets/images/large.png",
         "small": "/drivers/heatzy/assets/images/small.png"
       },
-      "icon": "/drivers/heatzy/assets/icon.svg",
-      "class": "thermostat",
       "pair": [
         {
           "id": "loading",
@@ -814,17 +814,8 @@
         },
         {
           "id": "login",
-          "template": "login_credentials",
           "options": {
             "logo": "logo.png",
-            "usernameLabel": {
-              "en": "Username",
-              "fr": "Nom d'utilisateur"
-            },
-            "usernamePlaceholder": {
-              "en": "user@domain.com",
-              "fr": "utilisateur@domain.fr"
-            },
             "passwordLabel": {
               "en": "Password",
               "fr": "Mot de passe"
@@ -832,15 +823,24 @@
             "passwordPlaceholder": {
               "en": "P4ssw0rd",
               "fr": "P4ssw0rd"
+            },
+            "usernameLabel": {
+              "en": "Username",
+              "fr": "Nom d'utilisateur"
+            },
+            "usernamePlaceholder": {
+              "en": "user@domain.com",
+              "fr": "utilisateur@domain.fr"
             }
-          }
+          },
+          "template": "login_credentials"
         },
         {
           "id": "list_devices",
-          "template": "list_devices",
           "navigation": {
             "next": "add_devices"
-          }
+          },
+          "template": "list_devices"
         },
         {
           "id": "add_devices",
@@ -850,17 +850,8 @@
       "repair": [
         {
           "id": "login",
-          "template": "login_credentials",
           "options": {
             "logo": "logo.png",
-            "usernameLabel": {
-              "en": "Username",
-              "fr": "Nom d'utilisateur"
-            },
-            "usernamePlaceholder": {
-              "en": "user@domain.com",
-              "fr": "utilisateur@domain.fr"
-            },
             "passwordLabel": {
               "en": "Password",
               "fr": "Mot de passe"
@@ -868,11 +859,19 @@
             "passwordPlaceholder": {
               "en": "P4ssw0rd",
               "fr": "P4ssw0rd"
+            },
+            "usernameLabel": {
+              "en": "Username",
+              "fr": "Nom d'utilisateur"
+            },
+            "usernamePlaceholder": {
+              "en": "user@domain.com",
+              "fr": "utilisateur@domain.fr"
             }
-          }
+          },
+          "template": "login_credentials"
         }
       ],
-      "name": "Heatzy",
       "capabilities": [
         "alarm_presence",
         "locked",
@@ -891,31 +890,31 @@
       ],
       "capabilitiesOptions": {
         "onoff.timer": {
-          "title": {
-            "en": "Timer",
-            "fr": "Programmation"
+          "insightsTitleFalse": {
+            "en": "Timer turned off",
+            "fr": "Programmation désactivée"
           },
           "insightsTitleTrue": {
             "en": "Timer turned on",
             "fr": "Programmation activée"
           },
-          "insightsTitleFalse": {
-            "en": "Timer turned off",
-            "fr": "Programmation désactivée"
+          "title": {
+            "en": "Timer",
+            "fr": "Programmation"
           }
         },
         "onoff.window_detection": {
-          "title": {
-            "en": "Open window detection",
-            "fr": "Détection de fenêtre ouverte"
+          "insightsTitleFalse": {
+            "en": "Open window detection turned off",
+            "fr": "Détection de fenêtre ouverte désactivée"
           },
           "insightsTitleTrue": {
             "en": "Open window detection turned on",
             "fr": "Détection de fenêtre ouverte activée"
           },
-          "insightsTitleFalse": {
-            "en": "Open window detection turned off",
-            "fr": "Détection de fenêtre ouverte désactivée"
+          "title": {
+            "en": "Open window detection",
+            "fr": "Détection de fenêtre ouverte"
           }
         },
         "target_temperature": {
@@ -924,45 +923,41 @@
           "step": 1
         },
         "target_temperature.eco": {
+          "max": 19,
+          "min": 10,
+          "step": 1,
           "title": {
             "en": "Target temperature - eco mode",
             "fr": "Température cible - mode éco"
-          },
-          "max": 19,
-          "min": 10,
-          "step": 1
+          }
         }
       },
+      "name": "Heatzy",
       "id": "heatzy",
       "settings": [
         {
           "id": "options",
-          "type": "group",
-          "label": {
-            "en": "Options",
-            "fr": "Options"
-          },
           "children": [
             {
+              "hint": {
+                "en": "This setting prevents the device from being switched off from Homey.\n\nIt can still be switched off manually (from a remote control or from the physical device).",
+                "fr": "Ce paramètre empêche l'appareil d'être éteint depuis Homey.\n\nIl peut toujours être éteint manuellement (à partir d'une télécommande ou depuis l'appareil physique)."
+              },
               "id": "always_on",
-              "type": "checkbox",
               "label": {
                 "en": "Disable shutdown from Homey",
                 "fr": "Désactiver l'extinction depuis Homey"
               },
-              "value": false,
-              "hint": {
-                "en": "This setting prevents the device from being switched off from Homey.\n\nIt can still be switched off manually (from a remote control or from the physical device).",
-                "fr": "Ce paramètre empêche l'appareil d'être éteint depuis Homey.\n\nIl peut toujours être éteint manuellement (à partir d'une télécommande ou depuis l'appareil physique)."
-              }
+              "type": "checkbox",
+              "value": false
             },
             {
               "id": "on_mode",
-              "type": "dropdown",
               "label": {
                 "en": "Behavior when switching on",
                 "fr": "Comportement à l'allumage"
               },
+              "type": "dropdown",
               "value": "previous",
               "values": [
                 {
@@ -988,31 +983,36 @@
                 }
               ]
             }
-          ]
+          ],
+          "label": {
+            "en": "Options",
+            "fr": "Options"
+          },
+          "type": "group"
         }
       ]
     }
   ],
   "capabilities": {
     "derog_end": {
-      "type": "string",
+      "getable": true,
+      "icon": "/assets/derog_end.svg",
+      "setable": false,
       "title": {
         "en": "End of derogation",
         "fr": "Fin de dérogation"
       },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/derog_end.svg"
+      "type": "string",
+      "uiComponent": "sensor"
     },
     "derog_time": {
-      "type": "enum",
+      "getable": true,
+      "setable": true,
       "title": {
         "en": "Derogation duration",
         "fr": "Durée de dérogation"
       },
-      "getable": true,
-      "setable": true,
+      "type": "enum",
       "uiComponent": "picker",
       "values": [
         {

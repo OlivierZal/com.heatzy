@@ -1,18 +1,64 @@
 {
-  "id": "com.heatzy",
-  "sdk": 3,
+  "api": {
+    "getDeviceSettings": {
+      "method": "GET",
+      "path": "/settings/devices"
+    },
+    "getDriverSettings": {
+      "method": "GET",
+      "path": "/settings/drivers"
+    },
+    "getLanguage": {
+      "method": "GET",
+      "path": "/language"
+    },
+    "login": {
+      "method": "POST",
+      "path": "/sessions"
+    },
+    "setDeviceSettings": {
+      "method": "PUT",
+      "path": "/settings/devices"
+    }
+  },
+  "author": {
+    "email": "olivier.zalmanski@me.com",
+    "name": "Olivier Zalmanski"
+  },
   "brandColor": "#153f35",
-  "name": "Heatzy",
-  "description": {
-    "en": "Pilot your electric radiators",
-    "fr": "Pilotez vos radiateurs électriques"
+  "bugs": {
+    "url": "https://github.com/OlivierZal/com.heatzy/issues"
   },
   "category": [
     "climate"
   ],
-  "esm": true,
-  "version": "21.0.1",
   "compatibility": ">=12.2.0",
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "OlivierZalmanski"
+      }
+    }
+  },
+  "description": {
+    "en": "Pilot your electric radiators",
+    "fr": "Pilotez vos radiateurs électriques"
+  },
+  "esm": true,
+  "homeyCommunityTopicId": 76406,
+  "id": "com.heatzy",
+  "images": {
+    "large": "/assets/images/large.png",
+    "small": "/assets/images/small.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "name": "Heatzy",
+  "platforms": [
+    "local"
+  ],
+  "sdk": 3,
+  "source": "https://github.com/OlivierZal/com.heatzy",
+  "support": "https://github.com/OlivierZal/com.heatzy/issues",
   "tags": {
     "en": [
       "acova",
@@ -33,51 +79,5 @@
       "sèche serviette"
     ]
   },
-  "images": {
-    "small": "/assets/images/small.png",
-    "large": "/assets/images/large.png",
-    "xlarge": "/assets/images/xlarge.png"
-  },
-  "author": {
-    "name": "Olivier Zalmanski",
-    "email": "olivier.zalmanski@me.com"
-  },
-  "bugs": {
-    "url": "https://github.com/OlivierZal/com.heatzy/issues"
-  },
-  "source": "https://github.com/OlivierZal/com.heatzy",
-  "support": "https://github.com/OlivierZal/com.heatzy/issues",
-  "homeyCommunityTopicId": 76406,
-  "contributing": {
-    "donate": {
-      "paypal": {
-        "username": "OlivierZalmanski"
-      }
-    }
-  },
-  "platforms": [
-    "local"
-  ],
-  "api": {
-    "getLanguage": {
-      "method": "GET",
-      "path": "/language"
-    },
-    "login": {
-      "method": "POST",
-      "path": "/sessions"
-    },
-    "getDeviceSettings": {
-      "method": "GET",
-      "path": "/settings/devices"
-    },
-    "setDeviceSettings": {
-      "method": "PUT",
-      "path": "/settings/devices"
-    },
-    "getDriverSettings": {
-      "method": "GET",
-      "path": "/settings/drivers"
-    }
-  }
+  "version": "21.0.1"
 }

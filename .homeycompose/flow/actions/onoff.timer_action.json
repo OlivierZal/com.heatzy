@@ -1,4 +1,19 @@
 {
+  "args": [
+    {
+      "filter": "driver_id=heatzy&capabilities=onoff.timer",
+      "name": "device",
+      "type": "device"
+    },
+    {
+      "name": "onoff",
+      "title": {
+        "en": "Timer",
+        "fr": "Programmation"
+      },
+      "type": "checkbox"
+    }
+  ],
   "title": {
     "en": "Set the timer",
     "fr": "Définir la programmation"
@@ -6,20 +21,5 @@
   "titleFormatted": {
     "en": "Set the timer to [[onoff]]",
     "fr": "Définir la programmation à [[onoff]]"
-  },
-  "args": [
-    {
-      "type": "device",
-      "name": "device",
-      "filter": "driver_id=heatzy&capabilities=onoff.timer"
-    },
-    {
-      "name": "onoff",
-      "type": "checkbox",
-      "title": {
-        "en": "Timer",
-        "fr": "Programmation"
-      }
-    }
-  ]
+  }
 }
