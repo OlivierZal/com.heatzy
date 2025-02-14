@@ -462,6 +462,15 @@ const config = [
     files: ['**/*.css'],
     language: 'css/css',
     ...css.configs.recommended,
+    rules: {
+      ...css.configs.recommended.rules,
+      'css/require-baseline': [
+        'error',
+        {
+          available: 'newly',
+        },
+      ],
+    },
   },
   {
     files: ['**/*.md'],
