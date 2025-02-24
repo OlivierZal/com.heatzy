@@ -25,7 +25,7 @@
     "@html-eslint/parser": "^0.35.0",
     "@stylistic/eslint-plugin": "^4.0.1",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.10",
-    "@types/node": "^22.13.4",
+    "@types/node": "^22.13.5",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.8.3",
