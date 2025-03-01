@@ -10,7 +10,7 @@ import {
   type ManifestDriver,
 } from '../../types.mts'
 
-import type PairSession from 'homey/lib/PairSession'
+import type PairSession from 'homey/lib/PairSession.js'
 
 import type HeatzyDevice from './device.mts'
 

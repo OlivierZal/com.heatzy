@@ -1,5 +1,5 @@
 import type { LoginPostData } from '@olivierzal/heatzy-api'
-import type { Homey } from 'homey/lib/Homey'
+import type { Homey } from 'homey/lib/Homey.js'
 
 import type { DeviceSettings, DriverSetting, Settings } from './types.mts'
 
