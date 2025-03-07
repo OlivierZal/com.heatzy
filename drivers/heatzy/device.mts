@@ -190,6 +190,7 @@ export default class HeatzyDevice extends Homey.Device {
         Object.entries(values).map(([capability, value]) =>
           this.#convertToDevice(
             device.product,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
             capability as keyof SetCapabilities,
             value,
           ),
@@ -198,6 +199,7 @@ export default class HeatzyDevice extends Homey.Device {
     ).reduce((acc, data) => ({ ...acc, ...data }), {})
   }
 
+  /* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
   #convertToDevice<K extends keyof SetCapabilities>(
     product: Product,
     capability: K,
@@ -239,6 +241,7 @@ export default class HeatzyDevice extends Homey.Device {
     }
     return {}
   }
+  /* eslint-enable @typescript-eslint/no-unsafe-type-assertion */
 
   async #fetchDevice(): Promise<IDeviceFacadeAny | null> {
     try {
@@ -311,6 +314,7 @@ export default class HeatzyDevice extends Homey.Device {
       async (acc, capabilityOptions) => {
         await acc
         await this.setCapabilityOptions(
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
           ...(capabilityOptions as [
             keyof CapabilitiesOptions,
             CapabilitiesOptions[keyof CapabilitiesOptions],
