@@ -199,7 +199,6 @@ export default class HeatzyDevice extends Homey.Device {
     ).reduce((acc, data) => ({ ...acc, ...data }), {})
   }
 
-  /* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
   #convertToDevice<K extends keyof SetCapabilities>(
     product: Product,
     capability: K,
@@ -207,6 +206,7 @@ export default class HeatzyDevice extends Homey.Device {
   ): PostAttrs {
     try {
       switch (capability) {
+        /* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
         case 'derog_time':
           return { derog_time: Number(value) }
         case 'heater_operation_mode':
@@ -234,6 +234,7 @@ export default class HeatzyDevice extends Homey.Device {
           return {
             mode: value === Mode.stop ? this.#offValue : (value as Mode),
           }
+        /* eslint-enable @typescript-eslint/no-unsafe-type-assertion */
         default:
       }
     } catch {
@@ -241,7 +242,6 @@ export default class HeatzyDevice extends Homey.Device {
     }
     return {}
   }
-  /* eslint-enable @typescript-eslint/no-unsafe-type-assertion */
 
   async #fetchDevice(): Promise<IDeviceFacadeAny | null> {
     try {
