@@ -464,6 +464,7 @@ const config = defineConfig([
     files: ['**/*.css'],
     language: 'css/css',
     rules: {
+      'css/prefer-logical-properties': 'error',
       'css/require-baseline': [
         'error',
         {
