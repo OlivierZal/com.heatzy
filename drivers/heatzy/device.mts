@@ -50,7 +50,7 @@ const getErrorMessage = (error: unknown): string | null => {
 
 const getModeFromCapability = (
   capability: 'target_temperature' | 'target_temperature.eco',
-): Mode.eco | Mode.cft =>
+): Mode.cft | Mode.eco =>
   capability === 'target_temperature.eco' ? Mode.eco : Mode.cft
 
 @addToLogs('getName()')
