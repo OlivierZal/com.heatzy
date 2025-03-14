@@ -29,8 +29,12 @@ import type HeatzyDriver from './driver.mts'
 const DEBOUNCE_DELAY = 1000
 
 const isDerogationMode = (
-  value: string,
-): value is keyof typeof DerogationMode => value in DerogationMode
+  value: boolean | number | string,
+): value is keyof typeof DerogationMode =>
+  typeof value === 'string' && value in DerogationMode
+
+const isMode = (value: boolean | number | string): value is Mode =>
+  typeof value === 'string' && value in Mode
 
 const getErrorMessage = (error: unknown): string | null => {
   if (error !== null) {
@@ -43,6 +47,11 @@ const getErrorMessage = (error: unknown): string | null => {
   }
   return null
 }
+
+const getModeFromCapability = (
+  capability: 'target_temperature' | 'target_temperature.eco',
+): Mode.eco | Mode.cft =>
+  capability === 'target_temperature.eco' ? Mode.eco : Mode.cft
 
 @addToLogs('getName()')
 // eslint-disable-next-line import/no-named-as-default-member
@@ -188,57 +197,48 @@ export default class HeatzyDevice extends Homey.Device {
     return (
       await Promise.all(
         Object.entries(values).map(([capability, value]) =>
-          this.#convertToDevice(
-            device.product,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-            capability as keyof SetCapabilities,
-            value,
-          ),
+          this.#convertToDevice(device.product, capability, value),
         ),
       )
     ).reduce((acc, data) => ({ ...acc, ...data }), {})
   }
 
-  #convertToDevice<K extends keyof SetCapabilities>(
+  #convertToDevice(
     product: Product,
-    capability: K,
-    value: SetCapabilities[K],
+    capability: string,
+    value: SetCapabilities[keyof SetCapabilities],
   ): PostAttrs {
-    try {
-      switch (capability) {
-        /* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
-        case 'derog_time':
-          return { derog_time: Number(value) }
-        case 'heater_operation_mode':
-          return {
-            derog_mode: DerogationMode[value as keyof typeof DerogationMode],
-          }
-        case 'locked':
-          return {
-            [product === Product.glow ? 'lock_c' : 'lock_switch']:
-              Number(value),
-          }
-        case 'onoff':
-          return product === Product.glow ?
-              { on_off: Number(value) }
-            : { mode: (value as boolean) ? this.#onValue : this.#offValue }
-        case 'onoff.timer':
-          return { timer_switch: Number(value) }
-        case 'onoff.window_detection':
-          return { window_switch: Number(value) }
-        case 'target_temperature':
-          return getTargetTemperature(product, Mode.cft, value as number)
-        case 'target_temperature.eco':
-          return getTargetTemperature(product, Mode.eco, value as number)
-        case 'thermostat_mode':
-          return {
-            mode: value === Mode.stop ? this.#offValue : (value as Mode),
-          }
-        /* eslint-enable @typescript-eslint/no-unsafe-type-assertion */
-        default:
-      }
-    } catch {
-      //
+    switch (capability) {
+      case 'derog_time':
+        return { derog_time: Number(value) }
+      case 'heater_operation_mode':
+        return isDerogationMode(value) ?
+            { derog_mode: DerogationMode[value] }
+          : {}
+      case 'locked':
+        return {
+          [product === Product.glow ? 'lock_c' : 'lock_switch']: Number(value),
+        }
+      case 'onoff':
+        return product === Product.glow ?
+            { on_off: Number(value) }
+          : { mode: value === true ? this.#onValue : this.#offValue }
+      case 'onoff.timer':
+        return { timer_switch: Number(value) }
+      case 'onoff.window_detection':
+        return { window_switch: Number(value) }
+      case 'target_temperature':
+      case 'target_temperature.eco':
+        return getTargetTemperature(
+          product,
+          getModeFromCapability(capability),
+          Number(value),
+        )
+      case 'thermostat_mode':
+        return isMode(value) ?
+            { mode: value === Mode.stop ? this.#offValue : value }
+          : {}
+      default:
     }
     return {}
   }
