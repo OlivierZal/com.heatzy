@@ -8,7 +8,7 @@ import {
   type IDeviceFacadeAny,
   type LoginPostData,
 } from '@olivierzal/heatzy-api'
-// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+// eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
 
 import { changelog } from './json-files.mts'
@@ -80,7 +80,7 @@ const getDriverLoginSetting = (
     }, {}),
   )
 
-// eslint-disable-next-line import/no-named-as-default-member
+// eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyApp extends Homey.App {
   declare public readonly homey: Homey.Homey
 

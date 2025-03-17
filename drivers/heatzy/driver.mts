@@ -1,5 +1,5 @@
 import { DeviceModel, type LoginPostData } from '@olivierzal/heatzy-api'
-// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+// eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
 
 import {
@@ -24,7 +24,7 @@ const discoverDevices = async (): Promise<DeviceDetails[]> =>
     })),
   )
 
-// eslint-disable-next-line import/no-named-as-default-member
+// eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyDriver extends Homey.Driver {
   declare public readonly getDevices: () => HeatzyDevice[]
 

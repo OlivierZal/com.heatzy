@@ -9,7 +9,7 @@ import {
   type IDeviceFacadeAny,
   type PostAttrs,
 } from '@olivierzal/heatzy-api'
-// eslint-disable-next-line import/default, import/no-extraneous-dependencies
+// eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
 
 import { addToLogs } from '../../decorators/add-to-logs.mts'
@@ -54,7 +54,7 @@ const getModeFromCapability = (
   capability === 'target_temperature.eco' ? Mode.eco : Mode.cft
 
 @addToLogs('getName()')
-// eslint-disable-next-line import/no-named-as-default-member
+// eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyDevice extends Homey.Device {
   declare public readonly driver: HeatzyDriver
 
