@@ -99,6 +99,7 @@ const moduleSortOptions = {
 
 const namedSortOptions = {
   ignoreAlias: true,
+  newlinesBetween: 'never',
 }
 
 const objectSortOptions = {
@@ -355,15 +356,15 @@ const config = defineConfig([
       'perfectionist/sort-named-exports': [
         'error',
         {
-          ...namedSortOptions,
           ...exportSortOptions,
+          ...namedSortOptions,
         },
       ],
       'perfectionist/sort-named-imports': [
         'error',
         {
-          ...namedSortOptions,
           ...importNamedSortOptions,
+          ...namedSortOptions,
         },
       ],
       'perfectionist/sort-object-types': ['error', typeLikeSortOptions],
