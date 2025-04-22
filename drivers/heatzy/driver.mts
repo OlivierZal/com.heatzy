@@ -1,16 +1,16 @@
-import { DeviceModel, type LoginPostData } from '@olivierzal/heatzy-api'
+import type PairSession from 'homey/lib/PairSession'
+
+import { type LoginPostData, DeviceModel } from '@olivierzal/heatzy-api'
 // eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
 
 import {
-  getCapabilitiesOptions,
-  getRequiredCapabilities,
   type DeviceDetails,
   type FlowArgs,
   type ManifestDriver,
+  getCapabilitiesOptions,
+  getRequiredCapabilities,
 } from '../../types.mts'
-
-import type PairSession from 'homey/lib/PairSession.js'
 
 import type HeatzyDevice from './device.mts'
 

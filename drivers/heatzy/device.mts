@@ -1,4 +1,6 @@
 import {
+  type IDeviceFacadeAny,
+  type PostAttrs,
   DerogationMode,
   getTargetTemperature,
   Mode,
@@ -6,22 +8,20 @@ import {
   supportsGlow,
   supportsPro,
   supportsV2,
-  type IDeviceFacadeAny,
-  type PostAttrs,
 } from '@olivierzal/heatzy-api'
 // eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
 
 import { addToLogs } from '../../decorators/add-to-logs.mts'
 import {
-  getCapabilitiesOptions,
-  getRequiredCapabilities,
   type Capabilities,
   type CapabilitiesOptions,
   type DeviceDetails,
   type SetCapabilities,
   type Settings,
   type Store,
+  getCapabilitiesOptions,
+  getRequiredCapabilities,
 } from '../../types.mts'
 
 import type HeatzyDriver from './driver.mts'

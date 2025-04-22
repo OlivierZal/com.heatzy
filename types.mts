@@ -1,9 +1,9 @@
 import {
-  Mode,
-  Product,
   type DerogationMode,
   type LoginPostData,
   type PreviousMode,
+  Mode,
+  Product,
 } from '@olivierzal/heatzy-api'
 
 import type HeatzyDevice from './drivers/heatzy/device.mts'

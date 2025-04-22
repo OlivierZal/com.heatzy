@@ -1,17 +1,15 @@
 import 'source-map-support/register.js'
-import 'core-js/actual/object/group-by.js'
+import 'core-js/actual/object/group-by'
 
 import {
+  type IDeviceFacadeAny,
+  type LoginPostData,
   DeviceModel,
   FacadeManager,
   HeatzyAPI,
-  type IDeviceFacadeAny,
-  type LoginPostData,
 } from '@olivierzal/heatzy-api'
 // eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
-
-import { changelog } from './json-files.mts'
 
 import type HeatzyDevice from './drivers/heatzy/device.mts'
 import type {
@@ -21,6 +19,8 @@ import type {
   ManifestDriver,
   Settings,
 } from './types.mts'
+
+import { changelog } from './json-files.mts'
 
 const NOTIFICATION_DELAY = 10000
 
