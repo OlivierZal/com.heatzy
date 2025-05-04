@@ -243,7 +243,7 @@ const config = defineConfig([
           },
           {
             format: ['PascalCase'],
-            selector: 'typeLike',
+            selector: ['enumMember', 'typeLike'],
           },
           {
             format: ['camelCase'],

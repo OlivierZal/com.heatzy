@@ -50,8 +50,8 @@ const getErrorMessage = (error: unknown): string | null => {
 
 const getModeFromCapability = (
   capability: 'target_temperature' | 'target_temperature.eco',
-): Mode.cft | Mode.eco =>
-  capability === 'target_temperature.eco' ? Mode.eco : Mode.cft
+): Mode.Comfort | Mode.Eco =>
+  capability === 'target_temperature.eco' ? Mode.Eco : Mode.Comfort
 
 @addToLogs('getName()')
 // eslint-disable-next-line import-x/no-named-as-default-member
@@ -123,14 +123,14 @@ export default class HeatzyDevice extends Homey.Device {
   }
 
   get #offValue(): Mode {
-    return this.getSetting('always_on') ? this.#onValue : Mode.stop
+    return this.getSetting('always_on') ? this.#onValue : Mode.Stop
   }
 
   get #onValue(): Mode {
     const onMode = this.getSetting('on_mode')
     return (
       (onMode === 'previous' ? this.getStoreValue('previousMode') : onMode) ??
-      Mode.eco
+      Mode.Eco
     )
   }
 
@@ -217,10 +217,10 @@ export default class HeatzyDevice extends Homey.Device {
           : {}
       case 'locked':
         return {
-          [product === Product.glow ? 'lock_c' : 'lock_switch']: Number(value),
+          [product === Product.Glow ? 'lock_c' : 'lock_switch']: Number(value),
         }
       case 'onoff':
-        return product === Product.glow ?
+        return product === Product.Glow ?
             { on_off: Number(value) }
           : { mode: value === true ? this.#onValue : this.#offValue }
       case 'onoff.timer':
@@ -236,7 +236,7 @@ export default class HeatzyDevice extends Homey.Device {
         )
       case 'thermostat_mode':
         return isMode(value) ?
-            { mode: value === Mode.stop ? this.#offValue : value }
+            { mode: value === Mode.Stop ? this.#offValue : value }
           : {}
       default:
     }
@@ -372,7 +372,10 @@ export default class HeatzyDevice extends Homey.Device {
       if (isDerogationMode(keyofDerogationMode)) {
         await this.setCapabilityValue(
           'heater_operation_mode',
-          keyofDerogationMode,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          keyofDerogationMode.toLowerCase() as Lowercase<
+            keyof typeof DerogationMode
+          >,
         )
       }
       await this.setCapabilityValue('derog_time', String(derogationTime))
