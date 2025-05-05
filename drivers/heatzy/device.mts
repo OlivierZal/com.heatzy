@@ -29,9 +29,15 @@ import type HeatzyDriver from './driver.mts'
 const DEBOUNCE_DELAY = 1000
 
 const isDerogationMode = (
-  value: boolean | number | string,
-): value is keyof typeof DerogationMode =>
-  typeof value === 'string' && value in DerogationMode
+  value: string,
+): value is keyof typeof DerogationMode => value in DerogationMode
+
+const getDerogationMode = (value: boolean | number | string): PostAttrs => {
+  const newValue = String(value).toUpperCase()
+  return isDerogationMode(newValue) ?
+      { derog_mode: DerogationMode[newValue] }
+    : {}
+}
 
 const isMode = (value: boolean | number | string): value is Mode =>
   typeof value === 'string' && value in Mode
@@ -212,9 +218,7 @@ export default class HeatzyDevice extends Homey.Device {
       case 'derog_time':
         return { derog_time: Number(value) }
       case 'heater_operation_mode':
-        return isDerogationMode(value) ?
-            { derog_mode: DerogationMode[value] }
-          : {}
+        return getDerogationMode(value)
       case 'locked':
         return {
           [product === Product.Glow ? 'lock_c' : 'lock_switch']: Number(value),
