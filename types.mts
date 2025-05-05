@@ -218,7 +218,10 @@ export const getCapabilitiesOptions = (
       ]
     : []),
     { id: Mode.Eco, title: { en: 'Eco', fr: 'Éco' } },
-    { id: Mode.FrostProtection, title: { en: 'Anti-frost', fr: 'Anti-gel' } },
+    {
+      id: Mode.FrostProtection,
+      title: { en: 'Frost protection', fr: 'Hors-gel' },
+    },
     { id: Mode.Stop, title: { en: 'Off', fr: 'Désactivé' } },
   ]
   return {
