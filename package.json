@@ -13,7 +13,7 @@
     "publish": "homey app publish"
   },
   "dependencies": {
-    "@olivierzal/heatzy-api": "^6.0.0",
+    "@olivierzal/heatzy-api": "^6.0.1",
     "core-js": "^3.42.0",
     "source-map-support": "^0.5.21"
   },

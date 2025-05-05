@@ -1,5 +1,5 @@
 import 'source-map-support/register.js'
-import 'core-js/actual/object/group-by'
+import 'core-js/actual/object/group-by.js'
 
 import {
   type IDeviceFacadeAny,
