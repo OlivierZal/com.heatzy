@@ -28,12 +28,25 @@ import type HeatzyDriver from './driver.mts'
 
 const DEBOUNCE_DELAY = 1000
 
+const capitalize = ([first = '', ...rest] = ''): string =>
+  first.toUpperCase() + rest.join('')
+
+const isMode = (value: boolean | number | string): value is Mode =>
+  typeof value === 'string' &&
+  [
+    Mode.Comfort,
+    Mode.ComfortMinus1,
+    Mode.ComfortMinus2,
+    Mode.Eco,
+    Mode.FrostProtection,
+    Mode.Stop,
+  ]
+    .map(String)
+    .includes(value)
+
 const isDerogationMode = (
   value: string,
 ): value is keyof typeof DerogationMode => value in DerogationMode
-
-const capitalize = ([first = '', ...rest] = ''): string =>
-  first.toUpperCase() + rest.join('')
 
 const getDerogationMode = (value: boolean | number | string): PostAttrs => {
   const newValue = capitalize(String(value))
@@ -41,9 +54,6 @@ const getDerogationMode = (value: boolean | number | string): PostAttrs => {
       { derog_mode: DerogationMode[newValue] }
     : {}
 }
-
-const isMode = (value: boolean | number | string): value is Mode =>
-  typeof value === 'string' && value in Mode
 
 const getErrorMessage = (error: unknown): string | null => {
   if (error !== null) {
