@@ -32,8 +32,11 @@ const isDerogationMode = (
   value: string,
 ): value is keyof typeof DerogationMode => value in DerogationMode
 
+const capitalize = ([first = '', ...rest] = ''): string =>
+  first.toUpperCase() + rest.join('')
+
 const getDerogationMode = (value: boolean | number | string): PostAttrs => {
-  const newValue = String(value).toUpperCase()
+  const newValue = capitalize(String(value))
   return isDerogationMode(newValue) ?
       { derog_mode: DerogationMode[newValue] }
     : {}
