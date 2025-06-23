@@ -14,18 +14,18 @@
   },
   "dependencies": {
     "@olivierzal/heatzy-api": "^6.0.1",
-    "core-js": "^3.42.0",
+    "core-js": "^3.43.0",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
     "@eslint/css": "^0.9.0",
-    "@eslint/js": "^9.28.0",
+    "@eslint/js": "^9.29.0",
     "@eslint/json": "^0.12.0",
     "@eslint/markdown": "^6.6.0",
     "@html-eslint/eslint-plugin": "^0.42.0",
     "@html-eslint/parser": "^0.42.0",
     "@stylistic/eslint-plugin": "^5.0.0",
-    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.11",
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^24.0.3",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
