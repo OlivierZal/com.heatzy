@@ -1,3 +1,6 @@
+// eslint-disable-next-line import-x/no-extraneous-dependencies
+import Homey from 'homey'
+
 import {
   type IDeviceFacadeAny,
   type PostAttrs,
@@ -9,8 +12,6 @@ import {
   supportsPro,
   supportsV2,
 } from '@olivierzal/heatzy-api'
-// eslint-disable-next-line import-x/no-extraneous-dependencies
-import Homey from 'homey'
 
 import { addToLogs } from '../../decorators/add-to-logs.mts'
 import {

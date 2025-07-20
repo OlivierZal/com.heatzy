@@ -1,8 +1,9 @@
 import type PairSession from 'homey/lib/PairSession'
 
-import { type LoginPostData, DeviceModel } from '@olivierzal/heatzy-api'
 // eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
+
+import { type LoginPostData, DeviceModel } from '@olivierzal/heatzy-api'
 
 import {
   type DeviceDetails,

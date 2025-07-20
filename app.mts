@@ -1,6 +1,9 @@
 import 'source-map-support/register.js'
 import 'core-js/actual/object/group-by.js'
 
+// eslint-disable-next-line import-x/no-extraneous-dependencies
+import Homey from 'homey'
+
 import {
   type IDeviceFacadeAny,
   type LoginPostData,
@@ -8,8 +11,6 @@ import {
   FacadeManager,
   HeatzyAPI,
 } from '@olivierzal/heatzy-api'
-// eslint-disable-next-line import-x/no-extraneous-dependencies
-import Homey from 'homey'
 
 import type HeatzyDevice from './drivers/heatzy/device.mts'
 import type {
