@@ -23,7 +23,7 @@ import type {
 
 import { changelog } from './json-files.mts'
 
-const NOTIFICATION_DELAY = 10000
+const NOTIFICATION_DELAY = 10_000
 
 const hasChangelogLanguage = (
   versionChangelog: object,
@@ -55,31 +55,30 @@ const getDriverSettings = (
 const getDriverLoginSetting = (
   { id: driverId, pair }: ManifestDriver,
   language: string,
-): DriverSetting[] =>
-  Object.values(
-    Object.entries(
-      pair?.find(
-        (pairSetting): pairSetting is LoginSetting =>
-          pairSetting.id === 'login',
-      )?.options ?? [],
-    ).reduce<Record<string, DriverSetting>>((acc, [option, label]) => {
-      const isPassword = option.startsWith('password')
-      const key = isPassword ? 'password' : 'username'
-      acc[key] ??= {
-        driverId,
-        groupId: 'login',
-        id: key,
-        title: '',
-        type: isPassword ? 'password' : 'text',
-      }
-      acc[key] = {
-        ...acc[key],
-        [option.endsWith('Placeholder') ? 'placeholder' : 'title']:
-          label[language] ?? label.en,
-      }
-      return acc
-    }, {}),
-  )
+): DriverSetting[] => {
+  const driverLoginSetting: Record<string, DriverSetting> = {}
+  for (const [option, label] of Object.entries(
+    pair?.find(
+      (pairSetting): pairSetting is LoginSetting => pairSetting.id === 'login',
+    )?.options ?? [],
+  )) {
+    const isPassword = option.startsWith('password')
+    const key = isPassword ? 'password' : 'username'
+    driverLoginSetting[key] ??= {
+      driverId,
+      groupId: 'login',
+      id: key,
+      title: '',
+      type: isPassword ? 'password' : 'text',
+    }
+    driverLoginSetting[key] = {
+      ...driverLoginSetting[key],
+      [option.endsWith('Placeholder') ? 'placeholder' : 'title']:
+        label[language] ?? label.en,
+    }
+  }
+  return Object.values(driverLoginSetting)
+}
 
 // eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyApp extends Homey.App {
@@ -113,27 +112,28 @@ export default class HeatzyApp extends Homey.App {
     this.#createNotification(language)
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onUninit(): Promise<void> {
     this.#api.clearSync()
-    return Promise.resolve()
   }
 
   public getDeviceSettings(): DeviceSettings {
-    return this.#getDevices().reduce<DeviceSettings>((acc, device) => {
+    const deviceSettings: DeviceSettings = {}
+    for (const device of this.#getDevices()) {
       const {
         driver: { id: driverId },
       } = device
-      acc[driverId] ??= {}
-      for (const [id, value] of Object.entries(device.getSettings())) {
-        if (!(id in acc[driverId])) {
-          acc[driverId][id] = value
-        } else if (acc[driverId][id] !== value) {
-          acc[driverId][id] = null
+      deviceSettings[driverId] ??= {}
+      for (const [settingId, value] of Object.entries(device.getSettings())) {
+        if (!(settingId in deviceSettings[driverId])) {
+          deviceSettings[driverId][settingId] = value
+        } else if (deviceSettings[driverId][settingId] !== value) {
+          deviceSettings[driverId][settingId] = null
           break
         }
       }
-      return acc
-    }, {})
+    }
+    return deviceSettings
   }
 
   public getDriverSettings(): Partial<Record<string, DriverSetting[]>> {
@@ -166,7 +166,7 @@ export default class HeatzyApp extends Homey.App {
           (changedKey) =>
             settings[changedKey] !== device.getSetting(changedKey),
         )
-        if (changedKeys.length) {
+        if (changedKeys.length > 0) {
           await device.setSettings(
             Object.fromEntries(changedKeys.map((key) => [key, settings[key]])),
           )
@@ -180,21 +180,22 @@ export default class HeatzyApp extends Homey.App {
   }
 
   #createNotification(language: string): void {
+    const { homey } = this
     const {
-      homey: {
-        manifest: { version },
-      },
-    } = this
-    if (this.homey.settings.get('notifiedVersion') !== version) {
+      manifest: { version },
+      notifications,
+      settings,
+    } = homey
+    if (settings.get('notifiedVersion') !== version) {
       const { [version]: versionChangelog = {} } = changelog
       if (language in versionChangelog) {
-        this.homey.setTimeout(async () => {
+        homey.setTimeout(async () => {
           try {
             if (hasChangelogLanguage(versionChangelog, language)) {
-              await this.homey.notifications.createNotification({
+              await notifications.createNotification({
                 excerpt: versionChangelog[language],
               })
-              this.homey.settings.set('notifiedVersion', version)
+              settings.set('notifiedVersion', version)
             }
           } catch {}
         }, NOTIFICATION_DELAY)

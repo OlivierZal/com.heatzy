@@ -12,8 +12,6 @@ import type {
 
 type HTMLValueElement = HTMLInputElement | HTMLSelectElement
 
-const SIZE_ONE = 1
-
 let deviceSettings: Partial<DeviceSettings> = {}
 let flatDeviceSettings: Partial<DeviceSetting> = {}
 
@@ -21,17 +19,17 @@ let usernameElement: HTMLInputElement | null = null
 let passwordElement: HTMLInputElement | null = null
 
 const getButtonElement = (id: string): HTMLButtonElement => {
-  const element = document.getElementById(id)
+  const element = document.querySelector(`#${id}`)
   if (!(element instanceof HTMLButtonElement)) {
-    throw new Error('Element is not a button')
+    throw new TypeError(`Element with id \`${id}\` is not a button`)
   }
   return element
 }
 
 const getDivElement = (id: string): HTMLDivElement => {
-  const element = document.getElementById(id)
+  const element = document.querySelector(`#${id}`)
   if (!(element instanceof HTMLDivElement)) {
-    throw new Error('Element is not a div')
+    throw new TypeError(`Element with id \`${id}\` is not a div`)
   }
   return element
 }
@@ -57,9 +55,9 @@ const disableButton = (element: HTMLButtonElement, value = true): void => {
 }
 
 const disableButtons = (value = true): void => {
-  ;[applySettingsElement, refreshSettingsElement].forEach((element) => {
+  for (const element of [applySettingsElement, refreshSettingsElement]) {
     disableButton(element, value)
-  })
+  }
 }
 
 const enableButtons = (value = true): void => {
@@ -118,7 +116,7 @@ const fetchFlattenDeviceSettings = (): void => {
       ),
     ).map(([id, groupedValues]) => {
       const set = new Set(groupedValues?.map(({ values }) => values))
-      return [id, set.size === SIZE_ONE ? set.values().next().value : null]
+      return [id, set.size === 1 ? set.values().next().value : null]
     }),
   )
 }
@@ -147,7 +145,7 @@ const createLabelElement = (
   const labelElement = document.createElement('label')
   labelElement.classList.add('homey-form-label')
   ;({ id: labelElement.htmlFor } = valueElement)
-  labelElement.innerText = text
+  labelElement.textContent = text
   labelElement.append(valueElement)
   return labelElement
 }
@@ -216,16 +214,16 @@ const createSelectElement = (
   const selectElement = document.createElement('select')
   selectElement.classList.add('homey-form-select')
   selectElement.id = id
-  ;[
+  for (const option of [
     { id: '', label: '' },
     ...(values ??
       ['false', 'true'].map((value) => ({
         id: value,
         label: homey.__(`settings.boolean.${value}`),
       }))),
-  ].forEach((option) => {
+  ]) {
     createOptionElement(selectElement, option)
-  })
+  }
   return selectElement
 }
 
@@ -274,36 +272,40 @@ const processValue = (element: HTMLSelectElement): ValueOf<Settings> => {
   return null
 }
 
+const setSetting = (settings: Settings, element: HTMLSelectElement): void => {
+  const [id] = element.id.split('__')
+  if (id !== undefined) {
+    const value = processValue(element)
+    if (shouldUpdate(id, value)) {
+      settings[id] = value
+    }
+  }
+}
+
 const buildSettingsBody = (elements: HTMLSelectElement[]): Settings => {
-  const errors: string[] = []
   const settings: Settings = {}
-  elements.forEach((element) => {
+  const errors: string[] = []
+  for (const element of elements) {
     try {
-      const [id] = element.id.split('__')
-      if (id !== undefined) {
-        const value = processValue(element)
-        if (shouldUpdate(id, value)) {
-          settings[id] = value
-        }
-      }
+      setSetting(settings, element)
     } catch (error) {
       errors.push(getErrorMessage(error))
     }
-  })
-  if (errors.length) {
-    throw new Error(errors.join('\n'))
+  }
+  if (errors.length > 0) {
+    throw new Error(errors.join('\n') || 'Unknown error')
   }
   return settings
 }
 
 const updateDeviceSettings = (body: Settings): void => {
-  Object.entries(body).forEach(([id, value]) => {
-    Object.keys(deviceSettings).forEach((driver) => {
+  for (const [id, value] of Object.entries(body)) {
+    for (const driver of Object.keys(deviceSettings)) {
       deviceSettings[driver] ??= {}
       deviceSettings[driver][id] = value
-    })
+    }
     flatDeviceSettings[id] = value
-  })
+  }
 }
 
 const updateCommonSetting = (element: HTMLSelectElement): void => {
@@ -318,7 +320,9 @@ const updateCommonSetting = (element: HTMLSelectElement): void => {
 }
 
 const refreshCommonSettings = (elements: HTMLSelectElement[]): void => {
-  elements.forEach(updateCommonSetting)
+  for (const element of elements) {
+    updateCommonSetting(element)
+  }
 }
 
 const setDeviceSettings = async (
@@ -326,7 +330,7 @@ const setDeviceSettings = async (
   elements: HTMLSelectElement[],
 ): Promise<void> => {
   const body = buildSettingsBody(elements)
-  if (!Object.keys(body).length) {
+  if (Object.keys(body).length === 0) {
     refreshCommonSettings(elements)
     homey.alert(homey.__('settings.devices.apply.nothing')).catch(() => {
       //
@@ -385,7 +389,7 @@ const generateCommonSettings = (
   homey: Homey,
   driverSettings: Partial<Record<string, DriverSetting[]>>,
 ): void => {
-  ;(driverSettings['options'] ?? []).forEach(({ id, title, type, values }) => {
+  for (const { id, title, type, values } of driverSettings['options'] ?? []) {
     const settingId = `${id}__setting`
     if (
       !settingsCommonElement.querySelector(`select[id="${settingId}"]`) &&
@@ -395,9 +399,10 @@ const generateCommonSettings = (
       createValueElement(settingsCommonElement, { title, valueElement })
       updateCommonSetting(valueElement)
     }
-  })
+  }
   addSettingsEventListeners(
     homey,
+    // eslint-disable-next-line unicorn/prefer-spread
     Array.from(settingsCommonElement.querySelectorAll('select')),
   )
 }
@@ -467,8 +472,10 @@ const addAuthenticateEventListener = (homey: Homey): void => {
   authenticateElement.addEventListener('click', () => {
     authenticateElement.classList.add('is-disabled')
     login(homey)
-      .catch(async (err: unknown) => {
-        await homey.alert(err instanceof Error ? err.message : String(err))
+      .catch(async (error: unknown) => {
+        await homey.alert(
+          error instanceof Error ? error.message : String(error),
+        )
       })
       .finally(() => {
         authenticateElement.classList.remove('is-disabled')

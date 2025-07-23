@@ -15,15 +15,14 @@ import {
 
 import type HeatzyDevice from './device.mts'
 
+// eslint-disable-next-line @typescript-eslint/require-await
 const discoverDevices = async (): Promise<DeviceDetails[]> =>
-  Promise.resolve(
-    DeviceModel.getAll().map(({ id, name, product }) => ({
-      capabilities: getRequiredCapabilities(product),
-      capabilitiesOptions: getCapabilitiesOptions(product),
-      data: { id },
-      name,
-    })),
-  )
+  DeviceModel.getAll().map(({ id, name, product }) => ({
+    capabilities: getRequiredCapabilities(product),
+    capabilitiesOptions: getCapabilitiesOptions(product),
+    data: { id },
+    name,
+  }))
 
 // eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyDriver extends Homey.Driver {
@@ -33,11 +32,12 @@ export default class HeatzyDriver extends Homey.Driver {
 
   declare public readonly manifest: ManifestDriver
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onInit(): Promise<void> {
     this.#registerRunListeners()
-    return Promise.resolve()
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onPair(session: PairSession): Promise<void> {
     session.setHandler('showView', async (view) => {
       if (view === 'loading') {
@@ -50,12 +50,11 @@ export default class HeatzyDriver extends Homey.Driver {
     })
     this.#handleLogin(session)
     session.setHandler('list_devices', async () => discoverDevices())
-    return Promise.resolve()
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onRepair(session: PairSession): Promise<void> {
     this.#handleLogin(session)
-    return Promise.resolve()
   }
 
   #handleLogin(session: PairSession): void {
@@ -86,20 +85,21 @@ export default class HeatzyDriver extends Homey.Driver {
   }
 
   #registerOnOffRunListeners(): void {
-    ;(['onoff.timer', 'onoff.window_detection'] as const).forEach(
-      (capability) => {
-        this.homey.flow
-          .getConditionCard(`${capability}_condition`)
-          .registerRunListener((args: FlowArgs) =>
-            args.device.getCapabilityValue(capability),
-          )
-        this.homey.flow
-          .getActionCard(`${capability}_action`)
-          .registerRunListener(async (args: FlowArgs) => {
-            await args.device.triggerCapabilityListener(capability, args.onoff)
-          })
-      },
-    )
+    for (const capability of [
+      'onoff.timer',
+      'onoff.window_detection',
+    ] as const) {
+      this.homey.flow
+        .getConditionCard(`${capability}_condition`)
+        .registerRunListener((args: FlowArgs) =>
+          args.device.getCapabilityValue(capability),
+        )
+      this.homey.flow
+        .getActionCard(`${capability}_action`)
+        .registerRunListener(async (args: FlowArgs) => {
+          await args.device.triggerCapabilityListener(capability, args.onoff)
+        })
+    }
   }
 
   #registerRunListeners(): void {
@@ -109,7 +109,7 @@ export default class HeatzyDriver extends Homey.Driver {
   }
 
   #registerTargetTemperatureRunListener(): void {
-    ;(['target_temperature.eco'] as const).forEach((capability) => {
+    for (const capability of ['target_temperature.eco'] as const) {
       this.homey.flow
         .getActionCard(`${capability}_action`)
         .registerRunListener(async (args: FlowArgs) => {
@@ -118,6 +118,6 @@ export default class HeatzyDriver extends Homey.Driver {
             args.target_temperature,
           )
         })
-    })
+    }
   }
 }

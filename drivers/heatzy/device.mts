@@ -214,13 +214,16 @@ export default class HeatzyDevice extends Homey.Device {
     values: Partial<SetCapabilities>,
   ): Promise<PostAttrs> {
     this.log('Requested data:', values)
-    return (
-      await Promise.all(
-        Object.entries(values).map(([capability, value]) =>
-          this.#convertToDevice(device.product, capability, value),
-        ),
-      )
-    ).reduce((acc, data) => ({ ...acc, ...data }), {})
+    const attributes = await Promise.all(
+      Object.entries(values).map(([capability, value]) =>
+        this.#convertToDevice(device.product, capability, value),
+      ),
+    )
+    const data: PostAttrs = {}
+    for (const attribute of attributes) {
+      Object.assign(data, attribute)
+    }
+    return data
   }
 
   #convertToDevice(
@@ -229,33 +232,41 @@ export default class HeatzyDevice extends Homey.Device {
     value: SetCapabilities[keyof SetCapabilities],
   ): PostAttrs {
     switch (capability) {
-      case 'derog_time':
+      case 'derog_time': {
         return { derog_time: Number(value) }
-      case 'heater_operation_mode':
+      }
+      case 'heater_operation_mode': {
         return getDerogationMode(value)
-      case 'locked':
+      }
+      case 'locked': {
         return {
           [product === Product.Glow ? 'lock_c' : 'lock_switch']: Number(value),
         }
-      case 'onoff':
+      }
+      case 'onoff': {
         return product === Product.Glow ?
             { on_off: Number(value) }
           : { mode: value === true ? this.#onValue : this.#offValue }
-      case 'onoff.timer':
+      }
+      case 'onoff.timer': {
         return { timer_switch: Number(value) }
-      case 'onoff.window_detection':
+      }
+      case 'onoff.window_detection': {
         return { window_switch: Number(value) }
+      }
       case 'target_temperature':
-      case 'target_temperature.eco':
+      case 'target_temperature.eco': {
         return getTargetTemperature(
           product,
           getModeFromCapability(capability),
           Number(value),
         )
-      case 'thermostat_mode':
+      }
+      case 'thermostat_mode': {
         return isMode(value) ?
             { mode: value === Mode.Stop ? this.#offValue : value }
           : {}
+      }
       default:
     }
     return {}
@@ -303,7 +314,7 @@ export default class HeatzyDevice extends Homey.Device {
     const device = await this.#fetchDevice()
     if (device) {
       const updateData = await this.#buildUpdateData(device, values)
-      if (Object.keys(updateData).length) {
+      if (Object.keys(updateData).length > 0) {
         try {
           await device.setValues(updateData)
         } catch (error) {
@@ -314,33 +325,29 @@ export default class HeatzyDevice extends Homey.Device {
   }
 
   async #setCapabilities(product: Product): Promise<void> {
-    const capabilities = getRequiredCapabilities(product)
-    await capabilities.reduce(async (acc, capability) => {
-      await acc
-      return this.addCapability(capability)
-    }, Promise.resolve())
-    await this.getCapabilities()
-      .filter((capability) => !capabilities.includes(capability))
-      .reduce(async (acc, capability) => {
-        await acc
-        await this.removeCapability(capability)
-      }, Promise.resolve())
+    const requiredCapabilities = new Set(getRequiredCapabilities(product))
+    const currentCapabilities = new Set(this.getCapabilities())
+    for (const capability of requiredCapabilities.symmetricDifference(
+      currentCapabilities,
+    )) {
+      // eslint-disable-next-line no-await-in-loop
+      await (requiredCapabilities.has(capability) ?
+        this.addCapability(capability)
+      : this.removeCapability(capability))
+    }
   }
 
   async #setCapabilityOptions(product: Product): Promise<void> {
-    await Object.entries(getCapabilitiesOptions(product)).reduce(
-      async (acc, capabilityOptions) => {
-        await acc
-        await this.setCapabilityOptions(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          ...(capabilityOptions as [
-            keyof CapabilitiesOptions,
-            CapabilitiesOptions[keyof CapabilitiesOptions],
-          ]),
-        )
-      },
-      Promise.resolve(),
-    )
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    for (const [capability, options] of Object.entries(
+      getCapabilitiesOptions(product),
+    ) as [
+      keyof CapabilitiesOptions,
+      CapabilitiesOptions[keyof CapabilitiesOptions],
+    ][]) {
+      // eslint-disable-next-line no-await-in-loop
+      await this.setCapabilityOptions(capability, options)
+    }
   }
 
   async #setGlowCapabilityValues(device: IDeviceFacadeAny): Promise<void> {
