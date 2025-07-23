@@ -325,10 +325,10 @@ export default class HeatzyDevice extends Homey.Device {
   }
 
   async #setCapabilities(product: Product): Promise<void> {
-    const requiredCapabilities = new Set(getRequiredCapabilities(product))
     const currentCapabilities = new Set(this.getCapabilities())
-    for (const capability of requiredCapabilities.symmetricDifference(
-      currentCapabilities,
+    const requiredCapabilities = new Set(getRequiredCapabilities(product))
+    for (const capability of currentCapabilities.symmetricDifference(
+      requiredCapabilities,
     )) {
       // eslint-disable-next-line no-await-in-loop
       await (requiredCapabilities.has(capability) ?

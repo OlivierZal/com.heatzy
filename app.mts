@@ -1,5 +1,6 @@
 import 'source-map-support/register.js'
 import 'core-js/actual/object/group-by.js'
+import 'core-js/actual/set/symmetric-difference.js'
 
 // eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
