@@ -3,7 +3,7 @@ import Homey from 'homey'
 
 import {
   type IDeviceFacadeAny,
-  type PostAttrs,
+  type PostAttributes,
   DerogationMode,
   getTargetTemperature,
   Mode,
@@ -49,7 +49,9 @@ const isDerogationMode = (
   value: string,
 ): value is keyof typeof DerogationMode => value in DerogationMode
 
-const getDerogationMode = (value: boolean | number | string): PostAttrs => {
+const getDerogationMode = (
+  value: boolean | number | string,
+): PostAttributes => {
   const newValue = capitalize(String(value))
   return isDerogationMode(newValue) ?
       { derog_mode: DerogationMode[newValue] }
@@ -212,14 +214,14 @@ export default class HeatzyDevice extends Homey.Device {
   async #buildUpdateData(
     device: IDeviceFacadeAny,
     values: Partial<SetCapabilities>,
-  ): Promise<PostAttrs> {
+  ): Promise<PostAttributes> {
     this.log('Requested data:', values)
     const attributes = await Promise.all(
       Object.entries(values).map(([capability, value]) =>
         this.#convertToDevice(device.product, capability, value),
       ),
     )
-    const data: PostAttrs = {}
+    const data: PostAttributes = {}
     for (const attribute of attributes) {
       Object.assign(data, attribute)
     }
@@ -230,7 +232,7 @@ export default class HeatzyDevice extends Homey.Device {
     product: Product,
     capability: string,
     value: SetCapabilities[keyof SetCapabilities],
-  ): PostAttrs {
+  ): PostAttributes {
     switch (capability) {
       case 'derog_time': {
         return { derog_time: Number(value) }
