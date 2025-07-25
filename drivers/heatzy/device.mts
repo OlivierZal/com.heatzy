@@ -248,23 +248,23 @@ export default class HeatzyDevice extends Homey.Device {
     }
   }
 
-  async #buildUpdateData(
+  #buildUpdateData(
     device: IDeviceFacadeAny,
     values: Partial<SetCapabilities>,
-  ): Promise<PostAttributes> {
+  ): PostAttributes {
     this.log('Requested data:', values)
-    const attributes = await Promise.all(
-      Object.entries(values).map(([capability, value]) =>
-        this.#convertToDevice(
-          device.product,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          capability as keyof SetCapabilities,
-          value,
+    return Object.fromEntries(
+      Object.entries(values).flatMap(([capability, value]) =>
+        Object.entries(
+          this.#convertToDevice(
+            device.product,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+            capability as keyof SetCapabilities,
+            value,
+          ),
         ),
       ),
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-    return Object.assign({}, ...attributes) as PostAttributes
   }
 
   #convertToDevice<K extends keyof SetCapabilities>(
@@ -316,7 +316,7 @@ export default class HeatzyDevice extends Homey.Device {
   async #set(values: Partial<SetCapabilities>): Promise<void> {
     const device = await this.#fetchDevice()
     if (device) {
-      const updateData = await this.#buildUpdateData(device, values)
+      const updateData = this.#buildUpdateData(device, values)
       if (Object.keys(updateData).length > 0) {
         try {
           await device.setValues(updateData)
