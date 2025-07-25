@@ -70,11 +70,6 @@ const getErrorMessage = (error: unknown): string | null => {
   return null
 }
 
-const getModeFromCapability = (
-  capability: 'target_temperature' | 'target_temperature.eco',
-): Mode.Comfort | Mode.Eco =>
-  capability === 'target_temperature.eco' ? Mode.Eco : Mode.Comfort
-
 @addToLogs('getName()')
 // eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyDevice extends Homey.Device {
@@ -137,6 +132,48 @@ export default class HeatzyDevice extends Homey.Device {
     capability: K,
     value: Capabilities[K],
   ) => Promise<void>
+
+  readonly #toDevice: Record<
+    keyof SetCapabilities,
+    (
+      value: SetCapabilities[keyof SetCapabilities],
+      product: Product,
+    ) => PostAttributes
+  > = {
+    derog_time: (value: SetCapabilities[keyof SetCapabilities]) => ({
+      derog_time: Number(value),
+    }),
+    heater_operation_mode: (value: SetCapabilities[keyof SetCapabilities]) =>
+      getDerogationMode(value),
+    locked: (
+      value: SetCapabilities[keyof SetCapabilities],
+      product: Product,
+    ) => ({
+      [product === Product.Glow ? 'lock_c' : 'lock_switch']: Number(value),
+    }),
+    onoff: (value: SetCapabilities[keyof SetCapabilities], product: Product) =>
+      product === Product.Glow ?
+        { on_off: Number(value) }
+      : { mode: value === true ? this.#onValue : this.#offValue },
+    'onoff.timer': (value: SetCapabilities[keyof SetCapabilities]) => ({
+      timer_switch: Number(value),
+    }),
+    'onoff.window_detection': (
+      value: SetCapabilities[keyof SetCapabilities],
+    ) => ({ window_switch: Number(value) }),
+    target_temperature: (
+      value: SetCapabilities[keyof SetCapabilities],
+      product: Product,
+    ) => getTargetTemperature(product, Mode.Comfort, Number(value)),
+    'target_temperature.eco': (
+      value: SetCapabilities[keyof SetCapabilities],
+      product: Product,
+    ) => getTargetTemperature(product, Mode.Eco, Number(value)),
+    thermostat_mode: (value: SetCapabilities[keyof SetCapabilities]) =>
+      isMode(value) ?
+        { mode: value === Mode.Stop ? this.#offValue : value }
+      : {},
+  }
 
   #device?: IDeviceFacadeAny
 
@@ -218,60 +255,24 @@ export default class HeatzyDevice extends Homey.Device {
     this.log('Requested data:', values)
     const attributes = await Promise.all(
       Object.entries(values).map(([capability, value]) =>
-        this.#convertToDevice(device.product, capability, value),
+        this.#convertToDevice(
+          device.product,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+          capability as keyof SetCapabilities,
+          value,
+        ),
       ),
     )
-    const data: PostAttributes = {}
-    for (const attribute of attributes) {
-      Object.assign(data, attribute)
-    }
-    return data
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    return Object.assign({}, ...attributes) as PostAttributes
   }
 
-  #convertToDevice(
+  #convertToDevice<K extends keyof SetCapabilities>(
     product: Product,
-    capability: string,
-    value: SetCapabilities[keyof SetCapabilities],
+    capability: K,
+    value: SetCapabilities[K],
   ): PostAttributes {
-    switch (capability) {
-      case 'derog_time': {
-        return { derog_time: Number(value) }
-      }
-      case 'heater_operation_mode': {
-        return getDerogationMode(value)
-      }
-      case 'locked': {
-        return {
-          [product === Product.Glow ? 'lock_c' : 'lock_switch']: Number(value),
-        }
-      }
-      case 'onoff': {
-        return product === Product.Glow ?
-            { on_off: Number(value) }
-          : { mode: value === true ? this.#onValue : this.#offValue }
-      }
-      case 'onoff.timer': {
-        return { timer_switch: Number(value) }
-      }
-      case 'onoff.window_detection': {
-        return { window_switch: Number(value) }
-      }
-      case 'target_temperature':
-      case 'target_temperature.eco': {
-        return getTargetTemperature(
-          product,
-          getModeFromCapability(capability),
-          Number(value),
-        )
-      }
-      case 'thermostat_mode': {
-        return isMode(value) ?
-            { mode: value === Mode.Stop ? this.#offValue : value }
-          : {}
-      }
-      default:
-    }
-    return {}
+    return this.#toDevice[capability](value, product)
   }
 
   async #fetchDevice(): Promise<IDeviceFacadeAny | null> {

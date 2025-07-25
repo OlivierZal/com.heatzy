@@ -216,7 +216,11 @@ const config = defineConfig([
             regex: String.raw`^[a-z]+(?:_[a-z0-9]+)*(\.(?:[a-z0-9]+_)*([a-z0-9]+)?)?$`,
           },
           format: null,
-          selector: ['objectLiteralProperty', 'typeProperty'],
+          selector: [
+            'objectLiteralMethod',
+            'objectLiteralProperty',
+            'typeProperty',
+          ],
         },
         {
           filter: {
