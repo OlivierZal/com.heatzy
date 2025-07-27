@@ -390,7 +390,7 @@ const generateCommonSettings = (
   driverSettings: Partial<Record<string, DriverSetting[]>>,
 ): void => {
   for (const { id, title, type, values } of driverSettings['options'] ?? []) {
-    const settingId = `${id}__setting`
+    const settingId = `${id}__settings`
     if (
       !settingsCommonElement.querySelector(`select[id="${settingId}"]`) &&
       ['checkbox', 'dropdown'].includes(type)
