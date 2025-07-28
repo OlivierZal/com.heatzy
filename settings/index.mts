@@ -392,7 +392,7 @@ const generateCommonSettings = (
   for (const { id, title, type, values } of driverSettings['options'] ?? []) {
     const settingId = `${id}__settings`
     if (
-      !settingsCommonElement.querySelector(`select[id="${settingId}"]`) &&
+      !settingsCommonElement.querySelector(`select#${settingId}`) &&
       ['checkbox', 'dropdown'].includes(type)
     ) {
       const valueElement = createSelectElement(homey, settingId, values)
