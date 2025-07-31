@@ -22,7 +22,7 @@ import type {
   Settings,
 } from './types.mts'
 
-import { LENGTH_ZERO } from './constants'
+import { LENGTH_ZERO } from './constants.mts'
 import { changelog } from './json-files.mts'
 
 const NOTIFICATION_DELAY = 10_000

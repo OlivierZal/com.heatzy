@@ -1,6 +1,6 @@
 import type { SimpleClass } from 'homey'
 
-import { LENGTH_ZERO } from '../constants'
+import { LENGTH_ZERO } from '../constants.mts'
 
 const PARENTHESES = '()'
 const START_SLICE = 0

@@ -13,7 +13,7 @@ import {
   supportsV2,
 } from '@olivierzal/heatzy-api'
 
-import { LENGTH_ZERO } from '../../constants'
+import { LENGTH_ZERO } from '../../constants.mts'
 import { addToLogs } from '../../decorators/add-to-logs.mts'
 import {
   type Capabilities,
