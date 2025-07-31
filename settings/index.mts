@@ -10,6 +10,9 @@ import type {
   ValueOf,
 } from '../types.mts'
 
+const LENGTH_ZERO = 0
+const SIZE_ONE = 1
+
 type HTMLValueElement = HTMLInputElement | HTMLSelectElement
 
 let deviceSettings: Partial<DeviceSettings> = {}
@@ -116,7 +119,7 @@ const fetchFlattenDeviceSettings = (): void => {
       ),
     ).map(([id, groupedValues]) => {
       const set = new Set(groupedValues?.map(({ values }) => values))
-      return [id, set.size === 1 ? set.values().next().value : null]
+      return [id, set.size === SIZE_ONE ? set.values().next().value : null]
     }),
   )
 }
@@ -292,7 +295,7 @@ const buildSettingsBody = (elements: HTMLSelectElement[]): Settings => {
       errors.push(getErrorMessage(error))
     }
   }
-  if (errors.length > 0) {
+  if (errors.length > LENGTH_ZERO) {
     throw new Error(errors.join('\n') || 'Unknown error')
   }
   return settings
@@ -330,7 +333,7 @@ const setDeviceSettings = async (
   elements: HTMLSelectElement[],
 ): Promise<void> => {
   const body = buildSettingsBody(elements)
-  if (Object.keys(body).length === 0) {
+  if (Object.keys(body).length === LENGTH_ZERO) {
     refreshCommonSettings(elements)
     homey.alert(homey.__('settings.devices.apply.nothing')).catch(() => {
       //

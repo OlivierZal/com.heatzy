@@ -22,6 +22,7 @@ import type {
   Settings,
 } from './types.mts'
 
+import { LENGTH_ZERO } from './constants'
 import { changelog } from './json-files.mts'
 
 const NOTIFICATION_DELAY = 10_000
@@ -167,7 +168,7 @@ export default class HeatzyApp extends Homey.App {
           (changedKey) =>
             settings[changedKey] !== device.getSetting(changedKey),
         )
-        if (changedKeys.length > 0) {
+        if (changedKeys.length > LENGTH_ZERO) {
           await device.setSettings(
             Object.fromEntries(changedKeys.map((key) => [key, settings[key]])),
           )
