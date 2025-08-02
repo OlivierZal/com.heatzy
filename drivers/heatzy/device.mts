@@ -59,17 +59,8 @@ const getDerogationMode = (
     : {}
 }
 
-const getErrorMessage = (error: unknown): string | null => {
-  if (error !== null) {
-    if (error instanceof Error) {
-      return error.message
-    }
-    if (typeof error === 'string') {
-      return error
-    }
-  }
-  return null
-}
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error)
 
 @addToLogs('getName()')
 // eslint-disable-next-line import-x/no-named-as-default-member
@@ -225,9 +216,8 @@ export default class HeatzyDevice extends Homey.Device {
   }
 
   public override async setWarning(error: unknown): Promise<void> {
-    const warning = getErrorMessage(error)
-    if (warning !== null) {
-      await super.setWarning(warning)
+    if (error !== null) {
+      await super.setWarning(getErrorMessage(error))
     }
     await super.setWarning(null)
   }
@@ -396,8 +386,8 @@ export default class HeatzyDevice extends Homey.Device {
         isLocked,
         isTimer,
       } = device
-      const { [derogationMode]: keyofDerogationMode } = DerogationMode
       await this.setCapabilityValue('derog_end', derogationEndString)
+      const { [derogationMode]: keyofDerogationMode } = DerogationMode
       if (isDerogationMode(keyofDerogationMode)) {
         await this.setCapabilityValue(
           'heater_operation_mode',
