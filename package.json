@@ -13,6 +13,7 @@
     "publish": "homey app publish"
   },
   "dependencies": {
+    "@olivierzal/heatzy-api": "^7.1.0",
     "core-js": "^3.44.0",
     "source-map-support": "^0.5.21"
   },
@@ -23,7 +24,6 @@
     "@eslint/markdown": "^7.1.0",
     "@html-eslint/eslint-plugin": "^0.44.0",
     "@html-eslint/parser": "^0.44.0",
-    "@olivierzal/heatzy-api": "^7.1.0",
     "@stylistic/eslint-plugin": "^5.2.2",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^24.1.0",
