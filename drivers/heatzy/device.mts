@@ -30,14 +30,14 @@ import type HeatzyDriver from './driver.mts'
 
 const DEBOUNCE_DELAY = 1000
 
-const modes = new Set([
+const modes = new Set<Mode>([
   Mode.comfort,
   Mode.comfortMinus1,
   Mode.comfortMinus2,
   Mode.eco,
   Mode.frostProtection,
   Mode.stop,
-]) satisfies Set<Mode> as Set<string>
+]) as Set<string>
 
 const isMode = (value: boolean | number | string): value is Mode =>
   typeof value === 'string' && modes.has(value)

@@ -13,6 +13,12 @@ import type {
 const LENGTH_ZERO = 0
 const SIZE_ONE = 1
 
+const booleanStrings = ['false', 'true']
+const booleanStringSet = new Set(booleanStrings)
+
+const commonElementTypes = new Set(['checkbox', 'dropdown'])
+const commonElementValueTypes = new Set(['boolean', 'number', 'string'])
+
 type HTMLValueElement = HTMLInputElement | HTMLSelectElement
 
 let deviceSettings: Partial<DeviceSettings> = {}
@@ -220,7 +226,7 @@ const createSelectElement = (
   for (const option of [
     { id: '', label: '' },
     ...(values ??
-      ['false', 'true'].map((value) => ({
+      booleanStrings.map((value) => ({
         id: value,
         label: homey.__(`settings.boolean.${value}`),
       }))),
@@ -268,7 +274,7 @@ const shouldUpdate = (id: string, value: ValueOf<Settings>): boolean => {
 
 const processValue = (element: HTMLSelectElement): ValueOf<Settings> => {
   if (element.value) {
-    return ['false', 'true'].includes(element.value) ?
+    return booleanStringSet.has(element.value) ?
         element.value === 'true'
       : element.value
   }
@@ -316,9 +322,7 @@ const updateCommonSetting = (element: HTMLSelectElement): void => {
   if (id !== undefined) {
     const { [id]: value } = flatDeviceSettings
     element.value =
-      ['boolean', 'number', 'string'].includes(typeof value) ?
-        String(value)
-      : ''
+      commonElementValueTypes.has(typeof value) ? String(value) : ''
   }
 }
 
@@ -396,7 +400,7 @@ const generateCommonSettings = (
     const settingId = `${id}__settings`
     if (
       !settingsCommonElement.querySelector(`select#${settingId}`) &&
-      ['checkbox', 'dropdown'].includes(type)
+      commonElementTypes.has(type)
     ) {
       const valueElement = createSelectElement(homey, settingId, values)
       createValueElement(settingsCommonElement, { title, valueElement })
