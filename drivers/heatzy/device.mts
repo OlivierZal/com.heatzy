@@ -51,7 +51,7 @@ const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)
 
 @addToLogs('getName()')
- 
+// eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyDevice extends Homey.Device {
   declare public readonly driver: HeatzyDriver
 
