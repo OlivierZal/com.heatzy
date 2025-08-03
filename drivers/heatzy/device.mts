@@ -37,7 +37,7 @@ const modes = new Set([
   Mode.eco,
   Mode.frostProtection,
   Mode.stop,
-]) as Set<string>
+]) satisfies Set<Mode> as Set<string>
 
 const isMode = (value: boolean | number | string): value is Mode =>
   typeof value === 'string' && modes.has(value)
@@ -51,7 +51,6 @@ const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)
 
 @addToLogs('getName()')
-// eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyDevice extends Homey.Device {
   declare public readonly driver: HeatzyDriver
 
