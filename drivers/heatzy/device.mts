@@ -30,40 +30,28 @@ import type HeatzyDriver from './driver.mts'
 
 const DEBOUNCE_DELAY = 1000
 
-const capitalize = ([first = '', ...rest] = ''): string =>
-  first.toUpperCase() + rest.join('')
+const modes = new Set([
+  Mode.comfort,
+  Mode.comfortMinus1,
+  Mode.comfortMinus2,
+  Mode.eco,
+  Mode.frostProtection,
+  Mode.stop,
+]) as Set<string>
 
 const isMode = (value: boolean | number | string): value is Mode =>
-  typeof value === 'string' &&
-  [
-    Mode.Comfort,
-    Mode.ComfortMinus1,
-    Mode.ComfortMinus2,
-    Mode.Eco,
-    Mode.FrostProtection,
-    Mode.Stop,
-  ]
-    .map(String)
-    .includes(value)
+  typeof value === 'string' && modes.has(value)
 
-const isDerogationMode = (
-  value: string,
-): value is keyof typeof DerogationMode => value in DerogationMode
-
-const getDerogationMode = (
+const iskeyOfDerogationMode = (
   value: boolean | number | string,
-): PostAttributes => {
-  const newValue = capitalize(String(value))
-  return isDerogationMode(newValue) ?
-      { derog_mode: DerogationMode[newValue] }
-    : {}
-}
+): value is keyof typeof DerogationMode =>
+  typeof value === 'string' && value in DerogationMode
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)
 
 @addToLogs('getName()')
-// eslint-disable-next-line import-x/no-named-as-default-member
+ 
 export default class HeatzyDevice extends Homey.Device {
   declare public readonly driver: HeatzyDriver
 
@@ -136,15 +124,15 @@ export default class HeatzyDevice extends Homey.Device {
       derog_time: Number(value),
     }),
     heater_operation_mode: (value: SetCapabilities[keyof SetCapabilities]) =>
-      getDerogationMode(value),
+      iskeyOfDerogationMode(value) ? { derog_mode: DerogationMode[value] } : {},
     locked: (
       value: SetCapabilities[keyof SetCapabilities],
       product: Product,
     ) => ({
-      [product === Product.Glow ? 'lock_c' : 'lock_switch']: Number(value),
+      [product === Product.glow ? 'lock_c' : 'lock_switch']: Number(value),
     }),
     onoff: (value: SetCapabilities[keyof SetCapabilities], product: Product) =>
-      product === Product.Glow ?
+      product === Product.glow ?
         { on_off: Number(value) }
       : { mode: value === true ? this.#onValue : this.#offValue },
     'onoff.timer': (value: SetCapabilities[keyof SetCapabilities]) => ({
@@ -156,14 +144,14 @@ export default class HeatzyDevice extends Homey.Device {
     target_temperature: (
       value: SetCapabilities[keyof SetCapabilities],
       product: Product,
-    ) => getTargetTemperature(product, Mode.Comfort, Number(value)),
+    ) => getTargetTemperature(product, Mode.comfort, Number(value)),
     'target_temperature.eco': (
       value: SetCapabilities[keyof SetCapabilities],
       product: Product,
-    ) => getTargetTemperature(product, Mode.Eco, Number(value)),
+    ) => getTargetTemperature(product, Mode.eco, Number(value)),
     thermostat_mode: (value: SetCapabilities[keyof SetCapabilities]) =>
       isMode(value) ?
-        { mode: value === Mode.Stop ? this.#offValue : value }
+        { mode: value === Mode.stop ? this.#offValue : value }
       : {},
   }
 
@@ -174,14 +162,14 @@ export default class HeatzyDevice extends Homey.Device {
   }
 
   get #offValue(): Mode {
-    return this.getSetting('always_on') ? this.#onValue : Mode.Stop
+    return this.getSetting('always_on') ? this.#onValue : Mode.stop
   }
 
   get #onValue(): Mode {
     const onMode = this.getSetting('on_mode')
     return (
       (onMode === 'previous' ? this.getStoreValue('previousMode') : onMode) ??
-      Mode.Eco
+      Mode.eco
     )
   }
 
@@ -387,14 +375,11 @@ export default class HeatzyDevice extends Homey.Device {
         isTimer,
       } = device
       await this.setCapabilityValue('derog_end', derogationEndString)
-      const { [derogationMode]: keyofDerogationMode } = DerogationMode
-      if (isDerogationMode(keyofDerogationMode)) {
+      const { [derogationMode]: keyOfDerogationMode } = DerogationMode
+      if (iskeyOfDerogationMode(keyOfDerogationMode)) {
         await this.setCapabilityValue(
           'heater_operation_mode',
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-          keyofDerogationMode.toLowerCase() as Lowercase<
-            keyof typeof DerogationMode
-          >,
+          keyOfDerogationMode,
         )
       }
       await this.setCapabilityValue('derog_time', String(derogationTime))

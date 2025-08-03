@@ -28,7 +28,7 @@ export interface Capabilities extends SetCapabilities {
 export interface CapabilitiesOptions {
   readonly heater_operation_mode: {
     readonly values: readonly CapabilitiesOptionsValues<
-      Lowercase<keyof typeof DerogationMode>
+      keyof typeof DerogationMode
     >[]
   }
   readonly operational_state: {
@@ -68,7 +68,7 @@ export interface DriverSetting {
 export interface FlowArgs {
   readonly derog_time: string
   readonly device: HeatzyDevice
-  readonly heater_operation_mode: Lowercase<keyof typeof DerogationMode>
+  readonly heater_operation_mode: keyof typeof DerogationMode
   readonly onoff: boolean
   readonly target_temperature: number
 }
@@ -142,7 +142,7 @@ export interface PairSetting {
 
 export interface SetCapabilities {
   readonly derog_time: string
-  readonly heater_operation_mode: Lowercase<keyof typeof DerogationMode>
+  readonly heater_operation_mode: keyof typeof DerogationMode
   readonly locked: boolean
   readonly onoff: boolean
   readonly 'onoff.timer': boolean
@@ -174,7 +174,7 @@ export const getRequiredCapabilities = (
 ): (keyof Capabilities)[] => [
   'onoff',
   'thermostat_mode',
-  ...(product >= Product.V2 ?
+  ...(product >= Product.v2 ?
     ([
       'locked',
       'onoff.timer',
@@ -183,14 +183,14 @@ export const getRequiredCapabilities = (
       'derog_time',
     ] as const)
   : []),
-  ...(product >= Product.Glow ?
+  ...(product >= Product.glow ?
     ([
       'measure_temperature',
       'target_temperature',
       'target_temperature.eco',
     ] as const)
   : []),
-  ...(product === Product.Pro ?
+  ...(product === Product.pro ?
     ([
       'alarm_presence',
       'measure_humidity',
@@ -204,30 +204,30 @@ export const getCapabilitiesOptions = (
   product: Product,
 ): CapabilitiesOptions => {
   const values = [
-    { id: Mode.Comfort, title: { en: 'Comfort', fr: 'Confort' } },
-    ...(product >= Product.V4 ?
+    { id: Mode.comfort, title: { en: 'Comfort', fr: 'Confort' } },
+    ...(product >= Product.v4 ?
       [
         {
-          id: Mode.ComfortMinus1,
+          id: Mode.comfortMinus1,
           title: { en: 'Comfort -1°C', fr: 'Confort -1°C' },
         },
         {
-          id: Mode.ComfortMinus2,
+          id: Mode.comfortMinus2,
           title: { en: 'Comfort -2°C', fr: 'Confort -2°C' },
         },
       ]
     : []),
-    { id: Mode.Eco, title: { en: 'Eco', fr: 'Éco' } },
+    { id: Mode.eco, title: { en: 'Eco', fr: 'Éco' } },
     {
-      id: Mode.FrostProtection,
+      id: Mode.frostProtection,
       title: { en: 'Frost protection', fr: 'Hors-gel' },
     },
-    { id: Mode.Stop, title: { en: 'Off', fr: 'Désactivé' } },
+    { id: Mode.stop, title: { en: 'Off', fr: 'Désactivé' } },
   ]
   return {
     heater_operation_mode: {
       values: [
-        ...(product === Product.Pro ?
+        ...(product === Product.pro ?
           ([
             {
               id: 'presence',
