@@ -4,36 +4,36 @@ import type { Homey } from 'homey/lib/Homey'
 import type { DeviceSettings, DriverSetting, Settings } from './types.mts'
 
 const api = {
-  getDeviceSettings({ homey }: { homey: Homey }): DeviceSettings {
-    return homey.app.getDeviceSettings()
+  getDeviceSettings({ homey: { app } }: { homey: Homey }): DeviceSettings {
+    return app.getDeviceSettings()
   },
   getDriverSettings({
-    homey,
+    homey: { app },
   }: {
     homey: Homey
   }): Partial<Record<string, DriverSetting[]>> {
-    return homey.app.getDriverSettings()
+    return app.getDriverSettings()
   },
-  getLanguage({ homey }: { homey: Homey }): string {
-    return homey.i18n.getLanguage()
+  getLanguage({ homey: { i18n } }: { homey: Homey }): string {
+    return i18n.getLanguage()
   },
   async login({
     body,
-    homey,
+    homey: { app },
   }: {
     body: LoginPostData
     homey: Homey
   }): Promise<boolean> {
-    return homey.app.login(body)
+    return app.login(body)
   },
   async setDeviceSettings({
     body,
-    homey,
+    homey: { app },
   }: {
     body: Settings
     homey: Homey
   }): Promise<void> {
-    return homey.app.setDeviceSettings(body)
+    return app.setDeviceSettings(body)
   },
 }
 
