@@ -13,7 +13,7 @@ import type {
 const LENGTH_ZERO = 0
 const SIZE_ONE = 1
 
-const booleanStrings = ['false', 'true']
+const booleanStrings: string[] = ['false', 'true'] satisfies `${boolean}`[]
 const booleanStringSet = new Set(booleanStrings)
 
 const commonElementTypes = new Set(['checkbox', 'dropdown'])
