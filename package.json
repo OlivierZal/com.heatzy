@@ -24,7 +24,7 @@
     "@eslint/markdown": "^7.1.0",
     "@html-eslint/eslint-plugin": "^0.44.0",
     "@html-eslint/parser": "^0.44.0",
-    "@stylistic/eslint-plugin": "^5.2.2",
+    "@stylistic/eslint-plugin": "^5.2.3",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^24.2.0",
     "eslint": "^9.33.0",
