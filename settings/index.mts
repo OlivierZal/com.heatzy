@@ -10,7 +10,6 @@ import type {
   ValueOf,
 } from '../types.mts'
 
-const LENGTH_ZERO = 0
 const SIZE_ONE = 1
 
 const booleanStrings: string[] = ['false', 'true'] satisfies `${boolean}`[]
@@ -301,7 +300,7 @@ const buildSettingsBody = (elements: HTMLSelectElement[]): Settings => {
       errors.push(getErrorMessage(error))
     }
   }
-  if (errors.length > LENGTH_ZERO) {
+  if (errors.length) {
     throw new Error(errors.join('\n') || 'Unknown error')
   }
   return settings
@@ -337,7 +336,7 @@ const setDeviceSettings = async (
   elements: HTMLSelectElement[],
 ): Promise<void> => {
   const body = buildSettingsBody(elements)
-  if (Object.keys(body).length === LENGTH_ZERO) {
+  if (!Object.keys(body).length) {
     refreshCommonSettings(elements)
     homey.alert(homey.__('settings.devices.apply.nothing')).catch(() => {
       //

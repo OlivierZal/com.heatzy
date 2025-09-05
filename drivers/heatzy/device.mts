@@ -13,7 +13,6 @@ import {
   supportsV2,
 } from '@olivierzal/heatzy-api'
 
-import { LENGTH_ZERO } from '../../constants.mts'
 import { addToLogs } from '../../decorators/add-to-logs.mts'
 import {
   type Capabilities,
@@ -296,7 +295,7 @@ export default class HeatzyDevice extends Homey.Device {
     const device = await this.#fetchDevice()
     if (device) {
       const updateData = this.#buildUpdateData(device, values)
-      if (Object.keys(updateData).length > LENGTH_ZERO) {
+      if (Object.keys(updateData).length) {
         try {
           await device.setValues(updateData)
         } catch (error) {
