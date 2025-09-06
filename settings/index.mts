@@ -13,7 +13,6 @@ import type {
 const SIZE_ONE = 1
 
 const booleanStrings: string[] = ['false', 'true'] satisfies `${boolean}`[]
-const booleanStringSet = new Set(booleanStrings)
 
 const commonElementTypes = new Set(['checkbox', 'dropdown'])
 const commonElementValueTypes = new Set(['boolean', 'number', 'string'])
@@ -273,7 +272,7 @@ const shouldUpdate = (id: string, value: ValueOf<Settings>): boolean => {
 
 const processValue = (element: HTMLSelectElement): ValueOf<Settings> => {
   if (element.value) {
-    return booleanStringSet.has(element.value) ?
+    return booleanStrings.includes(element.value) ?
         element.value === 'true'
       : element.value
   }
