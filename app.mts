@@ -1,6 +1,4 @@
 import 'source-map-support/register.js'
-import 'core-js/actual/object/group-by.js'
-import 'core-js/actual/set/symmetric-difference.js'
 
 // eslint-disable-next-line import-x/no-extraneous-dependencies
 import Homey from 'homey'
@@ -22,7 +20,7 @@ import type {
   Settings,
 } from './types.mts'
 
-import { changelog } from './json-files.mts'
+import { changelog } from './files.mts'
 
 const NOTIFICATION_DELAY = 10_000
 
@@ -188,7 +186,10 @@ export default class HeatzyApp extends Homey.App {
       settings,
     } = homey
     if (settings.get('notifiedVersion') !== version) {
-      const { [version]: versionChangelog = {} } = changelog
+      const { [version]: versionChangelog = {} } = changelog as Record<
+        string,
+        object
+      >
       if (language in versionChangelog) {
         homey.setTimeout(async () => {
           try {
