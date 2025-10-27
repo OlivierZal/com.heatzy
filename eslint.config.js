@@ -598,6 +598,7 @@ const config = defineConfig([
     ...packageJsonConfigs.recommended,
     rules: {
       ...packageJsonConfigs.recommended.rules,
+      'package-json/exports-subpaths-style': 'error',
       'package-json/restrict-dependency-ranges': [
         'error',
         [
