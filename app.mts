@@ -96,10 +96,10 @@ export default class HeatzyApp extends Homey.App {
     this.#api = await HeatzyAPI.create({
       language,
       logger: {
-        error: (...args) => {
+        error: (...args: unknown[]) => {
           this.error(...args)
         },
-        log: (...args) => {
+        log: (...args: unknown[]) => {
           this.log(...args)
         },
       },
