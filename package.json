@@ -5,13 +5,13 @@
   "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
+    "build": "tsc",
     "format": "prettier . --check",
     "format:docs": "prettier README.md --ignore-path --write",
     "format:fix": "prettier . --write",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "prepare": "npm run format:docs && npm run lint:fix && npm run format:fix",
-    "publish": "homey app publish"
+    "prepare": "npm run format:docs && npm run lint:fix && npm run format:fix"
   },
   "dependencies": {
     "@olivierzal/heatzy-api": "^9.0.0",
