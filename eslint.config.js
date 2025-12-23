@@ -17,10 +17,6 @@ import { configs as tsConfigs } from 'typescript-eslint'
 
 import { classGroups } from './eslint-utils/class-groups.js'
 
-const decoratorSortOptions = {
-  groups: ['unknown'],
-}
-
 const buildImportGroup = (selector) =>
   ['type', 'default', 'named', 'wildcard', 'require', 'ts-equals'].map(
     (modifier) => `${modifier}-${selector}`,
@@ -80,7 +76,6 @@ const config = defineConfig([
         projectService: {
           allowDefaultProject: ['*.js'],
         },
-        tsconfigRootDir: import.meta.dirname,
         warnOnUnsupportedTypeScriptVersion: false,
       },
       sourceType: 'module',
@@ -147,18 +142,18 @@ const config = defineConfig([
         },
         {
           format: ['camelCase', 'PascalCase'],
-          selector: 'import',
+          selector: ['import'],
         },
         {
           format: ['PascalCase'],
           prefix: ['can', 'did', 'has', 'is', 'should', 'will'],
-          selector: 'variable',
+          selector: ['variable'],
           types: ['boolean'],
         },
         {
           format: ['UPPER_CASE'],
           modifiers: ['const', 'global'],
-          selector: 'variable',
+          selector: ['variable'],
           types: ['boolean', 'number', 'string'],
         },
         {
@@ -168,7 +163,11 @@ const config = defineConfig([
         {
           format: ['camelCase'],
           leadingUnderscore: 'allow',
-          selector: 'default',
+          selector: ['parameter'],
+        },
+        {
+          format: ['camelCase'],
+          selector: ['default'],
         },
       ],
       '@typescript-eslint/no-dupe-class-members': 'off',
@@ -288,7 +287,31 @@ const config = defineConfig([
           newlinesInside: 1,
         },
       ],
-      'perfectionist/sort-decorators': ['error', decoratorSortOptions],
+      'perfectionist/sort-decorators': [
+        'error',
+        {
+          customGroups: [
+            {
+              elementNamePattern: '^fetchDevices$',
+              groupName: 'fetch-decorator',
+            },
+            {
+              elementNamePattern: '^syncDevices$',
+              groupName: 'sync-decorator',
+            },
+            {
+              elementNamePattern: '^updateDevice(s)?$',
+              groupName: 'update-decorator',
+            },
+          ],
+          groups: [
+            'sync-decorator',
+            'update-decorator',
+            'unknown',
+            'fetch-decorator',
+          ],
+        },
+      ],
       'perfectionist/sort-enums': [
         'error',
         {
