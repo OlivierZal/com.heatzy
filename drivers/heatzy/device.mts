@@ -273,6 +273,10 @@ export default class HeatzyDevice extends Homey.Device {
     await this.syncFromDevice(device)
   }
 
+  #isCapability(capability: string): boolean {
+    return (this.driver.manifest.capabilities ?? []).includes(capability)
+  }
+
   #registerCapabilityListeners(): void {
     this.registerMultipleCapabilityListener(
       [
@@ -307,7 +311,11 @@ export default class HeatzyDevice extends Homey.Device {
 
   async #setCapabilities(product: Product): Promise<void> {
     const currentCapabilities = new Set(this.getCapabilities())
-    const requiredCapabilities = new Set(getRequiredCapabilities(product))
+    const requiredCapabilities = new Set(
+      getRequiredCapabilities(product).filter((capability) =>
+        this.#isCapability(capability),
+      ),
+    )
     for (const capability of currentCapabilities.symmetricDifference(
       requiredCapabilities,
     )) {
