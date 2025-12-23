@@ -138,7 +138,7 @@ const config = defineConfig([
             regex: '^.+_temp(H|L)$',
           },
           format: null,
-          selector: 'objectLiteralProperty',
+          selector: ['objectLiteralProperty'],
         },
         {
           format: ['camelCase', 'PascalCase'],
