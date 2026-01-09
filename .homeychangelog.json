@@ -65,5 +65,14 @@
   },
   "21.1.0": {
     "en": "Upgraded modules"
+  },
+  "22.0.0": {
+    "da": "Opdateret for kompatibilitet med Node.js 22 og senere, inklusive flere rettelser (Glow/Shine enheder).",
+    "en": "Updated for compatibility with Node.js 22 and later, including several fixes (Glow/Shine devices).",
+    "es": "Actualizado para compatibilidad con Node.js 22 y posteriores, incluyendo varias correcciones (dispositivos Glow/Shine).",
+    "fr": "Mis à jour pour la compatibilité avec Node.js 22 et versions ultérieures, incluant plusieurs correctifs (appareils Glow/Shine).",
+    "nl": "Bijgewerkt voor compatibiliteit met Node.js 22 en later, inclusief meerdere fixes (Glow/Shine apparaten).",
+    "no": "Oppdatert for kompatibilitet med Node.js 22 og senere, inkludert flere rettelser (Glow/Shine enheter).",
+    "sv": "Uppdaterad för kompatibilitet med Node.js 22 och senare, inklusive flera korrigeringar (Glow/Shine enheter)."
   }
 }
