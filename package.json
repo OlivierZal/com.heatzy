@@ -5,7 +5,7 @@
   "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
-    "build": "npm run prepare && tsc",
+    "build": "npm run prepare && tsgo",
     "format": "prettier . --check",
     "format:docs": "prettier README.md --ignore-path --write",
     "format:fix": "prettier . --write",
@@ -26,7 +26,8 @@
     "@html-eslint/parser": "^0.52.0",
     "@stylistic/eslint-plugin": "^5.7.0",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.0.6",
+    "@typescript/native-preview": "^7.0.0-dev.20260112.1",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -38,7 +39,6 @@
     "jsonc-eslint-parser": "^2.4.2",
     "prettier": "^3.7.4",
     "prettier-plugin-packagejson": "^2.5.20",
-    "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0"
   }
 }
