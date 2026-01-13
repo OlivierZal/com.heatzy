@@ -26,8 +26,8 @@
     "@html-eslint/parser": "^0.52.0",
     "@stylistic/eslint-plugin": "^5.7.0",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
-    "@types/node": "^25.0.6",
-    "@typescript/native-preview": "^7.0.0-dev.20260112.1",
+    "@types/node": "^25.0.7",
+    "@typescript/native-preview": "^7.0.0-dev.20260113.1",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -38,7 +38,7 @@
     "eslint-plugin-yml": "^1.19.1",
     "jsonc-eslint-parser": "^2.4.2",
     "prettier": "^3.7.4",
-    "prettier-plugin-packagejson": "^2.5.20",
+    "prettier-plugin-packagejson": "^2.5.21",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.0"
   }
