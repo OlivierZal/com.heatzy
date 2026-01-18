@@ -7,12 +7,12 @@ import stylistic from '@stylistic/eslint-plugin'
 import prettier from 'eslint-config-prettier/flat'
 import perfectionist from 'eslint-plugin-perfectionist'
 import unicorn from 'eslint-plugin-unicorn'
-import yml from 'eslint-plugin-yml'
 
 import { defineConfig } from 'eslint/config'
 import { flatConfigs as importXConfigs } from 'eslint-plugin-import-x'
 import { configs as packageJsonConfigs } from 'eslint-plugin-package-json'
 import { Alphabet } from 'eslint-plugin-perfectionist/alphabet'
+import { configs as ymlConfigs } from 'eslint-plugin-yml'
 import { configs as tsConfigs } from 'typescript-eslint'
 
 import { classGroups } from './eslint-utils/class-groups.js'
@@ -492,7 +492,7 @@ const config = defineConfig([
     rules: {
       '@html-eslint/no-empty-headings': 'off',
       '@html-eslint/require-open-graph-protocol': 'off',
-      'html/use-baseline': [
+      '@html-eslint/use-baseline': [
         'error',
         {
           available: 'newly',
@@ -548,38 +548,41 @@ const config = defineConfig([
     },
   },
   {
-    extends: [yml.configs['flat/standard'], yml.configs['flat/prettier']],
-    rules: {
-      'yml/file-extension': [
-        'error',
-        {
-          extension: 'yml',
-        },
-      ],
-      'yml/require-string-key': 'error',
-      'yml/sort-keys': [
-        'error',
-        {
-          order: {
-            caseSensitive: true,
-            natural: true,
-            type: 'asc',
-          },
-          pathPattern: '^.*$',
-        },
-      ],
-      'yml/sort-sequence-values': [
-        'error',
-        {
-          order: {
-            caseSensitive: true,
-            natural: true,
-            type: 'asc',
-          },
-          pathPattern: '^.*$',
-        },
-      ],
-    },
+    extends: [ymlConfigs.standard, ymlConfigs.prettier],
+
+    /*
+     * Rules: {
+     *   'yml/file-extension': [
+     *     'error',
+     *     {
+     *       extension: 'yml',
+     *     },
+     *   ],
+     *   'yml/require-string-key': 'error',
+     *   'yml/sort-keys': [
+     *     'error',
+     *     {
+     *       order: {
+     *         caseSensitive: true,
+     *         natural: true,
+     *         type: 'asc',
+     *       },
+     *       pathPattern: '^.*$',
+     *     },
+     *   ],
+     *   'yml/sort-sequence-values': [
+     *     'error',
+     *     {
+     *       order: {
+     *         caseSensitive: true,
+     *         natural: true,
+     *         type: 'asc',
+     *       },
+     *       pathPattern: '^.*$',
+     *     },
+     *   ],
+     * },
+     */
   },
   {
     extends: [packageJsonConfigs.recommended, packageJsonConfigs.stylistic],
