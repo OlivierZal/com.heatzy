@@ -111,9 +111,10 @@ export default class HeatzyApp extends Homey.App {
     this.#createNotification(language)
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onUninit(): Promise<void> {
     this.#api.clearSync()
+    // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject
+    return Promise.resolve()
   }
 
   public getDeviceSettings(): DeviceSettings {

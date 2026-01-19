@@ -15,14 +15,16 @@ import {
 
 import type HeatzyDevice from './device.mts'
 
-// eslint-disable-next-line @typescript-eslint/require-await
 const discoverDevices = async (): Promise<DeviceDetails[]> =>
-  DeviceModel.getAll().map(({ id, name, product }) => ({
-    capabilities: getRequiredCapabilities(product),
-    capabilitiesOptions: getCapabilitiesOptions(product),
-    data: { id },
-    name,
-  }))
+  // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject
+  Promise.resolve(
+    DeviceModel.getAll().map(({ id, name, product }) => ({
+      capabilities: getRequiredCapabilities(product),
+      capabilitiesOptions: getCapabilitiesOptions(product),
+      data: { id },
+      name,
+    })),
+  )
 
 // eslint-disable-next-line import-x/no-named-as-default-member
 export default class HeatzyDriver extends Homey.Driver {
@@ -32,12 +34,12 @@ export default class HeatzyDriver extends Homey.Driver {
 
   declare public readonly manifest: ManifestDriver
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onInit(): Promise<void> {
     this.#registerRunListeners()
+    // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject
+    return Promise.resolve()
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onPair(session: PairSession): Promise<void> {
     session.setHandler('showView', async (view) => {
       if (view === 'loading') {
@@ -50,11 +52,14 @@ export default class HeatzyDriver extends Homey.Driver {
     })
     this.#handleLogin(session)
     session.setHandler('list_devices', async () => discoverDevices())
+    // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject
+    return Promise.resolve()
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   public override async onRepair(session: PairSession): Promise<void> {
     this.#handleLogin(session)
+    // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject
+    return Promise.resolve()
   }
 
   #handleLogin(session: PairSession): void {
