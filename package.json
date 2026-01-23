@@ -27,7 +27,7 @@
     "@stylistic/eslint-plugin": "^5.7.0",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^25.0.10",
-    "@typescript/native-preview": "^7.0.0-dev.20260122.2",
+    "@typescript/native-preview": "^7.0.0-dev.20260122.4",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
