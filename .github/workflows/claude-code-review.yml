@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 1
-      - uses: anthropics/claude-code-action@7d7d3055f1fdc9a97a040c69ead9ba392fa6326a
+      - uses: anthropics/claude-code-action@9db782c3a17ef2bfc274cd17411bc3e0a5ba1345
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
