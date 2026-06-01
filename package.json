@@ -30,7 +30,7 @@
     "@typescript/native-preview": "^7.0.0-dev.20260527.2",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import-x": "^4.16.2",
     "eslint-plugin-package-json": "^1.2.0",
     "eslint-plugin-perfectionist": "^5.9.0",
