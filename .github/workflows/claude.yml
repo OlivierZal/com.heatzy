@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 1
-      - uses: anthropics/claude-code-action@fbda2eb1bdc90d319b8d853f5deb53bca199a7c1
+      - uses: anthropics/claude-code-action@593d7a5c4e0073569f74772c2b7b64c30ec14707
         with:
           additional_permissions: |
             actions: read
