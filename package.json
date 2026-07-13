@@ -23,7 +23,7 @@
     "@eslint/json": "^2.0.1",
     "@eslint/markdown": "^8.0.3",
     "@html-eslint/eslint-plugin": "^0.63.0",
-    "@html-eslint/parser": "^0.63.0",
+    "@html-eslint/parser": "^0.64.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^26.1.1",
