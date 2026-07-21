@@ -1,6 +1,3 @@
-concurrency:
-  cancel-in-progress: true
-  group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
 jobs:
   claude:
     if: |
@@ -8,12 +5,6 @@ jobs:
         (github.event_name == 'issue_comment' &&
           contains(github.event.comment.body, '@claude') &&
           contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
-        (github.event_name == 'pull_request_review_comment' &&
-          contains(github.event.comment.body, '@claude') &&
-          contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
-        (github.event_name == 'pull_request_review' &&
-          contains(github.event.review.body || '', '@claude') &&
-          contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association)) ||
         (github.event_name == 'issues' &&
           (contains(github.event.issue.body || '', '@claude') || contains(github.event.issue.title, '@claude')) &&
           contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
@@ -25,15 +16,17 @@ jobs:
       id-token: write
       issues: read
       pull-requests: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 1
-      - uses: anthropics/claude-code-action@af0559ee4f514d1ef21826982bed13f7edc3c35e
+          persist-credentials: false
+      - uses: anthropics/claude-code-action@3553f84341b92da26052e28acf1aa898f9511f32
         with:
           additional_permissions: |
             actions: read
+          claude_args: --model opus
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     timeout-minutes: 15
 name: Claude
@@ -42,8 +35,4 @@ on:
     types: [created]
   issues:
     types: [opened]
-  pull_request_review:
-    types: [submitted]
-  pull_request_review_comment:
-    types: [created]
 permissions: {}

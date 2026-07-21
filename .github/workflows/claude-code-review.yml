@@ -1,9 +1,12 @@
-concurrency:
-  cancel-in-progress: true
-  group: claude-review-${{ github.event.pull_request.number }}
 jobs:
   review:
+    # Job-level so a fully-skipped bot-triggered run cannot claim the
+    # group and cancel an in-progress human review.
+    concurrency:
+      cancel-in-progress: true
+      group: claude-review-${{ github.event.pull_request.number }}
     if: |
+      github.actor != 'claude[bot]' &&
       github.actor != 'dependabot[bot]' &&
       !github.event.pull_request.draft &&
       github.event.pull_request.head.repo.full_name == github.repository
@@ -11,16 +14,19 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      issues: read
-      pull-requests: read
-    runs-on: ubuntu-latest
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 1
-      - uses: anthropics/claude-code-action@af0559ee4f514d1ef21826982bed13f7edc3c35e
+          persist-credentials: false
+      - uses: anthropics/claude-code-action@3553f84341b92da26052e28acf1aa898f9511f32
         with:
+          claude_args: --model opus
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          display_report: true
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: code-review@claude-code-plugins
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'

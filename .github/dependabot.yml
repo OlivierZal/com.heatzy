@@ -5,15 +5,45 @@ registries:
     url: https://npm.pkg.github.com
 updates:
   - directory: /
+    groups:
+      actions:
+        patterns:
+          - '*'
     package-ecosystem: github-actions
     schedule:
-      interval: daily
-      time: '05:00'
-  - directory: /
+      interval: weekly
+  - cooldown:
+      default-days: 7
+    directory: /
+    groups:
+      eslint:
+        patterns:
+          - '@eslint/*'
+          - '@html-eslint/*'
+          - '@stylistic/*'
+          - eslint
+          - eslint-*
+          - typescript-eslint
+      minor-and-patch:
+        exclude-patterns:
+          - '@eslint/*'
+          - '@html-eslint/*'
+          - '@stylistic/*'
+          - '@vitest/*'
+          - eslint
+          - eslint-*
+          - typescript-eslint
+          - vitest
+        update-types:
+          - minor
+          - patch
+      vitest:
+        patterns:
+          - '@vitest/*'
+          - vitest
     package-ecosystem: npm
     registries:
       - npm-github
     schedule:
-      interval: daily
-      time: '05:00'
+      interval: weekly
 version: 2

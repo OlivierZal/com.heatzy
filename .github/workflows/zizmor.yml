@@ -1,26 +1,22 @@
 concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-  group: validate-${{ github.ref }}
+  group: zizmor-${{ github.ref }}
 jobs:
-  validate:
-    name: Validate app
+  zizmor:
+    name: Zizmor
     permissions:
+      actions: read
       contents: read
-      packages: read
+      security-events: write
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
+          fetch-depth: 1
           persist-credentials: false
-      - uses: ./.github/actions/setup-node-and-install
-        with:
-          npm-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Validate app
-        uses: athombv/github-action-homey-app-validate@0f3b42c15d26aab79d7c48cde4d2805524da910e
-        with:
-          level: publish
+      - uses: zizmorcore/zizmor-action@6599ee8b7a49aef6a770f63d261d214911a7ce02
     timeout-minutes: 15
-name: Validate
+name: Zizmor
 on:
   merge_group: {}
   pull_request: {}
