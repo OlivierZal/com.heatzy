@@ -169,6 +169,12 @@ coverage.
   handled like a lint error — the code adapts, or the divergence is
   settled as a documented verdict (e.g. the `Number.NaN` convention in
   `eslint.config.ts`) — never merged over.
+- The SonarCloud project runs **CI-based analysis** (the `ci.yml` scan
+  step on the `lts/*` leg): **Automatic Analysis must stay DISABLED** in
+  the project's Administration settings, or the CI scanner aborts with
+  `exit 3` and fails the required `Test (Node lts/*)` leg. Coverage
+  exclusions cover `settings/**` and `scripts/**` (the webview bundle is
+  browser code exercised on-device, not in vitest).
 - Verify claimed library behavior empirically (headless chromium against
   the real dist/bundle in the scratchpad) rather than from memory.
 - Homey App Store releases: write the user-facing changelog entry into
