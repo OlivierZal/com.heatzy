@@ -74,5 +74,9 @@
     "nl": "Bijgewerkt voor compatibiliteit met Node.js 22 en later, inclusief meerdere fixes (Glow/Shine apparaten).",
     "no": "Oppdatert for kompatibilitet med Node.js 22 og senere, inkludert flere rettelser (Glow/Shine enheter).",
     "sv": "Uppdaterad för kompatibilitet med Node.js 22 och senare, inklusive flera korrigeringar (Glow/Shine enheter)."
+  },
+  "23.0.0": {
+    "en": "The app has been rewritten: sessions are handled better, signing in is more resilient, and the settings page is more reliable.",
+    "fr": "L'application a été réécrite : les sessions sont mieux gérées, la connexion est plus robuste et la page de réglages est plus fiable."
   }
 }

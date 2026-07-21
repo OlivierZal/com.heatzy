@@ -1,0 +1,25 @@
+concurrency:
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: zizmor-${{ github.ref }}
+jobs:
+  zizmor:
+    name: Zizmor
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@6599ee8b7a49aef6a770f63d261d214911a7ce02
+    timeout-minutes: 15
+name: Zizmor
+on:
+  merge_group: {}
+  pull_request: {}
+  push:
+    branches: [main]
+permissions: {}

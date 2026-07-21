@@ -2,7 +2,8 @@ import type HomeyLib from 'homey/lib/Homey.js'
 
 import type HeatzyApp from './app.mts'
 import type HeatzyDriver from './drivers/heatzy/driver.mts'
-import type { HomeySettings, Manifest } from './types.mts'
+import type { HomeySettings } from './types/app-settings.mts'
+import type { Manifest } from './types/manifest.mts'
 
 declare module 'homey' {
   interface Homey extends HomeyLib {
@@ -13,16 +14,14 @@ declare module 'homey' {
   }
 
   interface ManagerDrivers extends HomeyLib.ManagerDrivers {
-    getDriver: (driverId: string) => HeatzyDriver
     getDrivers: () => Record<string, HeatzyDriver>
   }
 
   interface ManagerSettings extends HomeyLib.ManagerSettings {
-    get: <T extends keyof HomeySettings>(key: T) => HomeySettings[T]
-    set: <T extends keyof HomeySettings>(
-      key: T,
-      value: HomeySettings[T],
-    ) => void
+    get: ((key: string) => unknown) &
+      (<T extends keyof HomeySettings>(key: T) => HomeySettings[T])
+    set: ((key: string, value: unknown) => void) &
+      (<T extends keyof HomeySettings>(key: T, value: HomeySettings[T]) => void)
   }
 }
 

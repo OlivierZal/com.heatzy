@@ -1,5 +1,9 @@
 {
   "api": {
+    "authenticate": {
+      "method": "POST",
+      "path": "/sessions"
+    },
     "getDeviceSettings": {
       "method": "GET",
       "path": "/settings/devices"
@@ -12,9 +16,17 @@
       "method": "GET",
       "path": "/language"
     },
-    "login": {
-      "method": "POST",
+    "isAuthenticated": {
+      "method": "GET",
       "path": "/sessions"
+    },
+    "logOut": {
+      "method": "DELETE",
+      "path": "/sessions"
+    },
+    "logWebviewBoot": {
+      "method": "POST",
+      "path": "/boot-error"
     },
     "setDeviceSettings": {
       "method": "PUT",
@@ -79,5 +91,5 @@
       "sèche serviette"
     ]
   },
-  "version": "22.0.0"
+  "version": "23.0.0"
 }

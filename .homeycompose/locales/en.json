@@ -2,11 +2,17 @@
   "errors": {
     "deviceNotFound": "Appareil introuvable."
   },
+  "notifications": {
+    "sessionExpired": "Your Heatzy session has expired: please sign in again from the app settings.",
+    "sessionRestored": "Your Heatzy session is active again."
+  },
   "settings": {
     "authenticate": {
       "button": "Log in",
       "failure": "Authentication failed.",
-      "legend": "Credentials"
+      "legend": "Credentials",
+      "rejected": "Heatzy rejected your credentials — please check them and sign in again.",
+      "reset": "Log out"
     },
     "boolean": {
       "false": "No",
@@ -19,6 +25,7 @@
       },
       "legend": "Device settings"
     },
+    "loadFailed": "The settings page failed to load. Please try again.",
     "refresh": "Refresh",
     "success": "Update succeeded.",
     "title": "Heatzy settings"

@@ -2,55 +2,93 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta content="Heatzy settings" name="description">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <title>Heatzy Settings</title>
-        <link href="styles.css" rel="stylesheet">
+        <script>
+            // The page bundle loads as a classic defer script, not an ES
+            // module: a static module script stalls the whole boot on a
+            // cold webview open (a stalled module fetch also blocks
+            // onHomeyReady — proven on-device in com.melcloud), while
+            // classic scripts, like the stylesheet, load cold. The poll
+            // keeps the boot bounded: it hands the instance to the
+            // bundle's start once it is up, or reports why and ends the
+            // overlay if it never arrives.
+            function onHomeyReady(homey) {
+                const deadline = Date.now() + 10000
+                const waitForBundle = () => {
+                    if (globalThis.HeatzyWebview) {
+                        globalThis.HeatzyWebview.start(homey)
+                    } else if (Date.now() > deadline) {
+                        // Boot beacon: the bundle never booted — report WHY
+                        // before degrading. A 200 probe with no global means
+                        // the script fetched but failed to parse/run (old
+                        // engine); a probe error means the fetch itself
+                        // fails on this device.
+                        const script = document.querySelector('script[src*="index.js"]')
+                        const report = (probe) => {
+                            homey.api('POST', '/boot-error', { message: 'The settings bundle did not boot within 10s', name: 'BootTimeout', probe, stack: '', userAgent: navigator.userAgent }, () => {})
+                            homey.ready()
+                            homey.alert(homey.__('settings.loadFailed')).catch(() => {})
+                        }
+                        fetch(script ? script.src : 'index.js')
+                            .then((response) => { report('fetch ' + String(response.status)) })
+                            .catch((error) => { report('fetch failed: ' + String(error)) })
+                    } else {
+                        setTimeout(waitForBundle, 50)
+                    }
+                }
+                waitForBundle()
+            }
+        </script>
+        <link href="index.css" rel="stylesheet">
+        <script defer src="index.js"></script>
         <script data-origin="settings" defer src="/homey.js"></script>
-        <script defer src="index.mjs"></script>
+        <meta content="Heatzy settings" name="description">
     </head>
     <body>
         <header class="homey-header">
-            <h1 class="homey-title" data-i18n="settings.title"></h1>
+            <h1
+                class="homey-title"
+                data-i18n="settings.title"
+            >Heatzy settings</h1>
         </header>
-        <div id="authenticating" class="hidden">
-            <fieldset class="homey-form-fieldset">
-                <legend class="homey-form-legend" data-i18n="settings.authenticate.legend"></legend>
-                <div id="login"></div>
-                <div class="homey-form-group">
-                    <button
-                        id="authenticate"
-                        type="button"
-                        class="homey-button-primary-full"
-                        aria-label="Authenticate"
-                        data-i18n="settings.authenticate.button"
-                    ></button>
-                </div>
-            </fieldset>
-        </div>
-        <div id="authenticated" class="hidden">
-            <fieldset class="homey-form-fieldset">
-                <legend class="homey-form-legend" data-i18n="settings.devices.legend"></legend>
-                <div id="settings_common"></div>
-                <div class="homey-form-group">
-                    <button
-                        id="refresh_settings_common"
-                        type="button"
-                        class="homey-button-secondary-shadow-full"
-                        aria-label="Refresh"
-                        data-i18n="settings.refresh"
-                    ></button>
-                </div>
-                <div class="homey-form-group">
-                    <button
-                        id="apply_settings_common"
-                        type="button"
-                        class="homey-button-danger-shadow-full"
-                        aria-label="Apply"
-                        data-i18n="settings.devices.apply.button"
-                    ></button>
-                </div>
-            </fieldset>
-        </div>
+        <!-- Collapsible: folded when signed in (the credentials are
+            settled), expanded while signed out. -->
+        <details id="authentication" class="homey-form-fieldset">
+            <summary class="homey-form-legend" data-i18n="settings.authenticate.legend">Credentials</summary>
+            <div id="login"></div>
+            <div class="homey-form-group container">
+                <button
+                    id="reset_credentials"
+                    type="button"
+                    class="homey-button-primary-full"
+                    data-i18n="settings.authenticate.reset"
+                >Log out</button>
+                <button
+                    id="authenticate"
+                    type="button"
+                    class="homey-button-primary-full"
+                    data-i18n="settings.authenticate.button"
+                >Authenticate</button>
+            </div>
+        </details>
+        <fieldset id="devices" class="homey-form-fieldset">
+            <legend class="homey-form-legend" data-i18n="settings.devices.legend">Device settings</legend>
+            <div id="settings_common"></div>
+            <div class="homey-form-group container">
+                <button
+                    id="refresh_settings_common"
+                    type="button"
+                    class="homey-button-secondary-shadow-full"
+                    data-i18n="settings.refresh"
+                >Refresh</button>
+                <button
+                    id="apply_settings_common"
+                    type="button"
+                    class="homey-button-danger-shadow-full"
+                    data-i18n="settings.devices.apply.button"
+                >Apply</button>
+            </div>
+        </fieldset>
     </body>
 </html>
