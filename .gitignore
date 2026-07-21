@@ -1,6 +1,9 @@
-node_modules/
 /.homeybuild/
 /.vscode/*
 !/.vscode/settings.json
 /coverage/
 /env.json
+node_modules/
+/settings/index.js
+/settings/index.mjs
+/.claude/

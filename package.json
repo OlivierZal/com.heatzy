@@ -1,20 +1,37 @@
 {
   "name": "com.heatzy",
-  "version": "22.0.0",
+  "version": "23.0.0",
   "description": "Heatzy for Homey",
+  "homepage": "https://github.com/OlivierZal/com.heatzy/",
+  "bugs": {
+    "url": "https://github.com/OlivierZal/com.heatzy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OlivierZal/com.heatzy.git"
+  },
   "license": "GPL-3.0-only",
+  "author": "Olivier Zalmanski",
+  "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "npm run prepare && tsc",
+    "build": "npm run build:assets && node ./node_modules/@typescript/native/bin/tsc --project tsconfig.build.json",
+    "build:assets": "node scripts/bundle.mjs",
     "format": "prettier . --check",
-    "format:docs": "prettier README.md --ignore-path --write",
     "format:fix": "prettier . --write",
-    "lint": "eslint .",
+    "github:push": "npm run homey:validate && npm run lint:fix && npm run format:fix && git push",
+    "homey:install": "npx homey app install",
+    "homey:publish": "npx homey app publish",
+    "homey:start": "npx homey app run --remote",
+    "homey:validate": "npx homey app validate --level=publish",
+    "lint": "node --max-old-space-size=8192 ./node_modules/eslint/bin/eslint.js .",
     "lint:fix": "npm run lint -- --fix",
-    "prepare": "npm run format:docs && npm run lint:fix && npm run format:fix"
+    "test": "vitest run",
+    "test:coverage": "npm test -- --coverage",
+    "typecheck": "node ./node_modules/@typescript/native/bin/tsc --noEmit"
   },
   "dependencies": {
-    "@olivierzal/heatzy-api": "^9.0.0",
+    "@olivierzal/heatzy-api": "^10.0.0",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
@@ -25,21 +42,33 @@
     "@html-eslint/eslint-plugin": "^0.64.0",
     "@html-eslint/parser": "^0.64.0",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@swc/core": "^1.15.43",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^26.1.1",
-    "@typescript/native-preview": "^7.0.0-dev.20260707.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/eslint-plugin": "^1.6.23",
+    "esbuild": "^0.28.1",
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-jsdoc": "^63.0.13",
     "eslint-plugin-package-json": "^1.6.0",
     "eslint-plugin-perfectionist": "^5.10.0",
     "eslint-plugin-unicorn": "^72.0.0",
     "eslint-plugin-yml": "^3.6.0",
+    "homey-apps-sdk-v3-types": "^0.3.12",
+    "jiti": "^2.7.0",
     "jsonc-eslint-parser": "^3.1.0",
     "prettier": "^3.9.5",
     "prettier-plugin-packagejson": "^3.0.2",
-    "typescript": "^7.0.2",
-    "typescript-eslint": "^8.64.0"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.1.7"
+  },
+  "engines": {
+    "node": ">=22.19.0"
   }
 }
