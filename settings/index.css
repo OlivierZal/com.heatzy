@@ -22,6 +22,18 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.is-disabled {
-  pointer-events: none;
+/* In-flight buttons use the native `disabled` attribute; the injected
+   sheet does not grey them, so paint the busy state here. */
+.homey-button-primary-full:disabled,
+.homey-button-secondary-shadow-full:disabled,
+.homey-button-danger-shadow-full:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Log out is destructive (clears saved credentials): paint it with
+   Homey's red (hex fallback). The id selector clears the injected
+   `[class*='-primary']` rule that sets the same variable. */
+#reset_credentials {
+  --homey-button-background: var(--homey-color-red, rgb(216 28 29));
 }
