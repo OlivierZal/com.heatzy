@@ -6,7 +6,9 @@
     "authenticate": {
       "button": "Se connecter",
       "failure": "L'authentification a échoué.",
-      "legend": "Identifiants"
+      "legend": "Identifiants",
+      "rejected": "Heatzy a refusé vos identifiants — vérifiez-les puis reconnectez-vous.",
+      "reset": "Se déconnecter"
     },
     "boolean": {
       "false": "Non",
@@ -21,6 +23,11 @@
     },
     "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",
-    "title": "Paramètres Heatzy"
+    "title": "Paramètres Heatzy",
+    "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer."
+  },
+  "notifications": {
+    "sessionExpired": "Votre session Heatzy a expiré : reconnectez-vous depuis les réglages de l’application.",
+    "sessionRestored": "Votre session Heatzy est de nouveau active."
   }
 }

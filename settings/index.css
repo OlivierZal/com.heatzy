@@ -1,0 +1,27 @@
+/* Homey injects its own class-based stylesheet at runtime; this file
+   only fills documented SDK gaps and page-specific layout. */
+
+/* The injected sheet resets fieldsets with `all: unset`, leaving
+   `display: inline` — and WebKit renders inline fieldsets atomically,
+   so sibling sets tile side by side. The ancestor selector outweighs
+   the injected (0,1,1) rule whatever the stylesheet order. */
+.homey-form-group fieldset.homey-form-checkbox-set {
+  display: block;
+}
+
+.homey-form-group
+  fieldset.homey-form-checkbox-set
+  + fieldset.homey-form-checkbox-set {
+  margin-block-start: var(--homey-su-3);
+}
+
+/* Two-column grid for button pairs */
+.container {
+  display: grid;
+  gap: var(--homey-su-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.is-disabled {
+  pointer-events: none;
+}
