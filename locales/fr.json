@@ -8,7 +8,8 @@
       "failure": "L'authentification a échoué.",
       "legend": "Identifiants",
       "rejected": "Heatzy a refusé vos identifiants — vérifiez-les puis reconnectez-vous.",
-      "reset": "Se déconnecter"
+      "reset": "Se déconnecter",
+      "resetConfirm": "Cela vous déconnecte immédiatement et efface vos identifiants Heatzy enregistrés."
     },
     "boolean": {
       "false": "Non",

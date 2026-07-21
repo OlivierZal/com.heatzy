@@ -240,10 +240,14 @@ export default class HeatzyDevice extends Device {
       return
     }
     this.homey.api.realtime('deviceupdate', null)
-    await this.#setV1CapabilityValues(device)
-    await this.#setV2CapabilityValues(device)
-    await this.#setGlowCapabilityValues(device)
-    await this.#setProCapabilityValues(device)
+    // Value writes are non-structural, so they run concurrently (the
+    // sequential helper is reserved for add/remove/options mutations).
+    await Promise.all([
+      this.#setV1CapabilityValues(device),
+      this.#setV2CapabilityValues(device),
+      this.#setGlowCapabilityValues(device),
+      this.#setProCapabilityValues(device),
+    ])
     await this.setStoreValue('previousMode', device.previousMode)
   }
 
@@ -388,9 +392,11 @@ export default class HeatzyDevice extends Device {
     }
 
     const { comfortTemperature, currentTemperature, ecoTemperature } = device
-    await this.setCapabilityValue('measure_temperature', currentTemperature)
-    await this.setCapabilityValue('target_temperature', comfortTemperature)
-    await this.setCapabilityValue('target_temperature.eco', ecoTemperature)
+    await Promise.all([
+      this.#setValue('measure_temperature', currentTemperature),
+      this.#setValue('target_temperature', comfortTemperature),
+      this.#setValue('target_temperature.eco', ecoTemperature),
+    ])
   }
 
   async #setProCapabilityValues(device: DeviceFacadeAny): Promise<void> {
@@ -400,19 +406,20 @@ export default class HeatzyDevice extends Device {
 
     const { currentHumidity, currentMode, isDetectingOpenWindow, isPresence } =
       device
-    await this.setCapabilityValue('alarm_presence', isPresence)
-    await this.setCapabilityValue('measure_humidity', currentHumidity)
-    await this.setCapabilityValue(
-      'onoff.window_detection',
-      isDetectingOpenWindow,
-    )
-    await this.setCapabilityValue('operational_state', currentMode)
+    await Promise.all([
+      this.#setValue('alarm_presence', isPresence),
+      this.#setValue('measure_humidity', currentHumidity),
+      this.#setValue('onoff.window_detection', isDetectingOpenWindow),
+      this.#setValue('operational_state', currentMode),
+    ])
   }
 
   async #setV1CapabilityValues(device: DeviceFacadeAny): Promise<void> {
     const { isOn, mode } = device
-    await this.setCapabilityValue('onoff', isOn)
-    await this.setCapabilityValue('thermostat_mode', mode)
+    await Promise.all([
+      this.#setValue('onoff', isOn),
+      this.#setValue('thermostat_mode', mode),
+    ])
   }
 
   async #setV2CapabilityValues(device: DeviceFacadeAny): Promise<void> {
@@ -427,13 +434,27 @@ export default class HeatzyDevice extends Device {
       isLocked,
       isTimer,
     } = device
-    await this.setCapabilityValue('derog_end', derogationEndString)
-    await this.setCapabilityValue(
-      'heater_operation_mode',
-      derogationModeKeys[derogationMode],
-    )
-    await this.setCapabilityValue('derog_time', String(derogationTime))
-    await this.setCapabilityValue('locked', isLocked)
-    await this.setCapabilityValue('onoff.timer', isTimer)
+    await Promise.all([
+      this.#setValue('derog_end', derogationEndString),
+      this.#setValue(
+        'heater_operation_mode',
+        derogationModeKeys[derogationMode],
+      ),
+      this.#setValue('derog_time', String(derogationTime)),
+      this.#setValue('locked', isLocked),
+      this.#setValue('onoff.timer', isTimer),
+    ])
+  }
+
+  // A capability the device's product tier reports but the manifest
+  // omits is skipped at add-time; guarding the write here degrades that
+  // mismatch to a no-op instead of a runtime throw.
+  async #setValue<TKey extends keyof Capabilities>(
+    capability: TKey,
+    value: Capabilities[TKey],
+  ): Promise<void> {
+    if (this.hasCapability(capability)) {
+      await this.setCapabilityValue(capability, value)
+    }
   }
 }

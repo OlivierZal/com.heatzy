@@ -8,7 +8,8 @@
       "failure": "Authentication failed.",
       "legend": "Credentials",
       "rejected": "Heatzy rejected your credentials — please check them and sign in again.",
-      "reset": "Log out"
+      "reset": "Log out",
+      "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials."
     },
     "boolean": {
       "false": "No",

@@ -3,6 +3,7 @@ import type HomeySettings from 'homey/lib/HomeySettings'
 
 import type { DeviceSettings, Settings } from '../types/device-settings.mts'
 import type { DriverSetting } from '../types/driver-settings.mts'
+import { getErrorMessage } from '../lib/get-error-message.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
 // stay ≤ es2023 — no iterator helpers, no Object.groupBy (old iOS
@@ -39,11 +40,20 @@ interface PageState {
   usernameElement: HTMLInputElement | null
 }
 
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message
+// Mobile keyboards mangle the email username: iOS autocapitalizes and
+// autocorrects it, and autocomplete appends a trailing space. The hints
+// disable that, and the login path trims what slips through.
+const applyCredentialHints = (
+  input: HTMLInputElement,
+  credentialKey: keyof LoginCredentials,
+): void => {
+  if (credentialKey === 'password') {
+    input.autocomplete = 'current-password'
+    return
   }
-  return typeof error === 'string' ? error : JSON.stringify(error)
+  input.autocomplete = 'username'
+  input.autocapitalize = 'none'
+  input.spellcheck = false
 }
 
 const getElement = <T extends HTMLElement>(
@@ -125,6 +135,20 @@ const homeyApiPut = async (
     })
   })
 
+const homeyConfirm = async (
+  homey: HomeySettings,
+  message: string,
+): Promise<boolean> =>
+  new Promise((resolve) => {
+    homey.confirm(
+      message,
+      null,
+      (error: Error | null, isConfirmed: boolean) => {
+        resolve(error === null && isConfirmed)
+      },
+    )
+  })
+
 const alertError = async (
   homey: HomeySettings,
   error: unknown,
@@ -171,7 +195,10 @@ const translatePage = (homey: HomeySettings): void => {
 }
 
 const disableButton = (element: HTMLButtonElement, isDisabled = true): void => {
-  element.classList.toggle('is-disabled', isDisabled)
+  // Native `disabled` (not a pointer-events class): it blocks keyboard
+  // re-fire (no double POST), greys the control, and is announced to
+  // screen readers.
+  element.disabled = isDisabled
 }
 
 const withDisabledButtons = async (
@@ -394,6 +421,7 @@ const generateCredential = (
   }
   const { id, placeholder, title, type } = loginSetting
   const valueElement = createInputElement({ id, placeholder, type })
+  applyCredentialHints(valueElement, credentialKey)
   createGroupElement(elements.login, valueElement, title)
   return valueElement
 }
@@ -440,7 +468,8 @@ const pushCredentials = async (
 
 const authenticate = async (context: PageContext): Promise<void> => {
   const { elements, homey, state } = context
-  const username = state.usernameElement?.value ?? ''
+  // Trimmed: mobile autocomplete appends a space after the email.
+  const username = (state.usernameElement?.value ?? '').trim()
   const password = state.passwordElement?.value ?? ''
   if (username === '' || password === '') {
     await alertError(homey, homey.__('settings.authenticate.failure'))
@@ -471,7 +500,12 @@ const pushLogOut = async (context: PageContext): Promise<void> => {
 }
 
 const logOut = async (context: PageContext): Promise<void> => {
-  const { elements } = context
+  const { elements, homey } = context
+  if (
+    !(await homeyConfirm(homey, homey.__('settings.authenticate.resetConfirm')))
+  ) {
+    return
+  }
   await withDisabledButtons(
     [elements.authenticate, elements.resetCredentials],
     async () => pushLogOut(context),
@@ -544,17 +578,31 @@ const init = async (homey: HomeySettings): Promise<void> => {
   )
 }
 
-const delay = async (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
+// Race the work against a deadline that REJECTS (not resolves): a hung
+// data fetch must surface an error through the caller's catch, not
+// resolve silently into a half-built page. The timer is always cleared.
+const withInitTimeout = async (work: Promise<void>): Promise<void> => {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  try {
+    await Promise.race([
+      work,
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => {
+          reject(new Error('Timed out while loading the settings page'))
+        }, INIT_TIMEOUT_MS)
+      }),
+    ])
+  } finally {
+    clearTimeout(timer)
+  }
+}
 
-// The overlay must end whatever happens: a hung DATA fetch is raced
-// against the timeout, failures are alerted, and `homey.ready()` runs
-// in the finally either way.
+// The overlay must end whatever happens: a hung fetch rejects through
+// the timeout, failures are alerted, and `homey.ready()` runs in the
+// finally either way.
 const runWebview = async (homey: HomeySettings): Promise<void> => {
   try {
-    await Promise.race([init(homey), delay(INIT_TIMEOUT_MS)])
+    await withInitTimeout(init(homey))
   } catch (error) {
     await alertError(homey, error)
   } finally {
