@@ -8,7 +8,7 @@
       "failure": "Authentication failed.",
       "legend": "Credentials",
       "rejected": "Heatzy rejected your credentials — please check them and sign in again.",
-      "reset": "Log out",
+      "reset": "Reset",
       "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials."
     },
     "boolean": {
@@ -20,12 +20,13 @@
         "button": "Apply to all devices",
         "nothing": "No change to apply."
       },
-      "legend": "Device settings"
+      "legend": "All device settings"
     },
     "refresh": "Refresh",
     "success": "Update succeeded.",
     "title": "Heatzy settings",
-    "loadFailed": "The settings page failed to load. Please try again."
+    "loadFailed": "The settings page failed to load. Please try again.",
+    "update": "Update"
   },
   "notifications": {
     "sessionExpired": "Your Heatzy session has expired: please sign in again from the app settings.",

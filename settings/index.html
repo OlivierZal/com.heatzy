@@ -63,31 +63,36 @@
                     type="button"
                     class="homey-button-primary-full"
                     data-i18n="settings.authenticate.reset"
-                >Log out</button>
+                >Reset</button>
                 <button
                     id="authenticate"
                     type="button"
                     class="homey-button-primary-full"
                     data-i18n="settings.authenticate.button"
-                >Authenticate</button>
+                >Log in</button>
             </div>
         </details>
-        <fieldset id="devices" class="homey-form-fieldset">
-            <legend class="homey-form-legend" data-i18n="settings.devices.legend">Device settings</legend>
+        <!-- Shown once authenticated — hidden by default to prevent a flash. -->
+        <fieldset
+            id="devices"
+            class="homey-form-fieldset"
+            hidden
+        >
+            <legend class="homey-form-legend" data-i18n="settings.devices.legend">All device settings</legend>
             <div id="settings_common"></div>
             <div class="homey-form-group container">
                 <button
                     id="refresh_settings_common"
                     type="button"
-                    class="homey-button-secondary-shadow-full"
+                    class="homey-button-secondary-shadow"
                     data-i18n="settings.refresh"
                 >Refresh</button>
                 <button
                     id="apply_settings_common"
                     type="button"
-                    class="homey-button-danger-shadow-full"
-                    data-i18n="settings.devices.apply.button"
-                >Apply</button>
+                    class="homey-button-danger-shadow"
+                    data-i18n="settings.update"
+                >Update</button>
             </div>
         </fieldset>
     </body>

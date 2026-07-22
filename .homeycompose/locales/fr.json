@@ -12,7 +12,7 @@
       "failure": "L'authentification a échoué.",
       "legend": "Identifiants",
       "rejected": "Heatzy a refusé vos identifiants — vérifiez-les puis reconnectez-vous.",
-      "reset": "Se déconnecter",
+      "reset": "Réinitialiser",
       "resetConfirm": "Cela vous déconnecte immédiatement et efface vos identifiants Heatzy enregistrés."
     },
     "boolean": {
@@ -21,14 +21,14 @@
     },
     "devices": {
       "apply": {
-        "button": "Appliquer à tous les appareils",
         "nothing": "Aucun changement à appliquer."
       },
-      "legend": "Paramètres des appareils"
+      "legend": "Paramètres de tous les appareils"
     },
     "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer.",
     "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",
-    "title": "Paramètres Heatzy"
+    "title": "Paramètres Heatzy",
+    "update": "Mettre à jour"
   }
 }
