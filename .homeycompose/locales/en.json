@@ -12,7 +12,7 @@
       "failure": "Authentication failed.",
       "legend": "Credentials",
       "rejected": "Heatzy rejected your credentials — please check them and sign in again.",
-      "reset": "Log out",
+      "reset": "Reset",
       "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials."
     },
     "boolean": {
@@ -21,14 +21,14 @@
     },
     "devices": {
       "apply": {
-        "button": "Apply to all devices",
         "nothing": "No change to apply."
       },
-      "legend": "Device settings"
+      "legend": "All device settings"
     },
     "loadFailed": "The settings page failed to load. Please try again.",
     "refresh": "Refresh",
     "success": "Update succeeded.",
-    "title": "Heatzy settings"
+    "title": "Heatzy settings",
+    "update": "Update"
   }
 }

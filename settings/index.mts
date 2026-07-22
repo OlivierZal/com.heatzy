@@ -27,6 +27,7 @@ interface PageElements {
   readonly applySettings: HTMLButtonElement
   readonly authenticate: HTMLButtonElement
   readonly authentication: HTMLDetailsElement
+  readonly devices: HTMLFieldSetElement
   readonly login: HTMLDivElement
   readonly refreshSettings: HTMLButtonElement
   readonly resetCredentials: HTMLButtonElement
@@ -71,6 +72,7 @@ const getPageElements = (): PageElements => ({
   applySettings: getElement('apply_settings_common', HTMLButtonElement),
   authenticate: getElement('authenticate', HTMLButtonElement),
   authentication: getElement('authentication', HTMLDetailsElement),
+  devices: getElement('devices', HTMLFieldSetElement),
   login: getElement('login', HTMLDivElement),
   refreshSettings: getElement('refresh_settings_common', HTMLButtonElement),
   resetCredentials: getElement('reset_credentials', HTMLButtonElement),
@@ -445,11 +447,15 @@ const generateCommonSettings = (
   }
 }
 
+// The credentials section folds once signed in; the device settings
+// stay hidden until then (mirrors melcloud's #content gating), so a
+// signed-out page shows only the expanded credentials.
 const setAuthenticatedState = (
   elements: PageElements,
   isAuthenticated: boolean,
 ): void => {
   elements.authentication.open = !isAuthenticated
+  elements.devices.hidden = !isAuthenticated
 }
 
 const pushCredentials = async (
