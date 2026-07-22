@@ -50,9 +50,8 @@ const heatzyLoginPair: LoginSetting = {
   id: 'login',
   options: {
     passwordLabel: { en: 'Password', fr: 'Mot de passe' },
-    passwordPlaceholder: { en: 'Your password' },
     usernameLabel: { en: 'Username', fr: 'Nom' },
-    usernamePlaceholder: { en: 'Your username' },
+    usernamePlaceholder: 'name@example.com',
   },
 }
 
@@ -640,9 +639,11 @@ describe(HeatzyApp, () => {
       assertDefined(username)
 
       expect(password.title).toBe('Mot de passe')
-      expect(password.placeholder).toBe('Your password')
+      // No password placeholder; the username placeholder is a single
+      // ASCII example, returned as-is by localize regardless of language.
+      expect(password.placeholder).toBeUndefined()
       expect(username.title).toBe('Nom')
-      expect(username.placeholder).toBe('Your username')
+      expect(username.placeholder).toBe('name@example.com')
     })
   })
 

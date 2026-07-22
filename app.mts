@@ -21,9 +21,10 @@ import { type Homey, App } from './lib/homey.mts'
 const NOTIFICATION_DELAY_MS = 10_000
 
 const localize = (
-  strings: Partial<Record<string, string>> & { readonly en: string },
+  strings: string | (Partial<Record<string, string>> & { readonly en: string }),
   language: string,
-): string => strings[language] ?? strings.en
+): string =>
+  typeof strings === 'string' ? strings : (strings[language] ?? strings.en)
 
 // Aggregates one device's settings into the per-driver map; a conflicting
 // value across devices marks the setting as indeterminate (`null`) and stops
