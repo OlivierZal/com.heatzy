@@ -41,6 +41,11 @@ interface PageState {
   usernameElement: HTMLInputElement | null
 }
 
+interface StoredCredentials {
+  password?: string | null
+  username?: string | null
+}
+
 // Mobile keyboards mangle the email username: iOS autocapitalizes and
 // autocorrects it, and autocomplete appends a trailing space. The hints
 // disable that, and the login path trims what slips through.
@@ -246,15 +251,18 @@ const createInputElement = ({
   id,
   placeholder,
   type,
+  value,
 }: {
   id: string
   type: string
   placeholder?: string | undefined
+  value?: string | null | undefined
 }): HTMLInputElement => {
   const inputElement = document.createElement('input')
   inputElement.classList.add('homey-form-input')
   inputElement.id = id
   inputElement.type = type
+  inputElement.value = value ?? ''
   if (placeholder !== undefined) {
     inputElement.placeholder = placeholder
   }
@@ -413,17 +421,25 @@ const applyDeviceSettings = async (context: PageContext): Promise<void> => {
 const generateCredential = (
   { elements }: PageContext,
   driverSettings: Partial<Record<string, DriverSetting[]>>,
-  credentialKey: keyof LoginCredentials,
+  credential: {
+    key: keyof LoginCredentials
+    value: string | null | undefined
+  },
 ): HTMLInputElement | null => {
   const loginSetting = driverSettings.login?.find(
-    ({ id: settingId }) => settingId === credentialKey,
+    ({ id: settingId }) => settingId === credential.key,
   )
   if (loginSetting === undefined) {
     return null
   }
   const { id, placeholder, title, type } = loginSetting
-  const valueElement = createInputElement({ id, placeholder, type })
-  applyCredentialHints(valueElement, credentialKey)
+  const valueElement = createInputElement({
+    id,
+    placeholder,
+    type,
+    value: credential.value,
+  })
+  applyCredentialHints(valueElement, credential.key)
   createGroupElement(elements.login, valueElement, title)
   return valueElement
 }
@@ -544,21 +560,35 @@ const addEventListeners = (context: PageContext): void => {
   })
 }
 
+// The persisted username/password (the lib's SettingManager writes them
+// into homey.settings) so the credential fields show the signed-in
+// account instead of empty placeholders.
+const fetchStoredCredentials = async (
+  homey: HomeySettings,
+): Promise<StoredCredentials> =>
+  new Promise((resolve) => {
+    homey.get((error: Error | null, settings: StoredCredentials | null) => {
+      resolve(error === null && settings !== null ? settings : {})
+    })
+  })
+
 const buildSections = async (context: PageContext): Promise<void> => {
   const { homey, state } = context
-  const driverSettings = await homeyApiGet<
-    Partial<Record<string, DriverSetting[]>>
-  >(homey, '/settings/drivers')
-  state.usernameElement = generateCredential(
-    context,
-    driverSettings,
-    'username',
-  )
-  state.passwordElement = generateCredential(
-    context,
-    driverSettings,
-    'password',
-  )
+  const [driverSettings, credentials] = await Promise.all([
+    homeyApiGet<Partial<Record<string, DriverSetting[]>>>(
+      homey,
+      '/settings/drivers',
+    ),
+    fetchStoredCredentials(homey),
+  ])
+  state.usernameElement = generateCredential(context, driverSettings, {
+    key: 'username',
+    value: credentials.username,
+  })
+  state.passwordElement = generateCredential(context, driverSettings, {
+    key: 'password',
+    value: credentials.password,
+  })
   await fetchDeviceSettings(context)
   generateCommonSettings(context, driverSettings)
 }

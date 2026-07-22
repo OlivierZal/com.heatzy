@@ -1,6 +1,17 @@
 /* Homey injects its own class-based stylesheet at runtime; this file
    only fills documented SDK gaps and page-specific layout. */
 
+/* The credentials panel's summary doubles as the fieldset legend, but
+   Homey's `legend.homey-form-legend` rule is tag-qualified and misses a
+   `summary` — restate the legend's tokens so the "Credentials" title
+   renders at the same size as the sibling legends instead of the tiny
+   default. */
+summary.homey-form-legend {
+  cursor: pointer;
+  font-size: var(--homey-font-size-medium);
+  font-weight: var(--homey-font-weight-bold);
+}
+
 /* The injected sheet resets fieldsets with `all: unset`, leaving
    `display: inline` — and WebKit renders inline fieldsets atomically,
    so sibling sets tile side by side. The ancestor selector outweighs
