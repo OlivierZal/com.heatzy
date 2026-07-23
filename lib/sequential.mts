@@ -2,6 +2,9 @@
  * Runs `run` over `items` strictly one at a time. The Homey SDK does not
  * support concurrent STRUCTURAL capability mutations (add/remove/options),
  * so those callers chain them; plain value writes stay concurrent.
+ * @param items - The values to process, in original order.
+ * @param run - The async operation applied to each item; the next item waits
+ *   for it to settle.
  */
 export const sequential = async <T,>(
   items: readonly T[],
