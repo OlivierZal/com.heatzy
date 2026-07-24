@@ -70,8 +70,9 @@ coverage.
   `[class*='homey-button']:disabled` generically, never a per-class list
   (a class list silently missed renamed buttons).
   `tests/unit/dirty-gate.test.ts` locks the behavior; the module is a
-  byte-identical copy of com.melcloud's `public/dirty-gate.mts` — edit
-  both together.
+  byte-identical copy of com.melcloud's `public/dirty-gate.mts`
+  (com.melcloud.extension carries the third copy) — edit all three
+  together.
 - The injected sheet resets `fieldset.homey-form-checkbox-set` /
   `-radio-set` with `all: unset`, which leaves `display: inline` — and
   WebKit renders inline fieldsets atomically, so SIBLING sets tile side
