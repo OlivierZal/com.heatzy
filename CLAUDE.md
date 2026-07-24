@@ -62,6 +62,16 @@ coverage.
   SDK gaps and app-specific design — Homey injects its own class-based
   stylesheet at runtime, which is not in the repo and not available
   offline.
+- Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
+  settings Apply/Refresh pair — never re-derive its invariant at a call
+  site. Its `serialize` must stay a PURE form snapshot, never a
+  request-body builder (reusing `buildSettingsBody` was the historical
+  never-pristine bug: it filters null deltas), and disabled greying styles
+  `[class*='homey-button']:disabled` generically, never a per-class list
+  (a class list silently missed renamed buttons).
+  `tests/unit/dirty-gate.test.ts` locks the behavior; the module is a
+  byte-identical copy of com.melcloud's `public/dirty-gate.mts` — edit
+  both together.
 - The injected sheet resets `fieldset.homey-form-checkbox-set` /
   `-radio-set` with `all: unset`, which leaves `display: inline` — and
   WebKit renders inline fieldsets atomically, so SIBLING sets tile side
