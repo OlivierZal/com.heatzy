@@ -37,6 +37,7 @@ interface PageElements {
 interface PageState {
   deviceSettings: DeviceSettings
   flatDeviceSettings: Record<string, unknown>
+  isBusy: boolean
   passwordElement: HTMLInputElement | null
   usernameElement: HTMLInputElement | null
 }
@@ -335,12 +336,6 @@ const commonSettingElements = (elements: PageElements): HTMLSelectElement[] => [
   ...elements.settingsCommon.querySelectorAll('select'),
 ]
 
-const refreshCommonSettings = ({ elements, state }: PageContext): void => {
-  for (const element of commonSettingElements(elements)) {
-    refreshCommonSetting(element, state.flatDeviceSettings)
-  }
-}
-
 const fetchDeviceSettings = async ({
   homey,
   state,
@@ -378,6 +373,53 @@ const buildSettingsBody = ({ elements, state }: PageContext): Settings => {
   return settings
 }
 
+// Apply means something only once the form diverges from the stored
+// device settings: an empty delta — or an in-flight request — greys the
+// button out. The delta itself is the dirty signal, so no separate
+// snapshot is needed.
+const updateSettingsDirty = (context: PageContext): void => {
+  const isPristine = Object.keys(buildSettingsBody(context)).length === 0
+  disableButton(
+    context.elements.applySettings,
+    context.state.isBusy || isPristine,
+  )
+}
+
+// A request in flight locks both settings buttons; the dirty recompute
+// folds the busy flag in so a control change mid-request cannot
+// re-enable Apply.
+const setSettingsButtonsBusy = (
+  context: PageContext,
+  isBusy: boolean,
+): void => {
+  context.state.isBusy = isBusy
+  // Refresh is gated by busy alone, never by the dirty state.
+  disableButton(context.elements.refreshSettings, isBusy)
+  updateSettingsDirty(context)
+}
+
+const withBusySettingsButtons = async (
+  context: PageContext,
+  action: () => Promise<void>,
+): Promise<void> => {
+  setSettingsButtonsBusy(context, true)
+  try {
+    await action()
+  } finally {
+    setSettingsButtonsBusy(context, false)
+  }
+}
+
+const refreshCommonSettings = (context: PageContext): void => {
+  const { elements, state } = context
+  for (const element of commonSettingElements(elements)) {
+    refreshCommonSetting(element, state.flatDeviceSettings)
+  }
+  // Repopulating realigns the form with the stored settings — recompute
+  // so Apply reflects the freshly pristine state.
+  updateSettingsDirty(context)
+}
+
 const updateDeviceSettings = (state: PageState, body: Settings): void => {
   for (const [id, value] of Object.entries(body)) {
     for (const driver of Object.keys(state.deviceSettings)) {
@@ -405,16 +447,17 @@ const pushDeviceSettings = async (
 }
 
 const applyDeviceSettings = async (context: PageContext): Promise<void> => {
-  const { elements, homey } = context
+  const { homey } = context
   const body = buildSettingsBody(context)
   if (Object.keys(body).length === 0) {
+    // Defensive: the dirty gating disables Apply on an empty delta, so
+    // this is rarely reached — realign the form and report no change.
     refreshCommonSettings(context)
     await alertError(homey, homey.__('settings.devices.apply.nothing'))
     return
   }
-  await withDisabledButtons(
-    [elements.applySettings, elements.refreshSettings],
-    async () => pushDeviceSettings(context, body),
+  await withBusySettingsButtons(context, async () =>
+    pushDeviceSettings(context, body),
   )
 }
 
@@ -457,6 +500,10 @@ const generateCommonSettings = (
       commonElementTypes.has(type)
     ) {
       const valueElement = createSelectElement(homey, settingId, values)
+      // Every control feeds the dirty check that gates Apply.
+      valueElement.addEventListener('change', () => {
+        updateSettingsDirty(context)
+      })
       createGroupElement(elements.settingsCommon, valueElement, title)
       refreshCommonSetting(valueElement, state.flatDeviceSettings)
     }
@@ -591,6 +638,8 @@ const buildSections = async (context: PageContext): Promise<void> => {
   })
   await fetchDeviceSettings(context)
   generateCommonSettings(context, driverSettings)
+  // Snapshot the pristine state once the sections are built.
+  updateSettingsDirty(context)
 }
 
 const init = async (homey: HomeySettings): Promise<void> => {
@@ -600,6 +649,7 @@ const init = async (homey: HomeySettings): Promise<void> => {
     state: {
       deviceSettings: {},
       flatDeviceSettings: {},
+      isBusy: false,
       passwordElement: null,
       usernameElement: null,
     },
