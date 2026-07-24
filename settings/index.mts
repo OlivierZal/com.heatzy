@@ -39,6 +39,7 @@ interface PageState {
   flatDeviceSettings: Record<string, unknown>
   isBusy: boolean
   passwordElement: HTMLInputElement | null
+  savedState: string
   usernameElement: HTMLInputElement | null
 }
 
@@ -373,12 +374,30 @@ const buildSettingsBody = ({ elements, state }: PageContext): Settings => {
   return settings
 }
 
-// Apply means something only once the form diverges from the stored
-// device settings: an empty delta — or an in-flight request — greys the
-// button out. The delta itself is the dirty signal, so no separate
-// snapshot is needed.
+// A stable snapshot of every common control's current value (nulls
+// included, never filtered): the dirty check compares it against the
+// value captured when the form was last populated. Sorted by id so
+// control order never perturbs the string.
+const serializeCommonSettings = ({ elements }: PageContext): string => {
+  const entries: [string, unknown][] = []
+  for (const element of commonSettingElements(elements)) {
+    const id = settingIdOf(element)
+    if (id !== undefined) {
+      entries.push([id, processValue(element)])
+    }
+  }
+  entries.sort(([firstId], [secondId]) => firstId.localeCompare(secondId))
+  return JSON.stringify(entries)
+}
+
+// Apply means something only once the form diverges from its loaded
+// snapshot: a value equal to the snapshot — or an in-flight request —
+// greys the button out. The snapshot is retaken whenever the form is
+// (re)populated, so a pristine load stays greyed even when a common
+// setting is mixed/null across devices.
 const updateSettingsDirty = (context: PageContext): void => {
-  const isPristine = Object.keys(buildSettingsBody(context)).length === 0
+  const isPristine =
+    serializeCommonSettings(context) === context.state.savedState
   disableButton(
     context.elements.applySettings,
     context.state.isBusy || isPristine,
@@ -415,8 +434,9 @@ const refreshCommonSettings = (context: PageContext): void => {
   for (const element of commonSettingElements(elements)) {
     refreshCommonSetting(element, state.flatDeviceSettings)
   }
-  // Repopulating realigns the form with the stored settings — recompute
-  // so Apply reflects the freshly pristine state.
+  // Repopulating realigns the form with the stored settings — snapshot it
+  // as the new baseline so Apply reflects the freshly pristine state.
+  state.savedState = serializeCommonSettings(context)
   updateSettingsDirty(context)
 }
 
@@ -443,6 +463,9 @@ const pushDeviceSettings = async (
     return
   }
   updateDeviceSettings(state, body)
+  // The just-saved values are the new pristine baseline — snapshot so
+  // Apply greys back out until the form diverges again.
+  state.savedState = serializeCommonSettings(context)
   await alertError(homey, homey.__('settings.success'))
 }
 
@@ -639,6 +662,7 @@ const buildSections = async (context: PageContext): Promise<void> => {
   await fetchDeviceSettings(context)
   generateCommonSettings(context, driverSettings)
   // Snapshot the pristine state once the sections are built.
+  state.savedState = serializeCommonSettings(context)
   updateSettingsDirty(context)
 }
 
@@ -651,6 +675,7 @@ const init = async (homey: HomeySettings): Promise<void> => {
       flatDeviceSettings: {},
       isBusy: false,
       passwordElement: null,
+      savedState: '',
       usernameElement: null,
     },
   }
