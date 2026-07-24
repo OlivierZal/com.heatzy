@@ -78,5 +78,9 @@
   "23.0.0": {
     "en": "The app has been rewritten: sessions are handled better, signing in is more resilient, and the settings page is more reliable.",
     "fr": "L'application a été réécrite : les sessions sont mieux gérées, la connexion est plus robuste et la page de réglages est plus fiable."
+  },
+  "23.0.1": {
+    "en": "Refined the settings collapse/expand chevron.",
+    "fr": "Chevron d'ouverture/fermeture des réglages affiné."
   }
 }
