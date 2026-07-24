@@ -82,5 +82,9 @@
   "23.0.1": {
     "en": "Refined the settings collapse/expand chevron.",
     "fr": "Chevron d'ouverture/fermeture des réglages affiné."
+  },
+  "23.0.2": {
+    "en": "Settings: the Update button now stays greyed out until you change a setting.",
+    "fr": "Réglages : le bouton Mettre à jour reste désormais grisé tant que vous n'avez pas modifié un réglage."
   }
 }
