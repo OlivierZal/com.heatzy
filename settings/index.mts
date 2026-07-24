@@ -4,6 +4,7 @@ import type HomeySettings from 'homey/lib/HomeySettings'
 import type { DeviceSettings, Settings } from '../types/device-settings.mts'
 import type { DriverSetting } from '../types/driver-settings.mts'
 import { getErrorMessage } from '../lib/get-error-message.mts'
+import { type DirtyGate, createDirtyGate } from './dirty-gate.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
 // stay ≤ es2023 — no iterator helpers, no Object.groupBy (old iOS
@@ -19,6 +20,7 @@ type HTMLValueElement = HTMLInputElement | HTMLSelectElement
 
 interface PageContext {
   readonly elements: PageElements
+  readonly gate: DirtyGate
   readonly homey: HomeySettings
   readonly state: PageState
 }
@@ -37,9 +39,7 @@ interface PageElements {
 interface PageState {
   deviceSettings: DeviceSettings
   flatDeviceSettings: Record<string, unknown>
-  isBusy: boolean
   passwordElement: HTMLInputElement | null
-  savedState: string
   usernameElement: HTMLInputElement | null
 }
 
@@ -378,7 +378,7 @@ const buildSettingsBody = ({ elements, state }: PageContext): Settings => {
 // included, never filtered): the dirty check compares it against the
 // value captured when the form was last populated. Sorted by id so
 // control order never perturbs the string.
-const serializeCommonSettings = ({ elements }: PageContext): string => {
+const serializeCommonSettings = (elements: PageElements): string => {
   const entries: [string, unknown][] = []
   for (const element of commonSettingElements(elements)) {
     const id = settingIdOf(element)
@@ -390,54 +390,14 @@ const serializeCommonSettings = ({ elements }: PageContext): string => {
   return JSON.stringify(entries)
 }
 
-// Apply means something only once the form diverges from its loaded
-// snapshot: a value equal to the snapshot — or an in-flight request —
-// greys the button out. The snapshot is retaken whenever the form is
-// (re)populated, so a pristine load stays greyed even when a common
-// setting is mixed/null across devices.
-const updateSettingsDirty = (context: PageContext): void => {
-  const isPristine =
-    serializeCommonSettings(context) === context.state.savedState
-  disableButton(
-    context.elements.applySettings,
-    context.state.isBusy || isPristine,
-  )
-}
-
-// A request in flight locks both settings buttons; the dirty recompute
-// folds the busy flag in so a control change mid-request cannot
-// re-enable Apply.
-const setSettingsButtonsBusy = (
-  context: PageContext,
-  isBusy: boolean,
-): void => {
-  context.state.isBusy = isBusy
-  // Refresh is gated by busy alone, never by the dirty state.
-  disableButton(context.elements.refreshSettings, isBusy)
-  updateSettingsDirty(context)
-}
-
-const withBusySettingsButtons = async (
-  context: PageContext,
-  action: () => Promise<void>,
-): Promise<void> => {
-  setSettingsButtonsBusy(context, true)
-  try {
-    await action()
-  } finally {
-    setSettingsButtonsBusy(context, false)
-  }
-}
-
 const refreshCommonSettings = (context: PageContext): void => {
-  const { elements, state } = context
+  const { elements, gate, state } = context
   for (const element of commonSettingElements(elements)) {
     refreshCommonSetting(element, state.flatDeviceSettings)
   }
-  // Repopulating realigns the form with the stored settings — snapshot it
-  // as the new baseline so Apply reflects the freshly pristine state.
-  state.savedState = serializeCommonSettings(context)
-  updateSettingsDirty(context)
+  // Repopulating realigns the form with the stored settings — re-baseline
+  // so Apply reflects the freshly pristine state.
+  gate.markSaved()
 }
 
 const updateDeviceSettings = (state: PageState, body: Settings): void => {
@@ -465,7 +425,7 @@ const pushDeviceSettings = async (
   updateDeviceSettings(state, body)
   // The just-saved values are the new pristine baseline — snapshot so
   // Apply greys back out until the form diverges again.
-  state.savedState = serializeCommonSettings(context)
+  context.gate.markSaved()
   await alertError(homey, homey.__('settings.success'))
 }
 
@@ -479,9 +439,7 @@ const applyDeviceSettings = async (context: PageContext): Promise<void> => {
     await alertError(homey, homey.__('settings.devices.apply.nothing'))
     return
   }
-  await withBusySettingsButtons(context, async () =>
-    pushDeviceSettings(context, body),
-  )
+  await context.gate.runBusy(async () => pushDeviceSettings(context, body))
 }
 
 const generateCredential = (
@@ -524,9 +482,7 @@ const generateCommonSettings = (
     ) {
       const valueElement = createSelectElement(homey, settingId, values)
       // Every control feeds the dirty check that gates Apply.
-      valueElement.addEventListener('change', () => {
-        updateSettingsDirty(context)
-      })
+      context.gate.wire([valueElement])
       createGroupElement(elements.settingsCommon, valueElement, title)
       refreshCommonSetting(valueElement, state.flatDeviceSettings)
     }
@@ -662,20 +618,23 @@ const buildSections = async (context: PageContext): Promise<void> => {
   await fetchDeviceSettings(context)
   generateCommonSettings(context, driverSettings)
   // Snapshot the pristine state once the sections are built.
-  state.savedState = serializeCommonSettings(context)
-  updateSettingsDirty(context)
+  context.gate.markSaved()
 }
 
 const init = async (homey: HomeySettings): Promise<void> => {
+  const elements = getPageElements()
   const context: PageContext = {
-    elements: getPageElements(),
+    elements,
+    gate: createDirtyGate({
+      applyElement: elements.applySettings,
+      refreshElements: [elements.refreshSettings],
+      serialize: (): string => serializeCommonSettings(elements),
+    }),
     homey,
     state: {
       deviceSettings: {},
       flatDeviceSettings: {},
-      isBusy: false,
       passwordElement: null,
-      savedState: '',
       usernameElement: null,
     },
   }
