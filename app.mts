@@ -308,9 +308,9 @@ export default class HeatzyApp extends App {
   #getDevices(ids?: readonly string[]): HeatzyDevice[] {
     return Object.values(this.homey.drivers.getDrivers()).flatMap((driver) => {
       const devices = driver.getDevices()
-      return ids === undefined ? devices : (
-          devices.filter(({ id }) => ids.includes(id))
-        )
+      return ids === undefined
+        ? devices
+        : devices.filter(({ id }) => ids.includes(id))
     })
   }
 

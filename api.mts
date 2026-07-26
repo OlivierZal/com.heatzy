@@ -12,9 +12,9 @@ import { getErrorMessage } from './lib/get-error-message.mts'
 // login failures are classified here, where `instanceof` still works: a
 // credential rejection reads differently from a transport failure.
 const toLoginFailure = (homey: Homey, error: unknown): Error =>
-  error instanceof AuthenticationError ?
-    new Error(homey.__('settings.authenticate.rejected'))
-  : new Error(getErrorMessage(error))
+  error instanceof AuthenticationError
+    ? new Error(homey.__('settings.authenticate.rejected'))
+    : new Error(getErrorMessage(error))
 
 // Diagnostics breadcrumb: the settings webview is otherwise invisible in
 // diagnostic reports (its routes never touch Heatzy), which makes
