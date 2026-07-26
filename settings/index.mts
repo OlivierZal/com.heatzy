@@ -169,9 +169,9 @@ const alertError = async (
   }
 }
 
-// The one sanctioned fire-and-forget seam (the lib's shape): detach
-// already-started work from an event handler, alerting a rejection
-// instead of propagating it.
+// The one sanctioned fire-and-forget seam: detach already-started
+// work from an event handler, alerting a rejection instead of
+// propagating it.
 const fireAndForget = (
   homey: HomeySettings,
   promise: Promise<unknown>,
@@ -488,8 +488,8 @@ const generateCommonSettings = (
 }
 
 // The credentials section folds once signed in; the device settings
-// stay hidden until then (mirrors melcloud's #content gating), so a
-// signed-out page shows only the expanded credentials.
+// stay hidden until then, so a signed-out page shows only the
+// expanded credentials.
 const setAuthenticatedState = (
   elements: PageElements,
   isAuthenticated: boolean,
