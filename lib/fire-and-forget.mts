@@ -1,6 +1,6 @@
-// The one sanctioned fire-and-forget seam (melcloud-api's shape):
-// detach already-started work from the caller's critical path, logging
-// a rejection instead of propagating it.
+// The one sanctioned fire-and-forget seam: detach already-started work
+// from the caller's critical path, logging a rejection instead of
+// propagating it.
 export const fireAndForget = (
   promise: Promise<unknown>,
   logError: (...args: unknown[]) => void,

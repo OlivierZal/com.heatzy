@@ -1,6 +1,5 @@
 import { vi } from 'vitest'
 
-// Options for createMockDeviceClass.
 // - `overrides`: instance-level props assigned in the constructor (shallow merge).
 // - `superMocks`: prototype-level methods that delegate to the provided vi.fn.
 //   Required for every method HeatzyDevice overrides with a super call

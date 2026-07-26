@@ -374,7 +374,6 @@ export default class HeatzyApp extends App {
     return false
   }
 
-  // Per-device sync failures are logged without aborting the full run.
   async #syncFromDevices(ids?: readonly string[]): Promise<void> {
     const results = await Promise.allSettled(
       this.#getDevices(ids).map(async (device) => device.syncFromDevice()),
