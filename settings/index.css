@@ -59,13 +59,10 @@ details[open] > summary.homey-form-legend::before {
 }
 
 /* Busy and dirty-gated buttons use the native `disabled` attribute; the
-   injected sheet does not grey them, so paint the disabled state here.
-   The classes must match the actual buttons (Apply is danger-shadow,
-   Refresh is secondary-shadow, Reset/Log in are primary-full) — the
-   `-full` shadow variants matched nothing, so disabled never greyed. */
-.homey-button-danger-shadow:disabled,
-.homey-button-primary-full:disabled,
-.homey-button-secondary-shadow:disabled {
+   injected sheet does not grey them, so paint the disabled state here on
+   EVERY homey-button variant. The attribute selector keeps the rule
+   variant-proof: a per-class list silently missed renamed buttons. */
+[class*='homey-button']:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
