@@ -323,13 +323,11 @@ const refreshCommonSetting = (
   if (id !== undefined) {
     const value = flatDeviceSettings[id]
     element.value =
-      (
-        typeof value === 'boolean' ||
-        typeof value === 'number' ||
-        typeof value === 'string'
-      ) ?
-        String(value)
-      : ''
+      typeof value === 'boolean' ||
+      typeof value === 'number' ||
+      typeof value === 'string'
+        ? String(value)
+        : ''
   }
 }
 
@@ -350,8 +348,8 @@ const fetchDeviceSettings = async ({
 
 const processValue = (element: HTMLSelectElement): unknown => {
   if (element.value !== '') {
-    return booleanStrings.includes(element.value) ?
-        element.value === 'true'
+    return booleanStrings.includes(element.value)
+      ? element.value === 'true'
       : element.value
   }
   return null

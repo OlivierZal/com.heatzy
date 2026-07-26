@@ -125,13 +125,13 @@ export default class HeatzyDevice extends Device {
     heater_operation_mode: (value) =>
       isDerogationModeKey(value) ? { derog_mode: DerogationMode[value] } : {},
     locked: (value, product) =>
-      product === Product.glow ?
-        { LOCK_C: toSwitch(value) }
-      : { lock_switch: toSwitch(value) },
+      product === Product.glow
+        ? { LOCK_C: toSwitch(value) }
+        : { lock_switch: toSwitch(value) },
     onoff: (value, product) =>
-      product === Product.glow ?
-        { on_off: toSwitch(value) }
-      : { mode: value === true ? this.#onValue : Mode.stop },
+      product === Product.glow
+        ? { on_off: toSwitch(value) }
+        : { mode: value === true ? this.#onValue : Mode.stop },
     'onoff.timer': (value) => ({ timer_switch: toSwitch(value) }),
     'onoff.window_detection': (value) => ({ window_switch: toSwitch(value) }),
     target_temperature: (value, product) =>
@@ -139,9 +139,9 @@ export default class HeatzyDevice extends Device {
     'target_temperature.eco': (value, product) =>
       getTargetTemperature(product, Mode.eco, Number(value)),
     thermostat_mode: (value) =>
-      isMode(value) ?
-        { mode: value === Mode.stop ? this.#offValue : value }
-      : {},
+      isMode(value)
+        ? { mode: value === Mode.stop ? this.#offValue : value }
+        : {},
   }
 
   get #offValue(): Mode {
@@ -265,9 +265,9 @@ export default class HeatzyDevice extends Device {
       // always_on devices never switch off from Homey: the outgoing
       // value is coerced before the converter runs.
       const value =
-        capability === 'onoff' && this.getSetting('always_on') ?
-          true
-        : values[capability]
+        capability === 'onoff' && this.getSetting('always_on')
+          ? true
+          : values[capability]
       updateData = {
         ...updateData,
         ...this.#toDevice[capability](value, device.product),
@@ -365,9 +365,9 @@ export default class HeatzyDevice extends Device {
     await sequential(
       [...currentCapabilities.symmetricDifference(requiredCapabilities)],
       async (capability) => {
-        await (requiredCapabilities.has(capability) ?
-          this.addCapability(capability)
-        : this.removeCapability(capability))
+        await (requiredCapabilities.has(capability)
+          ? this.addCapability(capability)
+          : this.removeCapability(capability))
       },
     )
   }

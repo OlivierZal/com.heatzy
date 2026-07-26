@@ -59,18 +59,18 @@ export const getCapabilitiesOptions = (
 ): CapabilitiesOptions => {
   const values: CapabilitiesOptionsValues<Mode>[] = [
     { id: Mode.comfort, title: { en: 'Comfort', fr: 'Confort' } },
-    ...(product >= Product.v4 ?
-      [
-        {
-          id: Mode.comfortMinus1,
-          title: { en: 'Comfort -1°C', fr: 'Confort -1°C' },
-        },
-        {
-          id: Mode.comfortMinus2,
-          title: { en: 'Comfort -2°C', fr: 'Confort -2°C' },
-        },
-      ]
-    : []),
+    ...(product >= Product.v4
+      ? [
+          {
+            id: Mode.comfortMinus1,
+            title: { en: 'Comfort -1°C', fr: 'Confort -1°C' },
+          },
+          {
+            id: Mode.comfortMinus2,
+            title: { en: 'Comfort -2°C', fr: 'Confort -2°C' },
+          },
+        ]
+      : []),
     { id: Mode.eco, title: { en: 'Eco', fr: 'Éco' } },
     {
       id: Mode.frostProtection,
@@ -81,14 +81,14 @@ export const getCapabilitiesOptions = (
   const derogationValues: CapabilitiesOptionsValues<
     CapabilitiesOptions['heater_operation_mode']['values'][number]['id']
   >[] = [
-    ...(product >= Product.pro ?
-      ([
-        {
-          id: 'presence',
-          title: { en: 'Presence detection', fr: 'Détection de présence' },
-        },
-      ] as const)
-    : []),
+    ...(product >= Product.pro
+      ? ([
+          {
+            id: 'presence',
+            title: { en: 'Presence detection', fr: 'Détection de présence' },
+          },
+        ] as const)
+      : []),
     { id: 'boost', title: 'Boost' },
     { id: 'vacation', title: { en: 'Vacation', fr: 'Vacances' } },
     { id: 'off', title: { en: 'Off', fr: 'Désactivé' } },
@@ -110,26 +110,26 @@ export const getCapabilitiesOptions = (
 export const getRequiredCapabilities = (product: Product): string[] => [
   'onoff',
   'thermostat_mode',
-  ...(product >= Product.v2 ?
-    [
-      'locked',
-      'onoff.timer',
-      'heater_operation_mode',
-      'derog_end',
-      'derog_time',
-    ]
-  : []),
-  ...(product >= Product.glow ?
-    ['measure_temperature', 'target_temperature', 'target_temperature.eco']
-  : []),
-  ...(product >= Product.pro ?
-    [
-      'alarm_presence',
-      'measure_humidity',
-      'onoff.window_detection',
-      'operational_state',
-    ]
-  : []),
+  ...(product >= Product.v2
+    ? [
+        'locked',
+        'onoff.timer',
+        'heater_operation_mode',
+        'derog_end',
+        'derog_time',
+      ]
+    : []),
+  ...(product >= Product.glow
+    ? ['measure_temperature', 'target_temperature', 'target_temperature.eco']
+    : []),
+  ...(product >= Product.pro
+    ? [
+        'alarm_presence',
+        'measure_humidity',
+        'onoff.window_detection',
+        'operational_state',
+      ]
+    : []),
 ]
 
 export default class HeatzyDriver extends Driver {
@@ -200,8 +200,8 @@ export default class HeatzyDriver extends Driver {
               },
             ) => {
               const value = args.device.getCapabilityValue(capability)
-              return typeof value === 'string' || typeof value === 'number' ?
-                  value === args[getArg(capability)]
+              return typeof value === 'string' || typeof value === 'number'
+                ? value === args[getArg(capability)]
                 : value
             },
           )
