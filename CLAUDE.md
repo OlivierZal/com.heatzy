@@ -70,7 +70,12 @@ coverage.
   settings SDK is error-first-callback); it is a byte-identical copy of
   com.melcloud's (com.melcloud.extension carries the third) — edit all
   three together. `fireAndForget` stays local by design: it binds
-  `homey` to auto-alert, this page's error policy.
+  `homey` to auto-alert, this page's error policy. The surface is
+  test-pinned in two halves, one file each — extend BOTH when touching
+  a route: `tests/unit/api-contract.test.ts` pins manifest ids ↔
+  handlers both ways plus the handlers' function type;
+  `tests/unit/api-route-guards.test.ts` pins the call sites (every
+  webview path literal must match a declared route).
 - Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
   settings Apply/Refresh pair — never re-derive its invariant at a call
   site. Its `serialize` must stay a PURE form snapshot, never a
