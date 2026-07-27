@@ -691,7 +691,7 @@ describe(HeatzyApp, () => {
       ])
       await app.onInit()
 
-      await app.setDeviceSettings(mock<Settings>({ always_on: true }))
+      await app.updateDeviceSettings(mock<Settings>({ always_on: true }))
 
       expect(setSettings).toHaveBeenCalledWith({ always_on: true })
       expect(onSettings).toHaveBeenCalledTimes(1)
@@ -710,7 +710,7 @@ describe(HeatzyApp, () => {
       ])
       await app.onInit()
 
-      await app.setDeviceSettings(mock<Settings>({ always_on: true }))
+      await app.updateDeviceSettings(mock<Settings>({ always_on: true }))
 
       expect(setSettings).not.toHaveBeenCalled()
     })

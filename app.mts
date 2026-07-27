@@ -200,7 +200,7 @@ export default class HeatzyApp extends App {
     return this.#facadeManager.get(instance)
   }
 
-  public async setDeviceSettings(settings: Settings): Promise<void> {
+  public async updateDeviceSettings(settings: Settings): Promise<void> {
     await Promise.all(
       this.#getDevices().map(async (device) => {
         const changedKeys = Object.keys(settings).filter(

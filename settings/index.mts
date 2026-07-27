@@ -4,6 +4,13 @@ import type HomeySettings from 'homey/lib/HomeySettings'
 import type { DeviceSettings, Settings } from '../types/device-settings.mts'
 import type { DriverSetting } from '../types/driver-settings.mts'
 import { getErrorMessage } from '../lib/get-error-message.mts'
+import {
+  homeyApiDelete,
+  homeyApiGet,
+  homeyApiPost,
+  homeyApiPut,
+  homeyConfirm,
+} from './callback-api.mts'
 import { type DirtyGate, createDirtyGate } from './dirty-gate.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
@@ -85,78 +92,6 @@ const getPageElements = (): PageElements => ({
   resetCredentials: getElement('reset_credentials', HTMLButtonElement),
   settingsCommon: getElement('settings_common', HTMLDivElement),
 })
-
-const homeyApiGet = async <T,>(
-  homey: HomeySettings,
-  path: string,
-): Promise<T> =>
-  new Promise((resolve, reject) => {
-    homey.api('GET', path, (error: Error | null, result: T) => {
-      if (error === null) {
-        resolve(result)
-        return
-      }
-      reject(error)
-    })
-  })
-
-const homeyApiDelete = async (
-  homey: HomeySettings,
-  path: string,
-): Promise<void> =>
-  new Promise((resolve, reject) => {
-    homey.api('DELETE', path, (error: Error | null) => {
-      if (error === null) {
-        resolve()
-        return
-      }
-      reject(error)
-    })
-  })
-
-const homeyApiPost = async (
-  homey: HomeySettings,
-  path: string,
-  body: unknown,
-): Promise<void> =>
-  new Promise((resolve, reject) => {
-    homey.api('POST', path, body, (error: Error | null) => {
-      if (error === null) {
-        resolve()
-        return
-      }
-      reject(error)
-    })
-  })
-
-const homeyApiPut = async (
-  homey: HomeySettings,
-  path: string,
-  body: unknown,
-): Promise<void> =>
-  new Promise((resolve, reject) => {
-    homey.api('PUT', path, body, (error: Error | null) => {
-      if (error === null) {
-        resolve()
-        return
-      }
-      reject(error)
-    })
-  })
-
-const homeyConfirm = async (
-  homey: HomeySettings,
-  message: string,
-): Promise<boolean> =>
-  new Promise((resolve) => {
-    homey.confirm(
-      message,
-      null,
-      (error: Error | null, isConfirmed: boolean) => {
-        resolve(error === null && isConfirmed)
-      },
-    )
-  })
 
 const alertError = async (
   homey: HomeySettings,
