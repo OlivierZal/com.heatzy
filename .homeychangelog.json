@@ -86,5 +86,9 @@
   "23.0.2": {
     "en": "Settings: the Update button now stays greyed out until you change a setting.",
     "fr": "Réglages : le bouton Mettre à jour reste désormais grisé tant que vous n'avez pas modifié un réglage."
+  },
+  "23.0.3": {
+    "en": "Under-the-hood maintenance and hardening.",
+    "fr": "Maintenance interne et durcissement."
   }
 }
