@@ -40,7 +40,7 @@ const api = {
     }
   },
   getDeviceSettings: ({ homey }: { homey: Homey }): DeviceSettings => {
-    logSettingsRoute(homey.app, '/settings/devices')
+    logSettingsRoute(homey.app, 'GET /settings/devices')
     return homey.app.getDeviceSettings()
   },
   getDriverSettings: ({
@@ -48,11 +48,11 @@ const api = {
   }: {
     homey: Homey
   }): Partial<Record<string, DriverSetting[]>> => {
-    logSettingsRoute(homey.app, '/settings/drivers')
+    logSettingsRoute(homey.app, 'GET /settings/drivers')
     return homey.app.getDriverSettings()
   },
   getLanguage: ({ homey }: { homey: Homey }): string => {
-    logSettingsRoute(homey.app, '/language')
+    logSettingsRoute(homey.app, 'GET /language')
     return homey.i18n.getLanguage()
   },
   isAuthenticated: ({ homey }: { homey: Homey }): boolean => {
@@ -78,7 +78,7 @@ const api = {
   }): void => {
     homey.app.error('Settings webview boot failure:', body)
   },
-  setDeviceSettings: async ({
+  updateDeviceSettings: async ({
     body,
     homey,
   }: {
@@ -86,7 +86,7 @@ const api = {
     homey: Homey
   }): Promise<void> => {
     logSettingsRoute(homey.app, 'PUT /settings/devices')
-    await homey.app.setDeviceSettings(body)
+    await homey.app.updateDeviceSettings(body)
   },
 }
 

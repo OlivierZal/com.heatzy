@@ -25,7 +25,7 @@ const mockApp = {
   getDeviceSettings: vi.fn<() => DeviceSettings>(),
   getDriverSettings: vi.fn<() => Partial<Record<string, DriverSetting[]>>>(),
   log: vi.fn<(...args: readonly unknown[]) => void>(),
-  setDeviceSettings: vi.fn<(settings: Settings) => Promise<void>>(),
+  updateDeviceSettings: vi.fn<(settings: Settings) => Promise<void>>(),
 }
 
 const mockI18n = { getLanguage: vi.fn<() => string>() }
@@ -98,7 +98,7 @@ describe('api', () => {
       expect(mockApp.getDeviceSettings).toHaveBeenCalledTimes(1)
       expect(mockApp.log).toHaveBeenCalledWith({
         dataType: SETTINGS_PAGE,
-        route: '/settings/devices',
+        route: 'GET /settings/devices',
       })
     })
   })
@@ -114,7 +114,7 @@ describe('api', () => {
       expect(mockApp.getDriverSettings).toHaveBeenCalledTimes(1)
       expect(mockApp.log).toHaveBeenCalledWith({
         dataType: SETTINGS_PAGE,
-        route: '/settings/drivers',
+        route: 'GET /settings/drivers',
       })
     })
   })
@@ -131,7 +131,7 @@ describe('api', () => {
         expect(mockI18n.getLanguage).toHaveBeenCalledTimes(1)
         expect(mockApp.log).toHaveBeenCalledWith({
           dataType: SETTINGS_PAGE,
-          route: '/language',
+          route: 'GET /language',
         })
       },
     )
@@ -168,13 +168,13 @@ describe('api', () => {
   })
 
   describe('device settings update', () => {
-    it('should delegate to app.setDeviceSettings and log the breadcrumb', async () => {
+    it('should delegate to app.updateDeviceSettings and log the breadcrumb', async () => {
       const body = mock<Settings>({ always_on: true })
-      mockApp.setDeviceSettings.mockResolvedValue()
+      mockApp.updateDeviceSettings.mockResolvedValue()
 
-      await api.setDeviceSettings({ body, homey })
+      await api.updateDeviceSettings({ body, homey })
 
-      expect(mockApp.setDeviceSettings).toHaveBeenCalledWith(body)
+      expect(mockApp.updateDeviceSettings).toHaveBeenCalledWith(body)
       expect(mockApp.log).toHaveBeenCalledWith({
         dataType: SETTINGS_PAGE,
         route: 'PUT /settings/devices',

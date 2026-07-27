@@ -62,6 +62,15 @@ coverage.
   SDK gaps and app-specific design — Homey injects its own class-based
   stylesheet at runtime, which is not in the repo and not available
   offline.
+- App-API surface conventions (aligned on com.melcloud): paths are
+  kebab-case REST, `get*` for GET and `update*` for PUT (never `set*`),
+  breadcrumbs log the verbed form (`'GET /settings/devices'`). Handler
+  renames are wire-invisible (routing is method+path).
+  `settings/callback-api.mts` is the settings page's transport (the
+  settings SDK is error-first-callback); it is a byte-identical copy of
+  com.melcloud's (com.melcloud.extension carries the third) — edit all
+  three together. `fireAndForget` stays local by design: it binds
+  `homey` to auto-alert, this page's error policy.
 - Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
   settings Apply/Refresh pair — never re-derive its invariant at a call
   site. Its `serialize` must stay a PURE form snapshot, never a
