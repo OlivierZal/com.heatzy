@@ -90,5 +90,9 @@
   "23.0.3": {
     "en": "Under-the-hood maintenance and hardening.",
     "fr": "Maintenance interne et durcissement."
+  },
+  "23.0.4": {
+    "en": "The message shown when a device cannot be found now appears in the right language.",
+    "fr": "Le message indiquant qu'un appareil est introuvable s'affiche désormais dans la bonne langue."
   }
 }
