@@ -1,6 +1,6 @@
 {
   "errors": {
-    "deviceNotFound": "Appareil introuvable."
+    "deviceNotFound": "Device not found."
   },
   "notifications": {
     "sessionExpired": "Your Heatzy session has expired: please sign in again from the app settings.",
