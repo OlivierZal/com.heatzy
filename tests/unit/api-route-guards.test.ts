@@ -50,6 +50,42 @@ const extractPathLiterals = (source: string): string[] =>
     .map((match) => match.groups?.path ?? '')
     .toArray()
 
+// The typed helpers carry the verb in their name; the HTML boot beacon
+// calls the raw SDK with the verb as its first argument. Both forms are
+// read as (method, path) pairs because a path match alone proves
+// nothing here: `/sessions` is declared under three different verbs.
+const HELPER_CALL =
+  /homeyApi(?<verb>Get|Put|Post|Delete)(?:<[^\(\)\n]*>)?\s*\(\s*homey\s*,\s*['"](?<path>\/[a-z][\w\-\/]*)['"]/gv
+const HELPER_CALL_SITE =
+  /homeyApi(?:Get|Put|Post|Delete)(?:<[^\(\)\n]*>)?\s*\(/gv
+const SDK_CALL =
+  /homey\.api\(\s*['"](?<verb>[A-Z]+)['"]\s*,\s*['"](?<path>\/[a-z][\w\-\/]*)['"]/gv
+
+const extractRouteCalls = (source: string): DeclaredRoute[] => {
+  const stripped = stripComments(source)
+  return [
+    ...stripped.matchAll(HELPER_CALL).map((match) => ({
+      method: (match.groups?.verb ?? '').toUpperCase(),
+      path: match.groups?.path ?? '',
+    })),
+    ...stripped.matchAll(SDK_CALL).map((match) => ({
+      method: match.groups?.verb ?? '',
+      path: match.groups?.path ?? '',
+    })),
+  ]
+}
+
+const countHelperCallSites = (source: string): number =>
+  stripComments(source).matchAll(HELPER_CALL_SITE).toArray().length
+
+const dedupeCalls = (calls: DeclaredRoute[]): DeclaredRoute[] => {
+  const byPair = new Map<string, DeclaredRoute>()
+  for (const call of calls) {
+    byPair.set(`${call.method} ${call.path}`, call)
+  }
+  return byPair.values().toArray()
+}
+
 const routeMatches = (routePath: string, literal: string): boolean => {
   const routeSegments = routePath.split('/')
   const literalSegments = literal.split('/')
@@ -62,20 +98,57 @@ const routeMatches = (routePath: string, literal: string): boolean => {
   )
 }
 
+const readSources = async (): Promise<string[]> => {
+  const fileGroups = await Promise.all(
+    SOURCE_DIRS.map(async (dir) => listSourceFiles(dir)),
+  )
+  return Promise.all(
+    fileGroups.flat().map(async (file) => readFile(file, 'utf8')),
+  )
+}
+
 describe('api route guards', () => {
   it('should declare every path the settings webview calls', async () => {
     const routes = await readRoutes()
-    const fileGroups = await Promise.all(
-      SOURCE_DIRS.map(async (dir) => listSourceFiles(dir)),
-    )
-    const sources = await Promise.all(
-      fileGroups.flat().map(async (file) => readFile(file, 'utf8')),
-    )
+    const sources = await readSources()
     const literals = sources.flatMap((source) => extractPathLiterals(source))
     const unmatched = [...new Set(literals)].filter((literal) =>
       routes.every((route) => !routeMatches(route.path, literal)),
     )
 
     expect(unmatched).toStrictEqual([])
+  })
+
+  it('should declare every method the settings webview calls each path with', async () => {
+    const routes = await readRoutes()
+    const sources = await readSources()
+    const calls = sources.flatMap((source) => extractRouteCalls(source))
+    const unmatched = dedupeCalls(calls).filter((call) =>
+      routes.every(
+        (route) =>
+          route.method !== call.method || !routeMatches(route.path, call.path),
+      ),
+    )
+
+    expect(unmatched).toStrictEqual([])
+  })
+
+  // Both regexes above would pass vacuously if they stopped matching,
+  // so the pair extractor must account for every helper call site. A
+  // mismatch means either a regex drifted or a call now builds its path
+  // dynamically — which this guard cannot see, and which needs a
+  // deliberate decision rather than silence.
+  it('should read a method and a literal path from every helper call site', async () => {
+    const sources = await readSources()
+    const callSites = sources.reduce(
+      (total, source) => total + countHelperCallSites(source),
+      0,
+    )
+    const extracted = sources.flatMap((source) =>
+      extractRouteCalls(source),
+    ).length
+
+    expect(callSites).toBeGreaterThan(0)
+    expect(extracted).toBeGreaterThanOrEqual(callSites)
   })
 })
