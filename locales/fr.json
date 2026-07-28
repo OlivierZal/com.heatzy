@@ -1,6 +1,6 @@
 {
   "errors": {
-    "deviceNotFound": "Device not found."
+    "deviceNotFound": "Appareil introuvable."
   },
   "settings": {
     "authenticate": {
