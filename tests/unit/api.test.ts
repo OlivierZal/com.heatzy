@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DeviceSettings, Settings } from '../../types/device-settings.mts'
 import type { DriverSetting } from '../../types/driver-settings.mts'
-import { mock } from '../helpers.js'
+import { mock } from '../helpers.ts'
 
 const { default: api } = await import('../../api.mts')
 
