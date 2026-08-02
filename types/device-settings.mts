@@ -1,10 +1,10 @@
 import type { PreviousMode } from '@olivierzal/heatzy-api'
 
-export type DeviceSetting = Record<string, unknown>
+type DeviceSetting = Record<string, unknown>
+
+type OnMode = 'previous' | PreviousMode
 
 export type DeviceSettings = Record<string, DeviceSetting>
-
-export type OnMode = 'previous' | PreviousMode
 
 export interface Settings extends Partial<Record<string, unknown>> {
   readonly always_on?: boolean

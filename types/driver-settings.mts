@@ -1,14 +1,6 @@
-import type { LoginCredentials } from '@olivierzal/heatzy-api'
-
 interface DriverSettingValue {
   readonly id: string
   readonly label: string
-}
-
-export interface DriverCapabilitiesOptions {
-  readonly title: string
-  readonly type: string
-  readonly values?: readonly DriverSettingValue[] | undefined
 }
 
 export interface DriverSetting {
@@ -24,8 +16,4 @@ export interface DriverSetting {
   readonly placeholder?: string
   readonly units?: string | undefined
   readonly values?: readonly DriverSettingValue[] | undefined
-}
-
-export interface LoginDriverSetting extends DriverSetting {
-  readonly id: keyof LoginCredentials
 }
