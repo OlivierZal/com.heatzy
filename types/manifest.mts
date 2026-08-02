@@ -1,5 +1,28 @@
 import type { LocalizedStrings } from './bases.mts'
 
+interface ManifestDriverSetting {
+  readonly label: LocalizedStrings
+  readonly children?: readonly ManifestDriverSettingData[]
+  readonly id?: string
+}
+
+interface ManifestDriverSettingData {
+  readonly id: string
+  readonly label: LocalizedStrings
+  readonly type: string
+  readonly max?: number
+  readonly min?: number
+  readonly units?: string
+  readonly values?: readonly {
+    readonly id: string
+    readonly label: LocalizedStrings
+  }[]
+}
+
+interface PairSetting {
+  readonly id: string
+}
+
 export interface LoginSetting extends PairSetting {
   readonly id: 'login'
   readonly options: {
@@ -25,27 +48,4 @@ export interface ManifestDriver {
   readonly name: LocalizedStrings
   readonly pair?: readonly PairSetting[]
   readonly settings?: readonly ManifestDriverSetting[]
-}
-
-export interface ManifestDriverSetting {
-  readonly label: LocalizedStrings
-  readonly children?: readonly ManifestDriverSettingData[]
-  readonly id?: string
-}
-
-export interface ManifestDriverSettingData {
-  readonly id: string
-  readonly label: LocalizedStrings
-  readonly type: string
-  readonly max?: number
-  readonly min?: number
-  readonly units?: string
-  readonly values?: readonly {
-    readonly id: string
-    readonly label: LocalizedStrings
-  }[]
-}
-
-export interface PairSetting {
-  readonly id: string
 }
