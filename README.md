@@ -45,7 +45,7 @@ npm run homey:start  # run the app on your Homey (remote)
 Architecture notes:
 
 - The API layer lives in [@olivierzal/heatzy-api](https://github.com/OlivierZal/heatzy-api), a sibling repository with its own tooling; API bugs are fixed there, not worked around here.
-- Browser code (the `settings/` page) is bundled by `scripts/bundle.mjs` into self-contained bundles; the outputs are emitted into `.homeybuild` by `npm run build`, which the Homey CLI runs automatically on validate/publish.
+- Browser code (the `settings/` page) is bundled by `scripts/bundle.mts` into self-contained bundles; the outputs are emitted into `.homeybuild` by `npm run build`, which the Homey CLI runs automatically on validate/publish.
 - Both the build and `npm run typecheck` use the native TypeScript 7 compiler (`typescript@7` aliased as `@typescript/native`) for speed; `typescript@6` remains alongside it for tools that need the JS API (typescript-eslint) until TypeScript 7.1 ships its stable programmatic API.
 - Test coverage is enforced at 100% for backend code; browser glue (`settings/`) is excluded from coverage, so the badge covers the driver, app and API layers only.
 

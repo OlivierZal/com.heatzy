@@ -54,7 +54,7 @@ const config: Config[] = defineConfig([
     ignores: [
       '.homeybuild/',
       'coverage/',
-      // esbuild outputs (see scripts/bundle.mjs), also gitignored
+      // esbuild outputs (see scripts/bundle.mts), also gitignored
       'settings/index.mjs',
     ],
   },
@@ -427,7 +427,12 @@ const config: Config[] = defineConfig([
           bundledDependencies: false,
           // The settings webview source is bundled by esbuild, so its
           // imports may live in devDependencies.
-          devDependencies: ['*.config.ts', 'settings/**', 'tests/**'],
+          devDependencies: [
+            '*.config.ts',
+            'scripts/**',
+            'settings/**',
+            'tests/**',
+          ],
           optionalDependencies: false,
           peerDependencies: false,
         },
@@ -997,7 +1002,7 @@ const config: Config[] = defineConfig([
       'unicorn/no-invalid-file-input-accept': 'error',
       // The referenced module bundles are gitignored build outputs (CI
       // lints without building); their existence is guaranteed harder by
-      // scripts/bundle.mjs, which hashes every local reference and
+      // scripts/bundle.mts, which hashes every local reference and
       // throws when one is missing.
       'unicorn/no-missing-local-resource': 'off',
       'unicorn/text-encoding-identifier-case': 'error',
@@ -1219,7 +1224,11 @@ const config: Config[] = defineConfig([
     },
   },
   {
+    // Scoped: without `files`, this block applied to every file, which
+    // made it the only one reaching `**/*.mjs` — and leaked 28 inert
+    // `yml/*` rules onto every `.mts` as well.
     extends: [ymlConfigs.standard, ymlConfigs.prettier],
+    files: ['**/*.{yaml,yml}'],
     rules: {
       'yml/file-extension': [
         'error',
