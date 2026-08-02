@@ -1,6 +1,6 @@
 {
   "name": "com.heatzy",
-  "version": "23.0.4",
+  "version": "23.1.0",
   "description": "Heatzy for Homey",
   "homepage": "https://github.com/OlivierZal/com.heatzy/",
   "bugs": {
@@ -31,7 +31,7 @@
     "typecheck": "node ./node_modules/@typescript/native/bin/tsc --noEmit"
   },
   "dependencies": {
-    "@olivierzal/heatzy-api": "^10.0.0",
+    "@olivierzal/heatzy-api": "11.0.0",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
