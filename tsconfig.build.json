@@ -2,6 +2,6 @@
   "compilerOptions": {
     "rootDir": "."
   },
-  "exclude": ["*.config.ts", "tests", "settings"],
+  "exclude": ["*.config.ts", "scripts", "tests", "settings"],
   "extends": "./tsconfig.json"
 }

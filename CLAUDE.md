@@ -17,19 +17,19 @@ caught real failures that the others miss:
 - `npm run typecheck` — `tsc` from `@typescript/native` (TypeScript 7).
 - `npm test` / `npm run test:coverage` — vitest; branches are at 100%,
   keep them there.
-- `npm run build` — esbuild bundle (`scripts/bundle.mjs`) + `tsc`
+- `npm run build` — esbuild bundle (`scripts/bundle.mts`) + `tsc`
   emit, BOTH into `.homeybuild`. The Homey CLI runs `npm run build`
   when it detects TypeScript (`devDependencies.typescript`; it
   validates `outDir: .homeybuild`) — but only AFTER its pre-process
   copy into `.homeybuild`, so the source tree stays sources-only and
   everything the package needs must be emitted there: tsc does it via
-  `outDir`, and `bundle.mjs` emits the settings webview bundles there
+  `outDir`, and `bundle.mts` emits the settings webview bundles there
   too (source-tree outfiles would land too late to be copied, and a
   store install would 404 the bundles). The CLI's own build invocation
   is therefore sufficient for install, run, validate and publish alike;
   a standalone suite run (no `.homeybuild` page copy) still proves the
   bundles compile.
-- Cache-busting `?v=` — a PACKAGE-TIME transform: `bundle.mjs` stamps
+- Cache-busting `?v=` — a PACKAGE-TIME transform: `bundle.mts` stamps
   every local asset reference of the `.homeybuild` page copy with a
   content hash (`?v=<hash>`), so phone webviews (which cache assets
   across app versions) refetch an asset exactly when its bytes change.
@@ -110,7 +110,7 @@ coverage.
   mechanism without new on-device evidence: classic `defer` is the
   cold-verified form.
 - Phone webviews also cache the HTML ITSELF across app versions, so
-  shipped bundle filenames are a COMPAT CONTRACT: `scripts/bundle.mjs`
+  shipped bundle filenames are a COMPAT CONTRACT: `scripts/bundle.mts`
   builds the settings entry twice — `index.js` (IIFE) for the current
   HTML, plus an `index.mjs` twin for every cached older HTML. Heatzy
   divergence from com.melcloud: the cached-HTML era here loaded
