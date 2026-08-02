@@ -94,5 +94,9 @@
   "23.0.4": {
     "en": "The message shown when a device cannot be found now appears in the right language.",
     "fr": "Le message indiquant qu'un appareil est introuvable s'affiche désormais dans la bonne langue."
+  },
+  "23.1.0": {
+    "en": "Signing in no longer reports success when your devices could not be loaded: instead of an empty device list, the app now tells you what went wrong.",
+    "fr": "La connexion ne s'annonce plus réussie lorsque vos appareils n'ont pas pu être chargés : au lieu d'une liste vide, l'app vous indique désormais ce qui a échoué."
   }
 }
