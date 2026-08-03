@@ -16,11 +16,10 @@
       "true": "Yes"
     },
     "devices": {
+      "legend": "All device settings",
       "apply": {
-        "button": "Apply to all devices",
         "nothing": "No change to apply."
-      },
-      "legend": "All device settings"
+      }
     },
     "refresh": "Refresh",
     "success": "Update succeeded.",

@@ -184,6 +184,12 @@ coverage.
 
 ## Repo process
 
+- `@olivierzal/heatzy-api` is pinned EXACTLY, never with a caret: the
+  library's breaking changes are self-published, adoption is an explicit
+  reviewed PR per release, and a caret is precisely what held the
+  published 11.0.0 auth fix away from users for six days (2026-08). The
+  library's own Releasing doctrine mirrors this — publishing is not done
+  until the adoption PR lands here.
 - `main` is protected (PRs only, squash merges); no merge queue
   (user-owned repo, org-only feature).
 - The PR title IS the commit that lands: `squash_merge_commit_title` is

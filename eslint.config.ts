@@ -1027,6 +1027,7 @@ const config: Config[] = defineConfig([
           natural: true,
         },
       ],
+      'json/top-level-interop': 'error',
     },
   },
   {
@@ -1234,6 +1235,15 @@ const config: Config[] = defineConfig([
         'error',
         {
           extension: 'yml',
+        },
+      ],
+      'yml/key-name-casing': [
+        'error',
+        {
+          camelCase: true,
+          'kebab-case': true,
+          SCREAMING_SNAKE_CASE: true,
+          snake_case: true,
         },
       ],
       'yml/require-string-key': 'error',
