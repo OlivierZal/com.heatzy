@@ -908,6 +908,40 @@ const config: Config[] = defineConfig([
     ],
   },
   {
+    // The webview runtime floor (see CLAUDE.md): es2023 array methods are
+    // the ceiling — no `Object.groupBy`/`Map.groupBy`, no iterator
+    // helpers (`.entries().map()` and friends). The tsconfig `lib`
+    // cannot express this (one project, two runtimes), so the constraint
+    // lives here.
+    files: ['settings/**/*.mts'],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          message:
+            'es2024+: old iOS webview engines lack it (CLAUDE.md webview floor).',
+          object: 'Object',
+          property: 'groupBy',
+        },
+        {
+          message:
+            'es2024+: old iOS webview engines lack it (CLAUDE.md webview floor).',
+          object: 'Map',
+          property: 'groupBy',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          message:
+            'Iterator helpers are 2025-era: old iOS webview engines lack them (CLAUDE.md webview floor). Spread into an array first.',
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.property.name=/^(drop|every|filter|find|flatMap|forEach|map|reduce|some|take|toArray)$/][callee.object.type='CallExpression'][callee.object.callee.type='MemberExpression'][callee.object.callee.property.name=/^(entries|keys|values)$/][callee.object.callee.object.name!='Object']",
+        },
+      ],
+    },
+  },
+  {
     files: ['lib/homey.mts'],
     rules: {
       'import-x/no-extraneous-dependencies': 'off',

@@ -63,7 +63,9 @@ coverage.
   stylesheet at runtime, which is not in the repo and not available
   offline.
 - App-API surface conventions (aligned on com.melcloud): paths are
-  kebab-case REST, `get*` for GET and `update*` for PUT (never `set*`),
+  kebab-case REST, `get*` for GET — except `is*` for a boolean GET —,
+  `update*` for PUT (never `set*`), and a business verb for POST
+  (`authenticate` on `/sessions`, `logWebviewBoot` on `/boot-error`),
   breadcrumbs log the verbed form (`'GET /settings/devices'`). Handler
   renames are wire-invisible (routing is method+path).
   `settings/callback-api.mts` is the settings page's transport (the
@@ -142,6 +144,26 @@ coverage.
   manifest capabilities and registers condition/action run listeners
   mechanically; the settable surface is the driver's `setCapabilities`
   list.
+
+## Naming & authored-content conventions
+
+- What `@typescript-eslint/naming-convention` cannot see is convention
+  too: booleans read as questions even untyped (`isX`/`hasX`), handlers
+  as verbs; a name states what the thing IS, never its history. Test
+  files are named after the unit under test (`<module>.test.ts`); shared
+  test helpers keep their family's names — apps say `assertDefined` and
+  `mock(overrides)` where the libraries say `defined` and
+  `mock(value?)`: two test families, deliberately not unified.
+- Static markup and styles live in `.html`/`.css` files. TS builds DOM
+  only when the content is programmatic (computed values, per-item
+  nodes), via `createElement` — never `innerHTML` (`no-unsafe-dom-html`
+  enforces it). Inline style writes are reserved for values CSS cannot
+  express; anything static belongs in the stylesheet, following the
+  CSS/HTML lint rules' spirit even where no rule captures it.
+- The webview runtime floor (es2023, no `Object.groupBy`, no iterator
+  helpers) is enforced by a scoped lint block over `settings/` — the
+  tsconfig cannot express two runtimes in one project. Node-side code
+  may use the newer APIs freely.
 
 ## Lint doctrine
 
