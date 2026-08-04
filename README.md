@@ -31,7 +31,7 @@ English, French.
 
 ## Development
 
-Requirements: Node.js 22 and the [Homey CLI](https://apps.developer.homey.app/the-basics/getting-started) (`npx homey`).
+Requirements: Node.js 22 (see `.nvmrc`) and the [Homey CLI](https://apps.developer.homey.app/the-basics/getting-started) (`npx homey`).
 
 ```bash title="Common commands"
 npm ci               # install dependencies
