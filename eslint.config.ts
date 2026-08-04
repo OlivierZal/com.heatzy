@@ -776,6 +776,7 @@ const config: Config[] = defineConfig([
       'unicorn/custom-error-definition': 'error',
       // Owned by `@typescript-eslint/naming-convention`.
       'unicorn/id-match': 'off',
+      'unicorn/iteration-fallback-style': 'error',
       // Vocabulary opt-out: the abbreviation renames it forces
       // (`args` -> `arguments_`, ...) fight the domain naming.
       'unicorn/name-replacements': 'off',
