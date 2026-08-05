@@ -25,6 +25,9 @@ declare module 'homey' {
   }
 }
 
+// The SDK module only default-exports the `Homey` class: this block is
+// what gives it a NAMED `Homey` interface export (with the typed `app`)
+// for the api surface's `import type { Homey } from 'homey/lib/Homey'`.
 declare module 'homey/lib/Homey.js' {
   interface Homey extends HomeyLib {
     app: HeatzyApp

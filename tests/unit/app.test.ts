@@ -586,6 +586,27 @@ describe(HeatzyApp, () => {
       expect(deviceSettings.heatzy?.always_on).toBe(true)
       expect(deviceSettings.heatzy?.on_mode).toBeNull()
     })
+
+    it('should keep folding the settings after an earlier conflict', async () => {
+      setupDrivers([
+        createDevice({
+          getSettings: vi
+            .fn<() => Record<string, unknown>>()
+            .mockReturnValue({ always_on: true, on_mode: 'comfort' }),
+        }),
+        createDevice({
+          getSettings: vi
+            .fn<() => Record<string, unknown>>()
+            .mockReturnValue({ always_on: false, on_mode: 'eco' }),
+        }),
+      ])
+      await app.onInit()
+
+      const deviceSettings = app.getDeviceSettings()
+
+      expect(deviceSettings.heatzy?.always_on).toBeNull()
+      expect(deviceSettings.heatzy?.on_mode).toBeNull()
+    })
   })
 
   describe('driver settings retrieval', () => {

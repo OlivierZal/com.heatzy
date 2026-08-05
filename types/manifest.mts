@@ -19,6 +19,15 @@ interface ManifestDriverSettingData {
   }[]
 }
 
+interface ManifestFlow {
+  readonly actions: readonly ManifestFlowCard[]
+  readonly conditions: readonly ManifestFlowCard[]
+}
+
+interface ManifestFlowCard {
+  readonly id: string
+}
+
 interface PairSetting {
   readonly id: string
 }
@@ -39,6 +48,7 @@ export interface LoginSetting extends PairSetting {
 
 export interface Manifest {
   readonly drivers: readonly ManifestDriver[]
+  readonly flow: ManifestFlow
   readonly version: string
 }
 

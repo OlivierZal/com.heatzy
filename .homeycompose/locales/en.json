@@ -14,10 +14,7 @@
       "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials."
     },
     "boolean": { "false": "No", "true": "Yes" },
-    "devices": {
-      "apply": { "nothing": "No change to apply." },
-      "legend": "All device settings"
-    },
+    "devices": { "legend": "All device settings" },
     "loadFailed": "The settings page failed to load. Please try again.",
     "refresh": "Refresh",
     "success": "Update succeeded.",

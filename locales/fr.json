@@ -2,6 +2,10 @@
   "errors": {
     "deviceNotFound": "Appareil introuvable."
   },
+  "notifications": {
+    "sessionExpired": "Votre session Heatzy a expiré : reconnectez-vous depuis les réglages de l’application.",
+    "sessionRestored": "Votre session Heatzy est de nouveau active."
+  },
   "settings": {
     "authenticate": {
       "button": "Se connecter",
@@ -16,19 +20,12 @@
       "true": "Oui"
     },
     "devices": {
-      "legend": "Paramètres de tous les appareils",
-      "apply": {
-        "nothing": "Aucun changement à appliquer."
-      }
+      "legend": "Paramètres de tous les appareils"
     },
+    "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer.",
     "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",
     "title": "Paramètres Heatzy",
-    "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer.",
     "update": "Mettre à jour"
-  },
-  "notifications": {
-    "sessionExpired": "Votre session Heatzy a expiré : reconnectez-vous depuis les réglages de l’application.",
-    "sessionRestored": "Votre session Heatzy est de nouveau active."
   }
 }

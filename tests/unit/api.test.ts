@@ -197,10 +197,15 @@ describe('api', () => {
   })
 
   describe('webview hashes', () => {
-    it('should serve the packaged manifest map', async () => {
+    it('should log a breadcrumb and serve the packaged manifest map', async () => {
       // A dev suite run packages no manifest: the empty map is the
       // documented fresh-by-default answer.
-      await expect(api.getWebviewHashes()).resolves.toStrictEqual({})
+      await expect(api.getWebviewHashes({ homey })).resolves.toStrictEqual({})
+
+      expect(mockApp.log).toHaveBeenCalledWith({
+        dataType: 'Settings page',
+        route: 'GET /webview-hashes',
+      })
     })
   })
 })

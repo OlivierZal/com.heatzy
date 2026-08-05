@@ -18,8 +18,8 @@ import type HeatzyDevice from './device.mts'
 
 const NOT_FOUND = -1
 
-// Capabilities Homey can write back to the wire — the action-card and
-// capability-listener surface (conditions cover every capability).
+// Capabilities Homey can write back to the wire — the
+// capability-listener write surface.
 export const SETTABLE_CAPABILITIES: readonly (keyof SetCapabilities)[] = [
   'derog_time',
   'heater_operation_mode',
@@ -32,19 +32,9 @@ export const SETTABLE_CAPABILITIES: readonly (keyof SetCapabilities)[] = [
   'thermostat_mode',
 ]
 
-const settableCapabilities: ReadonlySet<string> = new Set(SETTABLE_CAPABILITIES)
-
 const getArg = (capability: string): string => {
   const dot = capability.indexOf('.')
   return dot === NOT_FOUND ? capability : capability.slice(0, dot)
-}
-
-const tryRegisterFlowCard = (register: () => void): void => {
-  try {
-    register()
-  } catch {
-    // Flow card may not exist for this capability
-  }
 }
 
 /**
@@ -188,46 +178,58 @@ export default class HeatzyDriver extends Driver {
       }))
   }
 
-  #registerFlowListeners(): void {
-    for (const capability of this.manifest.capabilities) {
-      tryRegisterFlowCard(() => {
-        this.homey.flow
-          .getConditionCard(`${capability}_condition`)
-          .registerRunListener(
-            (
-              args: Record<string, unknown> & {
-                device: { getCapabilityValue: (key: string) => unknown }
-              },
-            ) => {
-              const value = args.device.getCapabilityValue(capability)
-              return typeof value === 'string' || typeof value === 'number'
-                ? value === args[getArg(capability)]
-                : value
-            },
+  #registerActionListener(capability: string): void {
+    this.homey.flow
+      .getActionCard(`${capability}_action`)
+      .registerRunListener(
+        async (
+          args: Record<string, unknown> & {
+            device: {
+              triggerCapabilityListener: (
+                key: string,
+                value: unknown,
+              ) => Promise<void>
+            }
+          },
+        ) => {
+          await args.device.triggerCapabilityListener(
+            capability,
+            args[getArg(capability)],
           )
-      })
-      if (settableCapabilities.has(capability)) {
-        tryRegisterFlowCard(() => {
-          this.homey.flow
-            .getActionCard(`${capability}_action`)
-            .registerRunListener(
-              async (
-                args: Record<string, unknown> & {
-                  device: {
-                    triggerCapabilityListener: (
-                      key: string,
-                      value: unknown,
-                    ) => Promise<void>
-                  }
-                },
-              ) => {
-                await args.device.triggerCapabilityListener(
-                  capability,
-                  args[getArg(capability)],
-                )
-              },
-            )
-        })
+        },
+      )
+  }
+
+  #registerConditionListener(capability: string): void {
+    this.homey.flow
+      .getConditionCard(`${capability}_condition`)
+      .registerRunListener(
+        (
+          args: Record<string, unknown> & {
+            device: { getCapabilityValue: (key: string) => unknown }
+          },
+        ) => {
+          const value = args.device.getCapabilityValue(capability)
+          return typeof value === 'string' || typeof value === 'number'
+            ? value === args[getArg(capability)]
+            : value
+        },
+      )
+  }
+
+  // Run listeners are wired for exactly the cards the app manifest
+  // declares, so a missing card is a contract break, never a swallowed
+  // throw.
+  #registerFlowListeners(): void {
+    const { actions, conditions } = this.homey.manifest.flow
+    const conditionIds = new Set(conditions.map(({ id }) => id))
+    const actionIds = new Set(actions.map(({ id }) => id))
+    for (const capability of this.manifest.capabilities) {
+      if (conditionIds.has(`${capability}_condition`)) {
+        this.#registerConditionListener(capability)
+      }
+      if (actionIds.has(`${capability}_action`)) {
+        this.#registerActionListener(capability)
       }
     }
   }
