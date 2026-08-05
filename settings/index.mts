@@ -116,6 +116,19 @@ const fireAndForget = (
   promise.catch(async (error: unknown) => alertMessage(homey, error))
 }
 
+// Freshness breadcrumbs ride the declared boot-error route; a missed
+// one is acceptable, so the callback swallows the outcome.
+const reportFreshness = (homey: HomeySettings, message: string): void => {
+  homey.api(
+    'POST',
+    '/boot-error',
+    { message, name: 'WebviewFreshness' },
+    () => {
+      // A missed freshness breadcrumb is acceptable.
+    },
+  )
+}
+
 const setDocumentLanguage = async (homey: HomeySettings): Promise<void> => {
   try {
     document.documentElement.lang = await homeyApiGet<string>(
@@ -547,11 +560,16 @@ const buildSections = async (context: PageContext): Promise<void> => {
 }
 
 const init = async (homey: HomeySettings): Promise<void> => {
-  // A stale cached page reloads itself once instead of booting: skip
+  // A stale cached page refetches itself once (never-cached address)
+  // instead of booting: skip
   // the init — the document is about to be replaced.
   if (
-    await ensureFreshWebview('settings', async () =>
-      homeyApiGet(homey, '/webview-hashes'),
+    await ensureFreshWebview(
+      'settings',
+      async () => homeyApiGet(homey, '/webview-hashes'),
+      (message) => {
+        reportFreshness(homey, message)
+      },
     )
   ) {
     return
