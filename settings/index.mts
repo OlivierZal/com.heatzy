@@ -560,7 +560,8 @@ const buildSections = async (context: PageContext): Promise<void> => {
 }
 
 const init = async (homey: HomeySettings): Promise<void> => {
-  // A stale cached page reloads itself once instead of booting: skip
+  // A stale cached page refetches itself once (never-cached address)
+  // instead of booting: skip
   // the init — the document is about to be replaced.
   if (
     await ensureFreshWebview(
