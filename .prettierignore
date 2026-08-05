@@ -4,3 +4,5 @@
 /locales/
 /README.md
 /.claude/
+/settings/index.mjs
+/settings/index.js

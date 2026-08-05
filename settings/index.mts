@@ -291,7 +291,10 @@ const processValue = (element: HTMLSelectElement): unknown => {
   return null
 }
 
-const buildSettingsBody = ({ elements, state }: PageContext): Settings => {
+const buildSettingsBody = ({
+  elements,
+  state,
+}: Pick<PageContext, 'elements' | 'state'>): Settings => {
   const settings: Record<string, unknown> = {}
   for (const element of commonSettingElements(elements)) {
     const id = settingIdOf(element)
@@ -557,8 +560,17 @@ const init = async (homey: HomeySettings): Promise<void> => {
     return
   }
   const elements = getPageElements()
+  const state: PageState = {
+    deviceSettings: {},
+    flatDeviceSettings: {},
+    passwordElement: null,
+    usernameElement: null,
+  }
   const context: PageContext = {
     elements,
+    // `elements` and `state` are initialized consts here, so the
+    // construction-time recompute may run the predicate safely (an
+    // empty state builds an empty body — Apply starts greyed).
     gate: createDirtyGate({
       applyElement: elements.applySettings,
       fieldsetElements: [elements.devices],
@@ -567,16 +579,11 @@ const init = async (homey: HomeySettings): Promise<void> => {
       // an unchanged or emptied field is omitted from the body, so
       // Apply arms only when pressing it would send something.
       isActionable: (): boolean =>
-        Object.keys(buildSettingsBody(context)).length > 0,
+        Object.keys(buildSettingsBody({ elements, state })).length > 0,
       serialize: (): string => serializeCommonSettings(elements),
     }),
     homey,
-    state: {
-      deviceSettings: {},
-      flatDeviceSettings: {},
-      passwordElement: null,
-      usernameElement: null,
-    },
+    state,
   }
   await setDocumentLanguage(homey)
   translatePage(homey)
