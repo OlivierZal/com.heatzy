@@ -559,19 +559,34 @@ const buildSections = async (context: PageContext): Promise<void> => {
   context.gate.markSaved()
 }
 
+// One freshness pass, shared by the boot pull and the app's realtime
+// poke; its breadcrumbs ride the declared boot-error route.
+const checkFreshness = async (homey: HomeySettings): Promise<boolean> =>
+  ensureFreshWebview(
+    'settings',
+    async () => homeyApiGet(homey, '/webview-hashes'),
+    (message) => {
+      reportFreshness(homey, message)
+    },
+  )
+
+// Boot pull, then push subscription: a stale page refetches itself
+// (the caller skips its init — the document is about to be replaced);
+// any page that stays — fresh, or stale but unable to refetch —
+// subscribes to the app's boot poke and re-runs the same handshake
+// when it fires.
+const startFreshness = async (homey: HomeySettings): Promise<boolean> => {
+  if (await checkFreshness(homey)) {
+    return true
+  }
+  homey.on('webview_hashes_changed', () => {
+    fireAndForget(homey, checkFreshness(homey))
+  })
+  return false
+}
+
 const init = async (homey: HomeySettings): Promise<void> => {
-  // A stale cached page refetches itself once (never-cached address)
-  // instead of booting: skip
-  // the init — the document is about to be replaced.
-  if (
-    await ensureFreshWebview(
-      'settings',
-      async () => homeyApiGet(homey, '/webview-hashes'),
-      (message) => {
-        reportFreshness(homey, message)
-      },
-    )
-  ) {
+  if (await startFreshness(homey)) {
     return
   }
   const elements = getPageElements()
