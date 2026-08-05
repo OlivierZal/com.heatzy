@@ -56,8 +56,14 @@ const api = {
     logSettingsRoute(homey.app, 'GET /language')
     return homey.i18n.getLanguage()
   },
-  getWebviewHashes: async (): Promise<Partial<Record<string, string>>> =>
-    getWebviewHashes(),
+  getWebviewHashes: async ({
+    homey,
+  }: {
+    homey: Homey
+  }): Promise<Partial<Record<string, string>>> => {
+    logSettingsRoute(homey.app, 'GET /webview-hashes')
+    return getWebviewHashes()
+  },
   isAuthenticated: ({ homey }: { homey: Homey }): boolean => {
     logSettingsRoute(homey.app, 'GET /sessions')
     return homey.app.api.isAuthenticated()

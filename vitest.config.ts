@@ -10,9 +10,11 @@ const swcPlugin = swc.vite({
 })
 
 const config: ViteUserConfig = defineConfig({
+  oxc: false,
+  plugins: [swcPlugin],
   test: {
     coverage: {
-      exclude: ['scripts/**/*.mts', 'settings/**/*.mts'],
+      exclude: ['.homeybuild/**', 'scripts/**/*.mts', 'settings/**/*.mts'],
       include: ['**/*.mts'],
       reporter: ['text', 'lcov'],
       thresholds: {
@@ -22,26 +24,7 @@ const config: ViteUserConfig = defineConfig({
         statements: 100,
       },
     },
-    projects: [
-      {
-        oxc: false,
-        plugins: [swcPlugin],
-        test: {
-          include: ['tests/unit/*device*.test.ts'],
-          name: 'device',
-          setupFiles: ['tests/setup-device-mocks.ts'],
-        },
-      },
-      {
-        oxc: false,
-        plugins: [swcPlugin],
-        test: {
-          exclude: ['tests/unit/*device*.test.ts'],
-          include: ['tests/**/*.test.ts'],
-          name: 'other',
-        },
-      },
-    ],
+    include: ['tests/**/*.test.ts'],
   },
 })
 

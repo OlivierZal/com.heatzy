@@ -1022,9 +1022,7 @@ const config: Config[] = defineConfig([
     },
   },
   {
-    // Scoped: without `files`, this block applied to every file, which
-    // made it the only one reaching `**/*.mjs` — and leaked 28 inert
-    // `yml/*` rules onto every `.mts` as well.
+    // `files` keeps the `yml/*` rules off every non-YAML file.
     extends: [ymlConfigs.standard, ymlConfigs.prettier],
     files: ['**/*.{yaml,yml}'],
     rules: {

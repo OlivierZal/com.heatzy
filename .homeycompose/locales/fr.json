@@ -14,10 +14,7 @@
       "resetConfirm": "Cela vous déconnecte immédiatement et efface vos identifiants Heatzy enregistrés."
     },
     "boolean": { "false": "Non", "true": "Oui" },
-    "devices": {
-      "apply": { "nothing": "Aucun changement à appliquer." },
-      "legend": "Paramètres de tous les appareils"
-    },
+    "devices": { "legend": "Paramètres de tous les appareils" },
     "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer.",
     "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",

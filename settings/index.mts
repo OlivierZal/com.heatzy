@@ -94,12 +94,12 @@ const getPageElements = (): PageElements => ({
   settingsCommon: getElement('settings_common', HTMLDivElement),
 })
 
-const alertError = async (
+const alertMessage = async (
   homey: HomeySettings,
-  error: unknown,
+  message: unknown,
 ): Promise<void> => {
   try {
-    await homey.alert(getErrorMessage(error))
+    await homey.alert(getErrorMessage(message))
   } catch {
     // The alert channel itself is best-effort
   }
@@ -113,7 +113,7 @@ const fireAndForget = (
   promise: Promise<unknown>,
 ): void => {
   // eslint-disable-next-line unicorn/prefer-await -- the single fire-and-forget seam: rejections are alerted, never propagated
-  promise.catch(async (error: unknown) => alertError(homey, error))
+  promise.catch(async (error: unknown) => alertMessage(homey, error))
 }
 
 const setDocumentLanguage = async (homey: HomeySettings): Promise<void> => {
@@ -356,14 +356,14 @@ const pushDeviceSettings = async (
   try {
     await homeyApiPut(homey, '/settings/devices', body)
   } catch (error) {
-    await alertError(homey, error)
+    await alertMessage(homey, error)
     return
   }
   updateDeviceSettings(state, body)
   // The just-saved values are the new pristine baseline — snapshot so
   // Apply greys back out until the form diverges again.
   context.gate.markSaved()
-  await alertError(homey, homey.__('settings.success'))
+  await alertMessage(homey, homey.__('settings.success'))
 }
 
 const applyDeviceSettings = async (context: PageContext): Promise<void> => {
@@ -404,10 +404,7 @@ const generateCommonSettings = (
   const optionSettings = driverSettings.options ?? []
   for (const { id, title, type, values } of optionSettings) {
     const settingId = `${id}__settings`
-    if (
-      elements.settingsCommon.querySelector(`select#${settingId}`) === null &&
-      commonElementTypes.has(type)
-    ) {
+    if (commonElementTypes.has(type)) {
       const valueElement = createSelectElement(homey, settingId, values)
       // Every control feeds the dirty check that gates Apply.
       context.gate.wire([valueElement])
@@ -436,7 +433,7 @@ const pushCredentials = async (
   try {
     await homeyApiPost(homey, '/sessions', credentials)
   } catch (error) {
-    await alertError(homey, error)
+    await alertMessage(homey, error)
     return
   }
   setAuthenticatedState(elements, true)
@@ -448,7 +445,7 @@ const authenticate = async (context: PageContext): Promise<void> => {
   const username = (state.usernameElement?.value ?? '').trim()
   const password = state.passwordElement?.value ?? ''
   if (username === '' || password === '') {
-    await alertError(homey, homey.__('settings.authenticate.failure'))
+    await alertMessage(homey, homey.__('settings.authenticate.failure'))
     return
   }
   await withDisabledButtons(
@@ -466,7 +463,7 @@ const pushLogOut = async (context: PageContext): Promise<void> => {
   try {
     await homeyApiDelete(homey, '/sessions')
   } catch (error) {
-    await alertError(homey, error)
+    await alertMessage(homey, error)
     return
   }
   if (state.passwordElement !== null) {
@@ -621,7 +618,7 @@ const runWebview = async (homey: HomeySettings): Promise<void> => {
   try {
     await withInitTimeout(init(homey))
   } catch (error) {
-    await alertError(homey, error)
+    await alertMessage(homey, error)
   } finally {
     homey.ready()
   }

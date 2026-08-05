@@ -19,6 +19,18 @@ const MANIFEST_CAPABILITIES = [
   'derog_end',
 ]
 
+// The app manifest declares fewer cards than the driver has
+// capabilities: registration must follow the declared set, never the
+// capability walk.
+const MANIFEST_FLOW = {
+  actions: [{ id: 'onoff_action' }, { id: 'onoff.timer_action' }],
+  conditions: [
+    { id: 'measure_temperature_condition' },
+    { id: 'onoff_condition' },
+    { id: 'onoff.timer_condition' },
+  ],
+}
+
 const {
   authenticateMock,
   getDevicesMock,
@@ -63,6 +75,7 @@ vi.mock(import('homey'), async () => {
           >()
           .mockReturnValue({ registerRunListener: registerRunListenerMock }),
       },
+      manifest: { flow: MANIFEST_FLOW },
     }
 
     public log = vi.fn<(...args: readonly unknown[]) => void>()
@@ -290,8 +303,8 @@ describe(HeatzyDriver, () => {
   })
 
   describe('flow listener registration', () => {
-    it.each(MANIFEST_CAPABILITIES)(
-      'should register a condition card for %s',
+    it.each(['measure_temperature', 'onoff', 'onoff.timer'])(
+      'should register the declared condition card for %s',
       async (capability) => {
         await driver.onInit()
 
@@ -301,8 +314,16 @@ describe(HeatzyDriver, () => {
       },
     )
 
+    it('should not register a condition card the manifest does not declare', async () => {
+      await driver.onInit()
+
+      expect(driver.homey.flow.getConditionCard).not.toHaveBeenCalledWith(
+        'derog_end_condition',
+      )
+    })
+
     it.each(['onoff', 'onoff.timer'])(
-      'should register an action card for settable capability %s',
+      'should register the declared action card for %s',
       async (capability) => {
         await driver.onInit()
 
@@ -312,8 +333,8 @@ describe(HeatzyDriver, () => {
       },
     )
 
-    it.each(['measure_temperature', 'derog_end'])(
-      'should not register an action card for non-settable capability %s',
+    it.each(['derog_end', 'measure_temperature'])(
+      'should not register an action card %s does not declare',
       async (capability) => {
         await driver.onInit()
 
@@ -409,22 +430,6 @@ describe(HeatzyDriver, () => {
         'onoff.timer',
         false,
       )
-    })
-
-    it('should absorb a missing condition card', async () => {
-      vi.spyOn(driver.homey.flow, 'getConditionCard').mockImplementation(() => {
-        throw new Error('Card not found')
-      })
-
-      await expect(driver.onInit()).resolves.toBeUndefined()
-    })
-
-    it('should absorb a missing action card', async () => {
-      vi.spyOn(driver.homey.flow, 'getActionCard').mockImplementation(() => {
-        throw new Error('Card not found')
-      })
-
-      await expect(driver.onInit()).resolves.toBeUndefined()
     })
   })
 
