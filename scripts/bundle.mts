@@ -26,10 +26,12 @@ const entryPoints = ['settings/index.mts']
 // webview cache served a stale copy.
 const pages = [{ entry: 'settings', page: 'settings/index.html' }]
 
-// A local asset reference: an attribute value (href/src) or a dynamic
-// import specifier, with an optional existing stamp.
+// A local asset reference — an href/src attribute value, with an
+// optional existing stamp. (A dynamic-import alternative once lived
+// here: dead since the classic-defer fix, no shipped HTML uses
+// `import()` any more.)
 const REFERENCE =
-  /(?<prefix>href="|src="|import\('\.\/)(?<file>[^"':?\/][^"':?]*)(?:\?v=[0-9a-f]+)?(?<suffix>["'\)])/gv
+  /(?<prefix>href="|src=")(?<file>[^"':?\/][^"':?]*)(?:\?v=[0-9a-f]+)?(?<suffix>")/gv
 
 const sharedOptions: BuildOptions = {
   bundle: true,
@@ -152,7 +154,12 @@ const stampHtml = async (htmlPath: string): Promise<string | null> => {
   if (stamped !== html) {
     await writeFile(htmlPath, stamped)
   }
-  return hashes.get('index.js') ?? null
+  // The page's identity is the join of every stamp it carries, in
+  // DOCUMENT order (the match order of `REFERENCE`, which the page's
+  // own collection mirrors): a change to any packaged asset (bundle,
+  // stylesheet) moves the identity, so CSS-only or markup-only ships
+  // self-heal too.
+  return hashes.size > 0 ? hashes.values().toArray().join('.') : null
 }
 
 // Emit the live-hash manifest the app serves (`GET /webview-hashes`) —

@@ -122,7 +122,7 @@ coverage.
   HTML, plus an `index.mjs` twin for every cached older HTML. A second cache layer covers the HTML
   itself (phone webviews cache the page across app versions,
   force-close included): each bundle carries a freshness handshake —
-  the page's `?v=` is its identity, `GET /webview-hashes` serves the
+  the page's identity is the document-order join of its `?v=` stamps (a CSS-only ship moves it too), `GET /webview-hashes` serves the
   live hashes (a manifest `bundle.mts` emits into the packaged app,
   read by `lib/webview-hashes.mts`), and a mismatch triggers ONE
   `location.reload()` (sessionStorage guard, `webview-freshness.mts`),
