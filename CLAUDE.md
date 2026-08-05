@@ -174,10 +174,14 @@ coverage.
   enforces it). Inline style writes are reserved for values CSS cannot
   express; anything static belongs in the stylesheet, following the
   CSS/HTML lint rules' spirit even where no rule captures it.
-- The webview runtime floor (es2023, no `Object.groupBy`, no iterator
-  helpers) is enforced by a scoped lint block over `settings/` — the
-  tsconfig cannot express two runtimes in one project. Node-side code
-  may use the newer APIs freely.
+- The webview runtime floor (es2023: no `Object.groupBy`, no iterator
+  helpers, no `v` regex flag) is enforced by a scoped lint block over
+  `settings/` — the tsconfig cannot express two runtimes in one
+  project. A `tsconfig.webview.json` floor was probed and refused on
+  com.melcloud (2026-08-06): tsc checks the import CLOSURE, which
+  crosses into node-side code — the same shape exists here
+  (`settings/` imports shared `lib/` and `types/` modules). Node-side
+  code may use the newer APIs freely.
 
 ## Lint doctrine
 
