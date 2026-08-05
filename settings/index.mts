@@ -291,7 +291,10 @@ const processValue = (element: HTMLSelectElement): unknown => {
   return null
 }
 
-const buildSettingsBody = ({ elements, state }: PageContext): Settings => {
+const buildSettingsBody = ({
+  elements,
+  state,
+}: Pick<PageContext, 'elements' | 'state'>): Settings => {
   const settings: Record<string, unknown> = {}
   for (const element of commonSettingElements(elements)) {
     const id = settingIdOf(element)
@@ -364,15 +367,9 @@ const pushDeviceSettings = async (
 }
 
 const applyDeviceSettings = async (context: PageContext): Promise<void> => {
-  const { homey } = context
+  // The gate's `isActionable` arms Apply only on a non-empty body —
+  // never re-derive that invariant here.
   const body = buildSettingsBody(context)
-  if (Object.keys(body).length === 0) {
-    // Defensive: the dirty gating disables Apply on an empty delta, so
-    // this is rarely reached — realign the form and report no change.
-    refreshCommonSettings(context)
-    await alertError(homey, homey.__('settings.devices.apply.nothing'))
-    return
-  }
   await context.gate.runBusy(async () => pushDeviceSettings(context, body))
 }
 
@@ -563,21 +560,30 @@ const init = async (homey: HomeySettings): Promise<void> => {
     return
   }
   const elements = getPageElements()
+  const state: PageState = {
+    deviceSettings: {},
+    flatDeviceSettings: {},
+    passwordElement: null,
+    usernameElement: null,
+  }
   const context: PageContext = {
     elements,
+    // `elements` and `state` are initialized consts here, so the
+    // construction-time recompute may run the predicate safely (an
+    // empty state builds an empty body — Apply starts greyed).
     gate: createDirtyGate({
       applyElement: elements.applySettings,
       fieldsetElements: [elements.devices],
       refreshElements: [elements.refreshSettings],
+      // Arming through the request builder (com.melcloud widget form):
+      // an unchanged or emptied field is omitted from the body, so
+      // Apply arms only when pressing it would send something.
+      isActionable: (): boolean =>
+        Object.keys(buildSettingsBody({ elements, state })).length > 0,
       serialize: (): string => serializeCommonSettings(elements),
     }),
     homey,
-    state: {
-      deviceSettings: {},
-      flatDeviceSettings: {},
-      passwordElement: null,
-      usernameElement: null,
-    },
+    state,
   }
   await setDocumentLanguage(homey)
   translatePage(homey)

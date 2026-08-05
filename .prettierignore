@@ -3,5 +3,6 @@
 /app.json
 /locales/
 /README.md
-/settings/index.mjs
 /.claude/
+/settings/index.mjs
+/settings/index.js

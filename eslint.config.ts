@@ -54,7 +54,9 @@ const config: Config[] = defineConfig([
     ignores: [
       '.homeybuild/',
       'coverage/',
-      // esbuild outputs (see scripts/bundle.mts), also gitignored
+      // Pre-`.homeybuild` leftovers in never-rebuilt trees: gitignored,
+      // and ignored here so a stale tree cannot break the lint run.
+      'settings/index.js',
       'settings/index.mjs',
     ],
   },
@@ -795,14 +797,6 @@ const config: Config[] = defineConfig([
     rules: {
       'import-x/no-default-export': 'off',
       'import-x/prefer-default-export': ['error', { target: 'any' }],
-    },
-  },
-  {
-    files: ['settings/index.mts'],
-    rules: {
-      // The settings webview is a single esbuild entry point; its
-      // manager classes live in one bundled file by design.
-      'max-classes-per-file': 'off',
     },
   },
   {

@@ -30,12 +30,8 @@
       "options": {
         "logo": "logo.png",
         "passwordLabel": { "en": "Password", "fr": "Mot de passe" },
-        "passwordPlaceholder": { "en": "P4ssw0rd", "fr": "P4ssw0rd" },
         "usernameLabel": { "en": "Username", "fr": "Nom d'utilisateur" },
-        "usernamePlaceholder": {
-          "en": "user@domain.com",
-          "fr": "utilisateur@domain.fr"
-        }
+        "usernamePlaceholder": "name@example.com"
       },
       "template": "login_credentials"
     }

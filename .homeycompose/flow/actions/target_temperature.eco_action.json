@@ -1,7 +1,7 @@
 {
   "args": [
     {
-      "filter": "driver_id=melcloud_atw&capabilities=target_temperature.eco",
+      "filter": "driver_id=heatzy&capabilities=target_temperature.eco",
       "name": "device",
       "type": "device"
     },
