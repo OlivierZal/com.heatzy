@@ -560,6 +560,7 @@ const init = async (homey: HomeySettings): Promise<void> => {
     elements,
     gate: createDirtyGate({
       applyElement: elements.applySettings,
+      fieldsetElements: [elements.devices],
       refreshElements: [elements.refreshSettings],
       serialize: (): string => serializeCommonSettings(elements),
     }),

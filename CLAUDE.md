@@ -80,7 +80,12 @@ coverage.
   webview path literal must match a declared route).
 - Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
   settings Apply/Refresh pair — never re-derive its invariant at a call
-  site. Its `serialize` must stay a PURE form snapshot, never a
+  site. The gate also freezes the gated
+  fieldsets while a request is in flight (container `disabled` +
+  `aria-busy`, so a control's own domain `disabled` survives the thaw):
+  every success path rewrites the fields, so a mid-flight edit would be
+  silently clobbered — pass every region `serialize` reads through
+  `fieldsetElements`. Its `serialize` must stay a PURE form snapshot, never a
   request-body builder (reusing `buildSettingsBody` was the historical
   never-pristine bug: it filters null deltas), and disabled greying styles
   `[class*='homey-button']:disabled` generically, never a per-class list
