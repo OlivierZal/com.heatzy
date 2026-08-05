@@ -58,7 +58,11 @@ details[open] > summary.homey-form-legend::before {
    `:disabled`) so nested fieldsets inside a frozen section do not
    compound the opacity; `pointer-events` because `disabled` only
    reaches form controls, not arbitrary interactive descendants. */
-fieldset[disabled] {
+/* The `body` ancestor outweighs the injected sheet's `all: unset` on
+   its reset fieldsets whatever the order: without it the section dim
+   can lose the cascade on-device, and the button neutralizer below then
+   leaves in-flight buttons fully opaque. */
+body fieldset[disabled] {
   cursor: not-allowed;
   opacity: 0.5;
   pointer-events: none;
