@@ -10,9 +10,6 @@ import type { InteropModule } from './helpers.ts'
 vi.mock(import('homey'), async () => {
   const { createMockDeviceClass, mock } = await import('./helpers.ts')
   return mock<InteropModule<typeof HomeyModule>>({
-    default: {
-      Device: createMockDeviceClass(),
-      Driver: vi.fn<() => void>(),
-    },
+    default: { Device: createMockDeviceClass(), Driver: vi.fn<() => void>() },
   })
 })

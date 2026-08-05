@@ -379,10 +379,7 @@ const applyDeviceSettings = async (context: PageContext): Promise<void> => {
 const generateCredential = (
   { elements }: PageContext,
   driverSettings: Partial<Record<string, DriverSetting[]>>,
-  credential: {
-    key: keyof LoginCredentials
-    value: string | null | undefined
-  },
+  credential: { key: keyof LoginCredentials; value: string | null | undefined },
 ): HTMLInputElement | null => {
   const loginSetting = driverSettings.login?.find(
     ({ id: settingId }) => settingId === credential.key,

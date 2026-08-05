@@ -1,71 +1,31 @@
 {
-  "1.0.0": {
-    "en": "Creating an app to pilot Heatzy via Homey!"
-  },
-  "2.0.0": {
-    "en": "Translated into French."
-  },
-  "3.0.0": {
-    "en": "Optimized loops and reshaped app settings."
-  },
-  "4.0.0": {
-    "en": "Reshaped error management."
-  },
-  "5.0.0": {
-    "en": "Improved performances."
-  },
-  "6.0.0": {
-    "en": "Updated modules."
-  },
-  "7.0.0": {
-    "en": "Use eslint flat config."
-  },
-  "7.0.1": {
-    "en": "Use mixins."
-  },
-  "8.0.0": {
-    "en": "Reshaped code."
-  },
-  "9.0.0": {
-    "en": "Use decorator."
-  },
+  "1.0.0": { "en": "Creating an app to pilot Heatzy via Homey!" },
+  "2.0.0": { "en": "Translated into French." },
+  "3.0.0": { "en": "Optimized loops and reshaped app settings." },
+  "4.0.0": { "en": "Reshaped error management." },
+  "5.0.0": { "en": "Improved performances." },
+  "6.0.0": { "en": "Updated modules." },
+  "7.0.0": { "en": "Use eslint flat config." },
+  "7.0.1": { "en": "Use mixins." },
+  "8.0.0": { "en": "Reshaped code." },
+  "9.0.0": { "en": "Use decorator." },
   "10.0.0": {
     "en": "Major release! Now supporting most Heatzy features (boost and vacation modes, on/off scheduling, comfort 1 and comfort 2 modes). Coming soon: temperature support for GLOW models."
   },
-  "10.1.0": {
-    "en": "Added support for GLOW devices."
-  },
-  "13.0.0": {
-    "en": "Added missing flows."
-  },
-  "14.0.0": {
-    "en": "Improved types."
-  },
-  "15.0.0": {
-    "en": "Improved performances."
-  },
-  "16.0.0": {
-    "en": "Improved error handling."
-  },
-  "17.0.0": {
-    "en": "Improved API management."
-  },
-  "18.0.0": {
-    "en": "Various improvements."
-  },
-  "19.0.0": {
-    "en": "Modularized API management."
-  },
+  "10.1.0": { "en": "Added support for GLOW devices." },
+  "13.0.0": { "en": "Added missing flows." },
+  "14.0.0": { "en": "Improved types." },
+  "15.0.0": { "en": "Improved performances." },
+  "16.0.0": { "en": "Improved error handling." },
+  "17.0.0": { "en": "Improved API management." },
+  "18.0.0": { "en": "Various improvements." },
+  "19.0.0": { "en": "Modularized API management." },
   "20.0.0": {
     "en": "Heatzy Pro & Glow/Shine are now fully supported!\nSome flows may need updating due to related breaking changes.",
     "fr": "Heatzy Pro et Glow/Shine sont désormais entièrement pris en charge !\nCertains flows peuvent nécessiter une mise à jour en raison de changements majeurs liés à cette intégration."
   },
-  "21.0.0": {
-    "en": "Added Onyx support."
-  },
-  "21.1.0": {
-    "en": "Upgraded modules"
-  },
+  "21.0.0": { "en": "Added Onyx support." },
+  "21.1.0": { "en": "Upgraded modules" },
   "22.0.0": {
     "da": "Opdateret for kompatibilitet med Node.js 22 og senere, inklusive flere rettelser (Glow/Shine enheder).",
     "en": "Updated for compatibility with Node.js 22 and later, including several fixes (Glow/Shine devices).",

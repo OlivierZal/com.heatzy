@@ -1,7 +1,5 @@
 {
-  "errors": {
-    "deviceNotFound": "Appareil introuvable."
-  },
+  "errors": { "deviceNotFound": "Appareil introuvable." },
   "notifications": {
     "sessionExpired": "Votre session Heatzy a expiré : reconnectez-vous depuis les réglages de l’application.",
     "sessionRestored": "Votre session Heatzy est de nouveau active."
@@ -15,14 +13,9 @@
       "reset": "Réinitialiser",
       "resetConfirm": "Cela vous déconnecte immédiatement et efface vos identifiants Heatzy enregistrés."
     },
-    "boolean": {
-      "false": "Non",
-      "true": "Oui"
-    },
+    "boolean": { "false": "Non", "true": "Oui" },
     "devices": {
-      "apply": {
-        "nothing": "Aucun changement à appliquer."
-      },
+      "apply": { "nothing": "Aucun changement à appliquer." },
       "legend": "Paramètres de tous les appareils"
     },
     "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer.",

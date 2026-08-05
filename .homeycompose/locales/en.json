@@ -1,7 +1,5 @@
 {
-  "errors": {
-    "deviceNotFound": "Device not found."
-  },
+  "errors": { "deviceNotFound": "Device not found." },
   "notifications": {
     "sessionExpired": "Your Heatzy session has expired: please sign in again from the app settings.",
     "sessionRestored": "Your Heatzy session is active again."
@@ -15,14 +13,9 @@
       "reset": "Reset",
       "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials."
     },
-    "boolean": {
-      "false": "No",
-      "true": "Yes"
-    },
+    "boolean": { "false": "No", "true": "Yes" },
     "devices": {
-      "apply": {
-        "nothing": "No change to apply."
-      },
+      "apply": { "nothing": "No change to apply." },
       "legend": "All device settings"
     },
     "loadFailed": "The settings page failed to load. Please try again.",
