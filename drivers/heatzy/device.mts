@@ -1,5 +1,6 @@
 import {
   type DeviceFacadeAny,
+  type DeviceV2Facade,
   type PostAttributes,
   DerogationMode,
   getTargetTemperature,
@@ -10,6 +11,7 @@ import {
   supportsGlow,
   supportsPro,
   supportsV2,
+  Temporal,
 } from '@olivierzal/heatzy-api'
 
 import type {
@@ -303,6 +305,16 @@ export default class HeatzyDevice extends Device {
     await this.syncFromDevice()
   }
 
+  // Reads mirror #setValue's manifest-mismatch guard: an absent
+  // capability reads as `null` instead of throwing.
+  #getValue<TKey extends keyof Capabilities>(
+    capability: TKey,
+  ): Capabilities[TKey] | null {
+    return this.hasCapability(capability)
+      ? this.getCapabilityValue(capability)
+      : null
+  }
+
   async #init(device: DeviceFacadeAny): Promise<void> {
     await this.#setCapabilities(device.product)
     fireAndForget(
@@ -314,6 +326,25 @@ export default class HeatzyDevice extends Device {
     )
   }
 
+  // Keep the persisted label only while it can still be the running
+  // derogation's: same mode, same duration, end still ahead. A re-armed
+  // identical derogation during downtime slips through — the retained
+  // end is then early, never late — which beats wiping a valid label on
+  // every restart.
+  #keepsStoredDerogationEnd(device: DeviceV2Facade): boolean {
+    const { derogationMode, derogationTime } = device
+    const storedEnd = this.getStoreValue('derogationEnd')
+    return (
+      derogationMode !== DerogationMode.off &&
+      this.#getValue('derog_end') !== null &&
+      this.#getValue('heater_operation_mode') ===
+        derogationModeKeys[derogationMode] &&
+      this.#getValue('derog_time') === String(derogationTime) &&
+      storedEnd !== null &&
+      storedEnd > Temporal.Now.instant().epochMilliseconds
+    )
+  }
+
   #registerCapabilityListeners(): void {
     this.registerMultipleCapabilityListener(
       [...SETTABLE_CAPABILITIES],
@@ -322,6 +353,26 @@ export default class HeatzyDevice extends Device {
       },
       DEBOUNCE_DELAY,
     )
+  }
+
+  // The wire carries no derogation start, so the facade cannot compute
+  // an end it never saw begin: after an app restart mid-derogation it
+  // reports `null` for the rest of that derogation. The label Homey
+  // persisted across the restart IS the missing memory — keep it while
+  // the derogation still matches the one it was rendered for.
+  async #resolveDerogationEnd(device: DeviceV2Facade): Promise<string | null> {
+    const { derogationEndDate, derogationEndString } = device
+    if (derogationEndString !== null) {
+      await this.#storeDerogationEnd(
+        derogationEndDate?.epochMilliseconds ?? null,
+      )
+      return derogationEndString
+    }
+    if (this.#keepsStoredDerogationEnd(device)) {
+      return this.#getValue('derog_end')
+    }
+    await this.#storeDerogationEnd(null)
+    return null
   }
 
   // Delay sync to let Homey's optimistic UI update and debounce settle.
@@ -427,15 +478,12 @@ export default class HeatzyDevice extends Device {
       return
     }
 
-    const {
-      derogationEndString,
-      derogationMode,
-      derogationTime,
-      isLocked,
-      isTimer,
-    } = device
+    const { derogationMode, derogationTime, isLocked, isTimer } = device
+    // Resolved before the parallel writes below overwrite the stored
+    // derogation parameters the keep-guard compares against.
+    const derogationEnd = await this.#resolveDerogationEnd(device)
     await Promise.all([
-      this.#setValue('derog_end', derogationEndString),
+      this.#setValue('derog_end', derogationEnd),
       this.#setValue(
         'heater_operation_mode',
         derogationModeKeys[derogationMode],
@@ -455,6 +503,12 @@ export default class HeatzyDevice extends Device {
   ): Promise<void> {
     if (this.hasCapability(capability)) {
       await this.setCapabilityValue(capability, value)
+    }
+  }
+
+  async #storeDerogationEnd(value: number | null): Promise<void> {
+    if (this.getStoreValue('derogationEnd') !== value) {
+      await this.setStoreValue('derogationEnd', value)
     }
   }
 }

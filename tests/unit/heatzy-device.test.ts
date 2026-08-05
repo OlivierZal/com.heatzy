@@ -24,6 +24,8 @@ import HeatzyDevice from '../../drivers/heatzy/device.mts'
 
 const DEBOUNCE_DELAY = 1000
 
+const DEROGATION_END_EPOCH = 1_800_000_000_000
+
 const ALL_CAPABILITIES: readonly string[] = [
   'alarm_presence',
   'derog_end',
@@ -127,6 +129,7 @@ const createFacade = (
   currentHumidity: 55,
   currentMode: Mode.comfort,
   currentTemperature: 20,
+  derogationEndDate: { epochMilliseconds: DEROGATION_END_EPOCH },
   derogationEndString: 'END',
   derogationMode: DerogationMode.boost,
   derogationTime: 60,
@@ -156,6 +159,18 @@ const createDevice = (driver: HeatzyDriver = createDriver()): HeatzyDevice => {
   const device = new HeatzyDevice()
   Object.defineProperty(device, 'driver', { configurable: true, value: driver })
   return device
+}
+
+// Mirrors createDevice's driver injection: the declared generic reader
+// cannot take a loose mock implementation through vi.mocked.
+const stubStoredCapabilities = (
+  device: HeatzyDevice,
+  values: Record<string, unknown>,
+): void => {
+  Object.defineProperty(device, 'getCapabilityValue', {
+    configurable: true,
+    value: (capability: string): unknown => values[capability] ?? null,
+  })
 }
 
 const getCallback = (): ((
@@ -738,6 +753,133 @@ describe(HeatzyDevice, () => {
         expect.anything(),
       )
       expect(device.setStoreValue).toHaveBeenCalledWith('previousMode', null)
+    })
+
+    it('should store the end instant alongside a fresh label', async () => {
+      const device = createDevice()
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setCapabilityValue).toHaveBeenCalledWith('derog_end', 'END')
+      expect(device.setStoreValue).toHaveBeenCalledWith(
+        'derogationEnd',
+        DEROGATION_END_EPOCH,
+      )
+    })
+
+    it('should keep the stored label across a restart mid-derogation', async () => {
+      configureFacade({ derogationEndDate: null, derogationEndString: null })
+      getStoreValueMock.mockImplementation((key: string) =>
+        key === 'derogationEnd' ? Date.now() + 60_000 : undefined,
+      )
+      const device = createDevice()
+      stubStoredCapabilities(device, {
+        derog_end: 'STORED',
+        derog_time: '60',
+        heater_operation_mode: 'boost',
+      })
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setCapabilityValue).toHaveBeenCalledWith(
+        'derog_end',
+        'STORED',
+      )
+    })
+
+    it('should wipe the stored label when the derogation changed offline', async () => {
+      configureFacade({ derogationEndDate: null, derogationEndString: null })
+      getStoreValueMock.mockImplementation((key: string) =>
+        key === 'derogationEnd' ? Date.now() + 60_000 : undefined,
+      )
+      const device = createDevice()
+      stubStoredCapabilities(device, {
+        derog_end: 'STORED',
+        derog_time: '30',
+        heater_operation_mode: 'boost',
+      })
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setCapabilityValue).toHaveBeenCalledWith('derog_end', null)
+      expect(device.setStoreValue).toHaveBeenCalledWith('derogationEnd', null)
+    })
+
+    it('should wipe the stored label once its end has passed', async () => {
+      configureFacade({ derogationEndDate: null, derogationEndString: null })
+      getStoreValueMock.mockImplementation((key: string) =>
+        key === 'derogationEnd' ? Date.now() - 60_000 : undefined,
+      )
+      const device = createDevice()
+      stubStoredCapabilities(device, {
+        derog_end: 'STORED',
+        derog_time: '60',
+        heater_operation_mode: 'boost',
+      })
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setCapabilityValue).toHaveBeenCalledWith('derog_end', null)
+    })
+
+    it('should clear the label and the store when the derogation is off', async () => {
+      configureFacade({
+        derogationEndDate: null,
+        derogationEndString: null,
+        derogationMode: DerogationMode.off,
+      })
+      getStoreValueMock.mockImplementation((key: string) =>
+        key === 'derogationEnd' ? Date.now() + 60_000 : undefined,
+      )
+      const device = createDevice()
+      stubStoredCapabilities(device, {
+        derog_end: 'STORED',
+        derog_time: '60',
+        heater_operation_mode: 'off',
+      })
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setCapabilityValue).toHaveBeenCalledWith('derog_end', null)
+      expect(device.setStoreValue).toHaveBeenCalledWith('derogationEnd', null)
+    })
+
+    it('should store a null instant when the label has no date', async () => {
+      configureFacade({ derogationEndDate: null })
+      const device = createDevice()
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setStoreValue).toHaveBeenCalledWith('derogationEnd', null)
+    })
+
+    it('should not rewrite an unchanged stored end instant', async () => {
+      getStoreValueMock.mockImplementation((key: string) =>
+        key === 'derogationEnd' ? DEROGATION_END_EPOCH : undefined,
+      )
+      const device = createDevice()
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setStoreValue).not.toHaveBeenCalledWith(
+        'derogationEnd',
+        expect.anything(),
+      )
+    })
+
+    it('should read an absent derog_end capability as no stored label', async () => {
+      configureFacade({ derogationEndDate: null, derogationEndString: null })
+      getStoreValueMock.mockImplementation((key: string) =>
+        key === 'derogationEnd' ? Date.now() + 60_000 : undefined,
+      )
+      const device = createDevice()
+      vi.spyOn(device, 'hasCapability').mockImplementation(
+        (capability) => capability !== 'derog_end',
+      )
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setStoreValue).toHaveBeenCalledWith('derogationEnd', null)
     })
 
     it('should return early when the device is unavailable', async () => {
