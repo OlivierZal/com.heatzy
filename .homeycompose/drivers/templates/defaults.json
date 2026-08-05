@@ -6,55 +6,32 @@
     "small": "{{driverAssetsPath}}/images/small.png"
   },
   "pair": [
-    {
-      "id": "loading",
-      "template": "loading"
-    },
+    { "id": "loading", "template": "loading" },
     {
       "id": "login",
       "options": {
         "logo": "logo.png",
-        "passwordLabel": {
-          "en": "Password",
-          "fr": "Mot de passe"
-        },
-        "usernameLabel": {
-          "en": "Username",
-          "fr": "Nom d'utilisateur"
-        },
+        "passwordLabel": { "en": "Password", "fr": "Mot de passe" },
+        "usernameLabel": { "en": "Username", "fr": "Nom d'utilisateur" },
         "usernamePlaceholder": "name@example.com"
       },
       "template": "login_credentials"
     },
     {
       "id": "list_devices",
-      "navigation": {
-        "next": "add_devices"
-      },
+      "navigation": { "next": "add_devices" },
       "template": "list_devices"
     },
-    {
-      "id": "add_devices",
-      "template": "add_devices"
-    }
+    { "id": "add_devices", "template": "add_devices" }
   ],
   "repair": [
     {
       "id": "login",
       "options": {
         "logo": "logo.png",
-        "passwordLabel": {
-          "en": "Password",
-          "fr": "Mot de passe"
-        },
-        "passwordPlaceholder": {
-          "en": "P4ssw0rd",
-          "fr": "P4ssw0rd"
-        },
-        "usernameLabel": {
-          "en": "Username",
-          "fr": "Nom d'utilisateur"
-        },
+        "passwordLabel": { "en": "Password", "fr": "Mot de passe" },
+        "passwordPlaceholder": { "en": "P4ssw0rd", "fr": "P4ssw0rd" },
+        "usernameLabel": { "en": "Username", "fr": "Nom d'utilisateur" },
         "usernamePlaceholder": {
           "en": "user@domain.com",
           "fr": "utilisateur@domain.fr"

@@ -26,10 +26,7 @@
         "en": "Timer turned on",
         "fr": "Programmation activée"
       },
-      "title": {
-        "en": "Timer",
-        "fr": "Programmation"
-      }
+      "title": { "en": "Timer", "fr": "Programmation" }
     },
     "onoff.window_detection": {
       "insightsTitleFalse": {
@@ -45,11 +42,7 @@
         "fr": "Détection de fenêtre ouverte"
       }
     },
-    "target_temperature": {
-      "max": 30,
-      "min": 15,
-      "step": 1
-    },
+    "target_temperature": { "max": 30, "min": 15, "step": 1 },
     "target_temperature.eco": {
       "max": 19,
       "min": 10,

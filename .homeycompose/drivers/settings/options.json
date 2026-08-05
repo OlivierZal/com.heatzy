@@ -22,14 +22,8 @@
       "type": "dropdown",
       "value": "previous",
       "values": [
-        {
-          "id": "cft",
-          "label": { "en": "Comfort", "fr": "Confort" }
-        },
-        {
-          "id": "eco",
-          "label": { "en": "Eco", "fr": "Éco" }
-        },
+        { "id": "cft", "label": { "en": "Comfort", "fr": "Confort" } },
+        { "id": "eco", "label": { "en": "Eco", "fr": "Éco" } },
         {
           "id": "previous",
           "label": { "en": "Previous mode", "fr": "Mode précédent" }
@@ -37,9 +31,6 @@
       ]
     }
   ],
-  "label": {
-    "en": "Options",
-    "fr": "Options"
-  },
+  "label": { "en": "Options", "fr": "Options" },
   "type": "group"
 }

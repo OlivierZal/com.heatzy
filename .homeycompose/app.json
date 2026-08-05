@@ -16,6 +16,10 @@
       "method": "GET",
       "path": "/language"
     },
+    "getWebviewHashes": {
+      "method": "GET",
+      "path": "/webview-hashes"
+    },
     "isAuthenticated": {
       "method": "GET",
       "path": "/sessions"

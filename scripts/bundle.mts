@@ -20,12 +20,18 @@ const HASH_LENGTH = 8
 
 const entryPoints = ['settings/index.mts']
 
-const pages = ['settings/index.html']
+// The packaged page, with the manifest key under which the app serves
+// its bundle hash (`GET /webview-hashes`): a booted page compares its
+// own `?v=` against the live value and reloads itself once when the
+// webview cache served a stale copy.
+const pages = [{ entry: 'settings', page: 'settings/index.html' }]
 
-// A local asset reference: an attribute value (href/src) or a dynamic
-// import specifier, with an optional existing stamp.
+// A local asset reference — an href/src attribute value, with an
+// optional existing stamp. (A dynamic-import alternative once lived
+// here: dead since the classic-defer fix, no shipped HTML uses
+// `import()` any more.)
 const REFERENCE =
-  /(?<prefix>href="|src="|import\('\.\/)(?<file>[^"':?\/][^"':?]*)(?:\?v=[0-9a-f]+)?(?<suffix>["'\)])/gv
+  /(?<prefix>href="|src=")(?<file>[^"':?\/][^"':?]*)(?:\?v=[0-9a-f]+)?(?<suffix>")/gv
 
 const sharedOptions: BuildOptions = {
   bundle: true,
@@ -134,24 +140,40 @@ const stampReferences = (
   return stamped + html.slice(cursor)
 }
 
-const stampHtml = async (htmlPath: string): Promise<void> => {
+const stampHtml = async (htmlPath: string): Promise<string | null> => {
   let html: string
   try {
     html = await readFile(htmlPath, 'utf8')
   } catch {
     // The page copy only exists in the CLI flow; a standalone suite run
     // has nothing to stamp.
-    return
+    return null
   }
-  const stamped = stampReferences(
-    html,
-    await collectHashes(html, path.dirname(htmlPath)),
-  )
+  const hashes = await collectHashes(html, path.dirname(htmlPath))
+  const stamped = stampReferences(html, hashes)
   if (stamped !== html) {
     await writeFile(htmlPath, stamped)
   }
+  // The page's identity is the join of every stamp it carries, in
+  // DOCUMENT order (the match order of `REFERENCE`, which the page's
+  // own collection mirrors): a change to any packaged asset (bundle,
+  // stylesheet) moves the identity, so CSS-only or markup-only ships
+  // self-heal too.
+  return hashes.size > 0 ? hashes.values().toArray().join('.') : null
 }
 
-await Promise.all(
-  pages.map(async (page) => stampHtml(path.join(OUT_ROOT, page))),
+// Emit the live-hash manifest the app serves (`GET /webview-hashes`) —
+// only in the CLI flow, where every page copy exists: a standalone
+// suite run stamps nothing and must not leave a partial manifest.
+const stampedEntries = await Promise.all(
+  pages.map(async ({ entry, page }): Promise<[string, string | null]> => [
+    entry,
+    await stampHtml(path.join(OUT_ROOT, page)),
+  ]),
 )
+if (stampedEntries.every(([, hash]) => hash !== null)) {
+  await writeFile(
+    path.join(OUT_ROOT, 'webview-hashes.json'),
+    JSON.stringify(Object.fromEntries(stampedEntries)),
+  )
+}

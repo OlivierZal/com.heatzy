@@ -7,17 +7,11 @@
     },
     {
       "name": "onoff",
-      "title": {
-        "en": "Timer",
-        "fr": "Programmation"
-      },
+      "title": { "en": "Timer", "fr": "Programmation" },
       "type": "checkbox"
     }
   ],
-  "title": {
-    "en": "Set the timer",
-    "fr": "Définir la programmation"
-  },
+  "title": { "en": "Set the timer", "fr": "Définir la programmation" },
   "titleFormatted": {
     "en": "Set the timer to [[onoff]]",
     "fr": "Définir la programmation à [[onoff]]"

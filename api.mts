@@ -7,6 +7,7 @@ import {
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
 import type { DriverSetting } from './types/driver-settings.mts'
 import { getErrorMessage } from './lib/get-error-message.mts'
+import { getWebviewHashes } from './lib/webview-hashes.mts'
 
 // The webview only receives an error MESSAGE across the app bridge, so
 // login failures are classified here, where `instanceof` still works: a
@@ -55,6 +56,8 @@ const api = {
     logSettingsRoute(homey.app, 'GET /language')
     return homey.i18n.getLanguage()
   },
+  getWebviewHashes: async (): Promise<Partial<Record<string, string>>> =>
+    getWebviewHashes(),
   isAuthenticated: ({ homey }: { homey: Homey }): boolean => {
     logSettingsRoute(homey.app, 'GET /sessions')
     return homey.app.api.isAuthenticated()

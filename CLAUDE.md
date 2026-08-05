@@ -80,7 +80,12 @@ coverage.
   webview path literal must match a declared route).
 - Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
   settings Apply/Refresh pair — never re-derive its invariant at a call
-  site. Its `serialize` must stay a PURE form snapshot, never a
+  site. The gate also freezes the gated
+  fieldsets while a request is in flight (container `disabled` +
+  `aria-busy`, so a control's own domain `disabled` survives the thaw):
+  every success path rewrites the fields, so a mid-flight edit would be
+  silently clobbered — pass every region `serialize` reads through
+  `fieldsetElements`. Its `serialize` must stay a PURE form snapshot, never a
   request-body builder (reusing `buildSettingsBody` was the historical
   never-pristine bug: it filters null deltas), and disabled greying styles
   `[class*='homey-button']:disabled` generically, never a per-class list
@@ -114,7 +119,16 @@ coverage.
 - Phone webviews also cache the HTML ITSELF across app versions, so
   shipped bundle filenames are a COMPAT CONTRACT: `scripts/bundle.mts`
   builds the settings entry twice — `index.js` (IIFE) for the current
-  HTML, plus an `index.mjs` twin for every cached older HTML. Heatzy
+  HTML, plus an `index.mjs` twin for every cached older HTML. A second cache layer covers the HTML
+  itself (phone webviews cache the page across app versions,
+  force-close included): each bundle carries a freshness handshake —
+  the page's identity is the document-order join of its `?v=` stamps (a CSS-only ship moves it too), `GET /webview-hashes` serves the
+  live hashes (a manifest `bundle.mts` emits into the packaged app,
+  read by `lib/webview-hashes.mts`), and a mismatch triggers ONE
+  `location.reload()` (sessionStorage guard, `webview-freshness.mts`),
+  which revalidates the HTML and pulls the fresh bundle. Every failure
+  path stays open: an unstamped page, an absent route or denied
+  storage must never take a working webview down. Heatzy
   divergence from com.melcloud: the cached-HTML era here loaded
   `index.mjs` as a CLASSIC `defer` script (never `type="module"`), so
   the shipped `index.mjs` twin is a SECOND IIFE with a

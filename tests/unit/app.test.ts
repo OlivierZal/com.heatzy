@@ -116,11 +116,7 @@ const mockFacadeManagerGet = vi.fn<(instance: unknown) => unknown>()
 
 const mockApiInstance = {
   clearSync: vi.fn<() => void>(),
-  registry: {
-    devices: {
-      getById: vi.fn<(id: string) => unknown>(),
-    },
-  },
+  registry: { devices: { getById: vi.fn<(id: string) => unknown>() } },
 }
 
 const mockCreateNotification = vi.fn<() => Promise<void>>()
@@ -146,10 +142,7 @@ const newMockFacadeManager = function newMockFacadeManager(): {
 const createApp = (): InstanceType<typeof HeatzyApp> => {
   const app = new HeatzyApp()
   Object.defineProperties(app, {
-    error: {
-      configurable: true,
-      value: vi.fn<(...args: unknown[]) => void>(),
-    },
+    error: { configurable: true, value: vi.fn<(...args: unknown[]) => void>() },
     homey: {
       configurable: true,
       value: {
@@ -169,10 +162,7 @@ const createApp = (): InstanceType<typeof HeatzyApp> => {
       },
       writable: false,
     },
-    log: {
-      configurable: true,
-      value: vi.fn<(...args: unknown[]) => void>(),
-    },
+    log: { configurable: true, value: vi.fn<(...args: unknown[]) => void>() },
   })
   return app
 }

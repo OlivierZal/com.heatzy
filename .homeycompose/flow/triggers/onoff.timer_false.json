@@ -6,8 +6,5 @@
       "type": "device"
     }
   ],
-  "title": {
-    "en": "Timer turned off",
-    "fr": "Programmation désactivée"
-  }
+  "title": { "en": "Timer turned off", "fr": "Programmation désactivée" }
 }

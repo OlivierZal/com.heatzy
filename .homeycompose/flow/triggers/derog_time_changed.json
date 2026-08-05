@@ -14,10 +14,7 @@
     {
       "example": "15",
       "name": "derog_time",
-      "title": {
-        "en": "Derogation duration",
-        "fr": "Durée de dérogation"
-      },
+      "title": { "en": "Derogation duration", "fr": "Durée de dérogation" },
       "type": "string"
     }
   ]

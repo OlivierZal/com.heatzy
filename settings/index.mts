@@ -12,6 +12,7 @@ import {
   homeyConfirm,
 } from './callback-api.mts'
 import { type DirtyGate, createDirtyGate } from './dirty-gate.mts'
+import { ensureFreshWebview } from './webview-freshness.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
 // stay ≤ es2023 — no iterator helpers, no Object.groupBy (old iOS
@@ -378,10 +379,7 @@ const applyDeviceSettings = async (context: PageContext): Promise<void> => {
 const generateCredential = (
   { elements }: PageContext,
   driverSettings: Partial<Record<string, DriverSetting[]>>,
-  credential: {
-    key: keyof LoginCredentials
-    value: string | null | undefined
-  },
+  credential: { key: keyof LoginCredentials; value: string | null | undefined },
 ): HTMLInputElement | null => {
   const loginSetting = driverSettings.login?.find(
     ({ id: settingId }) => settingId === credential.key,
@@ -555,11 +553,21 @@ const buildSections = async (context: PageContext): Promise<void> => {
 }
 
 const init = async (homey: HomeySettings): Promise<void> => {
+  // A stale cached page reloads itself once instead of booting: skip
+  // the init — the document is about to be replaced.
+  if (
+    await ensureFreshWebview('settings', async () =>
+      homeyApiGet(homey, '/webview-hashes'),
+    )
+  ) {
+    return
+  }
   const elements = getPageElements()
   const context: PageContext = {
     elements,
     gate: createDirtyGate({
       applyElement: elements.applySettings,
+      fieldsetElements: [elements.devices],
       refreshElements: [elements.refreshSettings],
       serialize: (): string => serializeCommonSettings(elements),
     }),
