@@ -120,6 +120,8 @@ const mockApiInstance = {
 }
 
 const mockCreateNotification = vi.fn<() => Promise<void>>()
+
+const mockRealtime = vi.fn<(event: string, data: unknown) => void>()
 const mockGetDrivers = vi.fn<() => Record<string, unknown>>()
 const mockGetLanguage = vi.fn<() => string>()
 const mockGetTimezone = vi.fn<() => string>()
@@ -147,6 +149,7 @@ const createApp = (): InstanceType<typeof HeatzyApp> => {
       configurable: true,
       value: {
         __: mockTranslate,
+        api: { realtime: mockRealtime },
         clock: { getTimezone: mockGetTimezone },
         drivers: { getDrivers: mockGetDrivers },
         i18n: { getLanguage: mockGetLanguage },
@@ -248,6 +251,12 @@ describe(HeatzyApp, () => {
       await app.onInit()
 
       expect(mockSettingsUnset).toHaveBeenCalledWith('expireAt')
+    })
+
+    it('should poke open webviews with the freshness event at boot', async () => {
+      await app.onInit()
+
+      expect(mockRealtime).toHaveBeenCalledWith('webview_hashes_changed', null)
     })
 
     it('should construct the facade manager with the API client', async () => {

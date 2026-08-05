@@ -153,6 +153,9 @@ export default class HeatzyApp extends App {
     })
     this.#facadeManager = new FacadeManager(this.#api)
     this.#createNotification(language)
+    // Poke any open webview to re-run its freshness handshake: an app
+    // (re)boot is exactly when the served hashes may have moved.
+    this.homey.api.realtime('webview_hashes_changed', null)
     fireAndForget(
       this.#logBootReady(),
       (...args: unknown[]) => {
