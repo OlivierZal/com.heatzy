@@ -12,5 +12,6 @@ export interface Settings extends Partial<Record<string, unknown>> {
 }
 
 export interface Store {
+  readonly derogationEnd: number | null
   readonly previousMode: PreviousMode | null
 }
