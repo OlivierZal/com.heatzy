@@ -572,8 +572,9 @@ const checkFreshness = async (homey: HomeySettings): Promise<boolean> =>
 
 // Boot pull, then push subscription: a stale page refetches itself
 // (the caller skips its init — the document is about to be replaced);
-// a fresh one subscribes to the app's boot poke and re-runs the same
-// handshake when it fires.
+// any page that stays — fresh, or stale but unable to refetch —
+// subscribes to the app's boot poke and re-runs the same handshake
+// when it fires.
 const startFreshness = async (homey: HomeySettings): Promise<boolean> => {
   if (await checkFreshness(homey)) {
     return true
