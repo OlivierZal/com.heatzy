@@ -86,10 +86,14 @@ coverage.
   fieldsets while a request is in flight (container `disabled` +
   `aria-busy`, so a control's own domain `disabled` survives the thaw):
   every success path rewrites the fields, so a mid-flight edit would be
-  silently clobbered — pass every region `serialize` reads through
-  `fieldsetElements`. Its `serialize` must stay a PURE form snapshot, never a
-  request-body builder (reusing `buildSettingsBody` was the historical
-  never-pristine bug: it filters null deltas), and disabled greying styles
+  silently clobbered — pass every region the arming source reads through
+  `fieldsetElements`. Arming comes from exactly ONE source, exclusive by
+  type: baseline mode (`serialize`, a pure snapshot — never a
+  request-body builder: reusing `buildSettingsBody` was the historical
+  never-pristine bug, it filters null deltas) or predicate mode
+  (`isActionable`, with no baseline to retain stale form state —
+  `markSaved` then only re-evaluates); both of this app's pairs arm
+  through predicates. Disabled greying styles
   `[class*='homey-button']:disabled` generically, never a per-class list
   (a class list silently missed renamed buttons).
   `tests/unit/dirty-gate.test.ts` locks the behavior; the module is a
