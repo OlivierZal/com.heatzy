@@ -57,11 +57,10 @@ details[open] > summary.homey-form-legend::before {
    request is in flight — grey it like the buttons. Attribute (not
    `:disabled`) so nested fieldsets inside a frozen section do not
    compound the opacity; `pointer-events` because `disabled` only
-   reaches form controls, not arbitrary interactive descendants. */
-/* The `body` ancestor outweighs the injected sheet's `all: unset` on
-   its reset fieldsets whatever the order: without it the section dim
-   can lose the cascade on-device, and the button neutralizer below then
-   leaves in-flight buttons fully opaque. */
+   reaches form controls, not arbitrary interactive descendants. The
+   `body` ancestor outweighs the injected sheet's `all: unset` on its
+   reset fieldsets whatever the stylesheet order — the button
+   neutralizer below counts on this dim rendering. */
 body fieldset[disabled] {
   cursor: not-allowed;
   opacity: 0.5;
