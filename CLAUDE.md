@@ -79,8 +79,10 @@ coverage.
   `tests/unit/api-route-guards.test.ts` pins the call sites (every
   webview path literal must match a declared route).
 - Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
-  settings Apply/Refresh pair — never re-derive its invariant at a call
-  site. The gate also freezes the gated
+  settings Apply/Refresh pair AND the credentials sign-in/reset pair
+  (sign-in arms through `isActionable` only when both credential fields
+  are filled; reset is its busy-gated Refresh) — never re-derive its
+  invariant at a call site. The gate also freezes the gated
   fieldsets while a request is in flight (container `disabled` +
   `aria-busy`, so a control's own domain `disabled` survives the thaw):
   every success path rewrites the fields, so a mid-flight edit would be
