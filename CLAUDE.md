@@ -242,6 +242,12 @@ coverage.
   SECURITY.md, CLAUDE.md) — never a later sweep; the 2026-08 README
   audit caught exactly the drift this prevents (a shipped Home ATW
   driver absent from its README, a stale `Result` kind list).
+- A settling pass closes every substantive wave: before its work is
+  released, re-read the wave's own diff for what the churn left behind
+  — history-narrating comments, orphaned helpers or config entries,
+  factorizations the fix made obvious — and fold the findings into a
+  targeted follow-up. Features land first, the pass runs after, so it
+  covers them; it is scoped to the wave's diff, never a full re-review.
 
 - `@olivierzal/heatzy-api` is pinned EXACTLY, never with a caret: the
   library's breaking changes are self-published, adoption is an explicit

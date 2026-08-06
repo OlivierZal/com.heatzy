@@ -58,5 +58,9 @@
   "23.1.0": {
     "en": "Signing in no longer reports success when your devices could not be loaded: instead of an empty device list, the app now tells you what went wrong.",
     "fr": "La connexion ne s'annonce plus réussie lorsque vos appareils n'ont pas pu être chargés : au lieu d'une liste vide, l'app vous indique désormais ce qui a échoué."
+  },
+  "23.2.0": {
+    "en": "The settings page now locks its forms while a change is being applied, refreshes itself after an app update, and shows a setting as undecided when your devices disagree instead of picking one of them. Your credentials are saved only once signing in succeeds, and a running derogation keeps its end time across a restart.",
+    "fr": "La page de réglages fige désormais ses formulaires pendant l'application d'un changement, se met à jour d'elle-même après une mise à jour de l'app, et affiche un réglage comme indéterminé lorsque vos appareils divergent au lieu d'en choisir un. Vos identifiants ne sont enregistrés qu'une fois la connexion réussie, et une dérogation en cours conserve son heure de fin après un redémarrage."
   }
 }
