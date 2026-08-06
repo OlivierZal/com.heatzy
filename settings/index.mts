@@ -560,7 +560,7 @@ const buildSections = async (context: PageContext): Promise<void> => {
 }
 
 // One freshness pass, shared by the boot pull and the app's realtime
-// poke; its breadcrumbs ride the declared boot-error route.
+// poke.
 const checkFreshness = async (homey: HomeySettings): Promise<boolean> =>
   ensureFreshWebview(
     'settings',
