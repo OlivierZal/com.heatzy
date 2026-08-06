@@ -302,28 +302,12 @@ const buildSettingsBody = ({
   return settings
 }
 
-// A stable snapshot of every common control's current value (nulls
-// included, never filtered): the dirty check compares it against the
-// value captured when the form was last populated. Sorted by id so
-// control order never perturbs the string.
-const serializeCommonSettings = (elements: PageElements): string => {
-  const entries: [string, unknown][] = []
-  for (const element of commonSettingElements(elements)) {
-    const id = settingIdOf(element)
-    if (id !== undefined) {
-      entries.push([id, processValue(element)])
-    }
-  }
-  entries.sort(([firstId], [secondId]) => firstId.localeCompare(secondId))
-  return JSON.stringify(entries)
-}
-
 const refreshCommonSettings = (context: PageContext): void => {
   const { elements, gate, state } = context
   for (const element of commonSettingElements(elements)) {
     refreshCommonSetting(element, state.flatDeviceSettings)
   }
-  // Repopulating realigns the form with the stored settings — re-baseline
+  // Repopulating realigns the form with the stored settings — re-evaluate
   // so Apply reflects the freshly pristine state.
   gate.markSaved()
 }
@@ -446,11 +430,6 @@ const createCredentialsGate = (
     isActionable: (): boolean =>
       (state.usernameElement?.value ?? '').trim() !== '' &&
       (state.passwordElement?.value ?? '') !== '',
-    serialize: (): string =>
-      JSON.stringify([
-        state.usernameElement?.value ?? '',
-        state.passwordElement?.value ?? '',
-      ]),
   })
 
 const authenticate = async (context: PageContext): Promise<void> => {
@@ -478,10 +457,9 @@ const pushLogOut = async (context: PageContext): Promise<void> => {
   if (state.passwordElement !== null) {
     state.passwordElement.value = ''
   }
-  // Re-baseline on the cleared form: the gate's saved snapshot would
-  // otherwise keep referencing the old serialized password until the
-  // page closes.
-  context.credentialsGate.markSaved()
+  // A programmatic clear fires no input event — re-evaluate by hand so
+  // sign-in greys on the emptied form.
+  context.credentialsGate.recompute()
   setAuthenticatedState(elements, false)
 }
 
@@ -557,8 +535,8 @@ const buildSections = async (context: PageContext): Promise<void> => {
   )
   await fetchDeviceSettings(context)
   generateCommonSettings(context, driverSettings)
-  // Snapshot the pristine state once the sections are built; the
-  // credentials rebaseline also re-arms sign-in for prefilled fields.
+  // Re-evaluate both gates once the sections are built; the credentials
+  // pass also re-arms sign-in for prefilled fields.
   context.gate.markSaved()
   context.credentialsGate.markSaved()
 }
@@ -615,7 +593,6 @@ const init = async (homey: HomeySettings): Promise<void> => {
       // Apply arms only when pressing it would send something.
       isActionable: (): boolean =>
         Object.keys(buildSettingsBody({ elements, state })).length > 0,
-      serialize: (): string => serializeCommonSettings(elements),
     }),
     homey,
     state,
