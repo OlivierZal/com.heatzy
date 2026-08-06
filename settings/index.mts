@@ -478,6 +478,10 @@ const pushLogOut = async (context: PageContext): Promise<void> => {
   if (state.passwordElement !== null) {
     state.passwordElement.value = ''
   }
+  // Re-baseline on the cleared form: the gate's saved snapshot would
+  // otherwise keep referencing the old serialized password until the
+  // page closes.
+  context.credentialsGate.markSaved()
   setAuthenticatedState(elements, false)
 }
 
