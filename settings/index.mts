@@ -27,6 +27,7 @@ const commonElementTypes = new Set(['checkbox', 'dropdown'])
 type HTMLValueElement = HTMLInputElement | HTMLSelectElement
 
 interface PageContext {
+  readonly credentialsGate: DirtyGate
   readonly elements: PageElements
   readonly gate: DirtyGate
   readonly homey: HomeySettings
@@ -38,7 +39,7 @@ interface PageElements {
   readonly authenticate: HTMLButtonElement
   readonly authentication: HTMLDetailsElement
   readonly devices: HTMLFieldSetElement
-  readonly login: HTMLDivElement
+  readonly login: HTMLFieldSetElement
   readonly refreshSettings: HTMLButtonElement
   readonly resetCredentials: HTMLButtonElement
   readonly settingsCommon: HTMLDivElement
@@ -88,7 +89,7 @@ const getPageElements = (): PageElements => ({
   authenticate: getElement('authenticate', HTMLButtonElement),
   authentication: getElement('authentication', HTMLDetailsElement),
   devices: getElement('devices', HTMLFieldSetElement),
-  login: getElement('login', HTMLDivElement),
+  login: getElement('login', HTMLFieldSetElement),
   refreshSettings: getElement('refresh_settings_common', HTMLButtonElement),
   resetCredentials: getElement('reset_credentials', HTMLButtonElement),
   settingsCommon: getElement('settings_common', HTMLDivElement),
@@ -148,29 +149,6 @@ const translatePage = (homey: HomeySettings): void => {
       if (translation !== '' && translation !== key) {
         element.textContent = translation
       }
-    }
-  }
-}
-
-const disableButton = (element: HTMLButtonElement, isDisabled = true): void => {
-  // Native `disabled` (not a pointer-events class): it blocks keyboard
-  // re-fire (no double POST), greys the control, and is announced to
-  // screen readers.
-  element.disabled = isDisabled
-}
-
-const withDisabledButtons = async (
-  elements: readonly HTMLButtonElement[],
-  action: () => Promise<void>,
-): Promise<void> => {
-  for (const element of elements) {
-    disableButton(element)
-  }
-  try {
-    await action()
-  } finally {
-    for (const element of elements) {
-      disableButton(element, false)
     }
   }
 }
@@ -452,8 +430,31 @@ const pushCredentials = async (
   setAuthenticatedState(elements, true)
 }
 
+// An empty credential can only produce the failure alert, so sign-in
+// arms only when the form could actually sign in; the caller hands
+// over initialized consts, so the construction-time recompute may run
+// the predicate safely (fields not built yet read as empty — the
+// sign-in button starts greyed).
+const createCredentialsGate = (
+  elements: PageElements,
+  state: PageState,
+): DirtyGate =>
+  createDirtyGate({
+    applyElement: elements.authenticate,
+    fieldsetElements: [elements.login],
+    refreshElements: [elements.resetCredentials],
+    isActionable: (): boolean =>
+      (state.usernameElement?.value ?? '').trim() !== '' &&
+      (state.passwordElement?.value ?? '') !== '',
+    serialize: (): string =>
+      JSON.stringify([
+        state.usernameElement?.value ?? '',
+        state.passwordElement?.value ?? '',
+      ]),
+  })
+
 const authenticate = async (context: PageContext): Promise<void> => {
-  const { elements, homey, state } = context
+  const { homey, state } = context
   // Trimmed: mobile autocomplete appends a space after the email.
   const username = (state.usernameElement?.value ?? '').trim()
   const password = state.passwordElement?.value ?? ''
@@ -461,13 +462,8 @@ const authenticate = async (context: PageContext): Promise<void> => {
     await alertMessage(homey, homey.__('settings.authenticate.failure'))
     return
   }
-  await withDisabledButtons(
-    [elements.authenticate, elements.resetCredentials],
-    async () =>
-      pushCredentials(context, {
-        password,
-        username,
-      } satisfies LoginCredentials),
+  await context.credentialsGate.runBusy(async () =>
+    pushCredentials(context, { password, username } satisfies LoginCredentials),
   )
 }
 
@@ -486,16 +482,13 @@ const pushLogOut = async (context: PageContext): Promise<void> => {
 }
 
 const logOut = async (context: PageContext): Promise<void> => {
-  const { elements, homey } = context
+  const { homey } = context
   if (
     !(await homeyConfirm(homey, homey.__('settings.authenticate.resetConfirm')))
   ) {
     return
   }
-  await withDisabledButtons(
-    [elements.authenticate, elements.resetCredentials],
-    async () => pushLogOut(context),
-  )
+  await context.credentialsGate.runBusy(async () => pushLogOut(context))
 }
 
 const refreshFromDeviceUpdate = async (context: PageContext): Promise<void> => {
@@ -553,10 +546,17 @@ const buildSections = async (context: PageContext): Promise<void> => {
     key: 'password',
     value: credentials.password,
   })
+  context.credentialsGate.wire(
+    [state.usernameElement, state.passwordElement].filter(
+      (element) => element !== null,
+    ),
+  )
   await fetchDeviceSettings(context)
   generateCommonSettings(context, driverSettings)
-  // Snapshot the pristine state once the sections are built.
+  // Snapshot the pristine state once the sections are built; the
+  // credentials rebaseline also re-arms sign-in for prefilled fields.
   context.gate.markSaved()
+  context.credentialsGate.markSaved()
 }
 
 // One freshness pass, shared by the boot pull and the app's realtime
@@ -597,6 +597,7 @@ const init = async (homey: HomeySettings): Promise<void> => {
     usernameElement: null,
   }
   const context: PageContext = {
+    credentialsGate: createCredentialsGate(elements, state),
     elements,
     // `elements` and `state` are initialized consts here, so the
     // construction-time recompute may run the predicate safely (an
