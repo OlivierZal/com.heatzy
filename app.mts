@@ -8,14 +8,13 @@ import {
   FacadeManager,
   HeatzyAPI,
 } from '@olivierzal/heatzy-api'
-import { fireAndForget } from '@olivierzal/homey-kit'
+import { fireAndForget, NotFoundError } from '@olivierzal/homey-kit'
 
 import type HeatzyDevice from './drivers/heatzy/device.mts'
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
 import type { DriverSetting } from './types/driver-settings.mts'
 import type { LoginSetting, ManifestDriver } from './types/manifest.mts'
 import { changelog } from './files.mts'
-import { NotFoundError } from './lib/errors.mts'
 import { type Homey, App } from './lib/homey.mts'
 
 const NOTIFICATION_DELAY_MS = 10_000

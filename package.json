@@ -33,7 +33,7 @@
   "prettier": "@olivierzal/configs/prettier",
   "dependencies": {
     "@olivierzal/heatzy-api": "12.0.1",
-    "@olivierzal/homey-kit": "1.1.0",
+    "@olivierzal/homey-kit": "2.1.1",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {

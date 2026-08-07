@@ -133,13 +133,22 @@ coverage.
   refetch of the document through a never-cached address
   (`?fresh=<identity>` — a bare reload can be re-served the same stale
   document from the HTTP cache; sessionStorage guard,
-  `ensureFreshWebview` from `@olivierzal/homey-kit/webview`), whose
+  `watchWebviewFreshness` from `@olivierzal/homey-kit/webview`), whose
   fresh stamps pull the fresh assets;
   a mismatch that survives its refetch is reported to
-  `POST /boot-error`. The app also emits a `webview_hashes_changed`
-  realtime event at its own boot; an open page re-runs the same
-  handshake on it — a second trigger of the one primitive, covering a
-  page left open across an app restart or update. Every failure
+  `POST /boot-error`. The guarantee lives in the BOOT check, and which
+  surface needs it was measured on device (2026-08-07): the web-app
+  settings page is destroyed and REMOUNTED when the app restarts, and
+  mobile widgets reload too — both are fresh for free. Only the mobile
+  settings page survives an app restart, so it alone never boots again;
+  that is why the watcher re-checks on RETURN TO THE FOREGROUND
+  (`visibilitychange`), the trigger that covers it. The app also emits a
+  `webview_hashes_changed` realtime event at its own boot and the page
+  subscribes to it, but it guarantees NOTHING on its own: it fires at
+  the end of the app's `onInit`, i.e. exactly when the restart has just
+  disconnected every open page, so its audience is absent by
+  construction (measured: an open mobile page produced no request and no
+  breadcrumb). Never fold the visibility trigger into it. Every failure
   path stays open: an unstamped page, an absent route or denied
   storage must never take a working webview down. Heatzy
   divergence from com.melcloud: the cached-HTML era here loaded
@@ -226,7 +235,8 @@ reads need auth).
 manifest reader runs on the device) owns what used to be copied across
 the three apps: the dirty gate and the freshness handshake
 (`/webview`), the settings transport (`/settings`), the manifest reader
-(`/node`), `fireAndForget`/`getErrorMessage`/`sequential` (root) and the
+(`/node`), `fireAndForget`/`getErrorMessage`/`NotFoundError`/`sequential`
+(root) and the
 two test kernels (`/testing`). A change to any of them is a kit release
 adopted here by a pin bump — never a local edit, never a re-derivation.
 
@@ -237,8 +247,8 @@ What stays local, by measurement rather than omission:
   takes `(promise, logger, message)` and is what `app.mts` and
   `drivers/heatzy/device.mts` use — the app or device instance passes
   itself, no error adapter at any site.
-- `lib/errors.mts` (`NotFoundError` carries this app's localized
-  message) and `lib/homey.mts`.
+- `lib/homey.mts`. (`NotFoundError` moved to the kit: the class only
+  names the error, the localized message is passed at the throw site.)
 - `homey-override.d.ts` keeps its `declare module` block: module
   augmentation cannot be packaged. It EXTENDS the SDK interfaces and
   takes only the narrowed member signatures from the kit generics
@@ -247,11 +257,11 @@ What stays local, by measurement rather than omission:
   does not work — they both declare those members, and the conflict
   silently resolves to the SDK's wider type.
 
-`api.mts` passes the manifest URL to `getWebviewHashes` explicitly: the
-kit's default resolves `../webview-hashes.json` against its own module,
-which sits in `node_modules` — only the caller knows where the bundler
-stamped it. Dropping that argument silently disables the freshness
-handshake (the reader fails open with an empty map).
+`api.mts` passes the manifest URL to `getWebviewHashes`: only the caller
+knows where the bundler stamped it. The kit made that argument REQUIRED
+in 2.0.0 — its former default resolved against the kit's own module in
+`node_modules`, a path that never exists, and the reader fails open with
+an empty map, so the omission silently disabled the whole handshake.
 
 ## Lint doctrine
 
