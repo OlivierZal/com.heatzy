@@ -1,51 +1,71 @@
 {
-  "1.0.0": { "en": "Creating an app to pilot Heatzy via Homey!" },
-  "2.0.0": { "en": "Translated into French." },
-  "3.0.0": { "en": "Optimized loops and reshaped app settings." },
-  "4.0.0": { "en": "Reshaped error management." },
-  "5.0.0": { "en": "Improved performances." },
-  "6.0.0": { "en": "Updated modules." },
-  "7.0.0": { "en": "Use eslint flat config." },
-  "7.0.1": { "en": "Use mixins." },
-  "8.0.0": { "en": "Reshaped code." },
-  "9.0.0": { "en": "Use decorator." },
+  "1.0.0": {
+    "en": "First release: control your Heatzy devices from Homey.",
+    "fr": "Première version : pilotez vos appareils Heatzy depuis Homey."
+  },
+  "2.0.0": {
+    "en": "The app is now available in French.",
+    "fr": "L’app est désormais disponible en français."
+  },
+  "3.0.0": {
+    "en": "The settings page has been reorganised, and the app responds faster.",
+    "fr": "La page de réglages a été réorganisée et l’app répond plus vite."
+  },
+  "4.0.0": {
+    "en": "Errors are now reported more clearly.",
+    "fr": "Les erreurs sont désormais signalées plus clairement."
+  },
+  "5.0.0": { "en": "The app runs faster.", "fr": "L’app est plus rapide." },
+  "6.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
+  "7.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
+  "7.0.1": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
+  "8.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
+  "9.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
   "10.0.0": {
-    "en": "Major release! Now supporting most Heatzy features (boost and vacation modes, on/off scheduling, comfort 1 and comfort 2 modes). Coming soon: temperature support for GLOW models."
+    "en": "Most Heatzy features are now supported: boost and vacation modes, on/off scheduling, and the Comfort 1 and Comfort 2 modes.",
+    "fr": "La plupart des fonctions Heatzy sont désormais prises en charge : modes boost et vacances, programmation marche/arrêt, et modes Confort 1 et Confort 2."
   },
-  "10.1.0": { "en": "Added support for GLOW devices." },
-  "13.0.0": { "en": "Added missing flows." },
-  "14.0.0": { "en": "Improved types." },
-  "15.0.0": { "en": "Improved performances." },
-  "16.0.0": { "en": "Improved error handling." },
-  "17.0.0": { "en": "Improved API management." },
-  "18.0.0": { "en": "Various improvements." },
-  "19.0.0": { "en": "Modularized API management." },
+  "10.1.0": {
+    "en": "GLOW devices are now supported.",
+    "fr": "Les appareils GLOW sont désormais pris en charge."
+  },
+  "13.0.0": {
+    "en": "New flow cards are available for your devices.",
+    "fr": "De nouvelles cartes de flux sont disponibles pour vos appareils."
+  },
+  "14.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
+  "15.0.0": { "en": "The app runs faster.", "fr": "L’app est plus rapide." },
+  "16.0.0": {
+    "en": "Errors are reported more clearly.",
+    "fr": "Les erreurs sont signalées plus clairement."
+  },
+  "17.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
+  "18.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
+  "19.0.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
   "20.0.0": {
-    "en": "Heatzy Pro & Glow/Shine are now fully supported!\nSome flows may need updating due to related breaking changes.",
-    "fr": "Heatzy Pro et Glow/Shine sont désormais entièrement pris en charge !\nCertains flows peuvent nécessiter une mise à jour en raison de changements majeurs liés à cette intégration."
+    "en": "Heatzy Pro and Glow/Shine are now fully supported. Some flows may need updating.",
+    "fr": "Heatzy Pro et Glow/Shine sont désormais entièrement pris en charge. Certains flows peuvent nécessiter une mise à jour."
   },
-  "21.0.0": { "en": "Added Onyx support." },
-  "21.1.0": { "en": "Upgraded modules" },
+  "21.0.0": {
+    "en": "Onyx devices are now supported.",
+    "fr": "Les appareils Onyx sont désormais pris en charge."
+  },
+  "21.1.0": { "en": "Internal maintenance.", "fr": "Maintenance interne." },
   "22.0.0": {
-    "da": "Opdateret for kompatibilitet med Node.js 22 og senere, inklusive flere rettelser (Glow/Shine enheder).",
-    "en": "Updated for compatibility with Node.js 22 and later, including several fixes (Glow/Shine devices).",
-    "es": "Actualizado para compatibilidad con Node.js 22 y posteriores, incluyendo varias correcciones (dispositivos Glow/Shine).",
-    "fr": "Mis à jour pour la compatibilité avec Node.js 22 et versions ultérieures, incluant plusieurs correctifs (appareils Glow/Shine).",
-    "nl": "Bijgewerkt voor compatibiliteit met Node.js 22 en later, inclusief meerdere fixes (Glow/Shine apparaten).",
-    "no": "Oppdatert for kompatibilitet med Node.js 22 og senere, inkludert flere rettelser (Glow/Shine enheter).",
-    "sv": "Uppdaterad för kompatibilitet med Node.js 22 och senare, inklusive flera korrigeringar (Glow/Shine enheter)."
+    "en": "Several fixes for Glow and Shine devices, and an update for newer Homey versions.",
+    "fr": "Plusieurs correctifs pour les appareils Glow et Shine, et une mise à jour pour les versions récentes de Homey."
   },
   "23.0.0": {
     "en": "The app has been rewritten: sessions are handled better, signing in is more resilient, and the settings page is more reliable.",
-    "fr": "L'application a été réécrite : les sessions sont mieux gérées, la connexion est plus robuste et la page de réglages est plus fiable."
+    "fr": "L’application a été réécrite : les sessions sont mieux gérées, la connexion est plus robuste et la page de réglages est plus fiable."
   },
   "23.0.1": {
     "en": "Refined the settings collapse/expand chevron.",
-    "fr": "Chevron d'ouverture/fermeture des réglages affiné."
+    "fr": "Chevron d’ouverture/fermeture des réglages affiné."
   },
   "23.0.2": {
     "en": "Settings: the Update button now stays greyed out until you change a setting.",
-    "fr": "Réglages : le bouton Mettre à jour reste désormais grisé tant que vous n'avez pas modifié un réglage."
+    "fr": "Réglages : le bouton Mettre à jour reste désormais grisé tant que vous n’avez pas modifié un réglage."
   },
   "23.0.3": {
     "en": "Under-the-hood maintenance and hardening.",
@@ -53,22 +73,22 @@
   },
   "23.0.4": {
     "en": "The message shown when a device cannot be found now appears in the right language.",
-    "fr": "Le message indiquant qu'un appareil est introuvable s'affiche désormais dans la bonne langue."
+    "fr": "Le message indiquant qu’un appareil est introuvable s’affiche désormais dans la bonne langue."
   },
   "23.1.0": {
     "en": "Signing in no longer reports success when your devices could not be loaded: instead of an empty device list, the app now tells you what went wrong.",
-    "fr": "La connexion ne s'annonce plus réussie lorsque vos appareils n'ont pas pu être chargés : au lieu d'une liste vide, l'app vous indique désormais ce qui a échoué."
+    "fr": "La connexion ne s’annonce plus réussie lorsque vos appareils n’ont pas pu être chargés : au lieu d’une liste vide, l’app vous indique désormais ce qui a échoué."
   },
   "23.2.0": {
     "en": "The settings page now locks its forms while a change is being applied, refreshes itself after an app update, and shows a setting as undecided when your devices disagree instead of picking one of them. Your credentials are saved only once signing in succeeds, and a running derogation keeps its end time across a restart.",
-    "fr": "La page de réglages fige désormais ses formulaires pendant l'application d'un changement, se met à jour d'elle-même après une mise à jour de l'app, et affiche un réglage comme indéterminé lorsque vos appareils divergent au lieu d'en choisir un. Vos identifiants ne sont enregistrés qu'une fois la connexion réussie, et une dérogation en cours conserve son heure de fin après un redémarrage."
+    "fr": "La page de réglages fige désormais ses formulaires pendant l’application d’un changement, se met à jour d’elle-même après une mise à jour de l’app, et affiche un réglage comme indéterminé lorsque vos appareils divergent au lieu d’en choisir un. Vos identifiants ne sont enregistrés qu’une fois la connexion réussie, et une dérogation en cours conserve son heure de fin après un redémarrage."
   },
   "23.2.1": {
     "en": "A settings page left open on your phone now refreshes itself when you come back to it after an app update, instead of staying on the previous version.",
-    "fr": "Une page de réglages laissée ouverte sur votre téléphone se met désormais à jour lorsque vous y revenez après une mise à jour de l'app, au lieu de rester sur la version précédente."
+    "fr": "Une page de réglages laissée ouverte sur votre téléphone se met désormais à jour lorsque vous y revenez après une mise à jour de l’app, au lieu de rester sur la version précédente."
   },
   "23.2.2": {
     "en": "The app no longer installs a large set of development files it never needed, freeing space on your Homey and removing a reported vulnerability along with them.",
-    "fr": "L'app n'installe plus un vaste ensemble de fichiers de développement dont elle n'avait aucun besoin, ce qui libère de l'espace sur votre Homey et supprime au passage une vulnérabilité signalée."
+    "fr": "L’app n’installe plus un vaste ensemble de fichiers de développement dont elle n’avait aucun besoin, ce qui libère de l’espace sur votre Homey et supprime au passage une vulnérabilité signalée."
   }
 }
