@@ -347,11 +347,15 @@ describe(HeatzyApp, () => {
       expect(mockSetTimeout).not.toHaveBeenCalled()
     })
 
-    it('should skip the notification when the language is absent from the changelog', async () => {
+    it('should fall back to English when the language is absent from the changelog', async () => {
       mockGetLanguage.mockReturnValue('ja')
       await app.onInit()
 
-      expect(mockSetTimeout).not.toHaveBeenCalled()
+      await runScheduledTimeout(0)
+
+      expect(mockCreateNotification).toHaveBeenCalledWith({
+        excerpt: 'English changelog',
+      })
     })
 
     it('should skip the notification when the version is absent from the changelog', async () => {
