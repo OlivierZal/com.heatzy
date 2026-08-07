@@ -8,11 +8,11 @@ import {
   Product,
   Switch,
 } from '@olivierzal/heatzy-api'
+import { NotFoundError } from '@olivierzal/homey-kit'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type HeatzyDriver from '../../drivers/heatzy/driver.mts'
 import { SETTABLE_CAPABILITIES } from '../../drivers/heatzy/driver.mts'
-import { NotFoundError } from '../../lib/errors.mts'
 import {
   type InteropModule,
   assertDefined,

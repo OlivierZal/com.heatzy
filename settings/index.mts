@@ -11,7 +11,7 @@ import {
 import {
   type DirtyGate,
   createDirtyGate,
-  ensureFreshWebview,
+  watchWebviewFreshness,
 } from '@olivierzal/homey-kit/webview'
 
 import type { DeviceSettings, Settings } from '../types/device-settings.mts'
@@ -544,31 +544,20 @@ const buildSections = async (context: PageContext): Promise<void> => {
   context.credentialsGate.markSaved()
 }
 
-// One freshness pass, shared by the boot pull and the app's realtime
-// poke.
-const checkFreshness = async (homey: HomeySettings): Promise<boolean> =>
-  ensureFreshWebview(
-    'settings',
-    async () => homeyApiGet(homey, '/webview-hashes'),
-    (message) => {
+// Boot check plus the triggers that cover a page outliving it: this
+// webview survives an app restart on mobile, so no new document — and
+// no boot check — ever happens there.
+const startFreshness = async (homey: HomeySettings): Promise<boolean> =>
+  watchWebviewFreshness({
+    entry: 'settings',
+    fetchHashes: async () => homeyApiGet(homey, '/webview-hashes'),
+    report: (message) => {
       reportFreshness(homey, message)
     },
-  )
-
-// Boot pull, then push subscription: a stale page refetches itself
-// (the caller skips its init — the document is about to be replaced);
-// any page that stays — fresh, or stale but unable to refetch —
-// subscribes to the app's boot poke and re-runs the same handshake
-// when it fires.
-const startFreshness = async (homey: HomeySettings): Promise<boolean> => {
-  if (await checkFreshness(homey)) {
-    return true
-  }
-  homey.on('webview_hashes_changed', () => {
-    fireAndForget(homey, checkFreshness(homey))
+    subscribe: (onPoke) => {
+      homey.on('webview_hashes_changed', onPoke)
+    },
   })
-  return false
-}
 
 const init = async (homey: HomeySettings): Promise<void> => {
   if (await startFreshness(homey)) {

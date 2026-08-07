@@ -16,6 +16,7 @@ import {
 import {
   fireAndForget,
   getErrorMessage,
+  NotFoundError,
   sequential,
 } from '@olivierzal/homey-kit'
 
@@ -25,7 +26,6 @@ import type {
   SetCapabilities,
 } from '../../types/capabilities.mts'
 import type { Settings, Store } from '../../types/device-settings.mts'
-import { NotFoundError } from '../../lib/errors.mts'
 import { type Homey, Device } from '../../lib/homey.mts'
 import type HeatzyDriver from './driver.mts'
 import {
