@@ -3,11 +3,11 @@ import {
   type LoginCredentials,
   AuthenticationError,
 } from '@olivierzal/heatzy-api'
+import { getErrorMessage } from '@olivierzal/homey-kit'
+import { getWebviewHashes } from '@olivierzal/homey-kit/node'
 
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
 import type { DriverSetting } from './types/driver-settings.mts'
-import { getErrorMessage } from './lib/get-error-message.mts'
-import { getWebviewHashes } from './lib/webview-hashes.mts'
 
 // The webview only receives an error MESSAGE across the app bridge, so
 // login failures are classified here, where `instanceof` still works: a
@@ -62,7 +62,10 @@ const api = {
     homey: Homey
   }): Promise<Partial<Record<string, string>>> => {
     logSettingsRoute(homey.app, 'GET /webview-hashes')
-    return getWebviewHashes()
+    // The manifest URL is passed explicitly: the kit resolves its
+    // default against its own module, which sits in `node_modules` —
+    // only the caller knows where the bundler stamped the manifest.
+    return getWebviewHashes(new URL('webview-hashes.json', import.meta.url))
   },
   isAuthenticated: ({ homey }: { homey: Homey }): boolean => {
     logSettingsRoute(homey.app, 'GET /sessions')

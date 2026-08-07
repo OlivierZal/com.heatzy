@@ -8,6 +8,7 @@ import {
   FacadeManager,
   HeatzyAPI,
 } from '@olivierzal/heatzy-api'
+import { fireAndForget } from '@olivierzal/homey-kit'
 
 import type HeatzyDevice from './drivers/heatzy/device.mts'
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
@@ -15,7 +16,6 @@ import type { DriverSetting } from './types/driver-settings.mts'
 import type { LoginSetting, ManifestDriver } from './types/manifest.mts'
 import { changelog } from './files.mts'
 import { NotFoundError } from './lib/errors.mts'
-import { fireAndForget } from './lib/fire-and-forget.mts'
 import { type Homey, App } from './lib/homey.mts'
 
 const NOTIFICATION_DELAY_MS = 10_000
@@ -156,13 +156,7 @@ export default class HeatzyApp extends App {
     // Poke any open webview to re-run its freshness handshake: an app
     // (re)boot is exactly when the served hashes may have moved.
     this.homey.api.realtime('webview_hashes_changed', null)
-    fireAndForget(
-      this.#logBootReady(),
-      (...args: unknown[]) => {
-        this.error(...args)
-      },
-      'Boot readiness tracking failed:',
-    )
+    fireAndForget(this.#logBootReady(), this, 'Boot readiness tracking failed:')
   }
 
   public override async onUninit(): Promise<void> {
