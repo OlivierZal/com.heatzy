@@ -120,6 +120,27 @@ const fireAndForget = (
   promise.catch(async (error: unknown) => alertMessage(homey, error))
 }
 
+// TEMPORARY (kit adoption test): appends the running bundle's `?v=`
+// content stamp to the page title, so an on-device tester can prove the
+// page is the branch's bundle and not a cached older one. Removed by
+// the commit that follows the test. Runs after `translatePage`, which
+// rewrites the title from the locale.
+const STAMP_LENGTH = 8
+
+const showBundleStamp = (): void => {
+  const stamp = [...document.querySelectorAll('script[src]')]
+    .map(
+      (element) =>
+        /[?&]v=(?<hash>[^&"']+)/u.exec(element.getAttribute('src') ?? '')
+          ?.groups?.hash,
+    )
+    .find((hash) => hash !== undefined)
+  const titleElement = document.querySelector('.homey-title')
+  if (titleElement !== null) {
+    titleElement.textContent = `${titleElement.textContent} KIT-TEST ${stamp?.slice(0, STAMP_LENGTH) ?? 'unstamped'}`
+  }
+}
+
 // Freshness breadcrumbs ride the declared boot-error route; a missed
 // one is acceptable, so the callback swallows the outcome.
 const reportFreshness = (homey: HomeySettings, message: string): void => {
@@ -154,6 +175,7 @@ const translatePage = (homey: HomeySettings): void => {
       }
     }
   }
+  showBundleStamp()
 }
 
 const createLabelElement = (
