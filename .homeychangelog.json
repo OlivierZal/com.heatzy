@@ -66,5 +66,9 @@
   "23.2.1": {
     "en": "A settings page left open on your phone now refreshes itself when you come back to it after an app update, instead of staying on the previous version.",
     "fr": "Une page de réglages laissée ouverte sur votre téléphone se met désormais à jour lorsque vous y revenez après une mise à jour de l'app, au lieu de rester sur la version précédente."
+  },
+  "23.2.2": {
+    "en": "The app no longer installs a large set of development files it never needed, freeing space on your Homey and removing a reported vulnerability along with them.",
+    "fr": "L'app n'installe plus un vaste ensemble de fichiers de développement dont elle n'avait aucun besoin, ce qui libère de l'espace sur votre Homey et supprime au passage une vulnérabilité signalée."
   }
 }
