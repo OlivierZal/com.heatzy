@@ -1,18 +1,21 @@
 import type { LoginCredentials } from '@olivierzal/heatzy-api'
 import type HomeySettings from 'homey/lib/HomeySettings'
-
-import type { DeviceSettings, Settings } from '../types/device-settings.mts'
-import type { DriverSetting } from '../types/driver-settings.mts'
-import { getErrorMessage } from '../lib/get-error-message.mts'
+import { getErrorMessage } from '@olivierzal/homey-kit'
 import {
   homeyApiDelete,
   homeyApiGet,
   homeyApiPost,
   homeyApiPut,
   homeyConfirm,
-} from './callback-api.mts'
-import { type DirtyGate, createDirtyGate } from './dirty-gate.mts'
-import { ensureFreshWebview } from './webview-freshness.mts'
+} from '@olivierzal/homey-kit/settings'
+import {
+  type DirtyGate,
+  createDirtyGate,
+  ensureFreshWebview,
+} from '@olivierzal/homey-kit/webview'
+
+import type { DeviceSettings, Settings } from '../types/device-settings.mts'
+import type { DriverSetting } from '../types/driver-settings.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
 // stay ≤ es2023 — no iterator helpers, no Object.groupBy (old iOS

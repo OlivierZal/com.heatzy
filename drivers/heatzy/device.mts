@@ -13,6 +13,11 @@ import {
   supportsV2,
   Temporal,
 } from '@olivierzal/heatzy-api'
+import {
+  fireAndForget,
+  getErrorMessage,
+  sequential,
+} from '@olivierzal/homey-kit'
 
 import type {
   Capabilities,
@@ -21,10 +26,7 @@ import type {
 } from '../../types/capabilities.mts'
 import type { Settings, Store } from '../../types/device-settings.mts'
 import { NotFoundError } from '../../lib/errors.mts'
-import { fireAndForget } from '../../lib/fire-and-forget.mts'
-import { getErrorMessage } from '../../lib/get-error-message.mts'
 import { type Homey, Device } from '../../lib/homey.mts'
-import { sequential } from '../../lib/sequential.mts'
 import type HeatzyDriver from './driver.mts'
 import {
   getCapabilitiesOptions,
@@ -319,9 +321,7 @@ export default class HeatzyDevice extends Device {
     await this.#setCapabilities(device.product)
     fireAndForget(
       this.#finishInit(device),
-      (...args: unknown[]) => {
-        this.error(...args)
-      },
+      this,
       'Deferred device init failed:',
     )
   }
