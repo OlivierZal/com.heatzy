@@ -62,5 +62,9 @@
   "23.2.0": {
     "en": "The settings page now locks its forms while a change is being applied, refreshes itself after an app update, and shows a setting as undecided when your devices disagree instead of picking one of them. Your credentials are saved only once signing in succeeds, and a running derogation keeps its end time across a restart.",
     "fr": "La page de réglages fige désormais ses formulaires pendant l'application d'un changement, se met à jour d'elle-même après une mise à jour de l'app, et affiche un réglage comme indéterminé lorsque vos appareils divergent au lieu d'en choisir un. Vos identifiants ne sont enregistrés qu'une fois la connexion réussie, et une dérogation en cours conserve son heure de fin après un redémarrage."
+  },
+  "23.2.1": {
+    "en": "A settings page left open on your phone now refreshes itself when you come back to it after an app update, instead of staying on the previous version.",
+    "fr": "Une page de réglages laissée ouverte sur votre téléphone se met désormais à jour lorsque vous y revenez après une mise à jour de l'app, au lieu de rester sur la version précédente."
   }
 }
