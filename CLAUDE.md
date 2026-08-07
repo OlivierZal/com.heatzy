@@ -199,6 +199,30 @@ coverage.
   (`settings/` imports shared `lib/` and `types/` modules). Node-side
   code may use the newer APIs freely.
 
+## Tooling boundary (@olivierzal/configs)
+
+The shared tooling lives in `@olivierzal/configs` (exact pin): the
+eslint `homeyApp` preset (plugins are the package's dependencies — no
+plugin devDeps here), the prettier config (`"prettier"` key in
+package.json, no local file), the `tsconfig/app` base and the vitest
+`swcPlugin`. The overlay keeps ONLY per-repo verdicts: the lint ignores
+(`.homeybuild/`, `coverage/`), the preset's per-app globs (bundled
+sources, default-export files, jsdoc files, untyped test doubles, the
+webview floor), and tsconfig `outDir`. Do not re-declare family policy
+locally — a rule evaluation or version bump happens in configs,
+adoption is a reviewed pin bump. Never extend `tsconfig/app-build`: its
+`rootDir` resolves against the base file inside node_modules (the trap
+the configs README documents) — `tsconfig.build.json` extends the LOCAL
+`./tsconfig.json` and keeps `rootDir`/`exclude` here. The
+CI/audit/claude*/dependabot/pr-title/zizmor workflows are stubs calling
+the family reusables in OlivierZal/configs, pinned `@<sha> # vX.Y.Z`;
+`publish.yml`, `validate.yml` and `claude-dependabot-fix.yml` stay
+local (no reusable exists for the first two; the fix reusable grants no
+`packages: read` and cannot carry the repo's heatzy-api doctrine line),
+so the composite action stays too — installs pass `npm-token` (the
+configs and heatzy-api dependencies live on GitHub Packages, where even
+reads need auth).
+
 ## Lint doctrine
 
 - Code adapts to the rules, never the reverse. Never add a disable — not
