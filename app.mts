@@ -14,95 +14,30 @@ import {
   selectChangelogEntries,
   sequential,
 } from '@olivierzal/homey-kit'
+import {
+  type DriverSetting,
+  getDriverLoginSetting,
+  getDriverSettings,
+  mergeDeviceSettings,
+} from '@olivierzal/homey-kit/manifest'
 
 import type HeatzyDevice from './drivers/heatzy/device.mts'
+import type { HomeySettings } from './types/app-settings.mts'
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
-import type { DriverSetting } from './types/driver-settings.mts'
-import type { LoginSetting, ManifestDriver } from './types/manifest.mts'
 import { changelog } from './files.mts'
 import { type Homey, App } from './lib/homey.mts'
 
 const NOTIFICATION_DELAY_MS = 10_000
 
-const localize = (
-  strings: string | (Partial<Record<string, string>> & { readonly en: string }),
-  language: string,
-): string =>
-  typeof strings === 'string' ? strings : (strings[language] ?? strings.en)
-
-// Aggregates one device's settings into the per-driver map; a conflicting
-// value across devices marks that setting as indeterminate (`null`) while
-// the remaining settings keep folding independently.
-const mergeDeviceSettings = (
-  driverSettings: Record<string, unknown>,
-  settings: Record<string, unknown>,
-): void => {
-  for (const [settingId, value] of Object.entries(settings)) {
-    if (!Object.hasOwn(driverSettings, settingId)) {
-      driverSettings[settingId] = value
-    } else if (driverSettings[settingId] !== value) {
-      driverSettings[settingId] = null
-    }
-  }
-}
-
-const getDriverSettings = (
-  { id: driverId, name, settings }: ManifestDriver,
-  language: string,
-): DriverSetting[] => {
-  const driverLabel = localize(name, language)
-  return (settings ?? []).flatMap(
-    ({ children, id: groupId, label: groupLabel }) =>
-      (children ?? []).map(({ id, label, max, min, type, units, values }) => ({
-        driverId,
-        driverLabel,
-        groupId,
-        groupLabel: localize(groupLabel, language),
-        id,
-        max,
-        min,
-        title: localize(label, language),
-        type,
-        units,
-        values: values?.map(({ id: valueId, label: valueLabel }) => ({
-          id: valueId,
-          label: localize(valueLabel, language),
-        })),
-      })),
-  )
-}
-
-const getDriverLoginSetting = (
-  { id: driverId, name, pair }: ManifestDriver,
-  language: string,
-): DriverSetting[] => {
-  const driverLabel = localize(name, language)
-  const driverLoginSetting: Record<string, DriverSetting> = {}
-  const loginOptions =
-    pair?.find(
-      (pairSetting): pairSetting is LoginSetting => pairSetting.id === 'login',
-    )?.options ?? []
-  for (const [option, label] of Object.entries(loginOptions)) {
-    const isPassword = option.startsWith('password')
-    const key = isPassword ? 'password' : 'username'
-    driverLoginSetting[key] ??= {
-      driverId,
-      driverLabel,
-      groupId: 'login',
-      id: key,
-      title: '',
-      type: isPassword ? 'password' : 'text',
-    }
-    driverLoginSetting[key] = {
-      ...driverLoginSetting[key],
-      [option.endsWith('Placeholder') ? 'placeholder' : 'title']: localize(
-        label,
-        language,
-      ),
-    }
-  }
-  return Object.values(driverLoginSetting)
-}
+// The one boundary where a settings key arrives untyped: the library's
+// `SettingManager` is keyed by plain strings, and it derives each key
+// from the name of the accessor its `@setting` decorator wraps — so the
+// key set belongs to the library and grows with its releases. Narrowing
+// by membership would drop a write the day the library persists one
+// more field, so the assertion stays, alone, here.
+const settingKey = (key: string): keyof HomeySettings =>
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- the library's SettingManager contract types its keys as plain strings
+  key as keyof HomeySettings
 
 export default class HeatzyApp extends App {
   declare public readonly homey: Homey.Homey
@@ -298,14 +233,14 @@ export default class HeatzyApp extends App {
   #createSettingManager(): SettingManager {
     return {
       get: (key: string): string | null | undefined => {
-        const value: unknown = this.homey.settings.get(key)
+        const value: unknown = this.homey.settings.get(settingKey(key))
         return typeof value === 'string' || value === null ? value : undefined
       },
       set: (key: string, value: string): void => {
-        this.homey.settings.set(key, value)
+        this.homey.settings.set(settingKey(key), value)
       },
       unset: (key: string): void => {
-        this.homey.settings.unset(key)
+        this.homey.settings.unset(settingKey(key))
       },
     }
   }

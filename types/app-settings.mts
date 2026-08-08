@@ -4,6 +4,12 @@
  * app's own bookkeeping.
  */
 export interface HomeySettings {
+  /**
+   * The previous major's expiry key, still on disk for anyone upgrading
+   * from it. Declared so the boot-time cleanup can name it; never read.
+   * @deprecated Superseded by `expiry`, and cleared at boot.
+   */
+  readonly expireAt?: string | null
   readonly expiry?: string | null
   readonly loginBackoffUntil?: string | null
   readonly notifiedVersion?: string | null

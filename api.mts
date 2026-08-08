@@ -1,3 +1,4 @@
+import type { DriverSetting } from '@olivierzal/homey-kit/manifest'
 import type { Homey } from 'homey/lib/Homey'
 import {
   type LoginCredentials,
@@ -7,7 +8,6 @@ import { getErrorMessage } from '@olivierzal/homey-kit'
 import { getWebviewHashes } from '@olivierzal/homey-kit/node'
 
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
-import type { DriverSetting } from './types/driver-settings.mts'
 
 // The webview only receives an error MESSAGE across the app bridge, so
 // login failures are classified here, where `instanceof` still works: a
