@@ -1,11 +1,12 @@
 import type * as HeatzyApiModule from '@olivierzal/heatzy-api'
+import type { LoginSetting } from '@olivierzal/homey-kit/manifest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type HeatzyDevice from '../../drivers/heatzy/device.mts'
 import type * as FilesModule from '../../files.mts'
 import type * as HomeyLib from '../../lib/homey.mts'
 import type { Settings } from '../../types/device-settings.mts'
-import type { LoginSetting, ManifestDriver } from '../../types/manifest.mts'
+import type { ManifestDriver } from '../../types/manifest.mts'
 import {
   assertDefined,
   getMockCallArg,

@@ -1,6 +1,19 @@
 import type { LoginCredentials } from '@olivierzal/heatzy-api'
+import type { DriverSetting } from '@olivierzal/homey-kit/manifest'
 import type HomeySettings from 'homey/lib/HomeySettings'
 import { getErrorMessage } from '@olivierzal/homey-kit'
+import {
+  type HTMLValueElement,
+  booleanOptions,
+  booleanStrings,
+  createInput,
+  createLabel,
+  createSelect,
+  getButton,
+  getDetails,
+  getDiv,
+  getFieldset,
+} from '@olivierzal/homey-kit/dom'
 import {
   homeyApiDelete,
   homeyApiGet,
@@ -11,23 +24,19 @@ import {
 import {
   type DirtyGate,
   createDirtyGate,
+  fireAndForget,
+  runWebview,
+  trySetDocumentLanguage,
   watchWebviewFreshness,
 } from '@olivierzal/homey-kit/webview'
 
 import type { DeviceSettings, Settings } from '../types/device-settings.mts'
-import type { DriverSetting } from '../types/driver-settings.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
 // stay ≤ es2023 — no iterator helpers, no Object.groupBy (old iOS
 // engines are real).
 
-const INIT_TIMEOUT_MS = 10_000
-
-const booleanStrings: readonly string[] = ['false', 'true']
-
 const commonElementTypes = new Set(['checkbox', 'dropdown'])
-
-type HTMLValueElement = HTMLInputElement | HTMLSelectElement
 
 interface PageContext {
   readonly credentialsGate: DirtyGate
@@ -76,26 +85,15 @@ const applyCredentialHints = (
   input.spellcheck = false
 }
 
-const getElement = <T extends HTMLElement>(
-  id: string,
-  elementConstructor: new () => T,
-): T => {
-  const element = document.querySelector(`#${id}`)
-  if (!(element instanceof elementConstructor)) {
-    throw new TypeError(`Missing page element: #${id}`)
-  }
-  return element
-}
-
 const getPageElements = (): PageElements => ({
-  applySettings: getElement('apply_settings_common', HTMLButtonElement),
-  authenticate: getElement('authenticate', HTMLButtonElement),
-  authentication: getElement('authentication', HTMLDetailsElement),
-  devices: getElement('devices', HTMLFieldSetElement),
-  login: getElement('login', HTMLFieldSetElement),
-  refreshSettings: getElement('refresh_settings_common', HTMLButtonElement),
-  resetCredentials: getElement('reset_credentials', HTMLButtonElement),
-  settingsCommon: getElement('settings_common', HTMLDivElement),
+  applySettings: getButton('apply_settings_common'),
+  authenticate: getButton('authenticate'),
+  authentication: getDetails('authentication'),
+  devices: getFieldset('devices'),
+  login: getFieldset('login'),
+  refreshSettings: getButton('refresh_settings_common'),
+  resetCredentials: getButton('reset_credentials'),
+  settingsCommon: getDiv('settings_common'),
 })
 
 const alertMessage = async (
@@ -112,14 +110,6 @@ const alertMessage = async (
 // The one sanctioned fire-and-forget seam: detach already-started
 // work from an event handler, alerting a rejection instead of
 // propagating it.
-const fireAndForget = (
-  homey: HomeySettings,
-  promise: Promise<unknown>,
-): void => {
-  // eslint-disable-next-line unicorn/prefer-await -- the single fire-and-forget seam: rejections are alerted, never propagated
-  promise.catch(async (error: unknown) => alertMessage(homey, error))
-}
-
 // Freshness breadcrumbs ride the declared boot-error route; a missed
 // one is acceptable, so the callback swallows the outcome.
 const reportFreshness = (homey: HomeySettings, message: string): void => {
@@ -131,17 +121,6 @@ const reportFreshness = (homey: HomeySettings, message: string): void => {
       // A missed freshness breadcrumb is acceptable.
     },
   )
-}
-
-const setDocumentLanguage = async (homey: HomeySettings): Promise<void> => {
-  try {
-    document.documentElement.lang = await homeyApiGet<string>(
-      homey,
-      '/language',
-    )
-  } catch {
-    // The default page language stands when the fetch fails
-  }
 }
 
 const translatePage = (homey: HomeySettings): void => {
@@ -156,18 +135,6 @@ const translatePage = (homey: HomeySettings): void => {
   }
 }
 
-const createLabelElement = (
-  valueElement: HTMLValueElement,
-  text: string,
-): HTMLLabelElement => {
-  const labelElement = document.createElement('label')
-  labelElement.classList.add('homey-form-label')
-  labelElement.htmlFor = valueElement.id
-  labelElement.textContent = text
-  labelElement.append(valueElement)
-  return labelElement
-}
-
 const createGroupElement = (
   parentElement: HTMLElement,
   valueElement: HTMLValueElement,
@@ -175,51 +142,8 @@ const createGroupElement = (
 ): void => {
   const divElement = document.createElement('div')
   divElement.classList.add('homey-form-group')
-  divElement.append(createLabelElement(valueElement, title))
+  divElement.append(createLabel(valueElement, title, 'homey-form-label'))
   parentElement.append(divElement)
-}
-
-const createInputElement = ({
-  id,
-  placeholder,
-  type,
-  value,
-}: {
-  id: string
-  type: string
-  placeholder?: string | undefined
-  value?: string | null | undefined
-}): HTMLInputElement => {
-  const inputElement = document.createElement('input')
-  inputElement.classList.add('homey-form-input')
-  inputElement.id = id
-  inputElement.type = type
-  inputElement.value = value ?? ''
-  if (placeholder !== undefined) {
-    inputElement.placeholder = placeholder
-  }
-  return inputElement
-}
-
-const createSelectElement = (
-  homey: HomeySettings,
-  id: string,
-  values?: readonly { id: string; label: string }[],
-): HTMLSelectElement => {
-  const selectElement = document.createElement('select')
-  selectElement.classList.add('homey-form-select')
-  selectElement.id = id
-  for (const { id: optionValue, label } of [
-    { id: '', label: '' },
-    ...(values ??
-      booleanStrings.map((booleanString) => ({
-        id: booleanString,
-        label: homey.__(`settings.boolean.${booleanString}`),
-      }))),
-  ]) {
-    selectElement.append(new Option(label, optionValue))
-  }
-  return selectElement
 }
 
 // The grouped view collapses across devices: a setting equal on every
@@ -363,11 +287,12 @@ const generateCredential = (
     return null
   }
   const { id, placeholder, title, type } = loginSetting
-  const valueElement = createInputElement({
+  const valueElement = createInput({
+    className: 'homey-form-input',
     id,
     placeholder,
     type,
-    value: credential.value,
+    value: credential.value ?? null,
   })
   applyCredentialHints(valueElement, credential.key)
   createGroupElement(elements.login, valueElement, title)
@@ -383,7 +308,11 @@ const generateCommonSettings = (
   for (const { id, title, type, values } of optionSettings) {
     const settingId = `${id}__settings`
     if (commonElementTypes.has(type)) {
-      const valueElement = createSelectElement(homey, settingId, values)
+      const valueElement = createSelect(
+        settingId,
+        values ?? booleanOptions((key) => homey.__(key)),
+        'homey-form-select',
+      )
       // Every control feeds the dirty check that gates Apply.
       context.gate.wire([valueElement])
       createGroupElement(elements.settingsCommon, valueElement, title)
@@ -395,6 +324,14 @@ const generateCommonSettings = (
 // The credentials section folds once signed in; the device settings
 // stay hidden until then, so a signed-out page shows only the
 // expanded credentials.
+// A settings page has a user in front of it, so a rejection becomes an
+// alert rather than the dev-tools surface a widget would use.
+const alertRejection =
+  (homey: HomeySettings) =>
+  (error: unknown): void => {
+    fireAndForget(alertMessage(homey, error))
+  }
+
 const setAuthenticatedState = (
   elements: PageElements,
   isAuthenticated: boolean,
@@ -484,13 +421,13 @@ const refreshFromDeviceUpdate = async (context: PageContext): Promise<void> => {
 const addEventListeners = (context: PageContext): void => {
   const { elements, homey } = context
   elements.authenticate.addEventListener('click', () => {
-    fireAndForget(homey, authenticate(context))
+    fireAndForget(authenticate(context), alertRejection(homey))
   })
   elements.resetCredentials.addEventListener('click', () => {
-    fireAndForget(homey, logOut(context))
+    fireAndForget(logOut(context), alertRejection(homey))
   })
   elements.applySettings.addEventListener('click', () => {
-    fireAndForget(homey, applyDeviceSettings(context))
+    fireAndForget(applyDeviceSettings(context), alertRejection(homey))
   })
   elements.refreshSettings.addEventListener('click', () => {
     refreshCommonSettings(context)
@@ -498,7 +435,7 @@ const addEventListeners = (context: PageContext): void => {
   // Device syncs refresh the grouped values live, like the manual
   // refresh button but without the tap.
   homey.on('deviceupdate', () => {
-    fireAndForget(homey, refreshFromDeviceUpdate(context))
+    fireAndForget(refreshFromDeviceUpdate(context), alertRejection(homey))
   })
 }
 
@@ -589,7 +526,9 @@ const init = async (homey: HomeySettings): Promise<void> => {
     homey,
     state,
   }
-  await setDocumentLanguage(homey)
+  await trySetDocumentLanguage(async () =>
+    homeyApiGet<string>(homey, '/language'),
+  )
   translatePage(homey)
   await buildSections(context)
   addEventListeners(context)
@@ -599,35 +538,17 @@ const init = async (homey: HomeySettings): Promise<void> => {
   )
 }
 
-// Race the work against a deadline that REJECTS (not resolves): a hung
-// data fetch must surface an error through the caller's catch, not
-// resolve silently into a half-built page. The timer is always cleared.
-const withInitTimeout = async (work: Promise<void>): Promise<void> => {
-  let timer: ReturnType<typeof setTimeout> | undefined
-  try {
-    await Promise.race([
-      work,
-      new Promise<never>((_resolve, reject) => {
-        timer = setTimeout(() => {
-          reject(new Error('Timed out while loading the settings page'))
-        }, INIT_TIMEOUT_MS)
-      }),
-    ])
-  } finally {
-    clearTimeout(timer)
-  }
-}
-
-// The overlay must end whatever happens: a hung fetch rejects through
-// the timeout, failures are alerted, and `homey.ready()` runs in the
-// finally either way.
-const runWebview = async (homey: HomeySettings): Promise<void> => {
-  try {
-    await withInitTimeout(init(homey))
-  } catch (error) {
+// The overlay must end whatever happens: `runWebview` bounds the work
+// against a deadline that REJECTS (a hung fetch must surface, not
+// resolve into a half-built page) and calls `homey.ready()` either way.
+// The failure is alerted AFTER the overlay closes, so the alert is not
+// competing with it.
+const runPage = async (homey: HomeySettings): Promise<void> => {
+  const { error, hasFailed } = await runWebview(homey, init(homey), {
+    timeoutMessage: 'Timed out while loading the settings page',
+  })
+  if (hasFailed) {
     await alertMessage(homey, error)
-  } finally {
-    homey.ready()
   }
 }
 
@@ -637,5 +558,5 @@ const runWebview = async (homey: HomeySettings): Promise<void> => {
  * @param homey - The Homey settings webview SDK instance.
  */
 export const start = (homey: HomeySettings): void => {
-  fireAndForget(homey, runWebview(homey))
+  fireAndForget(runPage(homey), alertRejection(homey))
 }
