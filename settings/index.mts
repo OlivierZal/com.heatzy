@@ -123,14 +123,18 @@ const reportFreshness = (homey: HomeySettings, message: string): void => {
   )
 }
 
+// Iterates every element so the `undefined` narrow is a real branch: a
+// `[data-i18n]` selector would guarantee the attribute and leave the
+// guard as dead code under the 100% coverage bar.
 const translatePage = (homey: HomeySettings): void => {
-  for (const element of document.querySelectorAll<HTMLElement>('[data-i18n]')) {
+  for (const element of document.querySelectorAll<HTMLElement>('*')) {
     const key = element.dataset.i18n
-    if (key !== undefined) {
-      const translation = homey.__(key)
-      if (translation !== '' && translation !== key) {
-        element.textContent = translation
-      }
+    if (key === undefined) {
+      continue
+    }
+    const translation = homey.__(key)
+    if (translation !== '' && translation !== key) {
+      element.textContent = translation
     }
   }
 }
@@ -166,8 +170,10 @@ const flattenDeviceSettings = (
   return flat
 }
 
+// Identity rides `dataset`, never an encoded id: splitting an id on a
+// separator breaks the day a setting id contains it (com.melcloud form).
 const settingIdOf = (element: HTMLSelectElement): string | undefined =>
-  element.id.split('__', 1)[0]
+  element.dataset.settingId
 
 const refreshCommonSetting = (
   element: HTMLSelectElement,
@@ -209,6 +215,12 @@ const processValue = (element: HTMLSelectElement): unknown => {
   return null
 }
 
+// The select displays a number as its string (refreshCommonSetting), so
+// the divergence check must compare against the same view — comparing
+// the raw number would arm Apply forever on an untouched form.
+const matchesBaseline = (value: unknown, baseline: unknown): boolean =>
+  value === (typeof baseline === 'number' ? String(baseline) : baseline)
+
 const buildSettingsBody = ({
   elements,
   state,
@@ -221,7 +233,7 @@ const buildSettingsBody = ({
       id !== undefined &&
       value !== null &&
       (state.flatDeviceSettings[id] === null ||
-        value !== state.flatDeviceSettings[id])
+        !matchesBaseline(value, state.flatDeviceSettings[id]))
     ) {
       settings[id] = value
     }
@@ -241,10 +253,8 @@ const refreshCommonSettings = (context: PageContext): void => {
 
 const updateDeviceSettings = (state: PageState, body: Settings): void => {
   for (const [id, value] of Object.entries(body)) {
-    for (const driver of Object.keys(state.deviceSettings)) {
-      const driverSettings = state.deviceSettings[driver] ?? {}
+    for (const driverSettings of Object.values(state.deviceSettings)) {
       driverSettings[id] = value
-      state.deviceSettings[driver] = driverSettings
     }
     state.flatDeviceSettings[id] = value
   }
@@ -306,18 +316,22 @@ const generateCommonSettings = (
   const { elements, homey, state } = context
   const optionSettings = driverSettings.options ?? []
   for (const { id, title, type, values } of optionSettings) {
-    const settingId = `${id}__settings`
-    if (commonElementTypes.has(type)) {
-      const valueElement = createSelect(
-        settingId,
-        values ?? booleanOptions((key) => homey.__(key)),
-        'homey-form-select',
-      )
-      // Every control feeds the dirty check that gates Apply.
-      context.gate.wire([valueElement])
-      createGroupElement(elements.settingsCommon, valueElement, title)
-      refreshCommonSetting(valueElement, state.flatDeviceSettings)
+    if (!commonElementTypes.has(type)) {
+      continue
     }
+
+    // The DOM id (label linkage) stays suffixed to avoid colliding
+    // with the page's own ids; the setting identity rides `dataset`.
+    const valueElement = createSelect(
+      `${id}__settings`,
+      values ?? booleanOptions((key) => homey.__(key)),
+      'homey-form-select',
+    )
+    valueElement.dataset.settingId = id
+    // Every control feeds the dirty check that gates Apply.
+    context.gate.wire([valueElement])
+    createGroupElement(elements.settingsCommon, valueElement, title)
+    refreshCommonSetting(valueElement, state.flatDeviceSettings)
   }
 }
 
