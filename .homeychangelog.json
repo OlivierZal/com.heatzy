@@ -90,5 +90,9 @@
   "23.2.2": {
     "en": "The app no longer installs a large set of development files it never needed, freeing space on your Homey and removing a reported vulnerability along with them.",
     "fr": "L’app n’installe plus un vaste ensemble de fichiers de développement dont elle n’avait aucun besoin, ce qui libère de l’espace sur votre Homey et supprime au passage une vulnérabilité signalée."
+  },
+  "23.3.0": {
+    "en": "Fixes the app failing to start on Homey Pro (2016 – 2019).",
+    "fr": "Corrige l'impossibilité de démarrer l'app sur Homey Pro (2016 – 2019)."
   }
 }
