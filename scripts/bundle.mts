@@ -32,6 +32,10 @@ const REFERENCE =
   /(?<prefix>href="|src=")(?<file>[^"':?\/][^"':?]*)(?:\?v=[0-9a-f]+)?(?<suffix>")/gv
 
 const sharedOptions: BuildOptions = {
+  // Pinned at load: esbuild's service process outlives this module and
+  // keeps its own working directory, so relative entries must be
+  // anchored to the app root explicitly.
+  absWorkingDir: process.cwd(),
   bundle: true,
   legalComments: 'none',
   logLevel: 'info',
@@ -85,26 +89,42 @@ const hashOf = async (filePath: string): Promise<string> => {
     .slice(0, HASH_LENGTH)
 }
 
-const collectHashes = async (
+interface StampedReference {
+  readonly hash: string
+  readonly index: number
+  readonly length: number
+  readonly text: string
+}
+
+// Every alternative of `REFERENCE` binds all three named groups with at
+// least one `file` character, so a match always carries them: the empty
+// defaults are the type-level spelling of that invariant, not a runtime
+// path. Hashing runs per reference — the page's references are unique,
+// and re-hashing a small asset is cheaper than a map whose miss no
+// input can reach.
+const collectReferences = async (
   html: string,
   directory: string,
-): Promise<ReadonlyMap<string, string>> => {
-  const files = new Set<string>()
-  for (const match of html.matchAll(REFERENCE)) {
-    const { file = '' } = match.groups ?? {}
-    if (file !== '') {
-      files.add(file)
-    }
-  }
-  return new Map(
-    await Promise.all(
-      [...files].map(async (file): Promise<[string, string]> => [
-        file,
-        await hashOf(path.join(directory, file)),
-      ]),
-    ),
+): Promise<readonly StampedReference[]> =>
+  Promise.all(
+    html
+      .matchAll(REFERENCE)
+      .map(
+        async ({
+          0: { length },
+          groups: { file = '', prefix = '', suffix = '' } = {},
+          index,
+        }): Promise<StampedReference> => {
+          const hash = await hashOf(path.join(directory, file))
+          return {
+            hash,
+            index,
+            length,
+            text: `${prefix}${file}?v=${hash}${suffix}`,
+          }
+        },
+      ),
   )
-}
 
 // Stamp only within a reference context, so the same filename written
 // elsewhere (e.g. a comment) is never rewritten. Rebuilt cursor-wise
@@ -112,17 +132,26 @@ const collectHashes = async (
 // arguments cannot carry the named groups safely.
 const stampReferences = (
   html: string,
-  hashes: ReadonlyMap<string, string>,
+  references: readonly StampedReference[],
 ): string => {
   let stamped = ''
   let cursor = 0
-  for (const match of html.matchAll(REFERENCE)) {
-    const { file = '', prefix = '', suffix = '' } = match.groups ?? {}
-    const hash = hashes.get(file) ?? ''
-    stamped += `${html.slice(cursor, match.index)}${prefix}${file}?v=${hash}${suffix}`
-    cursor = match.index + match[0].length
+  for (const { index, length, text } of references) {
+    stamped += html.slice(cursor, index) + text
+    cursor = index + length
   }
   return stamped + html.slice(cursor)
+}
+
+// The page's identity is the join of its UNIQUE stamp values, in
+// DOCUMENT order — exactly the page's own collection (its
+// `webview-freshness` join dedupes stamps through a Set, so a per-FILE
+// dedupe would diverge on two assets with identical bytes): a change to
+// any packaged asset (bundle, stylesheet) moves the identity, so
+// CSS-only or markup-only ships self-heal too.
+const identityOf = (references: readonly StampedReference[]): string | null => {
+  const stamps = [...new Set(references.map(({ hash }) => hash))]
+  return stamps.length > 0 ? stamps.join('.') : null
 }
 
 const stampHtml = async (htmlPath: string): Promise<string | null> => {
@@ -134,17 +163,12 @@ const stampHtml = async (htmlPath: string): Promise<string | null> => {
     // has nothing to stamp.
     return null
   }
-  const hashes = await collectHashes(html, path.dirname(htmlPath))
-  const stamped = stampReferences(html, hashes)
+  const references = await collectReferences(html, path.dirname(htmlPath))
+  const stamped = stampReferences(html, references)
   if (stamped !== html) {
     await writeFile(htmlPath, stamped)
   }
-  // The page's identity is the join of every stamp it carries, in
-  // DOCUMENT order (the match order of `REFERENCE`, which the page's
-  // own collection mirrors): a change to any packaged asset (bundle,
-  // stylesheet) moves the identity, so CSS-only or markup-only ships
-  // self-heal too.
-  return hashes.size > 0 ? hashes.values().toArray().join('.') : null
+  return identityOf(references)
 }
 
 // Emit the live-hash manifest the app serves (`GET /webview-hashes`) —
