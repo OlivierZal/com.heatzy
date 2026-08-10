@@ -35,8 +35,13 @@ caught real failures that the others miss:
   across app versions) refetch an asset exactly when its bytes change.
   The committed source HTML carries NO stamps — never hand-add a `?v=`
   there, and nothing needs re-committing when a webview source changes.
-  Stamps exist only in the packaged app, and only within
-  attribute/import reference contexts, never comments.
+  Stamps exist only in the packaged app, within attribute/import
+  reference contexts (`href="`/`src="`) — matched WHEREVER they appear,
+  HTML comments included: a commented reference to a missing file fails
+  the packaging pass, and one to a real file would be stamped by the
+  builder yet invisible to the page-side DOM query, splitting the two
+  identities into an endless refetch handshake. Delete a dead
+  reference, never comment it out.
 - `npm run homey:validate` — Homey validation at publish level; may
   rewrite files (see locales below), re-stage if it does.
 - `npm run homey:start` — `homey app run --remote` for on-device testing.
