@@ -17,16 +17,25 @@ const ENTRY_SOURCE = `export const start = (value?: string): string =>
   value ?? 'booted'
 `
 
+// Prettier owns the page's shape, so the fixture carries the two forms
+// it emits: attributes inline, and — once a tag outgrows the print
+// width — one per line. A reference pattern scoped to a tag or to a
+// single line would still stamp the inline form and silently miss the
+// exploded one.
 const PAGE_HTML = `<!doctype html>
 <html lang="en">
-    <head>
-        <!-- index.js is mentioned here and must stay unstamped -->
-        <link href="index.css" rel="stylesheet">
-        <script defer src="index.js"></script>
-        <script defer src="index.mjs?v=deadbeef"></script>
-        <script data-origin="settings" defer src="/homey.js"></script>
-    </head>
-    <body></body>
+  <head>
+    <!-- index.js is mentioned here and must stay unstamped -->
+    <link href="index.css" rel="stylesheet" />
+    <script defer src="index.js"></script>
+    <script
+      data-testid="a-tag-past-the-print-width-that-prettier-explodes"
+      defer
+      src="index.mjs?v=deadbeef"
+    ></script>
+    <script data-origin="settings" defer src="/homey.js"></script>
+  </head>
+  <body></body>
 </html>
 `
 
