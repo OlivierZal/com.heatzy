@@ -1,7 +1,7 @@
 {
   "errors": { "deviceNotFound": "Appareil introuvable." },
   "notifications": {
-    "sessionExpired": "Votre session Heatzy a expiré : reconnectez-vous depuis les réglages de l’application.",
+    "sessionExpired": "Votre session Heatzy a expiré : reconnectez-vous depuis les réglages de l'application.",
     "sessionRestored": "Votre session Heatzy est de nouveau active."
   },
   "settings": {
