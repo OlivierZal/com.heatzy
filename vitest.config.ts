@@ -6,7 +6,7 @@ const config: ViteUserConfig = defineConfig({
   plugins: [swcPlugin],
   test: {
     coverage: {
-      exclude: ['.homeybuild/**', 'scripts/**/*.mts'],
+      exclude: ['.homeybuild/**'],
       include: ['**/*.mts'],
       reporter: ['text', 'lcov'],
       thresholds: {
