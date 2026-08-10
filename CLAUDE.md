@@ -353,8 +353,10 @@ an empty map, so the omission silently disabled the whole handshake.
   published 11.0.0 auth fix away from users for six days (2026-08). The
   library's own Releasing doctrine mirrors this — publishing is not done
   until the adoption PR lands here.
-- `main` is protected (PRs only, squash merges); no merge queue
-  (user-owned repo, org-only feature).
+- `main` is protected (PRs only, squash merges); no merge queue —
+  GitHub gates it on ORGANISATION ownership and these repos are
+  user-owned (verified 2026-08 against the docs source), so the
+  workflows declare no `merge_group` trigger.
 - The PR title IS the commit that lands: `squash_merge_commit_title` is
   `PR_TITLE`, so the title is the single source (under the former
   `COMMIT_OR_PR_TITLE`, a one-commit PR silently took its commit subject
