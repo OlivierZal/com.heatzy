@@ -6,16 +6,16 @@ jobs:
       packages: read
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    uses: OlivierZal/configs/.github/workflows/reusable-ci.yml@91cfb98049d20d3c62d1f21b34a4769672040d95 # v1.8.0
+    uses: OlivierZal/configs/.github/workflows/reusable-ci.yml@bfaf1d97981a1c05326b4f666ec1a3784b52e8e9 # v3.1.0
     with:
       check-node-version: '22'
       # The fleet's floor, measured on-device (2026-08): 22.20 on a Pro
       # 2019, 22.23 on a Pro 2023. `22` resolves to the head of the line
       # and drifts off that floor, so the coverage/Sonar leg names the
-      # minor itself. The quotes are load-bearing: unquoted, `22.20` is
-      # JSON for the number 22.2.
-      coverage-node-version: '22.20'
-      node-versions: '["22", "22.20", "latest", "lts/*"]'
+      # minor itself and carries its own flag. The quotes are
+      # load-bearing: unquoted, `22.20` is JSON for the number 22.2, and
+      # the leg would name itself after it.
+      node-versions: '[{"node-version": "22"}, {"node-version": "22.20", "coverage": true}, {"node-version": "latest"}, {"node-version": "lts/*"}]'
 name: CI
 on:
   merge_group: {}

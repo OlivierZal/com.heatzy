@@ -246,8 +246,12 @@ adoption is a reviewed pin bump. Never extend `tsconfig/app-build`: its
 `rootDir` resolves against the base file inside node_modules (the trap
 the configs README documents) — `tsconfig.build.json` extends the LOCAL
 `./tsconfig.json` and keeps `rootDir`/`exclude` here. The
-CI/audit/claude*/dependabot/pr-title/zizmor workflows are stubs calling
-the family reusables in OlivierZal/configs, pinned `@<sha> # vX.Y.Z`;
+CI/claude*/dependabot/dependency-review/pr-title/zizmor workflows are
+stubs calling the family reusables in OlivierZal/configs, pinned
+`@<sha> # vX.Y.Z`; dependency vulnerabilities are GitHub's own —
+Dependabot alerts scan continuously and carry the named, reasoned
+dismissals (an exception lives on the advisory, so it cannot outlive
+it), while `dependency-review` judges what a PR introduces;
 `publish.yml`, `validate.yml` and `claude-dependabot-fix.yml` stay
 local (no reusable exists for the first two; the fix reusable grants no
 `packages: read` and cannot carry the repo's heatzy-api doctrine line),
