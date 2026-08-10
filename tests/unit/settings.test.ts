@@ -43,6 +43,12 @@ interface HomeyOptions {
   readonly translations?: Readonly<Record<string, string>>
 }
 
+// The wording an element shows, whitespace-collapsed the way HTML
+// renders it: the markup's own spacing is Prettier's to choose, so only
+// the words are a contract the page owes.
+const shownText = (selector: string): string | undefined =>
+  document.querySelector(selector)?.textContent.replaceAll(/\s+/gv, ' ').trim()
+
 const driverSettingsFixture = (): Partial<Record<string, DriverSetting[]>> => ({
   login: [
     {
@@ -313,16 +319,11 @@ describe('settings page', () => {
         },
       })
 
-      expect(document.querySelector('.homey-title')?.textContent).toBe(
-        'Réglages Heatzy',
+      expect(shownText('.homey-title')).toBe('Réglages Heatzy')
+      expect(shownText('[data-i18n="settings.authenticate.legend"]')).toBe(
+        'Credentials',
       )
-      expect(
-        document.querySelector('[data-i18n="settings.authenticate.legend"]')
-          ?.textContent,
-      ).toBe('Credentials')
-      expect(
-        document.querySelector('[data-i18n="settings.update"]')?.textContent,
-      ).toBe('Update')
+      expect(shownText('[data-i18n="settings.update"]')).toBe('Update')
     })
 
     it('should alert after the overlay when the build fails', async () => {
