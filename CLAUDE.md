@@ -202,8 +202,33 @@ coverage.
   project. A `tsconfig.webview.json` floor was probed and refused on
   com.melcloud (2026-08-06): tsc checks the import CLOSURE, which
   crosses into node-side code — the same shape exists here
-  (`settings/` imports shared `lib/` and `types/` modules). Node-side
-  code may use the newer APIs freely.
+  (`settings/` imports shared `lib/` and `types/` modules).
+- TWO floors coexist, on UNRELATED engines — never let one move the
+  other. The **webview** floor is es2023 and is set by the phone's
+  WebKit, which no Homey firmware can rejuvenate: it stays enforced by
+  the scoped lint block above, and the danger there is APIs, because
+  esbuild lowers syntax but NEVER polyfills (`Object.groupBy`, iterator
+  helpers…; the regex `v` flag is the mixed case — syntax esbuild does
+  not lower, hence its place in the same block). The **node-side**
+  floor is the Homey's own Node, and it is held by the manifest's
+  `compatibility` declaration, not by a check.
+- That node-side floor is a DECLARATION, deliberately: two shipped
+  incidents (the regex `v` flag, then `import … with { type: 'json' }`)
+  crashed the app at PARSE time on Homey Pro (2016-2019) firmwares
+  before 13.4, which run a pre-Node-20 engine — and 23.3.1 promised
+  "fixes the app failing to start on Homey Pro (2016 – 2019)" while
+  `files.mts` still carried the second, so the promise did not hold. A
+  parse-level guard was built and then REFUSED: no acorn `ecmaVersion`
+  matches "what Node 22.19 accepts" (es2025 is only partly there —
+  regex modifiers and duplicate named groups are Node 23, `using` is
+  Node 24), so any calibration is either too lax to catch anything or
+  too strict, forcing needless rewrites of valid code. A guard that
+  cannot be calibrated honestly guards nothing; the declaration is the
+  net. Keep it aligned with the `engines` of the shipped dependencies
+  (`>=22.19.0`), so `toSorted`, `toReversed` and `Object.groupBy` are
+  all legitimate node-side. `files.mts` still reads its JSON through
+  `createRequire` — not to satisfy a floor, but because it is the
+  robust form and costs nothing.
 
 ## Tooling boundary (@olivierzal/configs)
 
