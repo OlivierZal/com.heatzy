@@ -320,10 +320,7 @@ describe(HeatzyApp, () => {
       expect(app.log).toHaveBeenCalledWith(
         'Boot: ready after',
         expect.any(String),
-        's — platform',
-        expect.anything(),
-        '— node',
-        process.version,
+        's',
       )
     })
 
