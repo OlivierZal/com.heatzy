@@ -126,10 +126,16 @@ const collectReferences = async (
       ),
   )
 
-// Stamp only within a reference context, so the same filename written
-// elsewhere (e.g. a comment) is never rewritten. Rebuilt cursor-wise
-// rather than through a `replaceAll` callback, whose loosely typed rest
-// arguments cannot carry the named groups safely.
+// Stamp only within a reference context (`href="`/`src="`), so a bare
+// filename written elsewhere (e.g. prose in a comment) is never
+// rewritten. A FULL reference inside an HTML comment still matches:
+// pointing at a missing file it fails the packaging pass (ENOENT);
+// pointing at a real file it earns a stamp the page-side DOM query
+// never sees, splitting the builder identity from the page identity —
+// one refetch, then a boot-error on every open. No page carries a
+// commented reference today; delete, never comment out. Rebuilt
+// cursor-wise rather than through a `replaceAll` callback, whose
+// loosely typed rest arguments cannot carry the named groups safely.
 const stampReferences = (
   html: string,
   references: readonly StampedReference[],
