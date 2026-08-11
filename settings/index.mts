@@ -33,8 +33,9 @@ import {
 import type { DeviceSettings, Settings } from '../types/device-settings.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
-// stay ≤ es2023 — no iterator helpers, no Object.groupBy (old iOS
-// engines are real).
+// stay ≤ es2023 — no iterator helpers, no Object.groupBy: the Homey
+// mobile app requires iOS 16.4 or later (App Store, 2026-08-11) and
+// this page only ever gets that system WebKit.
 
 const commonElementTypes = new Set(['checkbox', 'dropdown'])
 

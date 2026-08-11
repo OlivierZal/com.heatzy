@@ -54,10 +54,12 @@ never "fix" the missing newline.
 Node-side code follows `engines.node` and may use modern APIs freely.
 
 Webview code — [`settings/`](settings) — runs on **phone browser
-engines**, not on the Homey. Those stall at **es2023**, a separate and
-lower ceiling the lint enforces on exactly that path. esbuild lowers
-syntax but never polyfills APIs, so a too-recent API passes both the lint
-and the compile and fails only on a user's phone. Raising one floor never
+engines**, not on the Homey. Its ceiling is **es2023**, derived from the
+Homey mobile app's own iOS 16.4 minimum (App Store, 2026-08-11): an app
+only ever gets the system WebKit, and iOS 16.4's has none of es2024. The
+lint enforces that ceiling on exactly that path. esbuild lowers syntax
+but never polyfills APIs, so a too-recent API passes both the lint and
+the compile and fails only on a user's phone. Raising one floor never
 raises the other; conflating them has already caused a production
 incident in a sibling app.
 
