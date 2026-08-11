@@ -208,15 +208,23 @@ coverage.
   com.melcloud (2026-08-06): tsc checks the import CLOSURE, which
   crosses into node-side code — the same shape exists here
   (`settings/` imports shared `lib/` and `types/` modules).
+- That floor is DERIVED, not preventive: the Homey mobile app requires
+  iOS 16.4 or later (App Store, read 2026-08-11) and a Homey app only
+  ever gets the system WebKit, so the worst legitimate engine is iOS
+  16.4's — es2023-complete, short of every es2024 gain (`Object.groupBy`
+  and `Promise.withResolvers` need Safari 17.4, the `v` flag 17). es2024
+  becomes derivable when that App Store minimum reaches 17.4; Android
+  never binds the floor, its System WebView being evergreen.
 - TWO floors coexist, on UNRELATED engines — never let one move the
-  other. The **webview** floor is es2023 and is set by the phone's
-  WebKit, which no Homey firmware can rejuvenate: it stays enforced by
-  the scoped lint block above, and the danger there is APIs, because
-  esbuild lowers syntax but NEVER polyfills (`Object.groupBy`, iterator
-  helpers…; the regex `v` flag is the mixed case — syntax esbuild does
-  not lower, hence its place in the same block). The **node-side**
-  floor is the Homey's own Node, and it is held by the manifest's
-  `compatibility` declaration, not by a check.
+  other. The **webview** floor is the derived one above, held by the
+  scoped lint block, and the danger there is APIs, because esbuild
+  lowers syntax but NEVER polyfills (`Object.groupBy`, iterator
+  helpers…). The `v` flag is the mixed case: under a sub-es2024 target
+  esbuild defers the literal to a `new RegExp` call, so an escapee
+  throws at RUNTIME, not at parse, inside the feature that runs it —
+  narrower blast radius, same ban. The **node-side** floor is the
+  Homey's own Node, and it is held by the manifest's `compatibility`
+  declaration, not by a check.
 - A floor is declared from WHERE THE CODE RUNS, never from what a
   dependency happens to require. `compatibility: ">=12.9.0"` is
   Athom's own documented Node 22 boundary ("as of Homey v12.9.0, all
