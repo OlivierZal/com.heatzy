@@ -94,5 +94,20 @@
   "23.3.1": {
     "en": "Fixes the app failing to start on Homey Pro (2016 – 2019) running older firmware.",
     "fr": "Corrige l'impossibilité de démarrer l'app sur Homey Pro (2016 – 2019) sous un firmware ancien."
+  },
+  "23.3.2": {
+    "ar": "إصلاح تعذّر تشغيل التطبيق على Homey Pro (2016 – 2019) بنظام تشغيل قديم. تستخدم النصوص الفرنسية الآن نفس الفاصلة العليا المستخدمة في بقية المنصة.",
+    "da": "Retter at appen ikke kunne starte på Homey Pro (2016 – 2019) med ældre firmware. De franske tekster bruger nu den samme apostrof som resten af platformen.",
+    "de": "Behebt, dass die App auf dem Homey Pro (2016 – 2019) mit älterer Firmware nicht starten konnte. Die französischen Texte verwenden jetzt denselben Apostroph wie der Rest der Plattform.",
+    "en": "Fixes the app failing to start on Homey Pro (2016 – 2019) running older firmware. The French texts now use the same apostrophe as the rest of the platform.",
+    "es": "Corrige que la aplicación no se iniciara en Homey Pro (2016 – 2019) con firmware antiguo. Los textos en francés ahora usan el mismo apóstrofo que el resto de la plataforma.",
+    "fr": "Corrige l'impossibilité de démarrer l'app sur Homey Pro (2016 – 2019) sous un firmware ancien. Les textes français utilisent désormais la même apostrophe que le reste de la plateforme.",
+    "it": "Corregge l'impossibilità di avviare l'app su Homey Pro (2016 – 2019) con firmware datato. I testi in francese ora usano lo stesso apostrofo del resto della piattaforma.",
+    "ko": "이전 펌웨어를 사용하는 Homey Pro(2016 – 2019)에서 앱이 시작되지 않던 문제를 수정했습니다. 프랑스어 텍스트가 이제 플랫폼의 다른 부분과 같은 아포스트로피를 사용합니다.",
+    "nl": "Lost op dat de app niet startte op Homey Pro (2016 – 2019) met oudere firmware. De Franse teksten gebruiken nu dezelfde apostrof als de rest van het platform.",
+    "no": "Retter at appen ikke startet på Homey Pro (2016 – 2019) med eldre fastvare. De franske tekstene bruker nå den samme apostrofen som resten av plattformen.",
+    "pl": "Naprawia problem z uruchamianiem aplikacji na Homey Pro (2016 – 2019) ze starszym oprogramowaniem. Francuskie teksty używają teraz tego samego apostrofu co reszta platformy.",
+    "ru": "Исправлен запуск приложения на Homey Pro (2016 – 2019) со старой прошивкой. Французские тексты теперь используют тот же апостроф, что и остальная платформа.",
+    "sv": "Åtgärdar att appen inte startade på Homey Pro (2016 – 2019) med äldre firmware. De franska texterna använder nu samma apostrof som resten av plattformen."
   }
 }
