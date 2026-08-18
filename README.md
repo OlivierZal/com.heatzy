@@ -46,7 +46,7 @@ Architecture notes:
 
 - The API layer lives in [@olivierzal/heatzy-api](https://github.com/OlivierZal/heatzy-api), a sibling repository with its own tooling; API bugs are fixed there, not worked around here.
 - Browser code (the `settings/` page) is bundled by `scripts/bundle.mts` into self-contained bundles; the outputs are emitted into `.homeybuild` by `npm run build`, which the Homey CLI runs automatically on validate/publish.
-- Both the build and `npm run typecheck` use the native TypeScript 7 compiler (`typescript@7` aliased as `@typescript/native`) for speed; `typescript@6` remains alongside it for tools that need the JS API (typescript-eslint) until TypeScript 7.1 ships its stable programmatic API.
+- Both the build and `npm run typecheck` use the native TypeScript 7 compiler for speed — since TypeScript 7.0, the npm `typescript` package at 7.x _is_ the native compiler, aliased here as `@typescript/native`; the TypeScript 6 JS API continues as `@typescript/typescript6`, aliased under the `typescript` name for tools with a `typescript` peer (typescript-eslint).
 - Test coverage is enforced at 100% for backend code; browser glue (`settings/`) is excluded from coverage, so the badge covers the driver, app and API layers only.
 
 ## Disclaimer
