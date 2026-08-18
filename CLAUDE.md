@@ -14,7 +14,12 @@ caught real failures that the others miss:
   cover formatting).
 - `npm run lint` / `npm run lint:fix` — ESLint (needs its 8 GB heap; also
   lints CSS and HTML via the css/html plugins).
-- `npm run typecheck` — `tsc` from `@typescript/native` (TypeScript 7).
+- `npm run typecheck` — TypeScript 7 through its explicit path,
+  `node ./node_modules/@typescript/native/bin/tsc`. `@typescript/native`
+  ships no `.bin` shim, and `.bin/tsc`/`.bin/tsc6` both resolve to the
+  TypeScript 6 that the `typescript` alias pulls in as `@typescript/old`
+  — a bare `tsc` would silently typecheck with 6. The explicit path
+  must stay, here and in `build`.
 - `npm test` / `npm run test:coverage` — vitest; branches are at 100%,
   keep them there.
 - `npm run build` — esbuild bundle (`scripts/bundle.mts`) + `tsc`
