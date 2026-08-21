@@ -109,5 +109,20 @@
     "pl": "Naprawia problem z uruchamianiem aplikacji na Homey Pro (2016 – 2019) ze starszym oprogramowaniem. Francuskie teksty używają teraz tego samego apostrofu co reszta platformy.",
     "ru": "Исправлен запуск приложения на Homey Pro (2016 – 2019) со старой прошивкой. Французские тексты теперь используют тот же апостроф, что и остальная платформа.",
     "sv": "Åtgärdar att appen inte startade på Homey Pro (2016 – 2019) med äldre firmware. De franska texterna använder nu samma apostrof som resten av plattformen."
+  },
+  "23.3.3": {
+    "ar": "إصلاح مشكلة أمنية: عند فشل أحد الطلبات، كان بإمكان التطبيق كتابة رمز حسابك في سجلّه الخاص، ومن هناك في أي تقرير تشخيصي تشاركه.",
+    "da": "Retter et sikkerhedsproblem: når en forespørgsel mislykkedes, kunne appen skrive din kontos token i sin egen log og derfra i enhver diagnosticeringsrapport, du delte.",
+    "de": "Behebt ein Sicherheitsproblem: Bei einer fehlgeschlagenen Anfrage konnte die App das Token deines Kontos in ihr eigenes Protokoll schreiben und damit in jeden geteilten Diagnosebericht.",
+    "en": "Fixes a security issue: when a request failed, the app could write your account token into its own log, and from there into any diagnostic report you shared.",
+    "es": "Corrige un problema de seguridad: cuando una solicitud fallaba, la aplicación podía escribir el token de tu cuenta en su propio registro y, de ahí, en cualquier informe de diagnóstico que compartieras.",
+    "fr": "Corrige une faille de sécurité : lorsqu'une requête échouait, l'app pouvait inscrire le jeton de votre compte dans son propre journal, et de là dans tout rapport de diagnostic que vous partagiez.",
+    "it": "Corregge un problema di sicurezza: quando una richiesta non riusciva, l'app poteva scrivere il token del tuo account nel proprio registro e, da lì, in qualsiasi rapporto diagnostico condiviso.",
+    "ko": "보안 문제를 수정했습니다: 요청이 실패하면 앱이 계정 토큰을 자체 로그에 기록할 수 있었고, 공유한 진단 보고서에까지 포함될 수 있었습니다.",
+    "nl": "Lost een beveiligingsprobleem op: als een verzoek mislukte, kon de app het token van je account in zijn eigen log schrijven en zo in elk diagnoserapport dat je deelde.",
+    "no": "Retter et sikkerhetsproblem: når en forespørsel mislyktes, kunne appen skrive kontoens token i sin egen logg og derfra i enhver diagnoserapport du delte.",
+    "pl": "Naprawia problem z bezpieczeństwem: gdy żądanie kończyło się niepowodzeniem, aplikacja mogła zapisać token Twojego konta we własnym dzienniku, a stamtąd w każdym udostępnionym raporcie diagnostycznym.",
+    "ru": "Исправлена проблема безопасности: при неудачном запросе приложение могло записать токен вашей учётной записи в собственный журнал, а оттуда в любой отправленный диагностический отчёт.",
+    "sv": "Åtgärdar ett säkerhetsproblem: när en förfrågan misslyckades kunde appen skriva ditt kontos token i sin egen logg och därifrån i alla diagnostikrapporter du delade."
   }
 }

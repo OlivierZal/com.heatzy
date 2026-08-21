@@ -423,16 +423,18 @@ an empty map, so the omission silently disabled the whole handshake.
 - Verify claimed library behavior empirically (headless chromium against
   the real dist/bundle in the scratchpad) rather than from memory.
 - Homey App Store releases: write the user-facing changelog entry into
-  `.homeychangelog.json` under the NEW version key (`en` + `fr` — this
-  app ships 2 locales only, not 13; non-exhaustive store-facing
-  wording), bump `version` in `.homeycompose/app.json`, align
-  `package.json` via `npm version X.Y.Z --no-git-tag-version`, run
-  `homey:validate` to regenerate `app.json`, and land it all through a
-  PR. Then tag `vX.Y.Z` and publish a GitHub release: `publish.yml`
-  fires on release-published (environment `homey`, `HOMEY_PAT` secret)
-  and pushes to the App Store via athombv's action. The old
-  `update-version.yml` workflow is deleted debt — it committed directly
-  to `main` and fails against the ruleset; never restore or dispatch
-  it, the PR + release flow above replaces it.
+  `.homeychangelog.json` under the NEW version key, in the THIRTEEN
+  store locales the file has used since 23.3.2, alphabetically (the
+  app's own UI ships `en` + `fr` only, but the store shows a changelog
+  entry to every user in their own language; non-exhaustive
+  store-facing wording), bump `version` in `.homeycompose/app.json`,
+  align `package.json` via `npm version X.Y.Z --no-git-tag-version`,
+  run `homey:validate` to regenerate `app.json`, and land it all
+  through a PR. Then tag `vX.Y.Z` and publish a GitHub release:
+  `publish.yml` fires on release-published (environment `homey`,
+  `HOMEY_PAT` secret) and pushes to the App Store via athombv's action.
+  The old `update-version.yml` workflow is deleted debt — it committed
+  directly to `main` and fails against the ruleset; never restore or
+  dispatch it, the PR + release flow above replaces it.
 - Store submissions: a rejected version number cannot be resubmitted —
   bump the patch version.
