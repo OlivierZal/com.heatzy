@@ -102,5 +102,9 @@
   "23.3.3": {
     "en": "Fixes a security issue: when a request failed, the app could write your account token into its own log, and from there into any diagnostic report you shared.",
     "fr": "Corrige une faille de sécurité : lorsqu'une requête échouait, l'app pouvait inscrire le jeton de votre compte dans son propre journal, et de là dans tout rapport de diagnostic que vous partagiez."
+  },
+  "23.3.4": {
+    "en": "Completes the previous security fix: until now, a rejected sign-in could still write your username and password into the app's log, and from there into any diagnostic report you shared.",
+    "fr": "Complète le correctif de sécurité précédent : jusqu'à présent, une connexion refusée pouvait encore inscrire votre nom d'utilisateur et votre mot de passe dans le journal de l'app, et de là dans tout rapport de diagnostic que vous partagiez."
   }
 }
