@@ -11,7 +11,8 @@
       "legend": "Credentials",
       "rejected": "Heatzy rejected your credentials — please check them and sign in again.",
       "reset": "Reset",
-      "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials."
+      "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials.",
+      "staleDevices": "Signed in, but the device list could not be refreshed — please try again later."
     },
     "boolean": { "false": "No", "true": "Yes" },
     "devices": { "legend": "All device settings" },

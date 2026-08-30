@@ -87,6 +87,26 @@ coverage.
   handlers both ways plus the handlers' function type;
   `tests/unit/api-route-guards.test.ts` pins the call sites (every
   webview path literal must match a declared route).
+- A rejection from `authenticate()` is NOT necessarily a credential
+  rejection, and the SESSION is the arbiter. Since heatzy-api 11.0.0
+  the library ENFORCES a registry sync after the server accepted the
+  sign-in, and that sync throws on its own — over a session that is
+  already live, with the credentials already persisted. So both entry
+  points classify by consulting `isAuthenticated()` when the error is
+  not an `AuthenticationError`: reading `true` means only the device
+  refresh failed, and the app-API handler (`api.mts`) answers
+  `{ isDeviceListStale: true }` rather than rejecting, while the
+  pairing handler (`drivers/heatzy/driver.mts`) continues to the
+  device list. Reading `false` is the real login failure. Degrading is
+  not the same as going silent: `pushCredentials` opens the devices
+  AND alerts `settings.authenticate.staleDevices`, the only place the
+  user hears that the list never arrived. Treating every rejection as
+  a credential failure (23.3.4 and earlier) stranded a signed-in user
+  on the login form, where their next click spent another real login
+  attempt — the library's backoff arms around the sign-in itself, NOT
+  around the enforced sync, so nothing local slowed the retries. Same
+  rule, same day, in com.melcloud: these two are twins, and a fix on
+  one reopens the question for the other.
 - Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
   settings Apply/Refresh pair AND the credentials sign-in/reset pair
   (sign-in arms through `isActionable` only when both credential fields
