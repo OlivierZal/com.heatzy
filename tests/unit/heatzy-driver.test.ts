@@ -498,12 +498,39 @@ describe(HeatzyDriver, () => {
     it('should rethrow non-authentication errors from the login handler', async () => {
       const error = new Error('network down')
       authenticateMock.mockRejectedValue(error)
+      isAuthenticatedMock.mockReturnValue(false)
       const { getHandler, session } = captureHandlers()
       await driver.onPair(session)
 
       await expect(
         getHandler('login')({ password: 'pass', username: 'user' }),
       ).rejects.toBe(error)
+    })
+
+    // The library enforces a registry sync AFTER the server accepted
+    // the credentials, so `authenticate()` can reject over a session
+    // that is live. Pairing follows the session, not the rejection —
+    // an account that IS signed in reaches its device list.
+    it('should pair through a registry failure that left the session live', async () => {
+      authenticateMock.mockRejectedValue(new Error('registry sync down'))
+      isAuthenticatedMock.mockReturnValue(true)
+      const { getHandler, session } = captureHandlers()
+      await driver.onPair(session)
+
+      await expect(
+        getHandler('login')({ password: 'pass', username: 'user' }),
+      ).resolves.toBe(true)
+    })
+
+    it('should never pair through a credential rejection', async () => {
+      authenticateMock.mockRejectedValue(new AuthenticationError('invalid'))
+      isAuthenticatedMock.mockReturnValue(true)
+      const { getHandler, session } = captureHandlers()
+      await driver.onPair(session)
+
+      await expect(
+        getHandler('login')({ password: 'wrong', username: 'user' }),
+      ).resolves.toBe(false)
     })
 
     it('should map registry devices to pairing details per product', async () => {

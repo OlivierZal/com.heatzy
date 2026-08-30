@@ -30,6 +30,7 @@ import {
   watchWebviewFreshness,
 } from '@olivierzal/homey-kit/webview'
 
+import type { AuthenticationResult } from '../types/api.mts'
 import type { DeviceSettings, Settings } from '../types/device-settings.mts'
 
 // Runtime floor: esbuild lowers syntax to es2020, but runtime APIs must
@@ -355,18 +356,42 @@ const setAuthenticatedState = (
   elements.devices.hidden = !isAuthenticated
 }
 
+// Answers the route's verdict, or `null` once the failure has been
+// alerted — keeping the try around the request alone, so nothing the
+// caller does afterwards can be mistaken for a transport failure.
+const postSession = async (
+  homey: HomeySettings,
+  credentials: LoginCredentials,
+): Promise<AuthenticationResult | null> => {
+  try {
+    return await homeyApiPost<AuthenticationResult>(
+      homey,
+      '/sessions',
+      credentials,
+    )
+  } catch (error) {
+    await alertMessage(homey, error)
+    return null
+  }
+}
+
 const pushCredentials = async (
   context: PageContext,
   credentials: LoginCredentials,
 ): Promise<void> => {
   const { elements, homey } = context
-  try {
-    await homeyApiPost(homey, '/sessions', credentials)
-  } catch (error) {
-    await alertMessage(homey, error)
+  const result = await postSession(homey, credentials)
+  if (result === null) {
     return
   }
   setAuthenticatedState(elements, true)
+  // Degrading is not going silent. The server accepted the sign-in, so
+  // the account stays signed in and the page opens — but the device
+  // list the library should have refreshed never arrived, and this
+  // alert is the only place the user hears about it.
+  if (result.isDeviceListStale) {
+    await alertMessage(homey, homey.__('settings.authenticate.staleDevices'))
+  }
 }
 
 // An empty credential can only produce the failure alert, so sign-in

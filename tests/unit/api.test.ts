@@ -49,8 +49,9 @@ describe('api', () => {
       })
       mockAuthenticate.mockResolvedValue()
 
-      await api.authenticate({ body: credentials, homey })
+      const result = await api.authenticate({ body: credentials, homey })
 
+      expect(result).toStrictEqual({ isDeviceListStale: false })
       expect(mockAuthenticate).toHaveBeenCalledWith(credentials)
       expect(mockApp.log).toHaveBeenCalledWith({
         dataType: SETTINGS_PAGE,
@@ -79,11 +80,44 @@ describe('api', () => {
 
     it('passes a transport failure message through untranslated', async () => {
       mockAuthenticate.mockRejectedValueOnce(new Error('transport down'))
+      mockIsAuthenticated.mockReturnValue(false)
 
       await expect(
         api.authenticate({ body: mock<LoginCredentials>(), homey }),
       ).rejects.toThrow('transport down')
       expect(mockTranslate).not.toHaveBeenCalled()
+    })
+  })
+
+  // The library enforces a registry sync AFTER the server accepted the
+  // credentials, so `authenticate()` rejects over a session that is
+  // live. The session is the arbiter: such a rejection reports a stale
+  // device list, never a login failure.
+  describe('accepted sign-in whose registry sync failed', () => {
+    it('should answer a stale device list rather than reject', async () => {
+      mockAuthenticate.mockRejectedValueOnce(new Error('registry sync down'))
+      mockIsAuthenticated.mockReturnValue(true)
+
+      await expect(
+        api.authenticate({ body: mock<LoginCredentials>(), homey }),
+      ).resolves.toStrictEqual({ isDeviceListStale: true })
+      expect(mockTranslate).not.toHaveBeenCalled()
+      expect(mockApp.log).toHaveBeenCalledWith({
+        dataType: SETTINGS_PAGE,
+        route: 'POST /sessions',
+      })
+    })
+
+    it('should never rescue a credential rejection over a live session', async () => {
+      mockAuthenticate.mockRejectedValueOnce(
+        new AuthenticationError('Heatzy rejected the credentials'),
+      )
+      mockIsAuthenticated.mockReturnValue(true)
+
+      await expect(
+        api.authenticate({ body: mock<LoginCredentials>(), homey }),
+      ).rejects.toThrow('settings.authenticate.rejected')
+      expect(mockIsAuthenticated).not.toHaveBeenCalled()
     })
   })
 

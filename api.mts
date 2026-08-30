@@ -7,6 +7,7 @@ import {
 import { getErrorMessage } from '@olivierzal/homey-kit'
 import { getWebviewHashes } from '@olivierzal/homey-kit/node'
 
+import type { AuthenticationResult } from './types/api.mts'
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
 
 // The webview only receives an error MESSAGE across the app bridge, so
@@ -32,13 +33,23 @@ const api = {
   }: {
     body: LoginCredentials
     homey: Homey
-  }): Promise<void> => {
+  }): Promise<AuthenticationResult> => {
     logSettingsRoute(homey.app, 'POST /sessions')
+    const { api: client } = homey.app
     try {
-      await homey.app.api.authenticate(body)
+      await client.authenticate(body)
     } catch (error) {
-      throw toLoginFailure(homey, error)
+      // A rejection is not proof the credentials were refused: the
+      // library enforces a registry sync AFTER the server accepted the
+      // sign-in, and that sync throws on its own. The session is the
+      // arbiter — a live one means the account is in, and only the
+      // device list is stale.
+      if (error instanceof AuthenticationError || !client.isAuthenticated()) {
+        throw toLoginFailure(homey, error)
+      }
+      return { isDeviceListStale: true }
     }
+    return { isDeviceListStale: false }
   },
   getDeviceSettings: ({ homey }: { homey: Homey }): DeviceSettings => {
     logSettingsRoute(homey.app, 'GET /settings/devices')

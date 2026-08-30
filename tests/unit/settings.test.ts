@@ -207,7 +207,7 @@ const defaultRoutes = (): Record<string, unknown> => ({
   'GET /settings/drivers': driverSettingsFixture(),
   'GET /webview-hashes': {},
   'POST /boot-error': undefined,
-  'POST /sessions': undefined,
+  'POST /sessions': { isDeviceListStale: false },
   'PUT /settings/devices': undefined,
 })
 
@@ -510,6 +510,47 @@ describe('settings page', () => {
 
       expect(alert).toHaveBeenCalledWith('bad credentials')
       expect(authenticationDetails().open).toBe(true)
+    })
+
+    // The route answers a stale device list on a sign-in the server
+    // accepted but whose registry refresh failed. That is a warning
+    // over a live session, never a credential failure: the page keeps
+    // the account, folds the credentials away and opens the devices —
+    // and still says what actually broke.
+    it('should open the devices and warn when the list came back stale', async () => {
+      const { alert } = await bootPage({
+        routes: {
+          ...defaultRoutes(),
+          'GET /sessions': false,
+          'POST /sessions': { isDeviceListStale: true },
+        },
+        translations: {
+          'settings.authenticate.staleDevices': 'Liste non actualisée',
+        },
+      })
+
+      commit(getInput('username'), 'user@example.com')
+      commit(getInput('password'), 'secret')
+      authenticateButton().click()
+      await settleDetached()
+
+      expect(devicesFieldset().hidden).toBe(false)
+      expect(authenticationDetails().open).toBe(false)
+      expect(alert).toHaveBeenCalledWith('Liste non actualisée')
+    })
+
+    it('should stay silent when the device list came back fresh', async () => {
+      const { alert } = await bootPage({
+        routes: { ...defaultRoutes(), 'GET /sessions': false },
+      })
+
+      commit(getInput('username'), 'user@example.com')
+      commit(getInput('password'), 'secret')
+      authenticateButton().click()
+      await settleDetached()
+
+      expect(devicesFieldset().hidden).toBe(false)
+      expect(alert).not.toHaveBeenCalled()
     })
 
     it('should do nothing when the reset is not confirmed', async () => {

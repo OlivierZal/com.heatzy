@@ -13,7 +13,8 @@
       "legend": "Identifiants",
       "rejected": "Heatzy a refusé vos identifiants — vérifiez-les puis reconnectez-vous.",
       "reset": "Réinitialiser",
-      "resetConfirm": "Cela vous déconnecte immédiatement et efface vos identifiants Heatzy enregistrés."
+      "resetConfirm": "Cela vous déconnecte immédiatement et efface vos identifiants Heatzy enregistrés.",
+      "staleDevices": "Connexion réussie, mais la liste des appareils n'a pas pu être actualisée — réessayez plus tard."
     },
     "boolean": {
       "false": "Non",
