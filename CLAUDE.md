@@ -400,7 +400,10 @@ an empty map, so the omission silently disabled the whole handshake.
   `COMMIT_OR_PR_TITLE`, a one-commit PR silently took its commit subject
   instead). It must follow Conventional Commits, which the required
   `PR title` check enforces (`.github/workflows/pr-title.yml`,
-  byte-identical in the five repos) — default type set, no scope
+  byte-identical in the SEVEN repos that call the family reusables —
+  every repo but `configs`, which hosts them and whose own copy
+  differs; md5-verified 2026-08-30, the count having gone stale at five
+  when `api-core` joined) — default type set, no scope
   allowlist, and no `subjectPattern`: subjects legitimately open on a
   proper noun. Dependabot's prefixes are pinned to `build(deps)` /
   `build(deps-dev)` rather than inferred, which is what had it land a
