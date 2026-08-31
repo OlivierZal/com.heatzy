@@ -88,16 +88,21 @@ coverage.
   `tests/unit/api-route-guards.test.ts` pins the call sites (every
   webview path literal must match a declared route).
 - A rejection from `authenticate()` is NOT necessarily a credential
-  rejection, and the SESSION is the arbiter. Since heatzy-api 11.0.0
-  the library ENFORCES a registry sync after the server accepted the
-  sign-in, and that sync throws on its own — over a session that is
-  already live, with the credentials already persisted. So both entry
-  points classify by consulting `isAuthenticated()` when the error is
-  not an `AuthenticationError`: reading `true` means only the device
-  refresh failed, and the app-API handler (`api.mts`) answers
-  `{ isDeviceListStale: true }` rather than rejecting, while the
-  pairing handler (`drivers/heatzy/driver.mts`) continues to the
-  device list. Reading `false` is the real login failure. Degrading is
+  rejection, and the TYPE is the arbiter. The library ENFORCES a
+  registry sync after the server accepted the sign-in, and since
+  heatzy-api 16.0.0 that failure arrives wrapped as
+  `RegistrySyncError` (the sync's own error on `cause`); a refused
+  credential is never wrapped — it stays `AuthenticationError`. So
+  both entry points classify by `instanceof RegistrySyncError`: the
+  app-API handler (`api.mts`) answers `{ isDeviceListStale: true }`
+  rather than rejecting, the pairing handler
+  (`drivers/heatzy/driver.mts`) continues to the device list, and
+  ANYTHING else is a login failure. Neither consults
+  `isAuthenticated()` — the retired judge-by-the-session heuristic
+  (11.0.0's era) had a CONFIRMED false positive: a transport failure
+  during the sign-in round-trip over a PRE-EXISTING live session (a
+  user switching accounts) read "signed in, stale list" while the new
+  credentials were never accepted. Degrading is
   not the same as going silent: `pushCredentials` opens the devices
   AND alerts `settings.authenticate.staleDevices`, the only place the
   user hears that the list never arrived. Treating every rejection as
