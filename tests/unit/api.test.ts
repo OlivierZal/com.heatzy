@@ -3,6 +3,7 @@ import type { Homey } from 'homey/lib/Homey'
 import {
   type LoginCredentials,
   AuthenticationError,
+  RegistrySyncError,
 } from '@olivierzal/heatzy-api'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -80,7 +81,6 @@ describe('api', () => {
 
     it('passes a transport failure message through untranslated', async () => {
       mockAuthenticate.mockRejectedValueOnce(new Error('transport down'))
-      mockIsAuthenticated.mockReturnValue(false)
 
       await expect(
         api.authenticate({ body: mock<LoginCredentials>(), homey }),
@@ -90,13 +90,18 @@ describe('api', () => {
   })
 
   // The library enforces a registry sync AFTER the server accepted the
-  // credentials, so `authenticate()` rejects over a session that is
-  // live. The session is the arbiter: such a rejection reports a stale
-  // device list, never a login failure.
+  // credentials and wraps that failure as `RegistrySyncError`: the TYPE
+  // is the arbiter, and such a rejection reports a stale device list,
+  // never a login failure. The session is never consulted — it reads
+  // "signed in" on a transport failure over a pre-existing live one.
   describe('accepted sign-in whose registry sync failed', () => {
     it('should answer a stale device list rather than reject', async () => {
-      mockAuthenticate.mockRejectedValueOnce(new Error('registry sync down'))
-      mockIsAuthenticated.mockReturnValue(true)
+      mockAuthenticate.mockRejectedValueOnce(
+        new RegistrySyncError(
+          'Signed in, but the registry could not be verified',
+          { cause: new Error('registry sync down') },
+        ),
+      )
 
       await expect(
         api.authenticate({ body: mock<LoginCredentials>(), homey }),
@@ -106,6 +111,21 @@ describe('api', () => {
         dataType: SETTINGS_PAGE,
         route: 'POST /sessions',
       })
+    })
+
+    // The retired heuristic's confirmed false positive: a transport
+    // failure during the sign-in round-trip over a PRE-EXISTING live
+    // session read "signed in, stale list" while the new credentials
+    // were never accepted. It is a LOGIN FAILURE, and the session is
+    // never consulted.
+    it('should report a login failure on a transport failure over a pre-existing live session', async () => {
+      mockAuthenticate.mockRejectedValueOnce(new Error('transport down'))
+      mockIsAuthenticated.mockReturnValue(true)
+
+      await expect(
+        api.authenticate({ body: mock<LoginCredentials>(), homey }),
+      ).rejects.toThrow('transport down')
+      expect(mockIsAuthenticated).not.toHaveBeenCalled()
     })
 
     it('should never rescue a credential rejection over a live session', async () => {
