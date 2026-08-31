@@ -106,5 +106,9 @@
   "23.3.4": {
     "en": "Completes the previous security fix: until now, a rejected sign-in could still write your username and password into the app's log, and from there into any diagnostic report you shared.",
     "fr": "Complète le correctif de sécurité précédent : jusqu'à présent, une connexion refusée pouvait encore inscrire votre nom d'utilisateur et votre mot de passe dans le journal de l'app, et de là dans tout rapport de diagnostic que vous partagiez."
+  },
+  "23.3.5": {
+    "en": "A successful sign-in is no longer reported as a failure: if your radiators cannot be listed right away, the app signs you in and tells you the list is stale instead of sending you back to the login form. An account whose password was changed elsewhere now shows as signed out instead of appearing connected forever.",
+    "fr": "Une connexion réussie n'est plus signalée comme un échec : si vos radiateurs ne peuvent pas être listés tout de suite, l'app vous connecte et vous indique que la liste n'est pas à jour au lieu de vous renvoyer à l'écran de connexion. Un compte dont le mot de passe a été changé ailleurs s'affiche désormais déconnecté au lieu de paraître connecté pour toujours."
   }
 }
