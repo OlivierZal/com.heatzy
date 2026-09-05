@@ -14,7 +14,14 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-node-and-install
         with:
+          # The Homey runtime version; the family action defaults to lts/*.
+          node-version: '22'
+          # The install pulls @olivierzal/configs and @olivierzal/heatzy-api
+          # from GitHub Packages, which requires auth even for read.
           npm-token: ${{ secrets.GITHUB_TOKEN }}
+          registry-url: https://npm.pkg.github.com
+          require-npm-token: 'true'
+          scope: '@olivierzal'
       - name: Validate app
         uses: athombv/github-action-homey-app-validate@0f3b42c15d26aab79d7c48cde4d2805524da910e # untagged: master carries the `don't npm ci` fix the @typescript/native toolchain needs; v1 predates it
         with:

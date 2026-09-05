@@ -298,9 +298,15 @@ it), while `dependency-review` judges what a PR introduces;
 `publish.yml`, `validate.yml` and `claude-dependabot-fix.yml` stay
 local (no reusable exists for the first two; the fix reusable grants no
 `packages: read` and cannot carry the repo's heatzy-api doctrine line),
-so the composite action stays too — installs pass `npm-token` (the
-configs and heatzy-api dependencies live on GitHub Packages, where even
-reads need auth).
+so the composite action stays too — as the family's VERBATIM copy of
+`OlivierZal/configs/.github/actions/setup-node-and-install`, re-copied
+at each adoption. Whatever is app-specific travels as caller inputs,
+never as an edit to the copy: `node-version: '22'` (the Homey runtime;
+the family default is `lts/*`), the `@olivierzal` `registry-url`/`scope`
+(also what makes setup-node write the user-level `.npmrc` that
+`publish.yml` copies for the publish action), and `require-npm-token:
+'true'` with `npm-token` (the configs and heatzy-api dependencies live
+on GitHub Packages, where even reads need auth).
 
 ## Runtime boundary (@olivierzal/homey-kit)
 
