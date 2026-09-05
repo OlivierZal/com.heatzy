@@ -38,10 +38,20 @@ describe.concurrent('webview floor closure', () => {
     repoRoot: REPO_ROOT,
   })
 
-  // A walk that dropped its seed would pass the inclusion check
-  // vacuously.
-  it.each(entryPoints)('walks the closure from %s', (entryPoint) => {
-    expect(findings.closure).toContain(entryPoint)
+  // Guards the guard: the perimeter read must see the one entry point
+  // the bundler declares — the kit only refuses an EMPTY sweep.
+  it('reads the entry point the bundler declares', () => {
+    expect(entryPoints).toStrictEqual(['settings/index.mts'])
+  })
+
+  // The closure is pinned exactly: with no value import today, no
+  // app-side assertion can tell a walk that read the file from one that
+  // did not (the kit's own suite pins the walk); what this pin does is
+  // make the first value import a conscious act — the closure grows and
+  // this list must follow, with the floor globs checked in the same
+  // move.
+  it('reaches no file beyond the entry point today', () => {
+    expect(findings.closure).toStrictEqual(entryPoints)
   })
 
   it('floors every file the settings bundle can emit', () => {
