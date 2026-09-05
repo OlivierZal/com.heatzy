@@ -34,19 +34,26 @@ caught real failures that the others miss:
   is therefore sufficient for install, run, validate and publish alike;
   a standalone suite run (no `.homeybuild` page copy) still proves the
   bundles compile.
-- Cache-busting `?v=` — a PACKAGE-TIME transform: `bundle.mts` stamps
-  every local asset reference of the `.homeybuild` page copy with a
-  content hash (`?v=<hash>`), so phone webviews (which cache assets
-  across app versions) refetch an asset exactly when its bytes change.
-  The committed source HTML carries NO stamps — never hand-add a `?v=`
-  there, and nothing needs re-committing when a webview source changes.
-  Stamps exist only in the packaged app, within attribute/import
-  reference contexts (`href="`/`src="`) — matched WHEREVER they appear,
-  HTML comments included: a commented reference to a missing file fails
-  the packaging pass, and one to a real file would be stamped by the
+- Cache-busting `?v=` — a PACKAGE-TIME transform: `bundle.mts` hands
+  its pages list to the kit's `stampPackagedPages`
+  (`@olivierzal/homey-kit/node`), which stamps every local asset
+  reference of the `.homeybuild` page copy with a content hash
+  (`?v=<hash>`) and emits the `webview-hashes.json` manifest beside it,
+  so phone webviews (which cache assets across app versions) refetch an
+  asset exactly when its bytes change. The committed source HTML
+  carries NO stamps — never hand-add a `?v=` there, and nothing needs
+  re-committing when a webview source changes. Stamps exist only in
+  the packaged app, within attribute/import reference contexts
+  (`href="`/`src="`) — matched WHEREVER they appear, HTML comments
+  included: a commented reference to a missing file fails the
+  packaging pass, and one to a real file would be stamped by the
   builder yet invisible to the page-side DOM query, splitting the two
   identities into an endless refetch handshake. Delete a dead
-  reference, never comment it out.
+  reference, never comment it out. Only a tree with NO page copy at
+  all (the standalone suite run) stamps nothing: a partial tree (a
+  mistyped page path in the CLI flow), an unreadable copy or a copy
+  with no local reference fails the pass rather than shipping a
+  release with a silently disabled handshake.
 - `npm run homey:validate` — Homey validation at publish level; may
   rewrite files (see locales below), re-stage if it does.
 - `npm run homey:start` — `homey app run --remote` for on-device testing.
@@ -79,9 +86,11 @@ coverage.
   breadcrumbs log the verbed form (`'GET /settings/devices'`). Handler
   renames are wire-invisible (routing is method+path).
   `@olivierzal/homey-kit/settings` is the settings page's transport (the
-  settings SDK is error-first-callback). The webview
-  `fireAndForget` stays local by design: it binds
-  `homey` to auto-alert, this page's error policy. The surface is
+  settings SDK is error-first-callback) and its freshness wiring
+  (`watchSettingsFreshness`: the three fixed routes over the kit's
+  `watchWebviewFreshness`). The page's error policy stays local:
+  `alertRejection(homey)`, the sink handed to the kit's webview
+  `fireAndForget`. The surface is
   test-pinned in two halves, one file each — extend BOTH when touching
   a route: `tests/unit/api-contract.test.ts` pins manifest ids ↔
   handlers both ways plus the handlers' function type;
@@ -161,14 +170,17 @@ coverage.
   itself (phone webviews cache the page across app versions,
   force-close included): each bundle carries a freshness handshake —
   the page's identity is the document-order join of its `?v=` stamps (a CSS-only ship moves it too), `GET /webview-hashes` serves the
-  live hashes (a manifest `bundle.mts` emits into the packaged app,
-  read by `@olivierzal/homey-kit/node`; `api.mts` passes the manifest
+  live hashes (the manifest the kit's `stampPackagedPages` emits into
+  the packaged app from `bundle.mts`, read back by `getWebviewHashes`
+  — both `@olivierzal/homey-kit/node`; `api.mts` passes the manifest
   URL explicitly — the kit's default resolves against its own module,
   which lives in `node_modules`), and a mismatch triggers ONE
   refetch of the document through a never-cached address
   (`?fresh=<identity>` — a bare reload can be re-served the same stale
   document from the HTTP cache; sessionStorage guard,
-  `watchWebviewFreshness` from `@olivierzal/homey-kit/webview`), whose
+  `watchSettingsFreshness` from `@olivierzal/homey-kit/settings` — the
+  settings page's whole handshake, entry, hashes route, breadcrumb and
+  poke, over the kit's `watchWebviewFreshness`), whose
   fresh stamps pull the fresh assets;
   a mismatch that survives its refetch is reported to
   `POST /boot-error`. The guarantee lives in the BOOT check, and which
@@ -223,8 +235,9 @@ coverage.
   as verbs; a name states what the thing IS, never its history. Test
   files are named after the unit under test (`<module>.test.ts`); shared
   test helpers keep their family's names — apps say `assertDefined` and
-  `mock(overrides)` where the libraries say `defined` and
-  `mock(value?)`: two test families, deliberately not unified.
+  `mock(overrides)` (served by `@olivierzal/homey-kit/testing`) where
+  the libraries say `defined` and `mock(value?)`: two test families,
+  deliberately not unified.
 - Static markup and styles live in `.html`/`.css` files. TS builds DOM
   only when the content is programmatic (computed values, per-item
   nodes), via `createElement` — never `innerHTML` (`no-unsafe-dom-html`
@@ -312,20 +325,37 @@ on GitHub Packages, where even reads need auth).
 
 `@olivierzal/homey-kit` (exact pin, a PRODUCTION dependency — the
 manifest reader runs on the device) owns what used to be copied across
-the three apps: the dirty gate and the freshness handshake
-(`/webview`), the settings transport (`/settings`), the manifest reader
-(`/node`), `fireAndForget`/`getErrorMessage`/`NotFoundError`/`sequential`
-(root) and the
-two test kernels (`/testing`). A change to any of them is a kit release
-adopted here by a pin bump — never a local edit, never a re-derivation.
+the three apps: the dirty gate and the freshness primitives
+(`/webview`); the settings transport and the settings page's whole
+freshness handshake, `watchSettingsFreshness` (`/settings`); the
+package-time stamp producer, `stampPackagedPages` with `stampHtml` and
+`stampReferences` underneath, and the manifest reader
+`getWebviewHashes` (`/node`);
+`fireAndForget`/`getErrorMessage`/`NotFoundError`/`sequential` (root);
+and the test side (`/testing`): the analysis kernels
+(`findContractBreach`, `analyzeRouteGuards`, `analyzeWebviewFloor` with
+`getQuotedEntries`) and the plain helpers (`assertDefined`,
+`getMockCallArg`, `mock`, `settleDetached`, `InteropModule`). A change
+to any of them is a kit release adopted here by a pin bump — never a
+local edit, never a re-derivation.
 
 What stays local, by measurement rather than omission:
 
-- The webview `fireAndForget` in `settings/index.mts`: it binds `homey`
-  to auto-alert, this page's error policy. The kit's node-side seam
-  takes `(promise, logger, message)` and is what `app.mts` and
+- The page's error policy in `settings/index.mts`: `alertRejection`
+  binds `homey` to auto-alert and is the sink handed to the kit's
+  webview `fireAndForget`. The kit's node-side seam takes a promise, a
+  logger and a message, and is what `app.mts` and
   `drivers/heatzy/device.mts` use — the app or device instance passes
   itself, no error adapter at any site.
+- The bundler's own decisions in `scripts/bundle.mts`: the esbuild
+  options, the compat pair (the `index.mjs` twin as a second IIFE) and
+  the pages list handed to the kit's stamp producer.
+- The suites' own `describe`/`it` and perimeter reading — the entry
+  points from `scripts/bundle.mts` and the floor globs from
+  `eslint.config.ts` (`tests/unit/webview-floor.test.ts`), the
+  route-guard surface table — plus `tests/mock-device-class.ts`, the
+  device-class double built around this app's `super` calls,
+  re-exported by `tests/helpers.ts`.
 - `lib/homey.mts`. (`NotFoundError` moved to the kit: the class only
   names the error, the localized message is passed at the throw site.)
 - `homey-override.d.ts` keeps its `declare module` block: module

@@ -1,5 +1,11 @@
 import type * as HeatzyApiModule from '@olivierzal/heatzy-api'
 import type { LoginSetting } from '@olivierzal/homey-kit/manifest'
+import {
+  assertDefined,
+  getMockCallArg,
+  mock,
+  settleDetached,
+} from '@olivierzal/homey-kit/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type HeatzyDevice from '../../drivers/heatzy/device.mts'
@@ -7,12 +13,6 @@ import type * as FilesModule from '../../files.mts'
 import type * as HomeyLib from '../../lib/homey.mts'
 import type { Settings } from '../../types/device-settings.mts'
 import type { ManifestDriver } from '../../types/manifest.mts'
-import {
-  assertDefined,
-  getMockCallArg,
-  mock,
-  settleDetached,
-} from '../helpers.ts'
 
 const { mockCreate, mockFacadeManagerConstructor } = vi.hoisted(() => ({
   mockCreate: vi.fn<(options: unknown) => Promise<unknown>>(),
@@ -20,7 +20,7 @@ const { mockCreate, mockFacadeManagerConstructor } = vi.hoisted(() => ({
 }))
 
 vi.mock(import('@olivierzal/heatzy-api'), async (importOriginal) => {
-  const { mock: mockModule } = await import('../helpers.ts')
+  const { mock: mockModule } = await import('@olivierzal/homey-kit/testing')
   return mockModule<typeof HeatzyApiModule>({
     ...(await importOriginal()),
     FacadeManager: mockFacadeManagerConstructor,
@@ -29,12 +29,12 @@ vi.mock(import('@olivierzal/heatzy-api'), async (importOriginal) => {
 })
 
 vi.mock(import('../../lib/homey.mts'), async () => {
-  const { mock: mockModule } = await import('../helpers.ts')
+  const { mock: mockModule } = await import('@olivierzal/homey-kit/testing')
   return mockModule<typeof HomeyLib>({ App: Function })
 })
 
 vi.mock(import('../../files.mts'), async (importOriginal) => {
-  const { mock: mockModule } = await import('../helpers.ts')
+  const { mock: mockModule } = await import('@olivierzal/homey-kit/testing')
   const original = await importOriginal()
   return mockModule<typeof FilesModule>({
     ...original,

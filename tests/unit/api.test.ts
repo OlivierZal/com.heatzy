@@ -5,10 +5,10 @@ import {
   AuthenticationError,
   RegistrySyncError,
 } from '@olivierzal/heatzy-api'
+import { mock } from '@olivierzal/homey-kit/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DeviceSettings, Settings } from '../../types/device-settings.mts'
-import { mock } from '../helpers.ts'
 
 const { default: api } = await import('../../api.mts')
 

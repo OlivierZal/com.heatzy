@@ -9,17 +9,17 @@ import {
   Switch,
 } from '@olivierzal/heatzy-api'
 import { NotFoundError } from '@olivierzal/homey-kit'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-import type HeatzyDriver from '../../drivers/heatzy/driver.mts'
-import { SETTABLE_CAPABILITIES } from '../../drivers/heatzy/driver.mts'
 import {
   type InteropModule,
   assertDefined,
   getMockCallArg,
   mock,
   settleDetached,
-} from '../helpers.ts'
+} from '@olivierzal/homey-kit/testing'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import type HeatzyDriver from '../../drivers/heatzy/driver.mts'
+import { SETTABLE_CAPABILITIES } from '../../drivers/heatzy/driver.mts'
 import HeatzyDevice from '../../drivers/heatzy/device.mts'
 
 const DEBOUNCE_DELAY = 1000
@@ -85,8 +85,8 @@ const {
 }))
 
 vi.mock(import('homey'), async () => {
-  const { createMockDeviceClass, mock: mockModule } =
-    await import('../helpers.ts')
+  const { createMockDeviceClass } = await import('../helpers.ts')
+  const { mock: mockModule } = await import('@olivierzal/homey-kit/testing')
   return mockModule<InteropModule<typeof HomeyModule>>({
     default: {
       Device: createMockDeviceClass({
