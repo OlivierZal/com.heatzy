@@ -7,9 +7,13 @@ import {
   Product,
   RegistrySyncError,
 } from '@olivierzal/heatzy-api'
+import {
+  type InteropModule,
+  assertDefined,
+  mock,
+} from '@olivierzal/homey-kit/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { type InteropModule, assertDefined, mock } from '../helpers.ts'
 import HeatzyDriver, {
   getCapabilitiesOptions,
   getRequiredCapabilities,
@@ -51,7 +55,7 @@ const {
 }))
 
 vi.mock(import('homey'), async () => {
-  const { mock: mockModule } = await import('../helpers.ts')
+  const { mock: mockModule } = await import('@olivierzal/homey-kit/testing')
   class MockDriver {
     public getDevices = vi.fn<() => readonly unknown[]>().mockReturnValue([])
 

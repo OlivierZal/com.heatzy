@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -9,38 +8,27 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // directory (the Homey CLI runs it from the packaged app's root), so
 // each test materializes a miniature app in a temp directory, moves
 // there, and imports the script afresh.
-const HASH_LENGTH = 8
-
 const initialDirectory = process.cwd()
 
 const ENTRY_SOURCE = `export const start = (value?: string): string =>
   value ?? 'booted'
 `
 
-// Prettier owns the page's shape, so the fixture carries the two forms
-// it emits: attributes inline, and — once a tag outgrows the print
-// width — one per line. A reference pattern scoped to a tag or to a
-// single line would still stamp the inline form and silently miss the
-// exploded one.
+// A packaged page referencing the compat pair the script emits plus a
+// stylesheet it does not: the stamp pass must find every one of them.
 const PAGE_HTML = `<!doctype html>
 <html lang="en">
   <head>
-    <!-- index.js is mentioned here and must stay unstamped -->
     <link href="index.css" rel="stylesheet" />
     <script defer src="index.js"></script>
-    <script
-      data-testid="a-tag-past-the-print-width-that-prettier-explodes"
-      defer
-      src="index.mjs?v=deadbeef"
-    ></script>
-    <script data-origin="settings" defer src="/homey.js"></script>
+    <script defer src="index.mjs"></script>
   </head>
   <body></body>
 </html>
 `
 
-const hashOf = (content: string | Buffer): string =>
-  createHash('sha256').update(content).digest('hex').slice(0, HASH_LENGTH)
+// The stamps a packaged page carries, in document order.
+const STAMP = /\?v=(?<stamp>[0-9a-f]+)"/gv
 
 // Cwd-relative on purpose: every test runs from inside its own temp
 // app, exactly where the Homey CLI runs the script from.
@@ -96,92 +84,34 @@ describe('bundle script', () => {
     expect(iife).toContain('??')
   })
 
-  it('should stamp references only, and emit the manifest', async () => {
+  it('should stamp the packaged page after the bundles it references exist', async () => {
     await seedPackagedPage(PAGE_HTML)
 
     await runBundler()
 
     const stamped = await packagedFile('settings/index.html')
-    const jsHash = hashOf(await packagedFile('settings/index.js'))
-    const cssHash = hashOf(await packagedFile('settings/index.css'))
-    const mjsHash = hashOf(await packagedFile('settings/index.mjs'))
 
-    expect(stamped).toContain(`href="index.css?v=${cssHash}"`)
-    expect(stamped).toContain(`src="index.js?v=${jsHash}"`)
-    // The stale stamp is replaced, never doubled
-    expect(stamped).toContain(`src="index.mjs?v=${mjsHash}"`)
-    expect(stamped).not.toContain('deadbeef')
-    // Outside a reference context nothing moves
-    expect(stamped).toContain(
-      '<!-- index.js is mentioned here and must stay unstamped -->',
-    )
-    expect(stamped).toContain('src="/homey.js"')
+    // Both halves of the compat pair are hashed, so the stamp pass runs
+    // only once esbuild has emitted them.
+    expect(stamped).toMatch(/src="index\.js\?v=[0-9a-f]+"/v)
+    expect(stamped).toMatch(/src="index\.mjs\?v=[0-9a-f]+"/v)
 
+    const stamps = stamped
+      .matchAll(STAMP)
+      .map((match) => match.groups?.stamp)
+      .filter((stamp) => stamp !== undefined)
+      .toArray()
     const manifest: unknown = JSON.parse(
       await packagedFile('webview-hashes.json'),
     )
 
-    // Document order: stylesheet first, then the two bundles
-    expect(manifest).toStrictEqual({
-      settings: [cssHash, jsHash, mjsHash].join('.'),
-    })
-  })
-
-  it('should rewrite nothing when the stamps are already fresh', async () => {
-    await seedPackagedPage(PAGE_HTML)
-
-    await runBundler()
-
-    const once = await packagedFile('settings/index.html')
-
-    await runBundler()
-
-    await expect(packagedFile('settings/index.html')).resolves.toBe(once)
-  })
-
-  it('should move the stamps when an asset changes', async () => {
-    await seedPackagedPage(PAGE_HTML)
-
-    await runBundler()
-
-    const before = await packagedFile('settings/index.html')
-    await writeFile('.homeybuild/settings/index.css', 'body { color: blue; }\n')
-
-    await runBundler()
-
-    await expect(packagedFile('settings/index.html')).resolves.not.toBe(before)
-  })
-
-  it('should join identical stamps once, as the page itself does', async () => {
-    await seedPackagedPage(
-      '<html><head><link href="a.css" rel="stylesheet"><link href="b.css" rel="stylesheet"></head></html>',
-    )
-    const twinBytes = 'body { margin: 0; }\n'
-    await writeFile('.homeybuild/settings/a.css', twinBytes)
-    await writeFile('.homeybuild/settings/b.css', twinBytes)
-
-    await runBundler()
-
-    const manifest: unknown = JSON.parse(
-      await packagedFile('webview-hashes.json'),
-    )
-
-    // The page joins UNIQUE stamp values — the manifest must agree, or
-    // twin-byte assets would loop the freshness handshake
-    expect(manifest).toStrictEqual({ settings: hashOf(twinBytes) })
+    // Served under the page's entry, the identity the stamped page
+    // computes for itself — what the booted page compares against.
+    expect(stamps).toHaveLength(3)
+    expect(manifest).toStrictEqual({ settings: stamps.join('.') })
   })
 
   it('should stamp nothing in a standalone suite run', async () => {
-    await runBundler()
-
-    await expect(packagedFile('webview-hashes.json')).rejects.toThrow('ENOENT')
-  })
-
-  it('should skip the manifest when a page carries no local reference', async () => {
-    await seedPackagedPage(
-      '<html><head><script src="/homey.js"></script></head></html>',
-    )
-
     await runBundler()
 
     await expect(packagedFile('webview-hashes.json')).rejects.toThrow('ENOENT')

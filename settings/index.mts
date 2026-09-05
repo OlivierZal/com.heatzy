@@ -20,6 +20,7 @@ import {
   homeyApiPost,
   homeyApiPut,
   homeyConfirm,
+  watchSettingsFreshness,
 } from '@olivierzal/homey-kit/settings'
 import {
   type DirtyGate,
@@ -27,7 +28,6 @@ import {
   fireAndForget,
   runWebview,
   trySetDocumentLanguage,
-  watchWebviewFreshness,
 } from '@olivierzal/homey-kit/webview'
 
 import type { AuthenticationResult } from '../types/api.mts'
@@ -107,22 +107,6 @@ const alertMessage = async (
   } catch {
     // The alert channel itself is best-effort
   }
-}
-
-// The one sanctioned fire-and-forget seam: detach already-started
-// work from an event handler, alerting a rejection instead of
-// propagating it.
-// Freshness breadcrumbs ride the declared boot-error route; a missed
-// one is acceptable, so the callback swallows the outcome.
-const reportFreshness = (homey: HomeySettings, message: string): void => {
-  homey.api(
-    'POST',
-    '/boot-error',
-    { message, name: 'WebviewFreshness' },
-    () => {
-      // A missed freshness breadcrumb is acceptable.
-    },
-  )
 }
 
 // Iterates every element so the `undefined` narrow is a real branch: a
@@ -521,23 +505,10 @@ const buildSections = async (context: PageContext): Promise<void> => {
   context.credentialsGate.markSaved()
 }
 
-// Boot check plus the triggers that cover a page outliving it: this
-// webview survives an app restart on mobile, so no new document — and
-// no boot check — ever happens there.
-const startFreshness = async (homey: HomeySettings): Promise<boolean> =>
-  watchWebviewFreshness({
-    entry: 'settings',
-    fetchHashes: async () => homeyApiGet(homey, '/webview-hashes'),
-    report: (message) => {
-      reportFreshness(homey, message)
-    },
-    subscribe: (onPoke) => {
-      homey.on('webview_hashes_changed', onPoke)
-    },
-  })
-
 const init = async (homey: HomeySettings): Promise<void> => {
-  if (await startFreshness(homey)) {
+  // A refetch issued by the boot check replaces this document: nothing
+  // to build on the one being torn down.
+  if (await watchSettingsFreshness(homey)) {
     return
   }
   const elements = getPageElements()
