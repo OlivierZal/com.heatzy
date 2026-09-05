@@ -16,7 +16,16 @@ jobs:
       - uses: ./.github/actions/setup-node-and-install
         with:
           cache: none
+          # The Homey runtime version; the family action defaults to lts/*.
+          node-version: '22'
+          # The install pulls @olivierzal/configs and @olivierzal/heatzy-api
+          # from GitHub Packages, which requires auth even for read. The
+          # registry-url also makes setup-node write the user-level .npmrc
+          # the next step copies for the publish action.
           npm-token: ${{ secrets.GITHUB_TOKEN }}
+          registry-url: https://npm.pkg.github.com
+          require-npm-token: 'true'
+          scope: '@olivierzal'
       - run: cp "$NPM_CONFIG_USERCONFIG" "$GITHUB_WORKSPACE/.npmrc"
       - id: publish
         name: Publish
