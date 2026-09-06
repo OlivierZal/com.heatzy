@@ -298,10 +298,10 @@ package.json, no local file), the `tsconfig/app` base and the vitest
 sources, default-export files, jsdoc files, untyped test doubles, the
 webview floor), and tsconfig `outDir`. Do not re-declare family policy
 locally — a rule evaluation or version bump happens in configs,
-adoption is a reviewed pin bump. Never extend `tsconfig/app-build`: its
-`rootDir` resolves against the base file inside node_modules (the trap
-the configs README documents) — `tsconfig.build.json` extends the LOCAL
-`./tsconfig.json` and keeps `rootDir`/`exclude` here. The
+adoption is a reviewed pin bump. `tsconfig.build.json` extends the
+LOCAL `./tsconfig.json` and keeps `rootDir`/`exclude` here — the base is
+named once, and the `-build` alias configs ships holds no option of its
+own. The
 CI/claude*/dependabot/dependency-review/pr-title/zizmor workflows are
 stubs calling the family reusables in OlivierZal/configs, pinned
 `@<sha> # vX.Y.Z`; dependency vulnerabilities are GitHub's own —
