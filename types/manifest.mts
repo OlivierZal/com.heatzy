@@ -1,23 +1,7 @@
-import type { LocalizedStrings } from './bases.mts'
-
-interface ManifestDriverSetting {
-  readonly label: LocalizedStrings
-  readonly children?: readonly ManifestDriverSettingData[]
-  readonly id?: string
-}
-
-interface ManifestDriverSettingData {
-  readonly id: string
-  readonly label: LocalizedStrings
-  readonly type: string
-  readonly max?: number
-  readonly min?: number
-  readonly units?: string
-  readonly values?: readonly {
-    readonly id: string
-    readonly label: LocalizedStrings
-  }[]
-}
+import type {
+  ManifestDriver as KitManifestDriver,
+  PairSetting,
+} from '@olivierzal/homey-kit/manifest'
 
 interface ManifestFlow {
   readonly actions: readonly ManifestFlowCard[]
@@ -28,20 +12,15 @@ interface ManifestFlowCard {
   readonly id: string
 }
 
-interface PairSetting {
-  readonly id: string
-}
-
 export interface Manifest {
   readonly drivers: readonly ManifestDriver[]
   readonly flow: ManifestFlow
   readonly version: string
 }
 
-export interface ManifestDriver {
+// The kit's driver shape (id, name, pair, settings) plus what this app
+// reads on top of it.
+export interface ManifestDriver extends KitManifestDriver {
   readonly capabilities: readonly string[]
-  readonly id: string
-  readonly name: LocalizedStrings
   readonly pair?: readonly PairSetting[]
-  readonly settings?: readonly ManifestDriverSetting[]
 }
