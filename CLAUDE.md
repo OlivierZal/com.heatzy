@@ -247,7 +247,9 @@ coverage.
   test helpers keep their family's names — apps say `assertDefined` and
   `mock(overrides)` (served by `@olivierzal/homey-kit/testing`) where
   the libraries say `defined` and `mock(value?)`: two test families,
-  deliberately not unified.
+  deliberately not unified. `@olivierzal/api-core/testing` resolves
+  here only as the SDK's transitive dependency (heatzy-api 17.0.0
+  moved the libraries' doubles there) — never import it in this app.
 - Static markup and styles live in `.html`/`.css` files. TS builds DOM
   only when the content is programmatic (computed values, per-item
   nodes), via `createElement` — never `innerHTML` (`no-unsafe-dom-html`
