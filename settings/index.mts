@@ -19,6 +19,7 @@ import {
   homeyApiGet,
   homeyApiPost,
   homeyApiPut,
+  homeyCallback,
   homeyConfirm,
   watchSettingsFreshness,
 } from '@olivierzal/homey-kit/settings'
@@ -109,22 +110,6 @@ const alertMessage = async (
   }
 }
 
-// Iterates every element so the `undefined` narrow is a real branch: a
-// `[data-i18n]` selector would guarantee the attribute and leave the
-// guard as dead code under the 100% coverage bar.
-const translatePage = (homey: HomeySettings): void => {
-  for (const element of document.querySelectorAll<HTMLElement>('*')) {
-    const key = element.dataset.i18n
-    if (key === undefined) {
-      continue
-    }
-    const translation = homey.__(key)
-    if (translation !== '' && translation !== key) {
-      element.textContent = translation
-    }
-  }
-}
-
 const createGroupElement = (
   parentElement: HTMLElement,
   valueElement: HTMLValueElement,
@@ -169,9 +154,7 @@ const refreshCommonSetting = (
   if (id !== undefined) {
     const value = flatDeviceSettings[id]
     element.value =
-      typeof value === 'boolean' ||
-      typeof value === 'number' ||
-      typeof value === 'string'
+      typeof value === 'boolean' || typeof value === 'string'
         ? String(value)
         : ''
   }
@@ -201,12 +184,8 @@ const processValue = (element: HTMLSelectElement): unknown => {
   return null
 }
 
-// The select displays a number as its string (refreshCommonSetting), so
-// the divergence check must compare against the same view — comparing
-// the raw number would arm Apply forever on an untouched form.
-const matchesBaseline = (value: unknown, baseline: unknown): boolean =>
-  value === (typeof baseline === 'number' ? String(baseline) : baseline)
-
+// A divergent baseline (`null`) is never equal to a chosen value, so the
+// one comparison covers both the untouched and the divergent select.
 const buildSettingsBody = ({
   elements,
   state,
@@ -218,8 +197,7 @@ const buildSettingsBody = ({
     if (
       id !== undefined &&
       value !== null &&
-      (state.flatDeviceSettings[id] === null ||
-        !matchesBaseline(value, state.flatDeviceSettings[id]))
+      value !== state.flatDeviceSettings[id]
     ) {
       settings[id] = value
     }
@@ -465,15 +443,21 @@ const addEventListeners = (context: PageContext): void => {
 
 // The persisted username/password (the lib's SettingManager writes them
 // into homey.settings) so the credential fields show the signed-in
-// account instead of empty placeholders.
+// account instead of empty placeholders. A failed read is alerted and
+// leaves the fields empty: the page still builds.
 const fetchStoredCredentials = async (
   homey: HomeySettings,
-): Promise<StoredCredentials> =>
-  new Promise((resolve) => {
-    homey.get((error: Error | null, settings: StoredCredentials | null) => {
-      resolve(error === null && settings !== null ? settings : {})
+): Promise<StoredCredentials> => {
+  let settings: StoredCredentials | null = null
+  try {
+    settings = await homeyCallback<StoredCredentials | null>((callback) => {
+      homey.get(callback)
     })
-  })
+  } catch (error) {
+    await alertMessage(homey, error)
+  }
+  return settings ?? {}
+}
 
 const buildSections = async (context: PageContext): Promise<void> => {
   const { homey, state } = context
@@ -540,7 +524,6 @@ const init = async (homey: HomeySettings): Promise<void> => {
   await trySetDocumentLanguage(async () =>
     homeyApiGet<string>(homey, '/language'),
   )
-  translatePage(homey)
   await buildSections(context)
   addEventListeners(context)
   setAuthenticatedState(

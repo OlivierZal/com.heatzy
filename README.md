@@ -15,7 +15,7 @@ A [Homey](https://homey.app/) app for controlling [Heatzy](https://heatzy.com/) 
 
 This app integrates [Heatzy](https://heatzy.com/) into [Homey](https://homey.app/) to pilot electric radiators, towel warmers and underfloor heating:
 
-- **Heatzy Pilote** (1st, 2nd and 4th generations) — pilot-wire modes, derogations (boost, vacation), timer, lock
+- **Heatzy Pilote** (1st to 4th generations) — pilot-wire modes, derogations (boost, vacation), timer, lock
 - **Heatzy Glow, Onyx and Shine** — everything above, plus temperature measures and comfort/eco setpoints
 - **Heatzy Pro** — everything above, plus presence detection, humidity and window-detection
 
@@ -47,7 +47,7 @@ Architecture notes:
 - The API layer lives in [@olivierzal/heatzy-api](https://github.com/OlivierZal/heatzy-api), a sibling repository with its own tooling; API bugs are fixed there, not worked around here.
 - Browser code (the `settings/` page) is bundled by `scripts/bundle.mts` into self-contained bundles; the outputs are emitted into `.homeybuild` by `npm run build`, which the Homey CLI runs automatically on validate/publish.
 - Both the build and `npm run typecheck` use the native TypeScript 7 compiler for speed — since TypeScript 7.0, the npm `typescript` package at 7.x _is_ the native compiler, aliased here as `@typescript/native`; the TypeScript 6 JS API continues as `@typescript/typescript6`, aliased under the `typescript` name for tools with a `typescript` peer (typescript-eslint). Both scripts spell the compiler out as `node ./node_modules/@typescript/native/bin/tsc`: `@typescript/native` installs no `.bin` shim, and the `tsc` and `tsc6` shims both run the compat package's TypeScript 6, so a bare `tsc` would silently typecheck with 6.
-- Test coverage is enforced at 100% for backend code; browser glue (`settings/`) is excluded from coverage, so the badge covers the driver, app and API layers only.
+- Test coverage is enforced at 100% on every axis for every `.mts` source, the settings page (under happy-dom) and the bundler script included.
 
 ## Disclaimer
 

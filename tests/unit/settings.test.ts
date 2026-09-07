@@ -91,17 +91,6 @@ const driverSettingsFixture = (): Partial<Record<string, DriverSetting[]>> => ({
     {
       driverId: 'heatzy',
       driverLabel: 'Heatzy',
-      id: 'temp_limit',
-      title: 'Temperature limit',
-      type: 'dropdown',
-      values: [
-        { id: '15', label: '15' },
-        { id: '16', label: '16' },
-      ],
-    },
-    {
-      driverId: 'heatzy',
-      driverLabel: 'Heatzy',
       id: 'notes',
       title: 'Notes',
       type: 'label',
@@ -110,8 +99,8 @@ const driverSettingsFixture = (): Partial<Record<string, DriverSetting[]>> => ({
 })
 
 const deviceSettingsFixture = (): DeviceSettings => ({
-  glow: { always_on: true, on_mode: 'cft', temp_limit: 15 },
-  heatzy: { always_on: true, on_mode: 'previous', temp_limit: 15 },
+  glow: { always_on: true, on_mode: 'cft' },
+  heatzy: { always_on: true, on_mode: 'previous' },
 })
 
 // The SDK api overloads GET/DELETE (3 args) with POST/PUT (4): the mock
@@ -288,7 +277,6 @@ describe('settings page', () => {
       expect(password.autocomplete).toBe('current-password')
       expect(settingSelect('always_on').value).toBe('true')
       expect(settingSelect('on_mode').value).toBe('')
-      expect(settingSelect('temp_limit').value).toBe('15')
       expect(settingSelect('always_on').id).toBe('always_on__settings')
       expect(
         document.querySelector('select[data-setting-id="notes"]'),
@@ -311,19 +299,12 @@ describe('settings page', () => {
       expect(document.documentElement.lang).toBe('en')
     })
 
-    it('should translate keys and skip empty or echoed translations', async () => {
-      await bootPage({
-        translations: {
-          'settings.authenticate.legend': '',
-          'settings.title': 'Réglages Heatzy',
-        },
-      })
+    // The Homey runtime translates `data-i18n` text content itself, so
+    // the page runs no pass of its own over the authored markup.
+    it('should leave the data-i18n text to the runtime', async () => {
+      await bootPage({ translations: { 'settings.title': 'Réglages Heatzy' } })
 
-      expect(shownText('.homey-title')).toBe('Réglages Heatzy')
-      expect(shownText('[data-i18n="settings.authenticate.legend"]')).toBe(
-        'Credentials',
-      )
-      expect(shownText('[data-i18n="settings.update"]')).toBe('Update')
+      expect(shownText('.homey-title')).toBe('Heatzy settings')
     })
 
     it('should alert after the overlay when the build fails', async () => {
@@ -344,9 +325,12 @@ describe('settings page', () => {
       expect(alert).toHaveBeenCalledWith('boom')
     })
 
-    it('should leave the fields empty when the stored read errors', async () => {
-      await bootPage({ storedError: new Error('storage down') })
+    it('should alert and leave the fields empty when the stored read errors', async () => {
+      const { alert } = await bootPage({
+        storedError: new Error('storage down'),
+      })
 
+      expect(alert).toHaveBeenCalledWith('storage down')
       expect(getInput('username').value).toBe('')
     })
 

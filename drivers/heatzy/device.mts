@@ -27,7 +27,6 @@ import type {
 } from '../../types/capabilities.mts'
 import type { Settings, Store } from '../../types/device-settings.mts'
 import { type Homey, Device } from '../../lib/homey.mts'
-import type HeatzyDriver from './driver.mts'
 import {
   getCapabilitiesOptions,
   getRequiredCapabilities,
@@ -60,8 +59,6 @@ const toSwitch = (value: unknown): Switch =>
   value === true ? Switch.on : Switch.off
 
 export default class HeatzyDevice extends Device {
-  declare public readonly driver: HeatzyDriver
-
   declare public readonly getCapabilities: () => string[]
 
   declare public readonly getCapabilityValue: <TKey extends keyof Capabilities>(
@@ -191,12 +188,6 @@ export default class HeatzyDevice extends Device {
     await Promise.resolve()
   }
 
-  public override async addCapability(capability: string): Promise<void> {
-    if (!this.hasCapability(capability)) {
-      await super.addCapability(capability)
-    }
-  }
-
   public async ensureDevice(): Promise<DeviceFacadeAny | null> {
     try {
       return await this.#ensureFacade()
@@ -219,12 +210,6 @@ export default class HeatzyDevice extends Device {
 
   public override log(...args: unknown[]): void {
     super.log(this.getName(), '-', ...args)
-  }
-
-  public override async removeCapability(capability: string): Promise<void> {
-    if (this.hasCapability(capability)) {
-      await super.removeCapability(capability)
-    }
   }
 
   // Homey keeps a warning bubble on the device tile until it is cleared:
@@ -307,8 +292,8 @@ export default class HeatzyDevice extends Device {
     await this.syncFromDevice()
   }
 
-  // Reads mirror #setValue's manifest-mismatch guard: an absent
-  // capability reads as `null` instead of throwing.
+  // Reads mirror #setValue's guard: an absent capability reads as
+  // `null` instead of throwing.
   #getValue<TKey extends keyof Capabilities>(
     capability: TKey,
   ): Capabilities[TKey] | null {
@@ -406,13 +391,11 @@ export default class HeatzyDevice extends Device {
     this.#scheduleSyncFromDevice()
   }
 
+  // The manifest declares every required capability of every product
+  // (pinned by the driver suite), so the required set applies whole.
   async #setCapabilities(product: Product): Promise<void> {
     const currentCapabilities = new Set(this.getCapabilities())
-    const requiredCapabilities = new Set(
-      getRequiredCapabilities(product).filter((capability) =>
-        this.driver.manifest.capabilities.includes(capability),
-      ),
-    )
+    const requiredCapabilities = new Set(getRequiredCapabilities(product))
     await sequential(
       [...currentCapabilities.symmetricDifference(requiredCapabilities)],
       async (capability) => {
@@ -494,9 +477,10 @@ export default class HeatzyDevice extends Device {
     ])
   }
 
-  // A capability the device's product tier reports but the manifest
-  // omits is skipped at add-time; guarding the write here degrades that
-  // mismatch to a no-op instead of a runtime throw.
+  // The facade is cached before its init settles, so a sync racing the
+  // init (the library's sync callback lands while `#setCapabilities` is
+  // still adding) would write a capability not added yet; guarding the
+  // write degrades that to a skipped value the next sync fills in.
   async #setValue<TKey extends keyof Capabilities>(
     capability: TKey,
     value: Capabilities[TKey],
