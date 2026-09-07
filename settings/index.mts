@@ -5,7 +5,6 @@ import { getErrorMessage } from '@olivierzal/homey-kit'
 import {
   type HTMLValueElement,
   booleanOptions,
-  booleanStrings,
   createInput,
   createLabel,
   createSelect,
@@ -13,6 +12,7 @@ import {
   getDetails,
   getDiv,
   getFieldset,
+  parseFormValue,
 } from '@olivierzal/homey-kit/dom'
 import {
   homeyApiDelete,
@@ -175,17 +175,12 @@ const fetchDeviceSettings = async ({
   state.flatDeviceSettings = flattenDeviceSettings(state.deviceSettings)
 }
 
-const processValue = (element: HTMLSelectElement): unknown => {
-  if (element.value !== '') {
-    return booleanStrings.includes(element.value)
-      ? element.value === 'true'
-      : element.value
-  }
-  return null
-}
-
 // A divergent baseline (`null`) is never equal to a chosen value, so the
 // one comparison covers both the untouched and the divergent select.
+// The reader coerces a finite numeric string to a number, and every
+// control here is a select whose values are the manifest's dropdown ids
+// (strings on the wire): those ids stay words, held by
+// tests/unit/device-settings-contract.test.ts.
 const buildSettingsBody = ({
   elements,
   state,
@@ -193,7 +188,7 @@ const buildSettingsBody = ({
   const settings: Record<string, unknown> = {}
   for (const element of commonSettingElements(elements)) {
     const id = settingIdOf(element)
-    const value = processValue(element)
+    const value = parseFormValue(element)
     if (
       id !== undefined &&
       value !== null &&

@@ -90,8 +90,9 @@ coverage.
   kebab-case REST, `get*` for GET — except `is*` for a boolean GET —,
   `update*` for PUT (never `set*`), and a business verb for POST
   (`authenticate` on `/sessions`, `logWebviewBoot` on `/boot-error`),
-  breadcrumbs log the verbed form (`'GET /settings/devices'`). Handler
-  renames are wire-invisible (routing is method+path).
+  breadcrumbs log the verbed form (`'GET /settings/devices'`) through
+  the kit's `logSettingsRoute`. Handler renames are wire-invisible
+  (routing is method+path).
   `@olivierzal/homey-kit/settings` is the settings page's transport (the
   settings SDK is error-first-callback) and its freshness wiring
   (`watchSettingsFreshness`: the three fixed routes over the kit's
@@ -361,16 +362,22 @@ runners `runWebview`/`trySetDocumentLanguage` (`/webview`); the
 settings transport — the `homeyApi*` verbs and `homeyConfirm` over
 their one promisification primitive, `homeyCallback` — and the settings
 page's whole freshness handshake, `watchSettingsFreshness`
-(`/settings`); the typed element getters and the `homey-form-*`
-builders the page composes its DOM with (`/dom`); the driver-manifest
+(`/settings`); the typed element getters, the `homey-form-*`
+builders the page composes its DOM with and the form-value reader
+`parseFormValue` (`/dom`); the driver-manifest
 readers `getDriverSettings`/`getDriverLoginSetting`/
 `mergeDeviceSettings` and the `DriverSetting`/`ManifestDriver`/
 `PairSetting`/`LocalizedStrings` leaf types the local manifest types extend
 (`/manifest`); the package-time stamp producer, `stampPackagedPages`
 with `stampHtml` and `stampReferences` underneath, and the hashes
-reader `getWebviewHashes` (`/node`);
-`fireAndForget`/`getErrorMessage`/`NotFoundError`/`sequential`/
-`selectChangelogEntries` (root); and the test side (`/testing`): the
+reader `getWebviewHashes` (`/node`); the app-side seams
+`fireAndForget`/`settleAll` (both on the kit's `Logger`),
+`getErrorMessage`/`NotFoundError`/`sequential`, the settings-page
+breadcrumb `logSettingsRoute`, the `homey.settings` → library
+`SettingManager` adapter `createSettingManager`, and the boot-time
+changelog announcement `announceChangelog` (with
+`NOTIFICATION_DELAY_MS`) over `selectChangelogEntries` (root); and the
+test side (`/testing`): the
 analysis kernels
 (`findContractBreach`, `analyzeRouteGuards`, `analyzeWebviewFloor` with
 `getQuotedEntries`) and the plain helpers (`assertDefined`,
@@ -382,10 +389,30 @@ What stays local, by measurement rather than omission:
 
 - The page's error policy in `settings/index.mts`: `alertRejection`
   binds `homey` to auto-alert and is the sink handed to the kit's
-  webview `fireAndForget`. The kit's node-side seam takes a promise, a
-  logger and a message, and is what `app.mts` and
-  `drivers/heatzy/device.mts` use — the app or device instance passes
-  itself, no error adapter at any site.
+  webview `fireAndForget`. The kit's node-side seams (`fireAndForget`,
+  `settleAll`) take a promise or promises, a logger and a message, and
+  are what `app.mts` (both) and `drivers/heatzy/device.mts`
+  (`fireAndForget`) use — the app or device instance passes itself, no
+  error adapter at any site.
+- The settings-key mapper `settingKey` in `app.mts`, with its boundary
+  comment and its eslint-disabled assertion: the kit's
+  `createSettingManager` has NO identity default by design — a store
+  keyed by `string` would be the escape hatch `TypedManagerSettings`
+  refuses — so the narrowing stays the app's one visible boundary and
+  the kit only wraps it.
+- The settings page's form-value verdict. The kit's `parseFormValue`
+  reads a finite numeric string as a NUMBER where the former local
+  reader kept the string; every control the page builds is a select
+  (a checkbox rides `booleanOptions`, a dropdown the manifest's value
+  ids), and a dropdown id is a string on the wire — a numeric-looking
+  id would be pushed as a number the driver never declared and read as
+  divergent from its own stored value forever. So the manifest's
+  dropdown ids stay words, pinned by
+  `tests/unit/device-settings-contract.test.ts`. The kit's
+  `parseNumber` strategy is NOT the hook for that case: it fires only
+  for a `type="number"` input carrying both bounds, which this page
+  never builds, so this app passes no strategy — the branch has no
+  consumer here (2026-09-07).
 - The bundler's own decisions in `scripts/bundle.mts`: the esbuild
   options, the compat pair (the `index.mjs` twin as a second IIFE) and
   the pages list handed to the kit's stamp producer.

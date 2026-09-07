@@ -9,10 +9,11 @@ import {
   HeatzyAPI,
 } from '@olivierzal/heatzy-api'
 import {
+  announceChangelog,
+  createSettingManager,
   fireAndForget,
   NotFoundError,
-  selectChangelogEntries,
-  sequential,
+  settleAll,
 } from '@olivierzal/homey-kit'
 import {
   type DriverSetting,
@@ -26,8 +27,6 @@ import type { HomeySettings } from './types/app-settings.mts'
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
 import { changelog } from './files.mts'
 import { type Homey, App } from './lib/homey.mts'
-
-const NOTIFICATION_DELAY_MS = 10_000
 
 // The one boundary where a settings key arrives untyped: the library's
 // `SettingManager` is keyed by plain strings, and it derives each key
@@ -198,51 +197,21 @@ export default class HeatzyApp extends App {
 
   #createNotification(language: string): void {
     const { homey } = this
-    const {
-      manifest: { version },
-      notifications,
-      settings,
-    } = homey
-    // Every release since the one already announced, not just the
-    // running one: a user who updates rarely would otherwise never hear
-    // about the versions in between.
-    // The SDK read is untyped, as everywhere else settings are read: a
-    // stored value that is not a string reads as no baseline at all.
-    const notified: unknown = settings.get('notifiedVersion')
-    const { entries } = selectChangelogEntries({
+    announceChangelog({
       changelog,
-      from: typeof notified === 'string' ? notified : null,
+      homey,
       language,
-      to: version,
+      notifications: homey.notifications,
+      settings: homey.settings,
+      version: homey.manifest.version,
     })
-    if (entries.length === 0) {
-      return
-    }
-    homey.setTimeout(async () => {
-      try {
-        await sequential(entries, async ({ excerpt }) => {
-          await notifications.createNotification({ excerpt })
-        })
-        settings.set('notifiedVersion', version)
-      } catch {
-        // Non-critical: notification display is best-effort
-      }
-    }, NOTIFICATION_DELAY_MS)
   }
 
+  // The library's own `SettingManager` is the declared type on purpose:
+  // it is where the kit's adapter is checked against the contract the
+  // session actually persists through.
   #createSettingManager(): SettingManager {
-    return {
-      get: (key: string): string | null | undefined => {
-        const value: unknown = this.homey.settings.get(settingKey(key))
-        return typeof value === 'string' || value === null ? value : undefined
-      },
-      set: (key: string, value: string): void => {
-        this.homey.settings.set(settingKey(key), value)
-      },
-      unset: (key: string): void => {
-        this.homey.settings.unset(settingKey(key))
-      },
-    }
+    return createSettingManager(this.homey.settings, settingKey)
   }
 
   #getDevices(ids?: readonly string[]): HeatzyDevice[] {
@@ -315,13 +284,10 @@ export default class HeatzyApp extends App {
   }
 
   async #syncFromDevices(ids?: readonly string[]): Promise<void> {
-    const results = await Promise.allSettled(
+    await settleAll(
       this.#getDevices(ids).map(async (device) => device.syncFromDevice()),
+      this,
+      'Device sync failed:',
     )
-    for (const result of results) {
-      if (result.status === 'rejected') {
-        this.error('Device sync failed:', result.reason)
-      }
-    }
   }
 }
