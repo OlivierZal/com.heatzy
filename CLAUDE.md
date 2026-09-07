@@ -311,7 +311,7 @@ package.json, no local file), the `tsconfig/app` base and the vitest
 axes) spread into `test.coverage`. The configs `swcPlugin` is NOT
 adopted: it exists for the decorator transform, and this app declares
 no decorator (the library's are compiled in its dist) — the suite runs
-on vitest's default transform, like the extension's. The overlay keeps
+on vitest's default transform, like the two siblings'. The overlay keeps
 ONLY per-repo verdicts: the lint ignores (`.homeybuild/`, `coverage/`),
 the preset's per-app globs (bundled sources, default-export files,
 jsdoc files, untyped test doubles, the webview floor), the app's
@@ -365,7 +365,7 @@ page's whole freshness handshake, `watchSettingsFreshness`
 builders the page composes its DOM with (`/dom`); the driver-manifest
 readers `getDriverSettings`/`getDriverLoginSetting`/
 `mergeDeviceSettings` and the `DriverSetting`/`ManifestDriver`/
-`LocalizedStrings` leaf types the local manifest types extend
+`PairSetting`/`LocalizedStrings` leaf types the local manifest types extend
 (`/manifest`); the package-time stamp producer, `stampPackagedPages`
 with `stampHtml` and `stampReferences` underneath, and the hashes
 reader `getWebviewHashes` (`/node`);
