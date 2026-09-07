@@ -1,5 +1,6 @@
 import type * as HeatzyApiModule from '@olivierzal/heatzy-api'
 import type { LoginSetting } from '@olivierzal/homey-kit/manifest'
+import { NOTIFICATION_DELAY_MS } from '@olivierzal/homey-kit'
 import {
   assertDefined,
   getMockCallArg,
@@ -339,6 +340,10 @@ describe(HeatzyApp, () => {
       await app.onInit()
 
       expect(mockSetTimeout).toHaveBeenCalledTimes(1)
+      expect(mockSetTimeout).toHaveBeenCalledWith(
+        expect.any(Function),
+        NOTIFICATION_DELAY_MS,
+      )
     })
 
     it('should skip the notification when the stored version matches', async () => {

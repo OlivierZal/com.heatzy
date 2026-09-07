@@ -5,7 +5,7 @@ import {
   AuthenticationError,
   RegistrySyncError,
 } from '@olivierzal/heatzy-api'
-import { getErrorMessage } from '@olivierzal/homey-kit'
+import { getErrorMessage, logSettingsRoute } from '@olivierzal/homey-kit'
 import { getWebviewHashes } from '@olivierzal/homey-kit/node'
 
 import type { AuthenticationResult } from './types/api.mts'
@@ -18,14 +18,6 @@ const toLoginFailure = (homey: Homey, error: unknown): Error =>
   error instanceof AuthenticationError
     ? new Error(homey.__('settings.authenticate.rejected'))
     : new Error(getErrorMessage(error))
-
-// Diagnostics breadcrumb: the settings webview is otherwise invisible in
-// diagnostic reports (its routes never touch Heatzy), which makes
-// "settings fail to load" reports undecidable — no line = the page's JS
-// never ran; lines without a completed sequence = where it stopped.
-const logSettingsRoute = (app: Homey['app'], route: string): void => {
-  app.log({ dataType: 'Settings page', route })
-}
 
 const api = {
   authenticate: async ({
