@@ -63,6 +63,13 @@ the compile and fails only on a user's phone. Raising one floor never
 raises the other; conflating them has already caused a production
 incident in a sibling app.
 
+The stylesheet is held to the same engine: `css/use-baseline` keeps
+[`settings/index.css`](settings/index.css) within Baseline 2022 plus the
+exact-name allowlist the shared configs derive from that WebKit. A
+rejection is settled against MDN's compat data — a feature Safari 16.4
+has enters the allowlist upstream, anything later is rewritten — never
+with a disable.
+
 The floor the device runs is a third, distinct declaration:
 `compatibility` in [`.homeycompose/app.json`](.homeycompose/app.json).
 

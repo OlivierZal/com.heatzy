@@ -268,6 +268,22 @@ coverage.
   and `Promise.withResolvers` need Safari 17.4, the `v` flag 17). es2024
   becomes derivable when that App Store minimum reaches 17.4; Android
   never binds the floor, its System WebView being evergreen.
+- The same 16.4 fact binds the STYLESHEET: `css/use-baseline` (the
+  `homeyApp` preset's CSS block) holds `settings/index.css` to Baseline
+  year 2022 — the last year whose every entry sits inside the 16.4
+  WebKit — plus an exact-name allowlist (`color-mix()`, `mask-image`,
+  `outline`) for what WebKit had before the floor but Baseline dates
+  later, since Baseline dates a feature by the LAST core browser to
+  ship it. A policy-crossing configs release (5.0.0), adopted with the
+  classification the doctrine asks for: the stylesheet measured 0
+  findings under the bound year (2026-09-07), and
+  `eslint --print-config` moved for `.css` alone — exactly the option
+  object — with every `.ts`/`.mts`/`.html`/`.json`/`.md`/`.yml` config
+  byte-identical. A future rejection is settled by MDN's compat data,
+  never by a disable: a feature Safari shipped at 16.4 or below enters
+  the allowlist in configs (a configs release, adopted here by the pin
+  bump), anything later is rewritten. Year and list re-derive with the
+  App Store minimum, in configs, together with the es2023 floor.
 - TWO floors coexist, on UNRELATED engines — never let one move the
   other. The **webview** floor is the derived one above, held by the
   scoped lint block, and the danger there is APIs, because esbuild
@@ -321,8 +337,10 @@ wire-naming entries (`LOCK_C`, the Glow lock attribute), the coverage
 family policy locally — a rule evaluation or version bump happens in
 configs, adoption is a reviewed pin bump. `tsconfig.build.json` extends
 the LOCAL `./tsconfig.json` and keeps `rootDir`/`exclude` here — the
-base is named once, and the `-build` alias configs ships holds no
-option of its own. The bare `homey-apps-sdk-v3-types` devDependency
+base is named once, and configs ships exactly two bases (`tsconfig/app`,
+`tsconfig/library`), neither carrying a path option, so a build config
+declares its own beside the base it inherits through. The bare
+`homey-apps-sdk-v3-types` devDependency
 beside the `@types/homey` alias is load-bearing, not a leftover, and
 the two lines bump together: the alias is what resolves `homey/lib/…`
 for TypeScript, the bare name is what satisfies
@@ -342,8 +360,11 @@ reusable (which grants `packages: read`): the caller keeps only the
 `workflow_run` trigger (filters cannot be inputs — it names the three
 always-running required gates, CI, Validate and zizmor) and hands the
 heatzy-api doctrine line over as the `repo-guidance` input.
-`publish.yml` and `validate.yml` stay local (no reusable exists), so
-the composite action stays too — as the family's VERBATIM copy of
+`publish.yml` and `validate.yml` stay local — they are the Homey App
+Store path (athombv's actions), which no family reusable covers; the
+`reusable-publish.yml`/`reusable-docs.yml` pair configs ships is the
+LIBRARIES' npm and Pages release path — so the composite action stays
+too — as the family's VERBATIM copy of
 `OlivierZal/configs/.github/actions/setup-node-and-install`, re-copied
 at each adoption. Whatever is app-specific travels as caller inputs,
 never as an edit to the copy: `node-version: '22'` (the Homey runtime;
