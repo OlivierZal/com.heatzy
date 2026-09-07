@@ -1,7 +1,12 @@
 # CLAUDE.md
 
-Homey app for Heatzy (pilot-wire electric-heating cloud). ESM only,
-Node >= 22.19. The API layer lives in `@olivierzal/heatzy-api` (GitHub
+Homey app for Heatzy (pilot-wire electric-heating cloud). ESM only.
+`engines` (`^22.22.2 || >=24.15.0`, `.nvmrc` on the same value) is the
+TOOLCHAIN floor — what the dependency tree needs to install and run,
+derived the way configs derives its own, never copied from a sibling;
+the DEVICE floor is the manifest's `compatibility` (see the floors
+below), and the CI coverage leg deliberately names the measured fleet
+floor (22.20). The API layer lives in `@olivierzal/heatzy-api` (GitHub
 Packages, sibling repo with its own CLAUDE.md) — API bugs are fixed there,
 not worked around here.
 
@@ -78,7 +83,9 @@ coverage.
   `homey-button-*` classes; the settings stylesheet only fills documented
   SDK gaps and app-specific design — Homey injects its own class-based
   stylesheet at runtime, which is not in the repo and not available
-  offline.
+  offline. The runtime also translates every `data-i18n` element's text
+  content itself (the authored English is the fallback), so the page
+  runs no translation pass of its own — pinned by the settings suite.
 - App-API surface conventions (aligned on com.melcloud): paths are
   kebab-case REST, `get*` for GET — except `is*` for a boolean GET —,
   `update*` for PUT (never `set*`), and a business verb for POST
@@ -121,7 +128,8 @@ coverage.
   around the enforced sync, so nothing local slowed the retries. Same
   rule, same day, in com.melcloud: these two are twins, and a fix on
   one reopens the question for the other.
-- Dirty-gating: `settings/dirty-gate.mts` is the ONE primitive behind the
+- Dirty-gating: `createDirtyGate` (`@olivierzal/homey-kit/webview`) is
+  the ONE primitive behind the
   settings Apply/Refresh pair AND the credentials sign-in/reset pair
   (sign-in arms through `isActionable` only when both credential fields
   are filled; reset is its busy-gated Refresh) — never re-derive its
@@ -173,8 +181,7 @@ coverage.
   live hashes (the manifest the kit's `stampPackagedPages` emits into
   the packaged app from `bundle.mts`, read back by `getWebviewHashes`
   — both `@olivierzal/homey-kit/node`; `api.mts` passes the manifest
-  URL explicitly — the kit's default resolves against its own module,
-  which lives in `node_modules`), and a mismatch triggers ONE
+  URL, the kit's required argument), and a mismatch triggers ONE
   refetch of the document through a never-cached address
   (`?fresh=<identity>` — a bare reload can be re-served the same stale
   document from the HTTP cache; sessionStorage guard,
@@ -213,7 +220,9 @@ coverage.
   product-gated at pairing (`list_devices`) and again at device init,
   through `HeatzyDriver.getRequiredCapabilities` (V1 exposes the mode
   only, V2/V4 add derogations, timer and lock, Glow adds temperatures,
-  Pro adds its measures and detections) and
+  Pro adds its measures and detections — the driver manifest declares
+  the union, pinned ⊇ per product by the driver suite, so the device
+  applies a product's set whole, no manifest filter) and
   `HeatzyDriver.getCapabilitiesOptions` (runtime enum values only — the
   mode vocabularies differ: comfort −1/−2 exist from V4 up, presence is
   Pro-only). Runtime capability options must be complete option objects,
@@ -267,7 +276,12 @@ coverage.
   throws at RUNTIME, not at parse, inside the feature that runs it —
   narrower blast radius, same ban. The **node-side** floor is the
   Homey's own Node, and it is held by the manifest's `compatibility`
-  declaration, not by a check.
+  declaration, not by a check. `engines` in package.json is neither: it
+  answers what the TOOLCHAIN needs to install and run, derived from the
+  dependency tree (re-derive it when the tree moves, never nudge it by
+  hand), and the CI coverage leg running on the measured 22.20 fleet
+  floor below it only warns — no `engine-strict` is set, and the two
+  floors coexist.
 - A floor is declared from WHERE THE CODE RUNS, never from what a
   dependency happens to require. `compatibility: ">=12.9.0"` is
   Athom's own documented Node 22 boundary ("as of Homey v12.9.0, all
@@ -293,25 +307,42 @@ The shared tooling lives in `@olivierzal/configs` (exact pin): the
 eslint `homeyApp` preset (plugins are the package's dependencies — no
 plugin devDeps here), the prettier config (`"prettier"` key in
 package.json, no local file), the `tsconfig/app` base and the vitest
-`swcPlugin`. The overlay keeps ONLY per-repo verdicts: the lint ignores
-(`.homeybuild/`, `coverage/`), the preset's per-app globs (bundled
-sources, default-export files, jsdoc files, untyped test doubles, the
-webview floor), and tsconfig `outDir`. Do not re-declare family policy
-locally — a rule evaluation or version bump happens in configs,
-adoption is a reviewed pin bump. `tsconfig.build.json` extends the
-LOCAL `./tsconfig.json` and keeps `rootDir`/`exclude` here — the base is
-named once, and the `-build` alias configs ships holds no option of its
-own. The
+`coverageDefaults` bar (`text` + `lcov` reporters, 100 % on all four
+axes) spread into `test.coverage`. The configs `swcPlugin` is NOT
+adopted: it exists for the decorator transform, and this app declares
+no decorator (the library's are compiled in its dist) — the suite runs
+on vitest's default transform, like the two siblings'. The overlay keeps
+ONLY per-repo verdicts: the lint ignores (`.homeybuild/`, `coverage/`),
+the preset's per-app globs (bundled sources, default-export files,
+jsdoc files, untyped test doubles, the webview floor), the app's
+wire-naming entries (`LOCK_C`, the Glow lock attribute), the coverage
+`include`/`exclude` globs, and tsconfig `outDir`. Do not re-declare
+family policy locally — a rule evaluation or version bump happens in
+configs, adoption is a reviewed pin bump. `tsconfig.build.json` extends
+the LOCAL `./tsconfig.json` and keeps `rootDir`/`exclude` here — the
+base is named once, and the `-build` alias configs ships holds no
+option of its own. The bare `homey-apps-sdk-v3-types` devDependency
+beside the `@types/homey` alias is load-bearing, not a leftover, and
+the two lines bump together: the alias is what resolves `homey/lib/…`
+for TypeScript, the bare name is what satisfies
+`import-x/no-extraneous-dependencies` (it checks the RESOLVED package's
+real name) for the test files' `homey/lib/…` type imports — measured
+2026-09-07: dropping it fails lint on exactly three test files
+(`heatzy-device`, `heatzy-driver`, `homey`) while typecheck still
+passes, which is why it reads as dead to a grep. The
 CI/claude*/dependabot/dependency-review/pr-title/zizmor workflows are
 stubs calling the family reusables in OlivierZal/configs, pinned
 `@<sha> # vX.Y.Z`; dependency vulnerabilities are GitHub's own —
 Dependabot alerts scan continuously and carry the named, reasoned
 dismissals (an exception lives on the advisory, so it cannot outlive
-it), while `dependency-review` judges what a PR introduces;
-`publish.yml`, `validate.yml` and `claude-dependabot-fix.yml` stay
-local (no reusable exists for the first two; the fix reusable grants no
-`packages: read` and cannot carry the repo's heatzy-api doctrine line),
-so the composite action stays too — as the family's VERBATIM copy of
+it), while `dependency-review` judges what a PR introduces.
+`claude-dependabot-fix.yml` is a stub too, over the family's fix
+reusable (which grants `packages: read`): the caller keeps only the
+`workflow_run` trigger (filters cannot be inputs — it names the three
+always-running required gates, CI, Validate and zizmor) and hands the
+heatzy-api doctrine line over as the `repo-guidance` input.
+`publish.yml` and `validate.yml` stay local (no reusable exists), so
+the composite action stays too — as the family's VERBATIM copy of
 `OlivierZal/configs/.github/actions/setup-node-and-install`, re-copied
 at each adoption. Whatever is app-specific travels as caller inputs,
 never as an edit to the copy: `node-version: '22'` (the Homey runtime;
@@ -324,15 +355,23 @@ on GitHub Packages, where even reads need auth).
 ## Runtime boundary (@olivierzal/homey-kit)
 
 `@olivierzal/homey-kit` (exact pin, a PRODUCTION dependency — the
-manifest reader runs on the device) owns what used to be copied across
-the three apps: the dirty gate and the freshness primitives
-(`/webview`); the settings transport and the settings page's whole
-freshness handshake, `watchSettingsFreshness` (`/settings`); the
-package-time stamp producer, `stampPackagedPages` with `stampHtml` and
-`stampReferences` underneath, and the manifest reader
-`getWebviewHashes` (`/node`);
-`fireAndForget`/`getErrorMessage`/`NotFoundError`/`sequential` (root);
-and the test side (`/testing`): the analysis kernels
+manifest readers run on the device) owns what used to be copied across
+the three apps: the dirty gate, the freshness primitives and the page
+runners `runWebview`/`trySetDocumentLanguage` (`/webview`); the
+settings transport — the `homeyApi*` verbs and `homeyConfirm` over
+their one promisification primitive, `homeyCallback` — and the settings
+page's whole freshness handshake, `watchSettingsFreshness`
+(`/settings`); the typed element getters and the `homey-form-*`
+builders the page composes its DOM with (`/dom`); the driver-manifest
+readers `getDriverSettings`/`getDriverLoginSetting`/
+`mergeDeviceSettings` and the `DriverSetting`/`ManifestDriver`/
+`PairSetting`/`LocalizedStrings` leaf types the local manifest types extend
+(`/manifest`); the package-time stamp producer, `stampPackagedPages`
+with `stampHtml` and `stampReferences` underneath, and the hashes
+reader `getWebviewHashes` (`/node`);
+`fireAndForget`/`getErrorMessage`/`NotFoundError`/`sequential`/
+`selectChangelogEntries` (root); and the test side (`/testing`): the
+analysis kernels
 (`findContractBreach`, `analyzeRouteGuards`, `analyzeWebviewFloor` with
 `getQuotedEntries`) and the plain helpers (`assertDefined`,
 `getMockCallArg`, `mock`, `settleDetached`, `InteropModule`). A change
@@ -362,7 +401,7 @@ What stays local, by measurement rather than omission:
   augmentation cannot be packaged. It EXTENDS the SDK interfaces and
   takes only the narrowed member signatures from the kit generics
   (`TypedManagerDrivers['getDrivers']`, `TypedManagerSettings['get' |
-'set']`). Extending the SDK interface and the generic side by side
+'set' | 'unset']`). Extending the SDK interface and the generic side by side
   does not work — they both declare those members, and the conflict
   silently resolves to the SDK's wider type.
 
@@ -479,11 +518,13 @@ an empty map, so the omission silently disabled the whole handshake.
   the `Number.NaN` convention in `eslint.config.ts`) — never merged
   over.
 - The SonarCloud project runs **CI-based analysis** (the `ci.yml` scan
-  step on the Node 22 leg): **Automatic Analysis must stay DISABLED** in
-  the project's Administration settings, or the CI scanner aborts with
-  `exit 3` and fails the required `Test (Node 22)` leg. Coverage
-  exclusions cover `settings/**` and `scripts/**` (the webview bundle is
-  browser code exercised on-device, not in vitest).
+  step on the `22.20` coverage leg): **Automatic Analysis must stay
+  DISABLED** in the project's Administration settings, or the CI scanner
+  aborts with `exit 3` and fails the required `Test (Node 22.20)` leg.
+  Coverage exclusions are only `tests/**` and `**/*.config.*`:
+  `settings/index.mts` runs under happy-dom
+  (`tests/unit/settings.test.ts`) and `scripts/bundle.mts` in a temp app
+  (`tests/unit/bundle.test.ts`), both held at 100 %.
 - Verify claimed library behavior empirically (headless chromium against
   the real dist/bundle in the scratchpad) rather than from memory.
 - Homey App Store releases: write the user-facing changelog entry into

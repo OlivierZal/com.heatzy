@@ -76,9 +76,9 @@ const api = {
     homey: Homey
   }): Promise<Partial<Record<string, string>>> => {
     logSettingsRoute(homey.app, 'GET /webview-hashes')
-    // The manifest URL is passed explicitly: the kit resolves its
-    // default against its own module, which sits in `node_modules` —
-    // only the caller knows where the bundler stamped the manifest.
+    // The manifest URL is app knowledge: the kit takes it as a required
+    // argument, since any path relative to its own module lands in
+    // `node_modules` — only the caller knows where the bundler stamped it.
     return getWebviewHashes(new URL('webview-hashes.json', import.meta.url))
   },
   isAuthenticated: ({ homey }: { homey: Homey }): boolean => {

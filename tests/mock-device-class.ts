@@ -3,8 +3,8 @@ import { vi } from 'vitest'
 // - `overrides`: instance-level props assigned in the constructor (shallow merge).
 // - `superMocks`: prototype-level methods that delegate to the provided vi.fn.
 //   Required for every method HeatzyDevice overrides with a super call
-//   (addCapability, removeCapability, setWarning, error, log) — instance
-//   vi.fn properties cannot be reached through super in a subclass.
+//   (setWarning, error, log) — instance vi.fn properties cannot be
+//   reached through super in a subclass.
 export interface MockDeviceClassOptions {
   readonly overrides?: Readonly<Record<string, unknown>>
   readonly superMocks?: Readonly<

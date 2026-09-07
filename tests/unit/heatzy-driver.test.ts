@@ -14,6 +14,7 @@ import {
 } from '@olivierzal/homey-kit/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import driverConfig from '../../drivers/heatzy/driver.compose.json' with { type: 'json' }
 import HeatzyDriver, {
   getCapabilitiesOptions,
   getRequiredCapabilities,
@@ -208,6 +209,18 @@ describe(getRequiredCapabilities, () => {
     'should list the required capabilities for product %i',
     (product, expected) => {
       expect(getRequiredCapabilities(product)).toStrictEqual(expected)
+    },
+  )
+
+  // The manifest is the ceiling of what a device may carry (the SDK
+  // refuses an undeclared capability), and the device applies each
+  // product's required set whole: every id must be declared.
+  it.each(Object.values(Product))(
+    'should find every required capability of product %i in the manifest',
+    (product) => {
+      expect(driverConfig.capabilities).toStrictEqual(
+        expect.arrayContaining(getRequiredCapabilities(product)),
+      )
     },
   )
 })

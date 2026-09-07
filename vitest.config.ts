@@ -1,10 +1,7 @@
 import { coverageDefaults } from '@olivierzal/configs/vitest-coverage'
-import { swcPlugin } from '@olivierzal/configs/vitest-swc'
 import { type ViteUserConfig, defineConfig } from 'vitest/config'
 
 const config: ViteUserConfig = defineConfig({
-  oxc: false,
-  plugins: [swcPlugin],
   test: {
     coverage: {
       ...coverageDefaults,

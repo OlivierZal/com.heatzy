@@ -13,12 +13,10 @@ import {
   type InteropModule,
   assertDefined,
   getMockCallArg,
-  mock,
   settleDetached,
 } from '@olivierzal/homey-kit/testing'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type HeatzyDriver from '../../drivers/heatzy/driver.mts'
 import { SETTABLE_CAPABILITIES } from '../../drivers/heatzy/driver.mts'
 import HeatzyDevice from '../../drivers/heatzy/device.mts'
 
@@ -26,39 +24,23 @@ const DEBOUNCE_DELAY = 1000
 
 const DEROGATION_END_EPOCH = 1_800_000_000_000
 
-const ALL_CAPABILITIES: readonly string[] = [
-  'alarm_presence',
-  'derog_end',
-  'derog_time',
-  'heater_operation_mode',
-  'locked',
-  'measure_humidity',
-  'measure_temperature',
-  'onoff',
-  'onoff.timer',
-  'onoff.window_detection',
-  'operational_state',
-  'target_temperature',
-  'target_temperature.eco',
-  'thermostat_mode',
-]
-
 const {
+  addCapabilityMock,
   clearTimeoutMock,
   getFacadeMock,
   getSettingMock,
   getStoreValueMock,
   realtimeMock,
   registerMultipleCapabilityListenerMock,
+  removeCapabilityMock,
   setTimeoutMock,
   setValuesMock,
-  superAddCapabilityMock,
   superErrorMock,
   superLogMock,
-  superRemoveCapabilityMock,
   superSetWarningMock,
   triggerCapabilityListenerMock,
 } = vi.hoisted(() => ({
+  addCapabilityMock: vi.fn<(capability: string) => Promise<void>>(),
   clearTimeoutMock: vi.fn<(timer: unknown) => void>(),
   getFacadeMock: vi.fn<(id: string) => unknown>(),
   getSettingMock: vi.fn<(key: string) => unknown>(),
@@ -72,13 +54,12 @@ const {
         delay?: number,
       ) => void
     >(),
+  removeCapabilityMock: vi.fn<(capability: string) => Promise<void>>(),
   setTimeoutMock:
     vi.fn<(callback: () => Promise<void>, ms: number) => unknown>(),
   setValuesMock: vi.fn<(data: Record<string, unknown>) => Promise<unknown>>(),
-  superAddCapabilityMock: vi.fn<(...args: readonly unknown[]) => unknown>(),
   superErrorMock: vi.fn<(...args: readonly unknown[]) => unknown>(),
   superLogMock: vi.fn<(...args: readonly unknown[]) => unknown>(),
-  superRemoveCapabilityMock: vi.fn<(...args: readonly unknown[]) => unknown>(),
   superSetWarningMock: vi.fn<(...args: readonly unknown[]) => unknown>(),
   triggerCapabilityListenerMock:
     vi.fn<(capability: string, value: unknown) => Promise<void>>(),
@@ -91,6 +72,7 @@ vi.mock(import('homey'), async () => {
     default: {
       Device: createMockDeviceClass({
         overrides: {
+          addCapability: addCapabilityMock,
           getSetting: getSettingMock,
           getStoreValue: getStoreValueMock,
           homey: {
@@ -101,13 +83,12 @@ vi.mock(import('homey'), async () => {
           },
           registerMultipleCapabilityListener:
             registerMultipleCapabilityListenerMock,
+          removeCapability: removeCapabilityMock,
           triggerCapabilityListener: triggerCapabilityListenerMock,
         },
         superMocks: {
-          addCapability: superAddCapabilityMock,
           error: superErrorMock,
           log: superLogMock,
-          removeCapability: superRemoveCapabilityMock,
           setWarning: superSetWarningMock,
         },
       }),
@@ -150,19 +131,10 @@ const configureFacade = (overrides: Record<string, unknown> = {}): void => {
   getFacadeMock.mockReturnValue(createFacade(overrides))
 }
 
-const createDriver = (
-  capabilities: readonly string[] = ALL_CAPABILITIES,
-): HeatzyDriver =>
-  mock<HeatzyDriver>({ manifest: mock({ capabilities: [...capabilities] }) })
+const createDevice = (): HeatzyDevice => new HeatzyDevice()
 
-const createDevice = (driver: HeatzyDriver = createDriver()): HeatzyDevice => {
-  const device = new HeatzyDevice()
-  Object.defineProperty(device, 'driver', { configurable: true, value: driver })
-  return device
-}
-
-// Mirrors createDevice's driver injection: the declared generic reader
-// cannot take a loose mock implementation through vi.mocked.
+// Injected through defineProperty: the declared generic reader cannot
+// take a loose mock implementation through vi.mocked.
 const stubStoredCapabilities = (
   device: HeatzyDevice,
   values: Record<string, unknown>,
@@ -457,32 +429,22 @@ describe(HeatzyDevice, () => {
   })
 
   describe('capability setup', () => {
-    it('should add missing and remove stale capabilities within the manifest', async () => {
+    it('should add the missing required capabilities and remove the stale ones', async () => {
       configureFacade({ product: Product.v2 })
-      const device = createDevice(
-        createDriver([
-          'onoff',
-          'thermostat_mode',
-          'locked',
-          'onoff.timer',
-          'heater_operation_mode',
-          'derog_time',
-        ]),
-      )
+      const device = createDevice()
       vi.spyOn(device, 'getCapabilities').mockReturnValue([
         'stale_cap',
         'onoff',
       ])
-      vi.spyOn(device, 'hasCapability').mockImplementation(
-        (capability: string) =>
-          capability === 'stale_cap' || capability === 'onoff',
-      )
       await device.onInit()
       await settleDetached()
 
-      expect(superRemoveCapabilityMock).toHaveBeenCalledWith('stale_cap')
-      expect(superAddCapabilityMock).toHaveBeenCalledWith('thermostat_mode')
-      expect(superAddCapabilityMock).not.toHaveBeenCalledWith('derog_end')
+      expect(removeCapabilityMock).toHaveBeenCalledWith('stale_cap')
+      expect(removeCapabilityMock).toHaveBeenCalledTimes(1)
+      expect(addCapabilityMock).toHaveBeenCalledWith('thermostat_mode')
+      expect(addCapabilityMock).toHaveBeenCalledWith('derog_end')
+      expect(addCapabilityMock).not.toHaveBeenCalledWith('onoff')
+      expect(addCapabilityMock).not.toHaveBeenCalledWith('measure_temperature')
     })
   })
 
@@ -954,42 +916,6 @@ describe(HeatzyDevice, () => {
 
     it('should resolve without a pending sync', async () => {
       await expect(createDevice().onUninit()).resolves.toBeUndefined()
-    })
-  })
-
-  describe('adding capabilities', () => {
-    it('should add a capability when it is absent', async () => {
-      const device = createDevice()
-      vi.spyOn(device, 'hasCapability').mockReturnValue(false)
-      await device.addCapability('measure_power')
-
-      expect(superAddCapabilityMock).toHaveBeenCalledWith('measure_power')
-    })
-
-    it('should not add a capability when it is present', async () => {
-      const device = createDevice()
-      vi.spyOn(device, 'hasCapability').mockReturnValue(true)
-      await device.addCapability('measure_power')
-
-      expect(superAddCapabilityMock).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('removing capabilities', () => {
-    it('should remove a capability when it is present', async () => {
-      const device = createDevice()
-      vi.spyOn(device, 'hasCapability').mockReturnValue(true)
-      await device.removeCapability('measure_power')
-
-      expect(superRemoveCapabilityMock).toHaveBeenCalledWith('measure_power')
-    })
-
-    it('should not remove a capability when it is absent', async () => {
-      const device = createDevice()
-      vi.spyOn(device, 'hasCapability').mockReturnValue(false)
-      await device.removeCapability('measure_power')
-
-      expect(superRemoveCapabilityMock).not.toHaveBeenCalled()
     })
   })
 
