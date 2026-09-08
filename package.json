@@ -37,7 +37,7 @@
   "devDependencies": {
     "@olivierzal/configs": "5.0.0",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitest/coverage-v8": "^4.1.11",
     "esbuild": "^0.28.2",
