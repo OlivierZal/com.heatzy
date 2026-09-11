@@ -189,19 +189,24 @@ export default class HeatzyDevice extends Device {
   }
 
   public async ensureDevice(): Promise<DeviceFacadeAny | null> {
+    let device: DeviceFacadeAny
     try {
-      return await this.#ensureFacade()
+      device = await this.#ensureFacade()
     } catch (error) {
-      // Expected failures (Heatzy API, registry lookup) surface as a
-      // user-visible warning; anything else is a programming error and
-      // is only logged, so real bugs are not masked as device warnings.
-      if (isAPIError(error) || error instanceof NotFoundError) {
-        await this.setWarning(error)
-      } else {
-        this.error('Unexpected error while ensuring device:', error)
-      }
-      return null
+      return this.#reportFacadeFailure(error)
     }
+    // The registry prunes its entries on a sign-out and rebuilds them on
+    // the next sync, so a facade whose id is gone throws on every read.
+    // Asked here, once, the absence reaches both callers as the `null`
+    // they already handle — rather than as an exception out of whichever
+    // getter happens to be read first. The reference itself stays valid:
+    // the facade binds by id and resolves again when that id returns, so
+    // nothing is rebuilt and nothing is cleared.
+    if (device.exists) {
+      return device
+    }
+    await this.setWarning(this.homey.__('errors.deviceNotFound'))
+    return null
   }
 
   public override error(...args: unknown[]): void {
@@ -338,6 +343,18 @@ export default class HeatzyDevice extends Device {
       },
       DEBOUNCE_DELAY,
     )
+  }
+
+  // Expected failures (Heatzy API, registry lookup) surface as a
+  // user-visible warning; anything else is a programming error and is
+  // only logged, so real bugs are not masked as device warnings.
+  async #reportFacadeFailure(error: unknown): Promise<null> {
+    if (isAPIError(error) || error instanceof NotFoundError) {
+      await this.setWarning(error)
+    } else {
+      this.error('Unexpected error while ensuring device:', error)
+    }
+    return null
   }
 
   // The wire carries no derogation start, so the facade cannot compute
