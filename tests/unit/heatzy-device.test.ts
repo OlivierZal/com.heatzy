@@ -80,6 +80,9 @@ vi.mock(import('homey'), async () => {
             app: { getFacade: getFacadeMock },
             clearTimeout: clearTimeoutMock,
             setTimeout: setTimeoutMock,
+            // The one translated string the device raises itself; the
+            // key is returned verbatim so the clause can assert on it.
+            __: (key: string): string => key,
           },
           registerMultipleCapabilityListener:
             registerMultipleCapabilityListenerMock,
@@ -115,6 +118,9 @@ const createFacade = (
   derogationMode: DerogationMode.boost,
   derogationTime: 60,
   ecoTemperature: 18,
+  // The facade binds by id and resolves its entity per access, so the
+  // device asks this once before reading anything.
+  exists: true,
   isDetectingOpenWindow: true,
   isLocked: true,
   isOn: true,
@@ -456,6 +462,21 @@ describe(HeatzyDevice, () => {
 
       expect(first).toBe(second)
       expect(getFacadeMock).toHaveBeenCalledTimes(1)
+    })
+
+    // A facade binds by id and resolves its entity per access, so one the
+    // registry has dropped throws on every read. The device asks once and
+    // surfaces the absence as the `null` both callers already handle,
+    // rather than letting an exception out of whichever getter is read
+    // first — and it keeps the reference: late binding resolves it again
+    // when the id returns.
+    it('should warn and return null while the registry has dropped it', async () => {
+      configureFacade({ exists: false, product: Product.v2 })
+      const device = createDevice()
+      const result = await device.ensureDevice()
+
+      expect(result).toBeNull()
+      expect(superSetWarningMock).toHaveBeenCalledWith('errors.deviceNotFound')
     })
 
     it('should warn and return null on an API error', async () => {
