@@ -385,6 +385,14 @@ export default class HeatzyDevice extends Device {
       try {
         await device.setValues(updateData)
       } catch (error) {
+        // A write that fails off the HTTP path — a timeout, an abort, a
+        // DNS failure — reaches no observability seam: the library
+        // serialises only an `HttpError`, and `setWarning` is a toast
+        // that clears itself in the same call. Without this line such a
+        // write is invisible everywhere at once — the flow reports
+        // success, the tile keeps the new value, and the unit never
+        // moved.
+        this.error('Write failed:', updateData, error)
         await this.setWarning(error)
       }
     }

@@ -525,16 +525,27 @@ describe(HeatzyDevice, () => {
       expect(setTimeoutMock).not.toHaveBeenCalled()
     })
 
+    // A write that fails off the HTTP path reaches no observability
+    // seam: the library serialises only an `HttpError`, and `setWarning`
+    // clears its own toast in the same call. The error line is the only
+    // trace a diagnostic report can carry, so it is pinned beside the
+    // warning.
     it('should warn when the update rejects', async () => {
       configureFacade({ product: Product.v2 })
       setValuesMock.mockRejectedValueOnce(new Error('update failed'))
       const device = createDevice()
       await device.onInit()
       await settleDetached()
+      const error = vi.spyOn(device, 'error')
       const callback = getCallback()
       await callback({ onoff: true })
 
       expect(superSetWarningMock).toHaveBeenCalledWith('update failed')
+      expect(error).toHaveBeenCalledWith(
+        'Write failed:',
+        expect.any(Object),
+        expect.any(Error),
+      )
     })
 
     it('should skip the write but still schedule a sync when nothing changes', async () => {
