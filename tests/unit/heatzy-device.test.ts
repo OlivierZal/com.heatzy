@@ -464,12 +464,12 @@ describe(HeatzyDevice, () => {
       expect(getFacadeMock).toHaveBeenCalledTimes(1)
     })
 
-    // A facade binds by id and resolves its entity per access, so one the
-    // registry has dropped throws on every read. The device asks once and
-    // surfaces the absence as the `null` both callers already handle,
-    // rather than letting an exception out of whichever getter is read
-    // first — and it keeps the reference: late binding resolves it again
-    // when the id returns.
+    // A facade binds by id and resolves its entity per access, so a
+    // facade whose id the registry has dropped throws on every read. The
+    // device asks once and surfaces the absence as the `null` both
+    // callers already handle, rather than letting an exception out of
+    // whichever getter is read first — and it keeps the reference: late
+    // binding resolves it again when the id returns.
     it('should warn and return null while the registry has dropped it', async () => {
       configureFacade({ exists: false, product: Product.v2 })
       const device = createDevice()
