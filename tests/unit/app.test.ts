@@ -255,15 +255,14 @@ describe(HeatzyApp, () => {
       expect(mockSettingsUnset).toHaveBeenCalledWith('expireAt')
     })
 
-    // The poke that used to fire here reached nobody: an app restart
-    // has just disconnected every open page. Kit 6.0.0 dropped the
-    // channel; this pins that the boot emits no such event.
+    // A restart disconnects every open page before `onInit` ends, so
+    // no realtime poke can reach one: the freshness guarantee is the
+    // boot check and the foreground trigger, never an event from here.
     it('should emit no freshness poke at boot', async () => {
       await app.onInit()
 
-      expect(mockRealtime).not.toHaveBeenCalledWith(
+      expect(mockRealtime.mock.calls.map(([event]) => event)).not.toContain(
         'webview_hashes_changed',
-        null,
       )
     })
 
