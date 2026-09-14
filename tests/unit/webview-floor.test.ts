@@ -41,8 +41,9 @@ describe('webview floor closure', () => {
     // Today the bundle emits the entry point alone — its only relative
     // imports are type-only — which is exactly when a future value
     // import would slip out unnoticed: this pin makes the first one a
-    // conscious act, the floor globs checked in the same move.
-    expect(inputs).toStrictEqual([...entryPoints])
+    // conscious act, the floor globs checked in the same move. Compared
+    // as sets: the metafile's key order is the bundler's, not a fact.
+    expect(new Set(inputs)).toStrictEqual(new Set(entryPoints))
     expect(inputs.filter((input) => !isFloored(input))).toStrictEqual([])
   })
 })
