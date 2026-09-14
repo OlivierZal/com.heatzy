@@ -187,8 +187,8 @@ coverage.
   (`?fresh=<identity>` — a bare reload can be re-served the same stale
   document from the HTTP cache; sessionStorage guard,
   `watchSettingsFreshness` from `@olivierzal/homey-kit/settings` — the
-  settings page's whole handshake, entry, hashes route, breadcrumb and
-  poke, over the kit's `watchWebviewFreshness`), whose
+  settings page's whole handshake, entry, hashes route and breadcrumb,
+  over the kit's `watchWebviewFreshness`), whose
   fresh stamps pull the fresh assets;
   a mismatch that survives its refetch is reported to
   `POST /boot-error`. The guarantee lives in the BOOT check, and which
@@ -197,13 +197,14 @@ coverage.
   mobile widgets reload too — both are fresh for free. Only the mobile
   settings page survives an app restart, so it alone never boots again;
   that is why the watcher re-checks on RETURN TO THE FOREGROUND
-  (`visibilitychange`), the trigger that covers it. The app also emits a
-  `webview_hashes_changed` realtime event at its own boot and the page
-  subscribes to it, but it guarantees NOTHING on its own: it fires at
-  the end of the app's `onInit`, i.e. exactly when the restart has just
-  disconnected every open page, so its audience is absent by
-  construction (measured: an open mobile page produced no request and no
-  breadcrumb). Never fold the visibility trigger into it. Every failure
+  (`visibilitychange`), the trigger that covers it. The
+  `webview_hashes_changed` realtime event the app used to emit at its
+  own boot guaranteed NOTHING on its own: it fired at the end of
+  `onInit`, i.e. exactly when the restart had just disconnected every
+  open page, so its audience was absent by construction (measured: an
+  open mobile page produced no request and no breadcrumb). Kit 6.0.0
+  dropped the channel and this app stopped emitting it; never re-add a
+  poke as a substitute for the visibility trigger. Every failure
   path stays open: an unstamped page, an absent route or denied
   storage must never take a working webview down. Heatzy
   divergence from com.melcloud: the cached-HTML era here loaded
