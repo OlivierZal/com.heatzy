@@ -401,12 +401,20 @@ breadcrumb `logSettingsRoute`, the `homey.settings` → library
 changelog announcement `announceChangelog` (with
 `NOTIFICATION_DELAY_MS`) over `selectChangelogEntries` (root); and the
 test side (`/testing`): the
-analysis kernels
-(`findContractBreach`, `analyzeRouteGuards`, `analyzeWebviewFloor` with
-`getQuotedEntries`) and the plain helpers (`assertDefined`,
-`getMockCallArg`, `mock`, `settleDetached`, `InteropModule`). A change
-to any of them is a kit release adopted here by a pin bump — never a
-local edit, never a re-derivation.
+analysis kernels (`findContractBreach`, `analyzeRouteGuards`) and the
+plain helpers (`assertDefined`, `getMockCallArg`, `mock`,
+`settleDetached`, `InteropModule`). A change to any of them is a kit
+release adopted here by a pin bump — never a local edit, never a
+re-derivation. The webview-floor closure is NOT one of them any more:
+since 2026-09-14 `tests/unit/webview-floor.test.ts` asks esbuild for
+the metafile of the real entry point (node_modules excluded) and checks
+every input against `webviewFloorFiles`, both read from
+`scripts/webview-perimeter.mts` — the one declaration the bundler and
+the lint share. That is the bundler's own answer to what the bundle
+emits, neither a text scrape of two config files nor a re-derivation
+of the kit's `analyzeWebviewFloor` walk, which this app no longer
+imports; the kit-floored modules a bundle pulls in are the kit's
+lint's business.
 
 What stays local, by measurement rather than omission:
 
@@ -439,9 +447,9 @@ What stays local, by measurement rather than omission:
 - The bundler's own decisions in `scripts/bundle.mts`: the esbuild
   options, the compat pair (the `index.mjs` twin as a second IIFE) and
   the pages list handed to the kit's stamp producer.
-- The suites' own `describe`/`it` and perimeter reading — the entry
-  points from `scripts/bundle.mts` and the floor globs from
-  `eslint.config.ts` (`tests/unit/webview-floor.test.ts`), the
+- The suites' own `describe`/`it`, the webview perimeter
+  (`scripts/webview-perimeter.mts`, read by `scripts/bundle.mts`,
+  `eslint.config.ts` and `tests/unit/webview-floor.test.ts` alike), the
   route-guard surface table — plus `tests/mock-device-class.ts`, the
   device-class double built around this app's `super` calls,
   re-exported by `tests/helpers.ts`.

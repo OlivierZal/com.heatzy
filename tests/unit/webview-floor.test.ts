@@ -1,60 +1,49 @@
-import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
-import {
-  analyzeWebviewFloor,
-  getQuotedEntries,
-} from '@olivierzal/homey-kit/testing'
+import { build } from 'esbuild'
 import { describe, expect, it } from 'vitest'
 
+import {
+  entryPoints,
+  webviewFloorFiles,
+} from '../../scripts/webview-perimeter.mts'
+
 // The es2023 webview floor must cover every file the settings bundle
-// can emit: the bundler's entry point plus every module it reaches
-// through a VALUE import — type imports erase at emit, so they pull
-// nothing into a bundle. Today that closure is the entry point alone
-// (its only relative imports are type-only), which is exactly when a
-// future value import would slip out unnoticed: this suite recomputes
-// the closure so such a file must join the floor globs before it can
-// ship API the phone engines lack. Inclusion is the invariant — globs
-// cover whole directories by design. The perimeter is read from this
-// app's own config text; the walk and the glob matching are the kit's.
+// emits: a reached file outside the floor globs would ship API the
+// phone engines lack without any lint saying so. The bundler is the
+// authority on what it emits, so its metafile — the real entry point,
+// bundled in memory — is the measurement; a text walk of the import
+// graph could only approximate it. Modules the bundle pulls in from
+// `node_modules` are out of scope: the kit floors its own webview
+// modules through its own lint.
 
 const REPO_ROOT = fileURLToPath(new URL('../..', import.meta.url))
 
-const readRepoFile = (relativePath: string): string =>
-  readFileSync(path.join(REPO_ROOT, relativePath), 'utf8')
+const isFloored = (input: string): boolean =>
+  webviewFloorFiles.some((glob) => path.matchesGlob(input, glob))
 
-describe.concurrent('webview floor closure', () => {
-  const entryPoints = getQuotedEntries(
-    readRepoFile('scripts/bundle.mts'),
-    'entryPoints',
-  )
-  const findings = analyzeWebviewFloor({
-    entryPoints,
-    floorGlobs: getQuotedEntries(
-      readRepoFile('eslint.config.ts'),
-      'webviewFloorFiles',
-    ),
-    repoRoot: REPO_ROOT,
-  })
+describe('webview floor closure', () => {
+  it('floors every file the settings bundle emits', async () => {
+    const { metafile } = await build({
+      absWorkingDir: REPO_ROOT,
+      bundle: true,
+      entryPoints: [...entryPoints],
+      format: 'esm',
+      logLevel: 'silent',
+      metafile: true,
+      write: false,
+    })
+    const inputs = Object.keys(metafile.inputs).filter(
+      (input) => !input.startsWith('node_modules/'),
+    )
 
-  // Guards the guard: the perimeter read must see the one entry point
-  // the bundler declares — the kit only refuses an EMPTY sweep.
-  it('reads the entry point the bundler declares', () => {
-    expect(entryPoints).toStrictEqual(['settings/index.mts'])
-  })
-
-  // The closure is pinned exactly: with no value import today, no
-  // app-side assertion can tell a walk that read the file from one that
-  // did not (the kit's own suite pins the walk); what this pin does is
-  // make the first value import a conscious act — the closure grows and
-  // this list must follow, with the floor globs checked in the same
-  // move.
-  it('reaches no file beyond the entry point today', () => {
-    expect(findings.closure).toStrictEqual(entryPoints)
-  })
-
-  it('floors every file the settings bundle can emit', () => {
-    expect(findings.uncovered).toStrictEqual([])
+    // Today the bundle emits the entry point alone — its only relative
+    // imports are type-only — which is exactly when a future value
+    // import would slip out unnoticed: this pin makes the first one a
+    // conscious act, the floor globs checked in the same move. Compared
+    // as sets: the metafile's key order is the bundler's, not a fact.
+    expect(new Set(inputs)).toStrictEqual(new Set(entryPoints))
+    expect(inputs.filter((input) => !isFloored(input))).toStrictEqual([])
   })
 })
