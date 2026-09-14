@@ -255,10 +255,16 @@ describe(HeatzyApp, () => {
       expect(mockSettingsUnset).toHaveBeenCalledWith('expireAt')
     })
 
-    it('should poke open webviews with the freshness event at boot', async () => {
+    // The poke that used to fire here reached nobody: an app restart
+    // has just disconnected every open page. Kit 6.0.0 dropped the
+    // channel; this pins that the boot emits no such event.
+    it('should emit no freshness poke at boot', async () => {
       await app.onInit()
 
-      expect(mockRealtime).toHaveBeenCalledWith('webview_hashes_changed', null)
+      expect(mockRealtime).not.toHaveBeenCalledWith(
+        'webview_hashes_changed',
+        null,
+      )
     })
 
     it('should construct the facade manager with the API client', async () => {
