@@ -8,14 +8,14 @@ import path from 'node:path'
 import { stampPackagedPages } from '@olivierzal/homey-kit/node'
 import { type BuildOptions, build } from 'esbuild'
 
+import { entryPoints } from './webview-perimeter.mts'
+
 // The IIFE global the page's inline `onHomeyReady` reads `start` from.
 const GLOBAL_NAME = 'HeatzyWebview'
 
 // The Homey CLI's packaging target: `tsc` already emits here (its
 // validated `outDir`), and the CLI packs exactly this directory.
 const OUT_ROOT = '.homeybuild'
-
-const entryPoints = ['settings/index.mts']
 
 // The packaged page, with the manifest key under which the app serves
 // its bundle hash (`GET /webview-hashes`): a booted page compares its

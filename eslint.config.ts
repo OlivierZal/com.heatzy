@@ -1,6 +1,8 @@
 import { homeyApp } from '@olivierzal/configs/eslint/homey-app'
 import { type Config, defineConfig } from 'eslint/config'
 
+import { webviewFloorFiles } from './scripts/webview-perimeter.mts'
+
 const config: Config[] = defineConfig([
   { ignores: ['.homeybuild/', 'coverage/'] },
   ...homeyApp({
@@ -16,7 +18,7 @@ const config: Config[] = defineConfig([
       'tests/unit/app.test.ts',
       'tests/unit/*{device,driver}*.test.ts',
     ],
-    webviewFloorFiles: ['settings/**/*.mts'],
+    webviewFloorFiles,
     wireNamingEntries: [
       // The Glow generation's lock attribute: `@olivierzal/heatzy-api`
       // declares it on the post payload and the device is sent it
