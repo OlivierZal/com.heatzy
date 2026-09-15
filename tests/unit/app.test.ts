@@ -208,7 +208,6 @@ describe(HeatzyApp, () => {
   let app: InstanceType<typeof HeatzyApp>
 
   beforeEach(() => {
-    vi.clearAllMocks()
     mockCreate.mockResolvedValue(mockApiInstance)
     mockFacadeManagerConstructor.mockImplementation(newMockFacadeManager)
     mockCreateNotification.mockResolvedValue()

@@ -6,7 +6,7 @@ import {
   RegistrySyncError,
 } from '@olivierzal/heatzy-api'
 import { mock } from '@olivierzal/homey-kit/testing'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {  describe, expect, it, vi } from 'vitest'
 
 import type { DeviceSettings, Settings } from '../../types/device-settings.mts'
 
@@ -38,10 +38,6 @@ const homey = mock<Homey>({ __: mockTranslate, app: mockApp, i18n: mockI18n })
 const SETTINGS_PAGE = 'Settings page'
 
 describe('api', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   describe('authentication', () => {
     it('should delegate to app.api.authenticate and log the breadcrumb', async () => {
       const credentials = mock<LoginCredentials>({
