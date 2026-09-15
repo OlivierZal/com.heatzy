@@ -357,7 +357,6 @@ const toDeviceCases: readonly {
 
 describe(HeatzyDevice, () => {
   beforeEach(() => {
-    vi.clearAllMocks()
     getSettingMock.mockReturnValue(undefined)
     getStoreValueMock.mockReturnValue(undefined)
     setValuesMock.mockResolvedValue(undefined)

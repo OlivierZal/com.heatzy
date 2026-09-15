@@ -318,8 +318,6 @@ describe(HeatzyDriver, () => {
   let driver: HeatzyDriver
 
   beforeEach(() => {
-    vi.clearAllMocks()
-
     driver = createDriver()
   })
 
