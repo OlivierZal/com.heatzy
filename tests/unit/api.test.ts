@@ -6,7 +6,7 @@ import {
   RegistrySyncError,
 } from '@olivierzal/heatzy-api'
 import { mock } from '@olivierzal/homey-kit/testing'
-import {  describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { DeviceSettings, Settings } from '../../types/device-settings.mts'
 
