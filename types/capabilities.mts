@@ -7,7 +7,7 @@ export interface Capabilities extends SetCapabilities {
   readonly derog_end: string | null
   readonly measure_humidity: number
   readonly measure_temperature: number
-  readonly operational_state: Mode
+  readonly operational_state: Mode | null
 }
 
 export interface CapabilitiesOptions {
@@ -26,7 +26,7 @@ export interface CapabilitiesOptions {
 
 export interface SetCapabilities {
   readonly derog_time: string
-  readonly heater_operation_mode: keyof typeof DerogationMode
+  readonly heater_operation_mode: keyof typeof DerogationMode | null
   readonly locked: boolean
   readonly onoff: boolean
   readonly 'onoff.timer': boolean

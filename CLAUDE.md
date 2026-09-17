@@ -234,6 +234,13 @@ coverage.
   dialect split lives in the converters next to the device class; wire
   normalization beyond it belongs in `@olivierzal/heatzy-api`, not
   here.
+- A reading the SDK does not model reaches the device as `null`
+  (heatzy-api 19.0.0: a numeric or `null` Pro `cur_mode`, the
+  undocumented derogation codes 4 and 5), and the device CLEARS the
+  capability with it: `operational_state` and `heater_operation_mode`
+  are typed `| null`, and a `null` derogation never keeps a stored end
+  label. Never map an unknown value onto the nearest known one, and
+  never skip the write, which would leave a stale label standing.
 - Flow-card registration is capability-generic: the driver walks its
   manifest capabilities and registers condition/action run listeners
   mechanically; the settable surface is the driver's `setCapabilities`

@@ -325,6 +325,7 @@ export default class HeatzyDevice extends Device {
     const { derogationMode, derogationTime } = device
     const storedEnd = this.getStoreValue('derogationEnd')
     return (
+      derogationMode !== null &&
       derogationMode !== DerogationMode.off &&
       this.#getValue('derog_end') !== null &&
       this.#getValue('heater_operation_mode') ===
@@ -494,7 +495,7 @@ export default class HeatzyDevice extends Device {
       this.#setValue('derog_end', derogationEnd),
       this.#setValue(
         'heater_operation_mode',
-        derogationModeKeys[derogationMode],
+        derogationMode === null ? null : derogationModeKeys[derogationMode],
       ),
       this.#setValue('derog_time', String(derogationTime)),
       this.#setValue('locked', isLocked),

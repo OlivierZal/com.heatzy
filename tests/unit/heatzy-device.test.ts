@@ -837,6 +837,53 @@ describe(HeatzyDevice, () => {
       expect(device.setStoreValue).toHaveBeenCalledWith('derogationEnd', null)
     })
 
+    // heatzy-api 19.0.0 reads a value it does not model (a numeric or
+    // null `cur_mode`, the undocumented `derog_mode` 4 and 5) as null:
+    // the capability is cleared rather than left on a stale label.
+    it('should clear the capabilities of unmodelled readings', async () => {
+      configureFacade({
+        currentMode: null,
+        derogationEndDate: null,
+        derogationEndString: null,
+        derogationMode: null,
+        product: Product.pro,
+      })
+      const device = createDevice()
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setCapabilityValue).toHaveBeenCalledWith(
+        'operational_state',
+        null,
+      )
+      expect(device.setCapabilityValue).toHaveBeenCalledWith(
+        'heater_operation_mode',
+        null,
+      )
+    })
+
+    it('should wipe the stored label when the derogation is unmodelled', async () => {
+      configureFacade({
+        derogationEndDate: null,
+        derogationEndString: null,
+        derogationMode: null,
+      })
+      getStoreValueMock.mockImplementation((key: string) =>
+        key === 'derogationEnd' ? Date.now() + 60_000 : undefined,
+      )
+      const device = createDevice()
+      stubStoredCapabilities(device, {
+        derog_end: 'STORED',
+        derog_time: '60',
+        heater_operation_mode: 'boost',
+      })
+      await device.syncFromDevice()
+      await settleDetached()
+
+      expect(device.setCapabilityValue).toHaveBeenCalledWith('derog_end', null)
+      expect(device.setStoreValue).toHaveBeenCalledWith('derogationEnd', null)
+    })
+
     it('should store a null instant when the label has no date', async () => {
       configureFacade({ derogationEndDate: null })
       const device = createDevice()
