@@ -118,5 +118,9 @@
   "23.3.7": {
     "en": "Heatzy Glow, Onyx and Shine radiators, Pilote Pro radiators with a temperature calibration, and first-generation Pilote modules update in Homey again: since the summer, the app refused their readings, so they stayed frozen or were reported as not found after a restart. A derogation or mode that Heatzy does not document now shows as empty instead of blocking the radiator. A radiator that cannot be read is reported once in the diagnostic log, then every five minutes, instead of every five seconds.",
     "fr": "Les radiateurs Heatzy Glow, Onyx et Shine, les Pilote Pro dont la température est calibrée et les modules Pilote de première génération se mettent de nouveau à jour dans Homey : depuis l'été, l'app refusait leurs relevés, qui restaient figés ou étaient signalés introuvables après un redémarrage. Une dérogation ou un mode que Heatzy ne documente pas s'affiche désormais vide au lieu de bloquer le radiateur. Un radiateur illisible est signalé une fois dans le journal de diagnostic, puis toutes les cinq minutes, au lieu de toutes les cinq secondes."
+  },
+  "23.3.8": {
+    "en": "When Heatzy is unreachable, the app no longer floods its diagnostic log: the failure is written once, then at most every five minutes, and once more when the connection comes back. Readings are also accepted in every form Heatzy sends them, so a radiator whose module words a setting differently keeps updating instead of going silent.",
+    "fr": "Quand Heatzy est injoignable, l'app n'inonde plus son journal de diagnostic : l'échec est écrit une fois, puis au plus toutes les cinq minutes, et une dernière fois quand la connexion revient. Les relevés sont par ailleurs acceptés sous toutes les formes que Heatzy envoie, si bien qu'un radiateur dont le module formule un réglage autrement continue de se mettre à jour au lieu de rester muet."
   }
 }
