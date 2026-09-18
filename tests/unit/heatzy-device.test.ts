@@ -530,6 +530,53 @@ describe(HeatzyDevice, () => {
   })
 
   describe('sending an update', () => {
+    // The presence derogation left the shared write surface in
+    // heatzy-api 20.0.0: the converter no longer carries it, and only a
+    // Pro facade accepts it — so the driver routes it, and the write
+    // still reaches the wire with everything else the batch changed.
+    it('should route the presence derogation through the Pro facade', async () => {
+      configureFacade({ product: Product.pro })
+      const device = createDevice()
+      await device.onInit()
+      await settleDetached()
+      setValuesMock.mockClear()
+      const callback = getCallback()
+      await callback({ derog_time: '30', heater_operation_mode: 'presence' })
+
+      expect(setValuesMock).toHaveBeenCalledWith({
+        derog_mode: DerogationMode.presence,
+        derog_time: 30,
+      })
+    })
+
+    // Presence alone leaves the converters with nothing to say, so the
+    // write is owed by the derogation itself.
+    it('should write the presence derogation asked on its own', async () => {
+      configureFacade({ product: Product.pro })
+      const device = createDevice()
+      await device.onInit()
+      await settleDetached()
+      setValuesMock.mockClear()
+      const callback = getCallback()
+      await callback({ heater_operation_mode: 'presence' })
+
+      expect(setValuesMock).toHaveBeenCalledWith({
+        derog_mode: DerogationMode.presence,
+      })
+    })
+
+    it('should write nothing when presence is asked of a product without it', async () => {
+      configureFacade({ product: Product.v2 })
+      const device = createDevice()
+      await device.onInit()
+      await settleDetached()
+      setValuesMock.mockClear()
+      const callback = getCallback()
+      await callback({ heater_operation_mode: 'presence' })
+
+      expect(setValuesMock).not.toHaveBeenCalled()
+    })
+
     it('should do nothing when the device is unavailable', async () => {
       getFacadeMock.mockImplementation(() => {
         throw new NotFoundError('not found')
