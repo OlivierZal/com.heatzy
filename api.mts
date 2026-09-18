@@ -15,9 +15,11 @@ import type { DeviceSettings, Settings } from './types/device-settings.mts'
 // login failures are classified here, where `instanceof` still works: a
 // credential rejection reads differently from a transport failure.
 const toLoginFailure = (homey: Homey, error: unknown): Error =>
-  error instanceof AuthenticationError
-    ? new Error(homey.__('settings.authenticate.rejected'))
-    : new Error(getErrorMessage(error))
+  new Error(
+    error instanceof AuthenticationError
+      ? homey.__('settings.authenticate.rejected')
+      : getErrorMessage(error),
+  )
 
 const api = {
   authenticate: async ({

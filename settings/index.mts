@@ -151,13 +151,12 @@ const refreshCommonSetting = (
   flatDeviceSettings: Record<string, unknown>,
 ): void => {
   const id = settingIdOf(element)
-  if (id !== undefined) {
-    const value = flatDeviceSettings[id]
-    element.value =
-      typeof value === 'boolean' || typeof value === 'string'
-        ? String(value)
-        : ''
+  if (id === undefined) {
+    return
   }
+  const value = flatDeviceSettings[id]
+  element.value =
+    typeof value === 'boolean' || typeof value === 'string' ? String(value) : ''
 }
 
 const commonSettingElements = (elements: PageElements): HTMLSelectElement[] => [
