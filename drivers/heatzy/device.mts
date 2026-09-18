@@ -55,6 +55,48 @@ const isDerogationModeKey = (
 ): value is keyof typeof DerogationMode =>
   typeof value === 'string' && Object.hasOwn(DerogationMode, value)
 
+// The presence detection is the Pilote Pro's own derogation — the
+// vendor documents `Enum (0-2)` on every other generation — so
+// heatzy-api 20.0.0 keeps it off the shared write surface and offers it
+// on the Pro facade alone. The converter therefore carries the three
+// derogations every product accepts, and `#write` routes the fourth.
+const isPresenceAsked = (values: Record<string, unknown>): boolean =>
+  values.heater_operation_mode === 'presence'
+
+const isCommonDerogationModeKey = (
+  value: unknown,
+): value is Exclude<keyof typeof DerogationMode, 'presence'> =>
+  isDerogationModeKey(value) && value !== 'presence'
+
+// A write is owed when the converters produced something, or when the
+// presence derogation was asked of a product that owns it — that one
+// leaves the payload empty by design, the facade carrying it instead.
+const hasSomethingToWrite = (
+  device: DeviceFacadeAny,
+  values: Record<string, unknown>,
+  updateData: PostAttributes,
+): boolean =>
+  Object.keys(updateData).length > 0 ||
+  (supportsPro(device) && isPresenceAsked(values))
+
+// Only `DeviceProFacade.setValues` accepts the presence derogation —
+// heatzy-api 20.0.0 types it that way — so this is where the product
+// knowledge the driver already holds meets the compiler.
+const write = async (
+  device: DeviceFacadeAny,
+  values: Record<string, unknown>,
+  updateData: PostAttributes,
+): Promise<void> => {
+  if (supportsPro(device) && isPresenceAsked(values)) {
+    await device.setValues({
+      ...updateData,
+      derog_mode: DerogationMode.presence,
+    })
+    return
+  }
+  await device.setValues(updateData)
+}
+
 const toSwitch = (value: unknown): Switch =>
   value === true ? Switch.on : Switch.off
 
@@ -124,7 +166,9 @@ export default class HeatzyDevice extends Device {
   } = {
     derog_time: (value) => ({ derog_time: Number(value) }),
     heater_operation_mode: (value) =>
-      isDerogationModeKey(value) ? { derog_mode: DerogationMode[value] } : {},
+      isCommonDerogationModeKey(value)
+        ? { derog_mode: DerogationMode[value] }
+        : {},
     locked: (value, product) =>
       product === Product.glow
         ? { LOCK_C: toSwitch(value) }
@@ -399,9 +443,9 @@ export default class HeatzyDevice extends Device {
       return
     }
     const updateData = this.#buildUpdateData(device, values)
-    if (Object.keys(updateData).length > 0) {
+    if (hasSomethingToWrite(device, values, updateData)) {
       try {
-        await device.setValues(updateData)
+        await write(device, values, updateData)
       } catch (error) {
         // A write that fails off the HTTP path — a timeout, an abort, a
         // DNS failure — reaches no observability seam: the library
