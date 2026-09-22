@@ -531,7 +531,7 @@ describe(HeatzyDevice, () => {
 
   describe('sending an update', () => {
     // The presence derogation left the shared write surface in
-    // heatzy-api 20.0.0: the converter no longer carries it, and only a
+    // The converter no longer carries it, and only a
     // Pro facade accepts it — so the driver routes it, and the write
     // still reaches the wire with everything else the batch changed.
     it('should route the presence derogation through the Pro facade', async () => {
@@ -884,7 +884,7 @@ describe(HeatzyDevice, () => {
       expect(device.setStoreValue).toHaveBeenCalledWith('derogationEnd', null)
     })
 
-    // heatzy-api 19.0.0 reads a value it does not model (a numeric or
+    // The SDK reads a value it does not model (a numeric or
     // null `cur_mode`, the undocumented `derog_mode` 4 and 5) as null:
     // the capability is cleared rather than left on a stale label.
     it('should clear the capabilities of unmodelled readings', async () => {

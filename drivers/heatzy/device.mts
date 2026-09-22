@@ -56,45 +56,35 @@ const isDerogationModeKey = (
   typeof value === 'string' && Object.hasOwn(DerogationMode, value)
 
 // The presence detection is the Pilote Pro's own derogation — the
-// vendor documents `Enum (0-2)` on every other generation — so
-// heatzy-api 20.0.0 keeps it off the shared write surface and offers it
-// on the Pro facade alone. The converter therefore carries the three
-// derogations every product accepts, and `#write` routes the fourth.
-const isPresenceAsked = (values: Record<string, unknown>): boolean =>
-  values.heater_operation_mode === 'presence'
-
+// vendor documents `Enum (0-2)` on every other generation — so the SDK
+// keeps it off the shared write surface and offers it on the Pro facade
+// alone. The converter therefore carries the three derogations every
+// product accepts, and `write` routes the fourth.
 const isCommonDerogationModeKey = (
   value: unknown,
 ): value is Exclude<keyof typeof DerogationMode, 'presence'> =>
   isDerogationModeKey(value) && value !== 'presence'
 
-// A write is owed when the converters produced something, or when the
-// presence derogation was asked of a product that owns it — that one
-// leaves the payload empty by design, the facade carrying it instead.
-const hasSomethingToWrite = (
-  device: DeviceFacadeAny,
-  values: Record<string, unknown>,
-  updateData: PostAttributes,
-): boolean =>
-  Object.keys(updateData).length > 0 ||
-  (supportsPro(device) && isPresenceAsked(values))
-
-// Only `DeviceProFacade.setValues` accepts the presence derogation —
-// heatzy-api 20.0.0 types it that way — so this is where the product
-// knowledge the driver already holds meets the compiler.
+// Only `DeviceProFacade.setValues` accepts the presence derogation, so
+// this is where the product knowledge the driver already holds meets
+// the compiler. A presence request leaves the converters' payload empty
+// by design, the facade carrying it instead; asked of a product without
+// it, nothing is written.
 const write = async (
   device: DeviceFacadeAny,
   values: Record<string, unknown>,
   updateData: PostAttributes,
 ): Promise<void> => {
-  if (supportsPro(device) && isPresenceAsked(values)) {
+  if (supportsPro(device) && values.heater_operation_mode === 'presence') {
     await device.setValues({
       ...updateData,
       derog_mode: DerogationMode.presence,
     })
     return
   }
-  await device.setValues(updateData)
+  if (Object.keys(updateData).length > 0) {
+    await device.setValues(updateData)
+  }
 }
 
 const toSwitch = (value: unknown): Switch =>
@@ -443,20 +433,18 @@ export default class HeatzyDevice extends Device {
       return
     }
     const updateData = this.#buildUpdateData(device, values)
-    if (hasSomethingToWrite(device, values, updateData)) {
-      try {
-        await write(device, values, updateData)
-      } catch (error) {
-        // A write that fails off the HTTP path — a timeout, an abort, a
-        // DNS failure — reaches no observability seam: the library
-        // serialises only an `HttpError`, and `setWarning` is a toast
-        // that clears itself in the same call. Without this line such a
-        // write is invisible everywhere at once — the flow reports
-        // success, the tile keeps the new value, and the unit never
-        // moved.
-        this.error('Write failed:', updateData, error)
-        await this.setWarning(error)
-      }
+    try {
+      await write(device, values, updateData)
+    } catch (error) {
+      // A write that fails off the HTTP path — a timeout, an abort, a
+      // DNS failure — reaches no observability seam: the library
+      // serialises only an `HttpError`, and `setWarning` is a toast
+      // that clears itself in the same call. Without this line such a
+      // write is invisible everywhere at once — the flow reports
+      // success, the tile keeps the new value, and the unit never
+      // moved.
+      this.error('Write failed:', updateData, error)
+      await this.setWarning(error)
     }
     this.#scheduleSyncFromDevice()
   }
