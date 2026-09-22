@@ -233,7 +233,10 @@ coverage.
   where every other generation speaks `mode`/`lock_switch`. That
   dialect split lives in the converters next to the device class; wire
   normalization beyond it belongs in `@olivierzal/heatzy-api`, not
-  here.
+  here. The one product split OUTSIDE the converters is the presence
+  derogation: only the Pro facade's `setValues` accepts it, so the
+  converter drops it and `write` routes it for a Pro — a presence
+  request on any other product writes nothing.
 - A reading the SDK does not model reaches the device as `null`
   (heatzy-api 19.0.0: a numeric or `null` Pro `cur_mode`, the
   undocumented derogation codes 4 and 5), and the device CLEARS the
