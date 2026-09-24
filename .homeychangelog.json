@@ -122,5 +122,9 @@
   "23.3.8": {
     "en": "When Heatzy is unreachable, the app no longer floods its diagnostic log: the failure is written once, then at most every five minutes, and once more when the connection comes back. Readings are also accepted in every form Heatzy sends them, so a radiator whose module words a setting differently keeps updating instead of going silent.",
     "fr": "Quand Heatzy est injoignable, l'app n'inonde plus son journal de diagnostic : l'échec est écrit une fois, puis au plus toutes les cinq minutes, et une dernière fois quand la connexion revient. Les relevés sont par ailleurs acceptés sous toutes les formes que Heatzy envoie, si bien qu'un radiateur dont le module formule un réglage autrement continue de se mettre à jour au lieu de rester muet."
+  },
+  "23.3.9": {
+    "en": "In the diagnostic log, a radiator that keeps failing to answer is reported when it starts, at most every five minutes while it lasts, and once when it answers again – the same rhythm as the rest of the log, instead of a count of attempts.",
+    "fr": "Dans le journal de diagnostic, un radiateur qui ne répond plus est signalé quand cela commence, au plus toutes les cinq minutes tant que cela dure, et une fois quand il répond à nouveau – le même rythme que le reste du journal, au lieu d'un décompte de tentatives."
   }
 }
