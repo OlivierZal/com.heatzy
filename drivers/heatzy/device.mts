@@ -290,7 +290,7 @@ export default class HeatzyDevice extends Device {
         continue
       }
 
-      // always_on devices never switch off from Homey: the outgoing
+      // `always_on` devices never switch off from Homey: the outgoing
       // value is coerced before the converter runs.
       const value =
         (capability === 'onoff' && this.getSetting('always_on')) ||
