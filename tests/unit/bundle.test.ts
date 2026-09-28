@@ -80,7 +80,7 @@ describe('bundle script', () => {
     expect(twin).not.toContain('export')
     expect(twin).toContain('globalThis.onHomeyReady')
     expect(twin).toContain('HeatzyWebview.start(homey)')
-    // es2020 target: nullish coalescing ships as-is, unlowered
+    // `es2020` target: nullish coalescing ships as-is, unlowered
     expect(iife).toContain('??')
   })
 

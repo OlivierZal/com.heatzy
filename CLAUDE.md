@@ -1,9 +1,13 @@
 # CLAUDE.md
 
 Homey app for Heatzy (pilot-wire electric-heating cloud). ESM only.
-`engines` (`^22.22.2 || >=24.15.0`, `.nvmrc` on the same value) is the
-TOOLCHAIN floor — what the dependency tree needs to install and run,
-derived the way configs derives its own, never copied from a sibling;
+`engines` (`^22.23.0 || ^24.18.0 || >=26.4.0`, `.nvmrc` on its lower
+bound) is the TOOLCHAIN floor — what the dependency tree needs to
+install and run, derived the way configs derives its own (the binding
+entry is `eslint-plugin-es-x`, a dependency of `@olivierzal/configs`,
+at `^22.23.0 || ^24.18.0 || >=26.4.0`, intersected with
+`eslint-plugin-package-json`'s `^22.22.2 || >=24.15.0`), never copied
+from a sibling;
 the DEVICE floor is the manifest's `compatibility` (see the floors
 below), and the CI coverage leg deliberately names the measured fleet
 floor (22.20). The API layer lives in `@olivierzal/heatzy-api` (GitHub
