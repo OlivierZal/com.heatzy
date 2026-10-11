@@ -31,12 +31,10 @@ describe('flow card device filters', () => {
               return driverIds.flatMap((driverId) => {
                 const declared = capabilitiesOf.get(driverId)
                 if (declared === undefined) {
-                  return [`${kind}/${card.id}: unknown driver ${driverId}`]
+                  return `${kind}/${card.id}: unknown driver ${driverId}`
                 }
                 return capability !== null && !declared.includes(capability)
-                  ? [
-                      `${kind}/${card.id}: ${driverId} declares no ${capability}`,
-                    ]
+                  ? `${kind}/${card.id}: ${driverId} declares no ${capability}`
                   : []
               })
             }),
