@@ -126,5 +126,9 @@
   "23.3.9": {
     "en": "In the diagnostic log, a radiator that keeps failing to answer is reported when it starts, at most every five minutes while it lasts, and once when it answers again – the same rhythm as the rest of the log, instead of a count of attempts.",
     "fr": "Dans le journal de diagnostic, un radiateur qui ne répond plus est signalé quand cela commence, au plus toutes les cinq minutes tant que cela dure, et une fois quand il répond à nouveau – le même rythme que le reste du journal, au lieu d'un décompte de tentatives."
+  },
+  "23.4.0": {
+    "en": "Diagnostic reports now keep more of the app's recent activity and no longer include your radiators' names or MAC addresses.",
+    "fr": "Les rapports de diagnostic conservent désormais davantage de l'activité récente de l'app et n'incluent plus les noms ni les adresses MAC de vos radiateurs."
   }
 }

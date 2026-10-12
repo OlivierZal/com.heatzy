@@ -1,6 +1,6 @@
 {
   "name": "com.heatzy",
-  "version": "23.3.9",
+  "version": "23.4.0",
   "private": true,
   "description": "Heatzy for Homey",
   "homepage": "https://github.com/OlivierZal/com.heatzy/",
@@ -31,7 +31,7 @@
   },
   "prettier": "@olivierzal/configs/prettier",
   "dependencies": {
-    "@olivierzal/heatzy-api": "20.1.0",
+    "@olivierzal/heatzy-api": "20.3.0",
     "@olivierzal/homey-kit": "7.0.0",
     "source-map-support": "^0.5.21"
   },
