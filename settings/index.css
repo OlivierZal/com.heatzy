@@ -29,12 +29,17 @@ summary.homey-form-legend::before {
   border-inline-end: 0.14em solid currentcolor;
   content: '';
   inline-size: 0.45em;
-  transform: rotate(45deg);
-  transition: transform 0.15s ease;
+  rotate: 45deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  summary.homey-form-legend::before {
+    transition: rotate 0.15s ease;
+  }
 }
 
 details[open] > summary.homey-form-legend::before {
-  transform: rotate(135deg);
+  rotate: 135deg;
 }
 
 /* Two-column grid for button pairs */

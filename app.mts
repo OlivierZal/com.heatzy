@@ -127,7 +127,7 @@ export default class HeatzyApp extends App {
         ...getDriverSettings(driver, language),
         ...getDriverLoginSetting(driver, language),
       ]),
-      ({ driverId, groupId }) => groupId ?? driverId,
+      ({ driverId, groupId = driverId }) => groupId,
     )
   }
 
