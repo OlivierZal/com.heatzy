@@ -2,8 +2,6 @@ import 'source-map-support/register.js'
 
 import {
   type DeviceFacadeAny,
-  type Logger,
-  type SettingManager,
   type SyncCallback,
   FacadeManager,
   HeatzyAPI,
@@ -84,13 +82,23 @@ export default class HeatzyApp extends App {
         },
       },
       locale: language,
-      logger: this.#createLogger(),
-      settingManager: this.#createSettingManager(),
+      logger: this,
+      // The library's own `SettingManager` is the declared type of this
+      // option on purpose: it is where the kit's adapter is checked
+      // against the contract the session actually persists through.
+      settingManager: createSettingManager(this.homey.settings, settingKey),
       shouldResumeSessionInBackground: true,
       timezone: this.homey.clock.getTimezone(),
     })
     this.#facadeManager = new FacadeManager(this.#api)
-    this.#createNotification(language)
+    announceChangelog({
+      changelog,
+      homey: this.homey,
+      language,
+      notifications: this.homey.notifications,
+      settings: this.homey.settings,
+      version: this.homey.manifest.version,
+    })
     fireAndForget(this.#logBootReady(), this, 'Boot readiness tracking failed:')
   }
 
@@ -179,36 +187,6 @@ export default class HeatzyApp extends App {
     if (this.#sessionLossState === 'pending') {
       this.#sessionLossState = 'shown'
     }
-  }
-
-  #createLogger(): Logger {
-    return {
-      error: (...args: unknown[]): void => {
-        this.error(...args)
-      },
-      log: (...args: unknown[]): void => {
-        this.log(...args)
-      },
-    }
-  }
-
-  #createNotification(language: string): void {
-    const { homey } = this
-    announceChangelog({
-      changelog,
-      homey,
-      language,
-      notifications: homey.notifications,
-      settings: homey.settings,
-      version: homey.manifest.version,
-    })
-  }
-
-  // The library's own `SettingManager` is the declared type on purpose:
-  // it is where the kit's adapter is checked against the contract the
-  // session actually persists through.
-  #createSettingManager(): SettingManager {
-    return createSettingManager(this.homey.settings, settingKey)
   }
 
   #getDevices(ids?: readonly string[]): HeatzyDevice[] {

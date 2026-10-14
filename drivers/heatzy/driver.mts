@@ -7,7 +7,6 @@ import {
   RegistrySyncError,
 } from '@olivierzal/heatzy-api'
 
-import type { AuthenticationAPI } from '../../types/api.mts'
 import type { CapabilitiesOptionsValues } from '../../types/bases.mts'
 import type {
   CapabilitiesOptions,
@@ -16,8 +15,6 @@ import type {
 import type { ManifestDriver } from '../../types/manifest.mts'
 import { type Homey, Driver } from '../../lib/homey.mts'
 import type HeatzyDevice from './device.mts'
-
-const NOT_FOUND = -1
 
 // Capabilities Homey can write back to the wire — the
 // capability-listener write surface.
@@ -33,10 +30,9 @@ export const SETTABLE_CAPABILITIES: readonly (keyof SetCapabilities)[] = [
   'thermostat_mode',
 ]
 
-const getArg = (capability: string): string => {
-  const dot = capability.indexOf('.')
-  return dot === NOT_FOUND ? capability : capability.slice(0, dot)
-}
+// A flow card's argument is named after the capability's root: the id
+// before the first dot (`onoff.timer` → `onoff`).
+const getArg = (capability: string): string => capability.replace(/\..*/v, '')
 
 /**
  * Runtime capability options per generation: the mode vocabularies
@@ -130,10 +126,6 @@ export default class HeatzyDriver extends Driver {
 
   declare public readonly manifest: ManifestDriver
 
-  get #api(): AuthenticationAPI {
-    return this.homey.app.api
-  }
-
   public override async onInit(): Promise<void> {
     this.#registerFlowListeners()
     await Promise.resolve()
@@ -144,7 +136,7 @@ export default class HeatzyDriver extends Driver {
       if (view !== 'loading') {
         return
       }
-      if (this.#api.isAuthenticated()) {
+      if (this.homey.app.api.isAuthenticated()) {
         await session.showView('list_devices')
         return
       }
@@ -238,7 +230,7 @@ export default class HeatzyDriver extends Driver {
   #registerLoginHandler(session: PairSession): void {
     session.setHandler('login', async (data: LoginCredentials) => {
       try {
-        await this.#api.authenticate(data)
+        await this.homey.app.api.authenticate(data)
         return true
       } catch (error) {
         if (error instanceof AuthenticationError) {
