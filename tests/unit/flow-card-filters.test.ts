@@ -33,9 +33,9 @@ describe('flow card device filters', () => {
                 if (declared === undefined) {
                   return `${kind}/${card.id}: unknown driver ${driverId}`
                 }
-                return capability !== null && !declared.includes(capability)
-                  ? `${kind}/${card.id}: ${driverId} declares no ${capability}`
-                  : []
+                return capability === null || declared.includes(capability)
+                  ? []
+                  : `${kind}/${card.id}: ${driverId} declares no ${capability}`
               })
             }),
         ),
