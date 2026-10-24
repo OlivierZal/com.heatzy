@@ -15,14 +15,14 @@ import api from '../../api.mts'
 // assertions it must satisfy.
 const SURFACES = [{ api, config: appConfig, name: 'app API' }]
 
-// The surface's handler union, so the compile-time half is asserted
-// once — this app exposes a single surface.
-type Handler = (typeof api)[keyof typeof api]
-
 describe('api contract', () => {
   // Asserted on the whole union at once: no per-name method reference
   // ever leaves its object (unbound-method).
   it('should expose only function handlers', () => {
+    // The surface's handler union, so the compile-time half is asserted
+    // once — this app exposes a single surface.
+    type Handler = (typeof api)[keyof typeof api]
+
     expectTypeOf<Handler>().toBeFunction()
   })
 

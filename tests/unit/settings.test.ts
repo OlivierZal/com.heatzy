@@ -21,8 +21,6 @@ import { start } from '../../settings/index.mts'
 // `import.meta.url` is an http URL the fs module refuses.
 const pageHtml = readFileSync('settings/index.html', 'utf8')
 
-type ApiCallback = (error: Error | null, result: unknown) => void
-
 interface Harness {
   readonly alert: ReturnType<typeof vi.fn>
   readonly api: ReturnType<typeof vi.fn>
@@ -113,6 +111,8 @@ const createApiMock = (
   routes: Record<string, unknown>,
 ): ReturnType<typeof vi.fn> =>
   vi.fn<(...callArgs: ApiCallArgs) => void>((...callArgs) => {
+    type ApiCallback = (error: Error | null, result: unknown) => void
+
     const [method, path] = callArgs
     const callback = callArgs.findLast(
       (argument): argument is ApiCallback => typeof argument === 'function',
