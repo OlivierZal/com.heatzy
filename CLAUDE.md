@@ -372,11 +372,15 @@ stubs calling the family reusables in OlivierZal/configs, pinned
 Dependabot alerts scan continuously and carry the named, reasoned
 dismissals (an exception lives on the advisory, so it cannot outlive
 it), while `dependency-review` judges what a PR introduces.
-`claude-dependabot-fix.yml` and `.github/zizmor.yml` went with configs
-6.0.0: the fix workflow was retired (4,296 runs family-wide, zero
-successes, and a success path — a push onto the Dependabot branch —
-the Sonar gate refuses by design), and the zizmor ignore existed only
-for it. A red Dependabot bump is a human's to classify.
+`claude-dependabot-fix.yml` went with configs 6.0.0: the fix workflow
+was retired (4,296 runs family-wide, zero successes, and a success
+path — a push onto the Dependabot branch — the Sonar gate refuses by
+design), and the `.github/zizmor.yml` ignore that existed only for it
+went too. A red Dependabot bump is a human's to classify.
+`.github/zizmor.yml` is back since zizmor 1.31 (2026-10) for one
+line-scoped entry: the `claude.yml` stub's `issue_comment`, owner-gated
+by the family workflow it calls (the verdict is in configs'
+`.github/zizmor.yml` and `CLAUDE.md`).
 `validate.yml` and `publish.yml` are stubs since configs 6.0.0 /
 homey-kit 6.1.0, over the kit's `reusable-homey-validate.yml` and
 `reusable-homey-publish.yml`: the Homey App Store path is Homey
