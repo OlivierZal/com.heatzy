@@ -130,5 +130,9 @@
   "23.4.0": {
     "en": "Diagnostic reports now keep more of the app's recent activity and no longer include your radiators' names or MAC addresses.",
     "fr": "Les rapports de diagnostic conservent désormais davantage de l'activité récente de l'app et n'incluent plus les noms ni les adresses MAC de vos radiateurs."
+  },
+  "23.5.0": {
+    "en": "When your signed-in account lists radiators none of which has been added to Homey yet, the app now explains how to add them, in the settings and after signing in. Cloud reads that fail or time out are retried, and the diagnostic log counts the radiators listed and added and names the cause of a failed read on one line.",
+    "fr": "Quand votre compte connecté recense des radiateurs dont aucun n'a encore été ajouté à Homey, l'application explique désormais comment les ajouter, dans les paramètres et après la connexion. Les lectures du cloud qui échouent ou expirent sont retentées, et le journal de diagnostic compte les radiateurs recensés et ajoutés et nomme sur une seule ligne la cause d'une lecture qui a échoué."
   }
 }
