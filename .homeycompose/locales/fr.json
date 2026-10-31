@@ -7,6 +7,7 @@
   "settings": {
     "authenticate": {
       "button": "Se connecter",
+      "emptyAccount": "Ce compte Heatzy ne recense aucun radiateur que l'application puisse lire.",
       "failure": "L'authentification a échoué.",
       "legend": "Identifiants",
       "rejected": "Heatzy a refusé vos identifiants — vérifiez-les puis reconnectez-vous.",

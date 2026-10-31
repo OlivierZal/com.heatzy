@@ -223,6 +223,10 @@ const accountLines = (): string[] =>
         typeof line === 'string' && line.startsWith('Heatzy: '),
     )
 
+// The settings page's push, one per account line written.
+const accountUpdates = (): number =>
+  mockRealtime.mock.calls.filter(([event]) => event === 'accountupdate').length
+
 describe(HeatzyApp, () => {
   let app: InstanceType<typeof HeatzyApp>
 
@@ -611,7 +615,8 @@ describe(HeatzyApp, () => {
 
   // One line per account, on the first sync and whenever a count moves:
   // the callback fires every registry cycle and after every write, so
-  // an unconditional line would flood the log.
+  // an unconditional line would flood the log. The same gate pushes the
+  // settings page's account update.
   describe('account line', () => {
     it('should log the listed and added counts on the first sync', async () => {
       listDevices(2)
@@ -622,8 +627,9 @@ describe(HeatzyApp, () => {
       await settleDetached()
 
       expect(accountLines()).toStrictEqual([
-        'Heatzy: 2 unit(s) listed by the cloud, 1 added in Homey',
+        'Heatzy: 2 units listed, 1 added in Homey',
       ])
+      expect(mockRealtime).toHaveBeenCalledWith('accountupdate', null)
     })
 
     it('should stay silent while the counts hold', async () => {
@@ -637,6 +643,7 @@ describe(HeatzyApp, () => {
       await settleDetached()
 
       expect(accountLines()).toHaveLength(1)
+      expect(accountUpdates()).toBe(1)
     })
 
     it.each([
@@ -661,9 +668,10 @@ describe(HeatzyApp, () => {
         await settleDetached()
 
         expect(accountLines()).toStrictEqual([
-          'Heatzy: 2 unit(s) listed by the cloud, 1 added in Homey',
-          `Heatzy: ${String(listed)} unit(s) listed by the cloud, ${String(added)} added in Homey`,
+          'Heatzy: 2 units listed, 1 added in Homey',
+          `Heatzy: ${String(listed)} units listed, ${String(added)} added in Homey`,
         ])
+        expect(accountUpdates()).toBe(2)
       },
     )
 
@@ -681,17 +689,19 @@ describe(HeatzyApp, () => {
       await getEvents().onSyncComplete()
 
       expect(accountLines()).toStrictEqual([])
+      expect(accountUpdates()).toBe(0)
 
       setupDrivers([createDevice({ id: '0' })])
       await settleDetached()
       await settleDetached()
 
       expect(accountLines()).toStrictEqual([
-        'Heatzy: 1 unit(s) listed by the cloud, 1 added in Homey',
+        'Heatzy: 1 unit listed, 1 added in Homey',
       ])
+      expect(accountUpdates()).toBe(1)
     })
 
-    it('should report a failed account line without failing the sync', async () => {
+    it('should report a failed account report without failing the sync', async () => {
       const syncFromDevice = vi.fn<() => Promise<void>>().mockResolvedValue()
       setupDrivers([createDevice({ id: '0', syncFromDevice })])
       await app.onInit()
@@ -702,9 +712,45 @@ describe(HeatzyApp, () => {
 
       expect(syncFromDevice).toHaveBeenCalledTimes(1)
       expect(app.error).toHaveBeenCalledWith(
-        'Account count logging failed:',
+        'Account report failed:',
         expect.any(Error),
       )
+    })
+  })
+
+  // The settings page's empty-account hint: an account whose listed
+  // registry holds nothing, judged over the account's own answer only.
+  describe('account empty', () => {
+    it('should read a listed account holding no radiator as empty', async () => {
+      await app.onInit()
+      await getEvents().onSyncComplete()
+
+      expect(app.isAccountEmpty()).toBe(true)
+    })
+
+    it('should read a listed account holding a radiator as not empty', async () => {
+      listDevices(1)
+      await app.onInit()
+      await getEvents().onSyncComplete()
+
+      expect(app.isAccountEmpty()).toBe(false)
+    })
+
+    // Before the first sync notification, an empty registry is the boot
+    // race, not the account's answer.
+    it('should read a registry no sync has filled as not empty', async () => {
+      await app.onInit()
+
+      expect(app.isAccountEmpty()).toBe(false)
+    })
+
+    // A registry a lost session wiped is not an account in use.
+    it('should read a signed-out account as not empty', async () => {
+      await app.onInit()
+      await getEvents().onSyncComplete()
+      mockApiInstance.isAuthenticated.mockReturnValue(false)
+
+      expect(app.isAccountEmpty()).toBe(false)
     })
   })
 
@@ -714,6 +760,7 @@ describe(HeatzyApp, () => {
     it('should read a listed account with no paired device as pending', async () => {
       listDevices(1)
       await app.onInit()
+      await getEvents().onSyncComplete()
 
       expect(app.isPairingPending()).toBe(true)
     })
@@ -722,12 +769,15 @@ describe(HeatzyApp, () => {
       listDevices(1)
       setupDrivers([createDevice({ id: '0' })])
       await app.onInit()
+      await getEvents().onSyncComplete()
 
       expect(app.isPairingPending()).toBe(false)
     })
 
-    // Before the first sync, an empty registry is the boot race.
-    it('should read a registry no sync has filled as settled', async () => {
+    // Before the first sync notification, the registry is not the
+    // account's answer, whatever it holds.
+    it('should read a registry no sync has notified as settled', async () => {
+      listDevices(1)
       await app.onInit()
 
       expect(app.isPairingPending()).toBe(false)
@@ -736,8 +786,9 @@ describe(HeatzyApp, () => {
     // A registry a lost session still holds is not an account in use.
     it('should read a signed-out account as settled', async () => {
       listDevices(1)
-      mockApiInstance.isAuthenticated.mockReturnValue(false)
       await app.onInit()
+      await getEvents().onSyncComplete()
+      mockApiInstance.isAuthenticated.mockReturnValue(false)
 
       expect(app.isPairingPending()).toBe(false)
     })

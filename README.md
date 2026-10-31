@@ -23,7 +23,7 @@ This app integrates [Heatzy](https://heatzy.com/) into [Homey](https://homey.app
 
 1. Install the [Heatzy app](https://homey.app/a/com.heatzy) from the Homey App Store.
 2. Open the app settings and log in with your Heatzy credentials.
-3. Add your radiators via Add device → Heatzy. The settings page points there while your account lists radiators none of which is in Homey yet.
+3. Add your radiators via Add device → Heatzy. The settings page points there while your account lists radiators none of which is in Homey yet, and says so when the account lists no radiator the app can read.
 
 ## Supported languages
 

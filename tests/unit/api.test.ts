@@ -13,6 +13,7 @@ import type { DeviceSettings, Settings } from '../../types/device-settings.mts'
 const { default: api } = await import('../../api.mts')
 
 const mockAuthenticate = vi.fn<(body: LoginCredentials) => Promise<void>>()
+const mockIsAccountEmpty = vi.fn<() => boolean>().mockReturnValue(false)
 const mockIsAuthenticated = vi.fn<() => boolean>()
 const mockIsPairingPending = vi.fn<() => boolean>().mockReturnValue(false)
 const mockLogOut = vi.fn<() => void>()
@@ -26,6 +27,7 @@ const mockApp = {
   error: vi.fn<(...args: readonly unknown[]) => void>(),
   getDeviceSettings: vi.fn<() => DeviceSettings>(),
   getDriverSettings: vi.fn<() => Partial<Record<string, DriverSetting[]>>>(),
+  isAccountEmpty: mockIsAccountEmpty,
   isPairingPending: mockIsPairingPending,
   log: vi.fn<(...args: readonly unknown[]) => void>(),
   updateDeviceSettings: vi.fn<(settings: Settings) => Promise<void>>(),
@@ -51,6 +53,7 @@ describe('api', () => {
       const result = await api.authenticate({ body: credentials, homey })
 
       expect(result).toStrictEqual({
+        isAccountEmpty: false,
         isDeviceListStale: false,
         isPairingPending: false,
       })
@@ -70,8 +73,24 @@ describe('api', () => {
       await expect(
         api.authenticate({ body: mock<LoginCredentials>(), homey }),
       ).resolves.toStrictEqual({
+        isAccountEmpty: false,
         isDeviceListStale: false,
         isPairingPending: true,
+      })
+    })
+
+    // The account itself answered that it lists nothing: said at the
+    // sign-in, where a pairing wizard could offer nothing.
+    it('should report an empty account once signed in', async () => {
+      mockAuthenticate.mockResolvedValue()
+      mockIsAccountEmpty.mockReturnValueOnce(true)
+
+      await expect(
+        api.authenticate({ body: mock<LoginCredentials>(), homey }),
+      ).resolves.toStrictEqual({
+        isAccountEmpty: true,
+        isDeviceListStale: false,
+        isPairingPending: false,
       })
     })
   })
@@ -121,11 +140,14 @@ describe('api', () => {
       await expect(
         api.authenticate({ body: mock<LoginCredentials>(), homey }),
       ).resolves.toStrictEqual({
+        isAccountEmpty: false,
         isDeviceListStale: true,
         isPairingPending: false,
       })
       expect(mockTranslate).not.toHaveBeenCalled()
-      // A list that could not be refreshed is not judged pending.
+      // A list that could not be refreshed is judged neither empty nor
+      // pending.
+      expect(mockIsAccountEmpty).not.toHaveBeenCalled()
       expect(mockIsPairingPending).not.toHaveBeenCalled()
       expect(mockApp.log).toHaveBeenCalledWith({
         dataType: SETTINGS_PAGE,
@@ -224,6 +246,22 @@ describe('api', () => {
         expect(mockApp.log).toHaveBeenCalledWith({
           dataType: SETTINGS_PAGE,
           route: 'GET /sessions',
+        })
+      },
+    )
+  })
+
+  describe('account-emptiness retrieval', () => {
+    it.each([true, false])(
+      'should return %s from app.isAccountEmpty and log the breadcrumb',
+      (isExpected) => {
+        mockIsAccountEmpty.mockReturnValueOnce(isExpected)
+
+        expect(api.isAccountEmpty({ homey })).toBe(isExpected)
+        expect(mockIsAccountEmpty).toHaveBeenCalledTimes(1)
+        expect(mockApp.log).toHaveBeenCalledWith({
+          dataType: SETTINGS_PAGE,
+          route: 'GET /sessions/empty',
         })
       },
     )

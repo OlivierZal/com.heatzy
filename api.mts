@@ -42,15 +42,21 @@ const api = {
       // PRE-EXISTING live session while the new credentials were never
       // accepted.
       // A list that could not be refreshed explains itself; whatever it
-      // still holds is not judged pending.
+      // still holds is judged neither empty nor pending.
       if (error instanceof RegistrySyncError) {
-        return { isDeviceListStale: true, isPairingPending: false }
+        return {
+          isAccountEmpty: false,
+          isDeviceListStale: true,
+          isPairingPending: false,
+        }
       }
       throw toLoginFailure(homey, error)
     }
     // The sign-in awaited its enforced sync, so the registry answers for
-    // the account: one listing radiators none of which is paired says so.
+    // the account: one listing nothing, or radiators none of which is
+    // paired, says so.
     return {
+      isAccountEmpty: homey.app.isAccountEmpty(),
       isDeviceListStale: false,
       isPairingPending: homey.app.isPairingPending(),
     }
@@ -81,6 +87,10 @@ const api = {
     // argument, since any path relative to its own module lands in
     // `node_modules` — only the caller knows where the bundler stamped it.
     return getWebviewHashes(new URL('webview-hashes.json', import.meta.url))
+  },
+  isAccountEmpty: ({ homey }: { homey: Homey }): boolean => {
+    logSettingsRoute(homey.app, 'GET /sessions/empty')
+    return homey.app.isAccountEmpty()
   },
   isAuthenticated: ({ homey }: { homey: Homey }): boolean => {
     logSettingsRoute(homey.app, 'GET /sessions')

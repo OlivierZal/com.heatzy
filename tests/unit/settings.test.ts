@@ -194,11 +194,16 @@ const defaultRoutes = (): Record<string, unknown> => ({
   'GET /devices/pending': false,
   'GET /language': 'fr',
   'GET /sessions': true,
+  'GET /sessions/empty': false,
   'GET /settings/devices': deviceSettingsFixture(),
   'GET /settings/drivers': driverSettingsFixture(),
   'GET /webview-hashes': {},
   'POST /boot-error': undefined,
-  'POST /sessions': { isDeviceListStale: false, isPairingPending: false },
+  'POST /sessions': {
+    isAccountEmpty: false,
+    isDeviceListStale: false,
+    isPairingPending: false,
+  },
   'PUT /settings/devices': undefined,
 })
 
@@ -238,6 +243,14 @@ const resetButton = (): HTMLButtonElement => getButton('reset_credentials')
 const devicesFieldset = (): HTMLFieldSetElement => getFieldset('devices')
 
 const pairingHint = (): HTMLDivElement => getDiv('pairing_pending')
+
+const emptyAccountHint = (): HTMLDivElement => getDiv('empty_account')
+
+// How many times the page probed a hint route.
+const probeCount = (api: ReturnType<typeof vi.fn>, path: string): number =>
+  api.mock.calls.filter(
+    ([method, calledPath]) => method === 'GET' && calledPath === path,
+  ).length
 
 const authenticationDetails = (): HTMLDetailsElement =>
   getDetails('authentication')
@@ -297,17 +310,15 @@ describe('settings page', () => {
 
       expect(devicesFieldset().hidden).toBe(true)
       expect(authenticationDetails().open).toBe(true)
-      // A signed-out account is not in use: nothing to judge pending.
-      expect(api).not.toHaveBeenCalledWith(
-        'GET',
-        '/devices/pending',
-        expect.any(Function),
-      )
+      // A signed-out account is not in use: nothing to explain.
+      expect(probeCount(api, '/devices/pending')).toBe(0)
+      expect(probeCount(api, '/sessions/empty')).toBe(0)
     })
 
-    it('should settle without the pairing hint when a radiator is paired', async () => {
+    it('should settle without the account hints when a radiator is paired', async () => {
       await bootPage()
 
+      expect(emptyAccountHint().hidden).toBe(true)
       expect(pairingHint().hidden).toBe(true)
     })
 
@@ -324,15 +335,35 @@ describe('settings page', () => {
 
       expect(ready).toHaveBeenCalledTimes(1)
       expect(devicesFieldset().hidden).toBe(false)
+      expect(emptyAccountHint().hidden).toBe(true)
       expect(pairingHint().hidden).toBe(false)
       expect(alert).not.toHaveBeenCalled()
     })
 
-    it('should boot without the hint when the pairing probe fails', async () => {
+    it('should show the empty-account hint without alerting when the account lists nothing', async () => {
       const { alert } = await bootPage({
-        failures: { 'GET /devices/pending': new Error('probe down') },
+        routes: {
+          ...defaultRoutes(),
+          'GET /sessions/empty': true,
+          'GET /settings/devices': {},
+        },
       })
 
+      expect(devicesFieldset().hidden).toBe(false)
+      expect(emptyAccountHint().hidden).toBe(false)
+      expect(pairingHint().hidden).toBe(true)
+      expect(alert).not.toHaveBeenCalled()
+    })
+
+    it('should boot without the hints when the probes fail', async () => {
+      const { alert } = await bootPage({
+        failures: {
+          'GET /devices/pending': new Error('probe down'),
+          'GET /sessions/empty': new Error('probe down'),
+        },
+      })
+
+      expect(emptyAccountHint().hidden).toBe(true)
       expect(pairingHint().hidden).toBe(true)
       expect(alert).not.toHaveBeenCalled()
     })
@@ -460,10 +491,10 @@ describe('settings page', () => {
       expect(settingSelect('on_mode').value).toBe('cft')
     })
 
-    // A device update comes from a paired device: the hint shown at boot
-    // goes once a radiator is added while the page is open.
-    it('should drop the pairing hint on a device update', async () => {
-      const { emit, routes } = await bootPage({
+    // A device update comes from a paired device, so the hints' answer
+    // is known: no probe, no breadcrumb per radiator per sync cycle.
+    it('should leave the account hints alone on a device update', async () => {
+      const { api, emit } = await bootPage({
         routes: {
           ...defaultRoutes(),
           'GET /devices/pending': true,
@@ -473,12 +504,51 @@ describe('settings page', () => {
 
       expect(pairingHint().hidden).toBe(false)
 
-      routes['GET /devices/pending'] = false
-      routes['GET /settings/devices'] = deviceSettingsFixture()
       emit('deviceupdate')
       await settleDetached()
 
+      expect(pairingHint().hidden).toBe(false)
+      expect(probeCount(api, '/devices/pending')).toBe(1)
+      expect(probeCount(api, '/sessions/empty')).toBe(1)
+    })
+
+    // The page opened across the restored session's first sync: the
+    // boot probes read an unlisted registry, and the account update the
+    // sync lands with brings the hint — never an alert.
+    it('should show the pairing hint once the first sync lists radiators while the page is open', async () => {
+      const { alert, emit, routes } = await bootPage({
+        routes: { ...defaultRoutes(), 'GET /settings/devices': {} },
+      })
+
       expect(pairingHint().hidden).toBe(true)
+
+      routes['GET /devices/pending'] = true
+      emit('accountupdate')
+      await settleDetached()
+
+      expect(pairingHint().hidden).toBe(false)
+      expect(emptyAccountHint().hidden).toBe(true)
+      expect(alert).not.toHaveBeenCalled()
+    })
+
+    // The account's counts moved the other way: the radiators left the
+    // account while the page was open.
+    it('should swap the hints when the account empties', async () => {
+      const { emit, routes } = await bootPage({
+        routes: {
+          ...defaultRoutes(),
+          'GET /devices/pending': true,
+          'GET /settings/devices': {},
+        },
+      })
+
+      routes['GET /devices/pending'] = false
+      routes['GET /sessions/empty'] = true
+      emit('accountupdate')
+      await settleDetached()
+
+      expect(pairingHint().hidden).toBe(true)
+      expect(emptyAccountHint().hidden).toBe(false)
     })
 
     it('should ignore a select it did not build', async () => {
@@ -572,6 +642,7 @@ describe('settings page', () => {
           ...defaultRoutes(),
           'GET /sessions': false,
           'POST /sessions': {
+            isAccountEmpty: false,
             isDeviceListStale: true,
             isPairingPending: false,
           },
@@ -589,8 +660,41 @@ describe('settings page', () => {
       expect(devicesFieldset().hidden).toBe(false)
       expect(authenticationDetails().open).toBe(false)
       expect(alert).toHaveBeenCalledWith('Liste non actualisée')
-      expect(alert).not.toHaveBeenCalledWith('settings.devices.none')
+      expect(alert).toHaveBeenCalledTimes(1)
+      expect(emptyAccountHint().hidden).toBe(true)
       expect(pairingHint().hidden).toBe(true)
+    })
+
+    // Signing in to an account that lists no radiator the app can read
+    // is told so, where a pairing wizard could offer nothing — alerted
+    // once, the hint then standing with it.
+    it('should explain a sign-in to an account listing nothing', async () => {
+      const { alert } = await bootPage({
+        routes: {
+          ...defaultRoutes(),
+          'GET /sessions': false,
+          'GET /settings/devices': {},
+          'POST /sessions': {
+            isAccountEmpty: true,
+            isDeviceListStale: false,
+            isPairingPending: false,
+          },
+        },
+        translations: {
+          'settings.authenticate.emptyAccount': 'Aucun radiateur lisible',
+        },
+      })
+
+      commit(getInput('username'), 'user@example.com')
+      commit(getInput('password'), 'secret')
+      authenticateButton().click()
+      await settleDetached()
+
+      expect(devicesFieldset().hidden).toBe(false)
+      expect(emptyAccountHint().hidden).toBe(false)
+      expect(pairingHint().hidden).toBe(true)
+      expect(alert).toHaveBeenCalledWith('Aucun radiateur lisible')
+      expect(alert).toHaveBeenCalledTimes(1)
     })
 
     // Signing in to an account that lists radiators none of which is in
@@ -603,6 +707,7 @@ describe('settings page', () => {
           'GET /sessions': false,
           'GET /settings/devices': {},
           'POST /sessions': {
+            isAccountEmpty: false,
             isDeviceListStale: false,
             isPairingPending: true,
           },
@@ -616,6 +721,7 @@ describe('settings page', () => {
       await settleDetached()
 
       expect(devicesFieldset().hidden).toBe(false)
+      expect(emptyAccountHint().hidden).toBe(true)
       expect(pairingHint().hidden).toBe(false)
       expect(alert).toHaveBeenCalledWith('Ajoutez vos radiateurs')
     })
@@ -631,6 +737,7 @@ describe('settings page', () => {
       await settleDetached()
 
       expect(devicesFieldset().hidden).toBe(false)
+      expect(emptyAccountHint().hidden).toBe(true)
       expect(pairingHint().hidden).toBe(true)
       expect(alert).not.toHaveBeenCalled()
     })

@@ -20,6 +20,10 @@
       "method": "GET",
       "path": "/webview-hashes"
     },
+    "isAccountEmpty": {
+      "method": "GET",
+      "path": "/sessions/empty"
+    },
     "isAuthenticated": {
       "method": "GET",
       "path": "/sessions"

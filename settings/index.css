@@ -42,7 +42,8 @@ details[open] > summary.homey-form-legend::before {
   rotate: 135deg;
 }
 
-/* The pairing hint under the device settings legend */
+/* The account hints under the device settings legend */
+#empty_account,
 #pairing_pending {
   font-size: var(--homey-font-size-small);
   margin-block-end: var(--homey-su-2);
