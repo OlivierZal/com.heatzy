@@ -36,6 +36,19 @@ const settingKey = (key: string): keyof HomeySettings =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- the library's SettingManager contract types its keys as plain strings
   key as keyof HomeySettings
 
+// The one line a change of the account's unit counts leaves in the log:
+// what the account lists (the radiators this SDK models and could read)
+// against what Homey holds of it — com.melcloud's form, so one grep
+// reads both apps.
+const formatUnitCounts = ({
+  added,
+  listed,
+}: {
+  added: number
+  listed: number
+}): string =>
+  `Heatzy: ${String(listed)} unit${listed === 1 ? '' : 's'} listed, ${String(added)} added in Homey`
+
 export default class HeatzyApp extends App {
   declare public readonly homey: Homey.Homey
 
@@ -47,9 +60,23 @@ export default class HeatzyApp extends App {
   // in-flight requests cannot outlive the app instance.
   readonly #abortController = new AbortController()
 
+  // The last account line written, so the sync callback — every registry
+  // cycle and every write — only reports when the line would change.
+  #accountLine: string | null = null
+
   #api!: HeatzyAPI
 
   #facadeManager!: FacadeManager
+
+  // Whether the registry holds the account's own answer: set by the first
+  // sync notification and never unset — the library notifies only after
+  // a resolved cycle, and a logout wipes the registry while the session
+  // is read at call time, so a cycle a logout raced notifies over a
+  // wiped registry the predicates then refuse anyway. Before it, an
+  // empty registry is the boot race (expected for up to a minute after
+  // start, longer under login backoff); after it, the registry is
+  // authoritative, EMPTY INCLUDED.
+  #isRegistryListed = false
 
   // Loss-episode ledger, written SYNCHRONOUSLY by both lib event
   // callbacks and read by the deferred halves: 'pending' = loss
@@ -139,6 +166,30 @@ export default class HeatzyApp extends App {
     return this.#facadeManager.get(instance)
   }
 
+  // Whether the signed-in account's listed registry holds no radiator at
+  // all: the account itself answered that it has nothing to offer, which
+  // the settings page explains in place of blank device settings. The
+  // wording stays "no radiator the app can read": a listing whose every
+  // entry this SDK dropped, or whose every `/devdata` read failed this
+  // cycle, empties the registry too.
+  public isAccountEmpty(): boolean {
+    return (
+      this.#isAccountListed() && this.#api.registry.getDevices().length === 0
+    )
+  }
+
+  // Whether the signed-in account lists radiators and Homey holds none
+  // of them: the account answered that it has units to offer and nothing
+  // was paired yet, which the settings page explains in place of blank
+  // device settings.
+  public isPairingPending(): boolean {
+    return (
+      this.#isAccountListed() &&
+      this.#api.registry.getDevices().length > 0 &&
+      !this.#hasPairedDevices()
+    )
+  }
+
   public async updateDeviceSettings(settings: Settings): Promise<void> {
     await Promise.all(
       this.#getDevices().map(async (device) => {
@@ -160,7 +211,12 @@ export default class HeatzyApp extends App {
     )
   }
 
+  // Records the registry as listed before anything reads it, then
+  // reports the account's counts off the callback: the library awaits
+  // it, and the report waits for readiness.
   readonly #onSync: SyncCallback = async ({ ids } = {}) => {
+    this.#isRegistryListed = true
+    fireAndForget(this.#reportAccountCounts(), this, 'Account report failed:')
     await this.#syncFromDevices(ids)
   }
 
@@ -202,6 +258,13 @@ export default class HeatzyApp extends App {
     return this.#getDevices().length > 0
   }
 
+  // Whether the account is in use AND its registry holds its own answer
+  // — the arbiter both hints read, so neither ever judges the boot race
+  // or a registry a lost session still holds.
+  #isAccountListed(): boolean {
+    return this.#api.isAuthenticated() && this.#isRegistryListed
+  }
+
   async #logBootReady(): Promise<void> {
     await this.homey.ready()
     this.log('Boot: ready after', process.uptime().toFixed(1), 's')
@@ -240,6 +303,29 @@ export default class HeatzyApp extends App {
         // Non-critical: notification display is best-effort
       }
     }, 0)
+  }
+
+  // One line per account, on the first sync and whenever a count moves:
+  // the callback fires every registry cycle (5 s) and after every
+  // write, so an unconditional line would flood the log. The readiness
+  // await orders the paired count after driver init — the background
+  // resume's first sync lands while `getDrivers()` is still empty. The
+  // same change gate pushes `accountupdate` to the settings page, whose
+  // account hints can only move when these counts do: a page opened
+  // across the restored session's first sync hears it land, and a
+  // radiator added while the page is open takes the pairing hint away.
+  async #reportAccountCounts(): Promise<void> {
+    await this.homey.ready()
+    const line = formatUnitCounts({
+      added: this.#getDevices().length,
+      listed: this.#api.registry.getDevices().length,
+    })
+    if (line === this.#accountLine) {
+      return
+    }
+    this.#accountLine = line
+    this.log(line)
+    this.homey.api.realtime('accountupdate', null)
   }
 
   // Residual credentials without any paired device only get a log

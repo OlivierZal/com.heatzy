@@ -7,6 +7,7 @@
   "settings": {
     "authenticate": {
       "button": "Se connecter",
+      "emptyAccount": "Ce compte Heatzy ne recense aucun radiateur que l'application puisse lire.",
       "failure": "L'authentification a échoué.",
       "legend": "Identifiants",
       "rejected": "Heatzy a refusé vos identifiants — vérifiez-les puis reconnectez-vous.",
@@ -15,7 +16,10 @@
       "staleDevices": "Connexion réussie, mais la liste des appareils n'a pas pu être actualisée — réessayez plus tard."
     },
     "boolean": { "false": "Non", "true": "Oui" },
-    "devices": { "legend": "Paramètres de tous les appareils" },
+    "devices": {
+      "legend": "Paramètres de tous les appareils",
+      "none": "Votre compte Heatzy liste des radiateurs qui ne sont pas encore ajoutés dans Homey : ajoutez-les via Ajouter un appareil → Heatzy."
+    },
     "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer.",
     "refresh": "Rafraîchir",
     "success": "La mise à jour a réussi.",

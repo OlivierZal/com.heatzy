@@ -14,14 +14,16 @@
       "rejected": "Heatzy rejected your credentials — please check them and sign in again.",
       "reset": "Reset",
       "resetConfirm": "This immediately signs you out and clears your saved Heatzy credentials.",
-      "staleDevices": "Signed in, but the device list could not be refreshed — please try again later."
+      "staleDevices": "Signed in, but the device list could not be refreshed — please try again later.",
+      "emptyAccount": "This Heatzy account lists no radiator the app can read."
     },
     "boolean": {
       "false": "No",
       "true": "Yes"
     },
     "devices": {
-      "legend": "All device settings"
+      "legend": "All device settings",
+      "none": "Your Heatzy account lists radiators that are not added in Homey yet: add them via Add device → Heatzy."
     },
     "loadFailed": "The settings page failed to load. Please try again.",
     "refresh": "Refresh",

@@ -54,7 +54,9 @@ interface PageElements {
   readonly authenticate: HTMLButtonElement
   readonly authentication: HTMLDetailsElement
   readonly devices: HTMLFieldSetElement
+  readonly emptyAccount: HTMLDivElement
   readonly login: HTMLFieldSetElement
+  readonly pairingPending: HTMLDivElement
   readonly refreshSettings: HTMLButtonElement
   readonly resetCredentials: HTMLButtonElement
   readonly settingsCommon: HTMLDivElement
@@ -93,7 +95,9 @@ const getPageElements = (): PageElements => ({
   authenticate: getButton('authenticate'),
   authentication: getDetails('authentication'),
   devices: getFieldset('devices'),
+  emptyAccount: getDiv('empty_account'),
   login: getFieldset('login'),
+  pairingPending: getDiv('pairing_pending'),
   refreshSettings: getButton('refresh_settings_common'),
   resetCredentials: getButton('reset_credentials'),
   settingsCommon: getDiv('settings_common'),
@@ -331,6 +335,46 @@ const postSession = async (
   }
 }
 
+// The two account hints under the device settings legend, each the
+// explanation of blank device settings for its own condition: an account
+// listing no radiator the app can read, or one listing radiators none of
+// which is in Homey yet.
+const applyAccountHints = (
+  elements: PageElements,
+  {
+    isAccountEmpty,
+    isPairingPending,
+  }: Pick<AuthenticationResult, 'isAccountEmpty' | 'isPairingPending'>,
+): void => {
+  elements.emptyAccount.hidden = !isAccountEmpty
+  elements.pairingPending.hidden = !isPairingPending
+}
+
+// What the user hears after an accepted sign-in, the most explanatory
+// first. Degrading is not going silent: the server accepted the sign-in,
+// so the account stays signed in and the page opens — but a device list
+// the library should have refreshed and that never arrived is said
+// here, the only place the user hears about it, and it explains any
+// empty or pending list better than the hints would. An account that
+// lists nothing is told so, where a pairing wizard could offer nothing;
+// one that lists radiators none of which is in Homey yet is sent to
+// that wizard, where the blank device settings would leave it guessing.
+const postLoginMessage = (
+  homey: HomeySettings,
+  { isAccountEmpty, isDeviceListStale, isPairingPending }: AuthenticationResult,
+): string | null => {
+  if (isDeviceListStale) {
+    return homey.__('settings.authenticate.staleDevices')
+  }
+  if (isAccountEmpty) {
+    return homey.__('settings.authenticate.emptyAccount')
+  }
+  if (isPairingPending) {
+    return homey.__('settings.devices.none')
+  }
+  return null
+}
+
 const pushCredentials = async (
   context: PageContext,
   credentials: LoginCredentials,
@@ -341,12 +385,10 @@ const pushCredentials = async (
     return
   }
   setAuthenticatedState(elements, true)
-  // Degrading is not going silent. The server accepted the sign-in, so
-  // the account stays signed in and the page opens — but the device
-  // list the library should have refreshed never arrived, and this
-  // alert is the only place the user hears about it.
-  if (result.isDeviceListStale) {
-    await alertMessage(homey, homey.__('settings.authenticate.staleDevices'))
+  applyAccountHints(elements, result)
+  const message = postLoginMessage(homey, result)
+  if (message !== null) {
+    await alertMessage(homey, message)
   }
 }
 
@@ -409,6 +451,27 @@ const logOut = async (context: PageContext): Promise<void> => {
   await context.credentialsGate.runBusy(async () => pushLogOut(context))
 }
 
+// A failed probe reads as "nothing to explain": the hints are
+// explanations, never a reason for the page to fail.
+const probeHint = async (request: Promise<boolean>): Promise<boolean> => {
+  try {
+    return await request
+  } catch {
+    return false
+  }
+}
+
+const refreshAccountHints = async ({
+  elements,
+  homey,
+}: PageContext): Promise<void> => {
+  const [isAccountEmpty, isPairingPending] = await Promise.all([
+    probeHint(homeyApiGet<boolean>(homey, '/sessions/empty')),
+    probeHint(homeyApiGet<boolean>(homey, '/devices/pending')),
+  ])
+  applyAccountHints(elements, { isAccountEmpty, isPairingPending })
+}
+
 const refreshFromDeviceUpdate = async (context: PageContext): Promise<void> => {
   await fetchDeviceSettings(context)
   refreshCommonSettings(context)
@@ -429,9 +492,18 @@ const addEventListeners = (context: PageContext): void => {
     refreshCommonSettings(context)
   })
   // Device syncs refresh the grouped values live, like the manual
-  // refresh button but without the tap.
+  // refresh button but without the tap. Only a paired device emits one,
+  // so the account hints are not re-judged here (the answer would be
+  // known, at a probe per radiator per sync cycle).
   homey.on('deviceupdate', () => {
     fireAndForget(refreshFromDeviceUpdate(context), alertRejection(homey))
+  })
+  // The app pushes this whenever its account counts move — the only
+  // moments the hints can change: the restored session's first sync
+  // landing after the page opened, a radiator added, one leaving the
+  // account.
+  homey.on('accountupdate', () => {
+    fireAndForget(refreshAccountHints(context), alertRejection(homey))
   })
 }
 
@@ -483,6 +555,18 @@ const buildSections = async (context: PageContext): Promise<void> => {
   context.credentialsGate.markSaved()
 }
 
+// The session read decides what the page shows; a signed-in account also
+// gets its account hints — toggled only, never alerted: a boot is not a
+// sign-in, and a hint stands until the account's counts move.
+const applySessionState = async (context: PageContext): Promise<void> => {
+  const { elements, homey } = context
+  const isAuthenticated = await homeyApiGet<boolean>(homey, '/sessions')
+  setAuthenticatedState(elements, isAuthenticated)
+  if (isAuthenticated) {
+    await refreshAccountHints(context)
+  }
+}
+
 const init = async (homey: HomeySettings): Promise<void> => {
   // A refetch issued by the boot check replaces this document: nothing
   // to build on the one being torn down.
@@ -520,10 +604,7 @@ const init = async (homey: HomeySettings): Promise<void> => {
   )
   await buildSections(context)
   addEventListeners(context)
-  setAuthenticatedState(
-    context.elements,
-    await homeyApiGet<boolean>(homey, '/sessions'),
-  )
+  await applySessionState(context)
 }
 
 // The overlay must end whatever happens: `runWebview` bounds the work

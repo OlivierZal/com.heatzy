@@ -95,8 +95,11 @@ coverage.
   `update*` for PUT (never `set*`), and a business verb for POST
   (`authenticate` on `/sessions`, `logWebviewBoot` on `/boot-error`),
   breadcrumbs log the verbed form (`'GET /settings/devices'`) through
-  the kit's `logSettingsRoute`. Handler renames are wire-invisible
-  (routing is method+path).
+  the kit's `logSettingsRoute`. The boolean GETs are `isAuthenticated`
+  on `/sessions`, `isAccountEmpty` on `/sessions/empty` and
+  `isPairingPending` on `/devices/pending`, the app's answers for the
+  settings page's account hints (below). Handler renames are
+  wire-invisible (routing is method+path).
   `@olivierzal/homey-kit/settings` is the settings page's transport (the
   settings SDK is error-first-callback) and its freshness wiring
   (`watchSettingsFreshness`: the three fixed routes over the kit's
@@ -126,13 +129,69 @@ coverage.
   credentials were never accepted. Degrading is
   not the same as going silent: `pushCredentials` opens the devices
   AND alerts `settings.authenticate.staleDevices`, the only place the
-  user hears that the list never arrived. Treating every rejection as
+  user hears that the list never arrived. The result carries two more
+  verdicts, `isAccountEmpty` and `isPairingPending` (the app's
+  predicates, below), which the stale one outranks: the route answers
+  both `false` with a stale list (a list that could not be refreshed
+  explains itself, and whatever it still holds is not judged), and the
+  page's `postLoginMessage` ranks `staleDevices` over
+  `settings.authenticate.emptyAccount` over `settings.devices.none` —
+  one alert per sign-in, the most explanatory. Treating every rejection as
   a credential failure (23.3.4 and earlier) stranded a signed-in user
   on the login form, where their next click spent another real login
   attempt — the library's backoff arms around the sign-in itself, NOT
   around the enforced sync, so nothing local slowed the retries. Same
   rule, same day, in com.melcloud: these two are twins, and a fix on
   one reopens the question for the other.
+- The account hints, twins of com.melcloud's empty-account and
+  no-device hints: `isAccountEmpty()` on the app holds when the account
+  is signed in, its registry is listed and holds no radiator at all —
+  the account itself answered that it has nothing to offer;
+  `isPairingPending()` when it is signed in, listed, holds at least one
+  radiator and no device is paired — it has units to offer and Homey
+  holds none. Both read `#isAccountListed()`, the arbiter com.melcloud
+  calls `isRegistryListed`: `isAuthenticated()` at call time AND the
+  first `onSyncComplete` landed (`#isRegistryListed`, set in `#onSync`
+  before anything else and never unset — the library notifies only
+  after a resolved cycle, a logout wipes the registry, and a cycle a
+  logout raced notifies over a wiped registry the session read then
+  refuses). Before it, an empty registry is the boot race (the
+  background resume's first sync, longer under login backoff); after
+  it, the registry is authoritative, EMPTY INCLUDED, and holds only the
+  radiators this SDK models AND whose `/devdata` read succeeded at
+  least once — hence the wording "no radiator the app can read". The
+  settings page shows them in exactly two ways and nowhere else: the
+  `empty_account` / `pairing_pending` hints under the device settings
+  legend, toggled at boot for a signed-in account only (a failed probe
+  reads false — a hint is an explanation, never a page failure) and
+  re-judged on the app's `accountupdate` realtime, which the account
+  line's change gate (below) pushes: a page opened across the restored
+  session's first sync gets its hint when the sync lands, and the
+  pairing hint goes once a radiator is added while the page is open.
+  NEVER re-judged on `deviceupdate`: only a paired device emits one, so
+  it could only ever hide the pairing hint, at one probe and one
+  breadcrumb per radiator per 5 s cycle while the page is open. And the
+  post-login alert, `settings.authenticate.emptyAccount` over
+  `settings.devices.none` (the latter pointing at the pairing wizard).
+  Never an alert at boot — a boot is not a sign-in.
+- One account line in the app log,
+  `Heatzy: 1 unit listed, 0 added in Homey` (singular and plural
+  handled, never JSON — com.melcloud's form, so one grep reads both
+  apps; a code span wrapped across lines loses its indentation to
+  Prettier, so it stays on one line), written from the sync callback
+  when the formatted line differs from the last one written
+  (`#accountLine`): the first sync, then whenever a count moves, never
+  otherwise — the
+  callback fires every registry cycle (5 s) AND after every facade
+  write, so an unconditional line is tens of thousands a day. It waits
+  for `homey.ready()` before counting the paired devices (the
+  background resume's first sync lands during `App#onInit`, when
+  `getDrivers()` is still empty — a naive first line would read "0
+  added" and a second would follow 5 s later) and runs off the callback
+  through `fireAndForget`, because the library AWAITS `onSyncComplete`.
+  The same gate pushes the `accountupdate` realtime the settings page's
+  hints listen to (above). The label is the fixed word "Heatzy", never
+  the username: nothing user-entered is ever logged.
 - Dirty-gating: `createDirtyGate` (`@olivierzal/homey-kit/webview`) is
   the ONE primitive behind the
   settings Apply/Refresh pair AND the credentials sign-in/reset pair

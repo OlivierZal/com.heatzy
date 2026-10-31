@@ -97,6 +97,27 @@
       <legend class="homey-form-legend" data-i18n="settings.devices.legend">
         All device settings
       </legend>
+      <!-- Says that the signed-in account lists no radiator the app can
+           read: nothing to set up, nothing to pair. -->
+      <div
+        id="empty_account"
+        aria-live="polite"
+        data-i18n="settings.authenticate.emptyAccount"
+        hidden
+      >
+        This Heatzy account lists no radiator the app can read.
+      </div>
+      <!-- Points at the pairing wizard while the signed-in account lists
+           radiators none of which is in Homey yet. -->
+      <div
+        id="pairing_pending"
+        aria-live="polite"
+        data-i18n="settings.devices.none"
+        hidden
+      >
+        Your Heatzy account lists radiators that are not added in Homey yet: add
+        them via Add device → Heatzy.
+      </div>
       <div id="settings_common"></div>
       <div class="homey-form-group container">
         <button

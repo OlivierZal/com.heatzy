@@ -21,9 +21,17 @@
       "method": "GET",
       "path": "/webview-hashes"
     },
+    "isAccountEmpty": {
+      "method": "GET",
+      "path": "/sessions/empty"
+    },
     "isAuthenticated": {
       "method": "GET",
       "path": "/sessions"
+    },
+    "isPairingPending": {
+      "method": "GET",
+      "path": "/devices/pending"
     },
     "logOut": {
       "method": "DELETE",
