@@ -36,6 +36,13 @@ const settingKey = (key: string): keyof HomeySettings =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- the library's SettingManager contract types its keys as plain strings
   key as keyof HomeySettings
 
+// The account line's two figures: what the cloud lists (the radiators
+// this SDK models and could read) against what Homey holds.
+interface AccountCounts {
+  readonly added: number
+  readonly listed: number
+}
+
 export default class HeatzyApp extends App {
   declare public readonly homey: Homey.Homey
 
@@ -46,6 +53,10 @@ export default class HeatzyApp extends App {
   // One shutdown signal for the API client: onUninit aborts it so
   // in-flight requests cannot outlive the app instance.
   readonly #abortController = new AbortController()
+
+  // The last account line written, so the sync callback — every registry
+  // cycle and every write — only writes a line when a count moves.
+  #accountCounts: AccountCounts | null = null
 
   #api!: HeatzyAPI
 
@@ -139,6 +150,20 @@ export default class HeatzyApp extends App {
     return this.#facadeManager.get(instance)
   }
 
+  // Whether the signed-in account lists radiators and Homey holds none
+  // of them: the account answered that it has units to offer and nothing
+  // was paired yet, which the settings page explains in place of blank
+  // device settings. A registry no sync has filled yet (the boot race)
+  // lists nothing, a logout wipes it, and the session is read at call
+  // time, so the predicate only ever holds over the account's own answer.
+  public isPairingPending(): boolean {
+    return (
+      this.#api.isAuthenticated() &&
+      this.#api.registry.getDevices().length > 0 &&
+      !this.#hasPairedDevices()
+    )
+  }
+
   public async updateDeviceSettings(settings: Settings): Promise<void> {
     await Promise.all(
       this.#getDevices().map(async (device) => {
@@ -160,7 +185,14 @@ export default class HeatzyApp extends App {
     )
   }
 
+  // The library awaits this callback, so the account line — which waits
+  // for readiness — runs off it rather than holding the sync cycle.
   readonly #onSync: SyncCallback = async ({ ids } = {}) => {
+    fireAndForget(
+      this.#logAccountCounts(),
+      this,
+      'Account count logging failed:',
+    )
     await this.#syncFromDevices(ids)
   }
 
@@ -200,6 +232,27 @@ export default class HeatzyApp extends App {
 
   #hasPairedDevices(): boolean {
     return this.#getDevices().length > 0
+  }
+
+  // One line per account, on the first sync and whenever a count moves:
+  // the callback fires every registry cycle (5 s) and after every
+  // write, so an unconditional line would flood the log. The readiness
+  // await orders the paired count after driver init — the background
+  // resume's first sync lands while `getDrivers()` is still empty.
+  async #logAccountCounts(): Promise<void> {
+    await this.homey.ready()
+    const counts: AccountCounts = {
+      added: this.#getDevices().length,
+      listed: this.#api.registry.getDevices().length,
+    }
+    const previous = this.#accountCounts
+    if (previous?.added === counts.added && previous.listed === counts.listed) {
+      return
+    }
+    this.#accountCounts = counts
+    this.log(
+      `Heatzy: ${String(counts.listed)} unit(s) listed by the cloud, ${String(counts.added)} added in Homey`,
+    )
   }
 
   async #logBootReady(): Promise<void> {

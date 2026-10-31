@@ -95,8 +95,10 @@ coverage.
   `update*` for PUT (never `set*`), and a business verb for POST
   (`authenticate` on `/sessions`, `logWebviewBoot` on `/boot-error`),
   breadcrumbs log the verbed form (`'GET /settings/devices'`) through
-  the kit's `logSettingsRoute`. Handler renames are wire-invisible
-  (routing is method+path).
+  the kit's `logSettingsRoute`. The boolean GETs are `isAuthenticated`
+  on `/sessions` and `isPairingPending` on `/devices/pending`, the
+  app's answer for the settings page's pairing hint (below). Handler
+  renames are wire-invisible (routing is method+path).
   `@olivierzal/homey-kit/settings` is the settings page's transport (the
   settings SDK is error-first-callback) and its freshness wiring
   (`watchSettingsFreshness`: the three fixed routes over the kit's
@@ -126,13 +128,49 @@ coverage.
   credentials were never accepted. Degrading is
   not the same as going silent: `pushCredentials` opens the devices
   AND alerts `settings.authenticate.staleDevices`, the only place the
-  user hears that the list never arrived. Treating every rejection as
+  user hears that the list never arrived. The result carries a second
+  verdict, `isPairingPending` (the app's predicate, below), which the
+  stale one outranks: the route answers `isPairingPending: false` with
+  a stale list (a list that could not be refreshed explains itself, and
+  whatever it still holds is not judged), and the page's
+  `postLoginMessage` ranks `staleDevices` over `settings.devices.none`
+  — one alert per sign-in, the most explanatory. Treating every rejection as
   a credential failure (23.3.4 and earlier) stranded a signed-in user
   on the login form, where their next click spent another real login
   attempt — the library's backoff arms around the sign-in itself, NOT
   around the enforced sync, so nothing local slowed the retries. Same
   rule, same day, in com.melcloud: these two are twins, and a fix on
   one reopens the question for the other.
+- The pairing-pending hint, twin of com.melcloud's empty-account hint:
+  `isPairingPending()` on the app holds when the account is signed in,
+  its registry lists at least one radiator and no device is paired —
+  the account answered that it has units to offer and Homey holds none,
+  which the settings page explains in place of blank device settings,
+  in exactly two ways and nowhere else: the `pairing_pending` hint
+  under the device settings legend, toggled at boot for a signed-in
+  account only (a failed probe reads false — the hint is an
+  explanation, never a page failure) and re-judged on every
+  `deviceupdate`, which only a paired device emits, so it goes once a
+  radiator is added while the page is open; and the post-login alert
+  `settings.devices.none`, pointing at the pairing wizard. Never an
+  alert at boot — a boot is not a sign-in. The predicate reads
+  `registry.getDevices()`, which holds only the radiators this SDK
+  models AND whose `/devdata` read succeeded at least once (the same
+  count com.melcloud's `isAccountEmpty` judges); a registry no sync has
+  filled yet lists nothing, a logout wipes it and the session is read
+  at call time, so it needs no first-sync tracking of its own.
+- One account line in the app log, `Heatzy: N unit(s) listed by the
+cloud, M added in Homey`, written from the sync callback on the first
+  sync and whenever a count moves, never otherwise: the callback fires
+  every registry cycle (5 s) AND after every facade write, so an
+  unconditional line is tens of thousands a day. It waits for
+  `homey.ready()` before counting the paired devices (the background
+  resume's first sync lands during `App#onInit`, when `getDrivers()`
+  is still empty — a naive first line would read "0 added" and a
+  second would follow 5 s later) and runs off the callback through
+  `fireAndForget`, because the library AWAITS `onSyncComplete`. The
+  label is the fixed word "Heatzy", never the username: nothing
+  user-entered is ever logged.
 - Dirty-gating: `createDirtyGate` (`@olivierzal/homey-kit/webview`) is
   the ONE primitive behind the
   settings Apply/Refresh pair AND the credentials sign-in/reset pair

@@ -55,6 +55,7 @@ interface PageElements {
   readonly authentication: HTMLDetailsElement
   readonly devices: HTMLFieldSetElement
   readonly login: HTMLFieldSetElement
+  readonly pairingPending: HTMLDivElement
   readonly refreshSettings: HTMLButtonElement
   readonly resetCredentials: HTMLButtonElement
   readonly settingsCommon: HTMLDivElement
@@ -94,6 +95,7 @@ const getPageElements = (): PageElements => ({
   authentication: getDetails('authentication'),
   devices: getFieldset('devices'),
   login: getFieldset('login'),
+  pairingPending: getDiv('pairing_pending'),
   refreshSettings: getButton('refresh_settings_common'),
   resetCredentials: getButton('reset_credentials'),
   settingsCommon: getDiv('settings_common'),
@@ -331,6 +333,27 @@ const postSession = async (
   }
 }
 
+// What the user hears after an accepted sign-in, the most explanatory
+// first. Degrading is not going silent: the server accepted the sign-in,
+// so the account stays signed in and the page opens — but a device list
+// the library should have refreshed and that never arrived is said
+// here, the only place the user hears about it, and it explains any
+// pending pairing better than the hint would. An account that lists
+// radiators none of which is in Homey yet is sent to the pairing
+// wizard, where the blank device settings would leave it guessing.
+const postLoginMessage = (
+  homey: HomeySettings,
+  { isDeviceListStale, isPairingPending }: AuthenticationResult,
+): string | null => {
+  if (isDeviceListStale) {
+    return homey.__('settings.authenticate.staleDevices')
+  }
+  if (isPairingPending) {
+    return homey.__('settings.devices.none')
+  }
+  return null
+}
+
 const pushCredentials = async (
   context: PageContext,
   credentials: LoginCredentials,
@@ -341,12 +364,10 @@ const pushCredentials = async (
     return
   }
   setAuthenticatedState(elements, true)
-  // Degrading is not going silent. The server accepted the sign-in, so
-  // the account stays signed in and the page opens — but the device
-  // list the library should have refreshed never arrived, and this
-  // alert is the only place the user hears about it.
-  if (result.isDeviceListStale) {
-    await alertMessage(homey, homey.__('settings.authenticate.staleDevices'))
+  elements.pairingPending.hidden = !result.isPairingPending
+  const message = postLoginMessage(homey, result)
+  if (message !== null) {
+    await alertMessage(homey, message)
   }
 }
 
@@ -409,9 +430,32 @@ const logOut = async (context: PageContext): Promise<void> => {
   await context.credentialsGate.runBusy(async () => pushLogOut(context))
 }
 
+// A failed probe reads as "nothing pending": the hint is an explanation,
+// never a reason for the page to fail.
+const fetchIsPairingPending = async (
+  homey: HomeySettings,
+): Promise<boolean> => {
+  try {
+    return await homeyApiGet<boolean>(homey, '/devices/pending')
+  } catch {
+    return false
+  }
+}
+
+const refreshPairingHint = async ({
+  elements,
+  homey,
+}: PageContext): Promise<void> => {
+  elements.pairingPending.hidden = !(await fetchIsPairingPending(homey))
+}
+
+// A device update comes from a paired device, so the pairing hint is
+// re-judged with the values: it goes once a radiator is added while the
+// page is open.
 const refreshFromDeviceUpdate = async (context: PageContext): Promise<void> => {
   await fetchDeviceSettings(context)
   refreshCommonSettings(context)
+  await refreshPairingHint(context)
 }
 
 const addEventListeners = (context: PageContext): void => {
@@ -483,6 +527,18 @@ const buildSections = async (context: PageContext): Promise<void> => {
   context.credentialsGate.markSaved()
 }
 
+// The session read decides what the page shows; a signed-in account also
+// gets its pairing hint — toggled only, never alerted: a boot is not a
+// sign-in, and the hint stands until a radiator is added.
+const applySessionState = async (context: PageContext): Promise<void> => {
+  const { elements, homey } = context
+  const isAuthenticated = await homeyApiGet<boolean>(homey, '/sessions')
+  setAuthenticatedState(elements, isAuthenticated)
+  if (isAuthenticated) {
+    await refreshPairingHint(context)
+  }
+}
+
 const init = async (homey: HomeySettings): Promise<void> => {
   // A refetch issued by the boot check replaces this document: nothing
   // to build on the one being torn down.
@@ -520,10 +576,7 @@ const init = async (homey: HomeySettings): Promise<void> => {
   )
   await buildSections(context)
   addEventListeners(context)
-  setAuthenticatedState(
-    context.elements,
-    await homeyApiGet<boolean>(homey, '/sessions'),
-  )
+  await applySessionState(context)
 }
 
 // The overlay must end whatever happens: `runWebview` bounds the work

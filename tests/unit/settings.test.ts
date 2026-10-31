@@ -8,6 +8,7 @@ import type HomeySettings from 'homey/lib/HomeySettings'
 import {
   getButton,
   getDetails,
+  getDiv,
   getFieldset,
   getInput,
 } from '@olivierzal/homey-kit/dom'
@@ -190,13 +191,14 @@ const createHarness = (options: HomeyOptions = {}): Harness => {
 
 const defaultRoutes = (): Record<string, unknown> => ({
   'DELETE /sessions': undefined,
+  'GET /devices/pending': false,
   'GET /language': 'fr',
   'GET /sessions': true,
   'GET /settings/devices': deviceSettingsFixture(),
   'GET /settings/drivers': driverSettingsFixture(),
   'GET /webview-hashes': {},
   'POST /boot-error': undefined,
-  'POST /sessions': { isDeviceListStale: false },
+  'POST /sessions': { isDeviceListStale: false, isPairingPending: false },
   'PUT /settings/devices': undefined,
 })
 
@@ -234,6 +236,8 @@ const authenticateButton = (): HTMLButtonElement => getButton('authenticate')
 const resetButton = (): HTMLButtonElement => getButton('reset_credentials')
 
 const devicesFieldset = (): HTMLFieldSetElement => getFieldset('devices')
+
+const pairingHint = (): HTMLDivElement => getDiv('pairing_pending')
 
 const authenticationDetails = (): HTMLDetailsElement =>
   getDetails('authentication')
@@ -287,10 +291,50 @@ describe('settings page', () => {
     })
 
     it('should stay signed out when the session read says so', async () => {
-      await bootPage({ routes: { ...defaultRoutes(), 'GET /sessions': false } })
+      const { api } = await bootPage({
+        routes: { ...defaultRoutes(), 'GET /sessions': false },
+      })
 
       expect(devicesFieldset().hidden).toBe(true)
       expect(authenticationDetails().open).toBe(true)
+      // A signed-out account is not in use: nothing to judge pending.
+      expect(api).not.toHaveBeenCalledWith(
+        'GET',
+        '/devices/pending',
+        expect.any(Function),
+      )
+    })
+
+    it('should settle without the pairing hint when a radiator is paired', async () => {
+      await bootPage()
+
+      expect(pairingHint().hidden).toBe(true)
+    })
+
+    // A boot is not a sign-in: the hint is toggled, never alerted, and
+    // stands until a radiator is added.
+    it('should show the pairing hint without alerting when nothing is paired', async () => {
+      const { alert, ready } = await bootPage({
+        routes: {
+          ...defaultRoutes(),
+          'GET /devices/pending': true,
+          'GET /settings/devices': {},
+        },
+      })
+
+      expect(ready).toHaveBeenCalledTimes(1)
+      expect(devicesFieldset().hidden).toBe(false)
+      expect(pairingHint().hidden).toBe(false)
+      expect(alert).not.toHaveBeenCalled()
+    })
+
+    it('should boot without the hint when the pairing probe fails', async () => {
+      const { alert } = await bootPage({
+        failures: { 'GET /devices/pending': new Error('probe down') },
+      })
+
+      expect(pairingHint().hidden).toBe(true)
+      expect(alert).not.toHaveBeenCalled()
     })
 
     it('should keep the authored language when the read fails', async () => {
@@ -416,6 +460,27 @@ describe('settings page', () => {
       expect(settingSelect('on_mode').value).toBe('cft')
     })
 
+    // A device update comes from a paired device: the hint shown at boot
+    // goes once a radiator is added while the page is open.
+    it('should drop the pairing hint on a device update', async () => {
+      const { emit, routes } = await bootPage({
+        routes: {
+          ...defaultRoutes(),
+          'GET /devices/pending': true,
+          'GET /settings/devices': {},
+        },
+      })
+
+      expect(pairingHint().hidden).toBe(false)
+
+      routes['GET /devices/pending'] = false
+      routes['GET /settings/devices'] = deviceSettingsFixture()
+      emit('deviceupdate')
+      await settleDetached()
+
+      expect(pairingHint().hidden).toBe(true)
+    })
+
     it('should ignore a select it did not build', async () => {
       await bootPage()
 
@@ -506,7 +571,10 @@ describe('settings page', () => {
         routes: {
           ...defaultRoutes(),
           'GET /sessions': false,
-          'POST /sessions': { isDeviceListStale: true },
+          'POST /sessions': {
+            isDeviceListStale: true,
+            isPairingPending: false,
+          },
         },
         translations: {
           'settings.authenticate.staleDevices': 'Liste non actualisée',
@@ -521,6 +589,35 @@ describe('settings page', () => {
       expect(devicesFieldset().hidden).toBe(false)
       expect(authenticationDetails().open).toBe(false)
       expect(alert).toHaveBeenCalledWith('Liste non actualisée')
+      expect(alert).not.toHaveBeenCalledWith('settings.devices.none')
+      expect(pairingHint().hidden).toBe(true)
+    })
+
+    // Signing in to an account that lists radiators none of which is in
+    // Homey yet explains the blank device settings and says where to go
+    // — the one sign-in that is alerted, the hint then standing with it.
+    it('should send a sign-in with nothing paired to the pairing wizard', async () => {
+      const { alert } = await bootPage({
+        routes: {
+          ...defaultRoutes(),
+          'GET /sessions': false,
+          'GET /settings/devices': {},
+          'POST /sessions': {
+            isDeviceListStale: false,
+            isPairingPending: true,
+          },
+        },
+        translations: { 'settings.devices.none': 'Ajoutez vos radiateurs' },
+      })
+
+      commit(getInput('username'), 'user@example.com')
+      commit(getInput('password'), 'secret')
+      authenticateButton().click()
+      await settleDetached()
+
+      expect(devicesFieldset().hidden).toBe(false)
+      expect(pairingHint().hidden).toBe(false)
+      expect(alert).toHaveBeenCalledWith('Ajoutez vos radiateurs')
     })
 
     it('should stay silent when the device list came back fresh', async () => {
@@ -534,6 +631,7 @@ describe('settings page', () => {
       await settleDetached()
 
       expect(devicesFieldset().hidden).toBe(false)
+      expect(pairingHint().hidden).toBe(true)
       expect(alert).not.toHaveBeenCalled()
     })
 

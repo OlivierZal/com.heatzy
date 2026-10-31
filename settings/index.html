@@ -97,6 +97,17 @@
       <legend class="homey-form-legend" data-i18n="settings.devices.legend">
         All device settings
       </legend>
+      <!-- Points at the pairing wizard while the signed-in account lists
+           radiators none of which is in Homey yet. -->
+      <div
+        id="pairing_pending"
+        aria-live="polite"
+        data-i18n="settings.devices.none"
+        hidden
+      >
+        Your Heatzy account lists radiators that are not added in Homey yet: add
+        them via Add device → Heatzy.
+      </div>
       <div id="settings_common"></div>
       <div class="homey-form-group container">
         <button

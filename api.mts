@@ -41,12 +41,19 @@ const api = {
       // from the session read "signed in" on a transport failure over a
       // PRE-EXISTING live session while the new credentials were never
       // accepted.
+      // A list that could not be refreshed explains itself; whatever it
+      // still holds is not judged pending.
       if (error instanceof RegistrySyncError) {
-        return { isDeviceListStale: true }
+        return { isDeviceListStale: true, isPairingPending: false }
       }
       throw toLoginFailure(homey, error)
     }
-    return { isDeviceListStale: false }
+    // The sign-in awaited its enforced sync, so the registry answers for
+    // the account: one listing radiators none of which is paired says so.
+    return {
+      isDeviceListStale: false,
+      isPairingPending: homey.app.isPairingPending(),
+    }
   },
   getDeviceSettings: ({ homey }: { homey: Homey }): DeviceSettings => {
     logSettingsRoute(homey.app, 'GET /settings/devices')
@@ -78,6 +85,10 @@ const api = {
   isAuthenticated: ({ homey }: { homey: Homey }): boolean => {
     logSettingsRoute(homey.app, 'GET /sessions')
     return homey.app.api.isAuthenticated()
+  },
+  isPairingPending: ({ homey }: { homey: Homey }): boolean => {
+    logSettingsRoute(homey.app, 'GET /devices/pending')
+    return homey.app.isPairingPending()
   },
   logOut: ({ homey }: { homey: Homey }): void => {
     logSettingsRoute(homey.app, 'DELETE /sessions')

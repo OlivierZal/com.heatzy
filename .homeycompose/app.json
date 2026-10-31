@@ -24,6 +24,10 @@
       "method": "GET",
       "path": "/sessions"
     },
+    "isPairingPending": {
+      "method": "GET",
+      "path": "/devices/pending"
+    },
     "logOut": {
       "method": "DELETE",
       "path": "/sessions"

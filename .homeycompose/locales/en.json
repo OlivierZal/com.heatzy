@@ -15,7 +15,10 @@
       "staleDevices": "Signed in, but the device list could not be refreshed — please try again later."
     },
     "boolean": { "false": "No", "true": "Yes" },
-    "devices": { "legend": "All device settings" },
+    "devices": {
+      "legend": "All device settings",
+      "none": "Your Heatzy account lists radiators that are not added in Homey yet: add them via Add device → Heatzy."
+    },
     "loadFailed": "The settings page failed to load. Please try again.",
     "refresh": "Refresh",
     "success": "Update succeeded.",

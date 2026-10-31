@@ -21,7 +21,8 @@
       "true": "Yes"
     },
     "devices": {
-      "legend": "All device settings"
+      "legend": "All device settings",
+      "none": "Your Heatzy account lists radiators that are not added in Homey yet: add them via Add device → Heatzy."
     },
     "loadFailed": "The settings page failed to load. Please try again.",
     "refresh": "Refresh",

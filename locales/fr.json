@@ -21,7 +21,8 @@
       "true": "Oui"
     },
     "devices": {
-      "legend": "Paramètres de tous les appareils"
+      "legend": "Paramètres de tous les appareils",
+      "none": "Votre compte Heatzy liste des radiateurs qui ne sont pas encore ajoutés dans Homey : ajoutez-les via Ajouter un appareil → Heatzy."
     },
     "loadFailed": "La page de réglages n'a pas pu se charger. Veuillez réessayer.",
     "refresh": "Rafraîchir",

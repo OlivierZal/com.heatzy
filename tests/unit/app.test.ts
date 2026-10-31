@@ -118,7 +118,11 @@ const mockFacadeManagerGet = vi.fn<(instance: unknown) => unknown>()
 
 const mockApiInstance = {
   clearSync: vi.fn<() => void>(),
-  registry: { devices: { getById: vi.fn<(id: string) => unknown>() } },
+  isAuthenticated: vi.fn<() => boolean>(),
+  registry: {
+    devices: { getById: vi.fn<(id: string) => unknown>() },
+    getDevices: vi.fn<() => readonly unknown[]>(),
+  },
 }
 
 const mockCreateNotification = vi.fn<() => Promise<void>>()
@@ -128,6 +132,7 @@ const mockGetDrivers = vi.fn<() => Record<string, unknown>>()
 const mockGetLanguage = vi.fn<() => string>()
 const mockGetTimezone = vi.fn<() => string>()
 const mockHomeyReady = vi.fn<() => Promise<void>>()
+const mockLog = vi.fn<(...args: unknown[]) => void>()
 const mockSettingsGet = vi.fn<(key: string) => unknown>()
 const mockSettingsSet = vi.fn<(key: string, value: string) => void>()
 const mockSettingsUnset = vi.fn<(key: string) => void>()
@@ -167,7 +172,7 @@ const createApp = (): InstanceType<typeof HeatzyApp> => {
       },
       writable: false,
     },
-    log: { configurable: true, value: vi.fn<(...args: unknown[]) => void>() },
+    log: { configurable: true, value: mockLog },
   })
   return app
 }
@@ -204,11 +209,27 @@ const runScheduledTimeout = async (index: number): Promise<void> => {
   await getMockCallArg<() => Promise<void>>(mockSetTimeout, index, 0)()
 }
 
+const listDevices = (count: number): void => {
+  mockApiInstance.registry.getDevices.mockReturnValue(
+    Array.from({ length: count }, (_value, index) => ({ id: String(index) })),
+  )
+}
+
+const accountLines = (): string[] =>
+  mockLog.mock.calls
+    .map(([line]) => line)
+    .filter(
+      (line): line is string =>
+        typeof line === 'string' && line.startsWith('Heatzy: '),
+    )
+
 describe(HeatzyApp, () => {
   let app: InstanceType<typeof HeatzyApp>
 
   beforeEach(() => {
     mockCreate.mockResolvedValue(mockApiInstance)
+    mockApiInstance.isAuthenticated.mockReturnValue(true)
+    listDevices(0)
     mockFacadeManagerConstructor.mockImplementation(newMockFacadeManager)
     mockCreateNotification.mockResolvedValue()
     mockHomeyReady.mockResolvedValue()
@@ -585,6 +606,140 @@ describe(HeatzyApp, () => {
         'Device sync failed:',
         expect.any(Error),
       )
+    })
+  })
+
+  // One line per account, on the first sync and whenever a count moves:
+  // the callback fires every registry cycle and after every write, so
+  // an unconditional line would flood the log.
+  describe('account line', () => {
+    it('should log the listed and added counts on the first sync', async () => {
+      listDevices(2)
+      setupDrivers([createDevice({ id: '0' })])
+      await app.onInit()
+
+      await getEvents().onSyncComplete()
+      await settleDetached()
+
+      expect(accountLines()).toStrictEqual([
+        'Heatzy: 2 unit(s) listed by the cloud, 1 added in Homey',
+      ])
+    })
+
+    it('should stay silent while the counts hold', async () => {
+      listDevices(2)
+      setupDrivers([createDevice({ id: '0' })])
+      await app.onInit()
+
+      await getEvents().onSyncComplete()
+      await getEvents().onSyncComplete({ ids: ['0'] })
+      await getEvents().onSyncComplete()
+      await settleDetached()
+
+      expect(accountLines()).toHaveLength(1)
+    })
+
+    it.each([
+      { added: 1, listed: 3, moved: 'listed' },
+      { added: 2, listed: 2, moved: 'added' },
+    ])(
+      'should log again once the $moved count moves',
+      async ({ added, listed }) => {
+        listDevices(2)
+        setupDrivers([createDevice({ id: '0' })])
+        await app.onInit()
+        await getEvents().onSyncComplete()
+        await settleDetached()
+
+        listDevices(listed)
+        setupDrivers(
+          Array.from({ length: added }, (_value, index) =>
+            createDevice({ id: String(index) }),
+          ),
+        )
+        await getEvents().onSyncComplete()
+        await settleDetached()
+
+        expect(accountLines()).toStrictEqual([
+          'Heatzy: 2 unit(s) listed by the cloud, 1 added in Homey',
+          `Heatzy: ${String(listed)} unit(s) listed by the cloud, ${String(added)} added in Homey`,
+        ])
+      },
+    )
+
+    // The background resume's first sync lands during `App#onInit`,
+    // when `getDrivers()` is still empty: the paired count is read once
+    // every driver initialized, never as a spurious zero.
+    it('should count the paired devices once the drivers are ready', async () => {
+      // Readiness lands a macrotask later, as on a real boot.
+      mockHomeyReady.mockImplementation(async () => {
+        await settleDetached()
+      })
+      listDevices(1)
+      await app.onInit()
+
+      await getEvents().onSyncComplete()
+
+      expect(accountLines()).toStrictEqual([])
+
+      setupDrivers([createDevice({ id: '0' })])
+      await settleDetached()
+      await settleDetached()
+
+      expect(accountLines()).toStrictEqual([
+        'Heatzy: 1 unit(s) listed by the cloud, 1 added in Homey',
+      ])
+    })
+
+    it('should report a failed account line without failing the sync', async () => {
+      const syncFromDevice = vi.fn<() => Promise<void>>().mockResolvedValue()
+      setupDrivers([createDevice({ id: '0', syncFromDevice })])
+      await app.onInit()
+      mockHomeyReady.mockRejectedValueOnce(new Error('never ready'))
+
+      await getEvents().onSyncComplete()
+      await settleDetached()
+
+      expect(syncFromDevice).toHaveBeenCalledTimes(1)
+      expect(app.error).toHaveBeenCalledWith(
+        'Account count logging failed:',
+        expect.any(Error),
+      )
+    })
+  })
+
+  // The settings page's pairing hint: an account that lists radiators
+  // none of which is paired, judged over the account's own answer only.
+  describe('pairing pending', () => {
+    it('should read a listed account with no paired device as pending', async () => {
+      listDevices(1)
+      await app.onInit()
+
+      expect(app.isPairingPending()).toBe(true)
+    })
+
+    it('should read a listed account with a paired device as settled', async () => {
+      listDevices(1)
+      setupDrivers([createDevice({ id: '0' })])
+      await app.onInit()
+
+      expect(app.isPairingPending()).toBe(false)
+    })
+
+    // Before the first sync, an empty registry is the boot race.
+    it('should read a registry no sync has filled as settled', async () => {
+      await app.onInit()
+
+      expect(app.isPairingPending()).toBe(false)
+    })
+
+    // A registry a lost session still holds is not an account in use.
+    it('should read a signed-out account as settled', async () => {
+      listDevices(1)
+      mockApiInstance.isAuthenticated.mockReturnValue(false)
+      await app.onInit()
+
+      expect(app.isPairingPending()).toBe(false)
     })
   })
 
