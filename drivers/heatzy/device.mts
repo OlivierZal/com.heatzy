@@ -1,3 +1,5 @@
+import { format } from 'node:util'
+
 import {
   type DeviceFacadeAny,
   type DeviceV2Facade,
@@ -35,6 +37,25 @@ import {
 
 const DEBOUNCE_DELAY = 1000
 
+const MINUTE = 60_000
+
+// A read-back is judged only once the radiator had time to apply the
+// command: the registry lists every 5 s and a radiator takes a cycle or
+// two, so the first syncs after a write legitimately read the old value.
+const READ_BACK_GRACE = MINUTE
+
+// Past this, a divergence can no longer be laid at the write's door:
+// the watch expires in silence.
+const READ_BACK_WINDOW_MINUTES = 15
+const READ_BACK_WINDOW = READ_BACK_WINDOW_MINUTES * MINUTE
+
+// A write awaiting the cloud's read-back: the Homey-domain value sent and
+// the instant it was sent.
+interface WatchedWrite {
+  readonly at: number
+  readonly value: unknown
+}
+
 // The as-const constants carry no reverse mapping; the capability
 // value is the key, spelled out per member so the compiler pins it.
 const derogationModeKeys: Record<DerogationMode, keyof typeof DerogationMode> =
@@ -69,22 +90,28 @@ const isCommonDerogationModeKey = (
 // this is where the product knowledge the driver already holds meets
 // the compiler. A presence request leaves the converters' payload empty
 // by design, the facade carrying it instead; asked of a product without
-// it, nothing is written.
+// it, nothing is written. Answers whether anything reached the wire:
+// only a write that happened can be read back.
 const write = async (
   device: DeviceFacadeAny,
-  values: Record<string, unknown>,
+  requested: ReadonlyMap<keyof SetCapabilities, unknown>,
   updateData: PostAttributes,
-): Promise<void> => {
-  if (supportsPro(device) && values.heater_operation_mode === 'presence') {
+): Promise<boolean> => {
+  if (
+    supportsPro(device) &&
+    requested.get('heater_operation_mode') === 'presence'
+  ) {
     await device.setValues({
       ...updateData,
       derog_mode: DerogationMode.presence,
     })
-    return
+    return true
   }
-  if (Object.keys(updateData).length > 0) {
-    await device.setValues(updateData)
+  if (Object.keys(updateData).length === 0) {
+    return false
   }
+  await device.setValues(updateData)
+  return true
 }
 
 const toSwitch = (value: unknown): Switch =>
@@ -173,15 +200,11 @@ export default class HeatzyDevice extends Device {
       getTargetTemperature(product, Mode.comfort, Number(value)),
     'target_temperature.eco': (value, product) =>
       getTargetTemperature(product, Mode.eco, Number(value)),
-    thermostat_mode: (value) =>
-      isMode(value)
-        ? { mode: value === Mode.stop ? this.#offValue : value }
-        : {},
+    thermostat_mode: (value) => (isMode(value) ? { mode: value } : {}),
   }
 
-  get #offValue(): Mode {
-    return this.getSetting('always_on') ? this.#onValue : Mode.stop
-  }
+  // The writes awaiting the cloud's read-back, the latest per capability.
+  readonly #watchedWrites = new Map<keyof Capabilities, WatchedWrite>()
 
   get #onValue(): Mode {
     const onMode = this.getSetting('on_mode')
@@ -281,20 +304,10 @@ export default class HeatzyDevice extends Device {
 
   #buildUpdateData(
     device: DeviceFacadeAny,
-    values: Record<string, unknown>,
+    requested: ReadonlyMap<keyof SetCapabilities, unknown>,
   ): PostAttributes {
-    this.log('Requested data:', values)
     let updateData: PostAttributes = {}
-    for (const capability of SETTABLE_CAPABILITIES) {
-      if (!Object.hasOwn(values, capability)) {
-        continue
-      }
-
-      // `always_on` devices never switch off from Homey: the outgoing
-      // value is coerced before the converter runs.
-      const value =
-        (capability === 'onoff' && this.getSetting('always_on')) ||
-        values[capability]
+    for (const [capability, value] of requested) {
       updateData = {
         ...updateData,
         ...this.#toDevice[capability](value, device.product),
@@ -310,6 +323,21 @@ export default class HeatzyDevice extends Device {
 
     this.homey.clearTimeout(this.#syncTimeout)
     this.#syncTimeout = null
+  }
+
+  // `always_on` devices never switch off from Homey: an off request is
+  // coerced before the converter runs, so the value the read-back watch
+  // remembers is the one the wire was asked for.
+  #coerceAlwaysOn(capability: keyof SetCapabilities, value: unknown): unknown {
+    if (!this.getSetting('always_on')) {
+      return value
+    }
+    if (capability === 'onoff') {
+      return true
+    }
+    return capability === 'thermostat_mode' && value === Mode.stop
+      ? this.#onValue
+      : value
   }
 
   async #ensureFacade(): Promise<DeviceFacadeAny> {
@@ -349,6 +377,35 @@ export default class HeatzyDevice extends Device {
     )
   }
 
+  // The facade merges the write echo into the model right after the
+  // write, so an equal read-back is expected until the next real listing
+  // and confirms nothing: the watch holds until it expires. A differing
+  // read-back inside the grace is the radiator still applying the
+  // command; past it, the cloud kept another value, and the line says so
+  // — once, in the device log, the only trace a diagnostic report gets.
+  #judgeReadBack(capability: keyof Capabilities, value: unknown): void {
+    const written = this.#watchedWrites.get(capability)
+    if (written === undefined) {
+      return
+    }
+    const elapsed = Temporal.Now.instant().epochMilliseconds - written.at
+    if (elapsed <= READ_BACK_WINDOW) {
+      if (elapsed < READ_BACK_GRACE || value === written.value) {
+        return
+      }
+      this.log(
+        format(
+          '%s written as %s, read back as %s after %d min',
+          capability,
+          written.value,
+          value,
+          Math.round(elapsed / MINUTE),
+        ),
+      )
+    }
+    this.#watchedWrites.delete(capability)
+  }
+
   // Keep the persisted label only while it can still be the running
   // derogation's: same mode, same duration, end still ahead. A re-armed
   // identical derogation during downtime slips through — the retained
@@ -367,6 +424,30 @@ export default class HeatzyDevice extends Device {
       storedEnd !== null &&
       storedEnd > Temporal.Now.instant().epochMilliseconds
     )
+  }
+
+  // A write that fails off the HTTP path — a timeout, an abort, a DNS
+  // failure — reaches no observability seam: the library serialises only
+  // an `HttpError`, and `setWarning` is a toast that clears itself in
+  // the same call. Without the error line such a write is invisible
+  // everywhere at once — the flow reports success, the tile keeps the
+  // new value, and the unit never moved. A write that happened is
+  // watched for its read-back.
+  async #pushUpdate(
+    device: DeviceFacadeAny,
+    requested: ReadonlyMap<keyof SetCapabilities, unknown>,
+  ): Promise<void> {
+    const updateData = this.#buildUpdateData(device, requested)
+    let isWritten = false
+    try {
+      isWritten = await write(device, requested, updateData)
+    } catch (error) {
+      this.error('Write failed:', updateData, error)
+      await this.setWarning(error)
+    }
+    if (isWritten) {
+      this.#watchWrites(requested)
+    }
   }
 
   #registerCapabilityListeners(): void {
@@ -389,6 +470,24 @@ export default class HeatzyDevice extends Device {
       this.error('Unexpected error while ensuring device:', error)
     }
     return null
+  }
+
+  // What the write encodes, in Homey's domain, `always_on` applied: the
+  // converters run on these, and a read-back is judged against them.
+  #requestedValues(
+    values: Record<string, unknown>,
+  ): Map<keyof SetCapabilities, unknown> {
+    this.log('Requested data:', values)
+    const requested = new Map<keyof SetCapabilities, unknown>()
+    for (const capability of SETTABLE_CAPABILITIES) {
+      if (Object.hasOwn(values, capability)) {
+        requested.set(
+          capability,
+          this.#coerceAlwaysOn(capability, values[capability]),
+        )
+      }
+    }
+    return requested
   }
 
   // The wire carries no derogation start, so the facade cannot compute
@@ -431,20 +530,7 @@ export default class HeatzyDevice extends Device {
     if (device === null) {
       return
     }
-    const updateData = this.#buildUpdateData(device, values)
-    try {
-      await write(device, values, updateData)
-    } catch (error) {
-      // A write that fails off the HTTP path — a timeout, an abort, a
-      // DNS failure — reaches no observability seam: the library
-      // serialises only an `HttpError`, and `setWarning` is a toast
-      // that clears itself in the same call. Without this line such a
-      // write is invisible everywhere at once — the flow reports
-      // success, the tile keeps the new value, and the unit never
-      // moved.
-      this.error('Write failed:', updateData, error)
-      await this.setWarning(error)
-    }
+    await this.#pushUpdate(device, this.#requestedValues(values))
     this.#scheduleSyncFromDevice()
   }
 
@@ -542,14 +628,25 @@ export default class HeatzyDevice extends Device {
     capability: TKey,
     value: Capabilities[TKey],
   ): Promise<void> {
-    if (this.hasCapability(capability)) {
-      await this.setCapabilityValue(capability, value)
+    if (!this.hasCapability(capability)) {
+      return
     }
+    this.#judgeReadBack(capability, value)
+    await this.setCapabilityValue(capability, value)
   }
 
   async #storeDerogationEnd(value: number | null): Promise<void> {
     if (this.getStoreValue('derogationEnd') !== value) {
       await this.setStoreValue('derogationEnd', value)
+    }
+  }
+
+  // A later write of a capability replaces its watch: only the latest
+  // value sent can be the one the cloud reads back.
+  #watchWrites(requested: ReadonlyMap<keyof SetCapabilities, unknown>): void {
+    const at = Temporal.Now.instant().epochMilliseconds
+    for (const [capability, value] of requested) {
+      this.#watchedWrites.set(capability, { at, value })
     }
   }
 }

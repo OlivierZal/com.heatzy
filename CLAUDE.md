@@ -311,6 +311,22 @@ coverage.
   manifest capabilities and registers condition/action run listeners
   mechanically; the settable surface is the driver's `setCapabilities`
   list.
+- One read-back line in the device log,
+  `target_temperature written as 20, read back as 19 after 6 min`
+  (com.melcloud's form, so one grep reads both apps; values as they
+  are, never JSON): a write that reached the wire remembers each
+  capability's Homey-domain value — `always_on` applied, the coerced
+  value being the one the wire was asked for — for a 15-minute WINDOW,
+  and the first sync that reads a different value at least 60 s (the
+  GRACE) after the write logs it once and forgets the write. A read-back
+  within the grace never logs: the registry lists every 5 s and a
+  radiator applies a command within a cycle or two, so the first syncs
+  legitimately read the old value. An equal read-back is no
+  confirmation either — the facade merges the write echo into the model
+  right after the write, so equality is expected until the next real
+  listing — and the watch simply expires. A later write of the same
+  capability replaces its watch. Diagnostic log only: no setting, no
+  route, no locale.
 
 ## Naming & authored-content conventions
 

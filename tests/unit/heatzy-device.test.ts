@@ -7,6 +7,7 @@ import {
   Mode,
   Product,
   Switch,
+  Temporal,
 } from '@olivierzal/heatzy-api'
 import { NotFoundError } from '@olivierzal/homey-kit'
 import {
@@ -15,7 +16,7 @@ import {
   getMockCallArg,
   settleDetached,
 } from '@olivierzal/homey-kit/testing'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { SETTABLE_CAPABILITIES } from '../../drivers/heatzy/driver.mts'
 import HeatzyDevice from '../../drivers/heatzy/device.mts'
@@ -23,6 +24,12 @@ import HeatzyDevice from '../../drivers/heatzy/device.mts'
 const DEBOUNCE_DELAY = 1000
 
 const DEROGATION_END_EPOCH = 1_800_000_000_000
+
+const MINUTE = 60_000
+
+// The instant a write under test is sent; the syncs that read it back
+// are placed relative to it.
+const WRITE_EPOCH = 1_700_000_000_000
 
 const {
   addCapabilityMock,
@@ -173,6 +180,38 @@ const runToDevice = async (
   const callback = getCallback()
   await callback(values)
   return setValuesMock.mock.calls.at(0)?.at(0)
+}
+
+const setClock = (epochMilliseconds: number): void => {
+  vi.spyOn(Temporal.Now, 'instant').mockReturnValue(
+    Temporal.Instant.fromEpochMilliseconds(epochMilliseconds),
+  )
+}
+
+const readBackLines = (): unknown[] =>
+  superLogMock.mock.calls
+    .map((call) => call.at(-1))
+    .filter((line) => typeof line === 'string' && line.includes('read back as'))
+
+// Boots a device over `facade` and sends `values` at `WRITE_EPOCH`; the
+// facade object stays the caller's by reference, so a test moves what
+// the cloud reads back by mutating it.
+const writeAt = async (
+  facade: Record<string, unknown>,
+  values: Record<string, unknown>,
+): Promise<HeatzyDevice> => {
+  getFacadeMock.mockReturnValue(facade)
+  const device = createDevice()
+  await device.onInit()
+  await settleDetached()
+  setClock(WRITE_EPOCH)
+  await getCallback()(values)
+  return device
+}
+
+const syncAt = async (device: HeatzyDevice, offset: number): Promise<void> => {
+  setClock(WRITE_EPOCH + offset)
+  await device.syncFromDevice()
 }
 
 const toDeviceCases: readonly {
@@ -342,6 +381,20 @@ const toDeviceCases: readonly {
     product: Product.v2,
     settings: { always_on: true },
     values: { thermostat_mode: Mode.stop },
+  },
+  {
+    expected: { mode: Mode.comfort },
+    name: 'a heating thermostat_mode untouched by always_on',
+    product: Product.v2,
+    settings: { always_on: true },
+    values: { thermostat_mode: Mode.comfort },
+  },
+  {
+    expected: { lock_switch: Switch.on },
+    name: 'locked untouched by always_on',
+    product: Product.v2,
+    settings: { always_on: true },
+    values: { locked: true },
   },
   {
     expected: undefined,
@@ -978,6 +1031,105 @@ describe(HeatzyDevice, () => {
       await device.syncFromDevice()
 
       expect(realtimeMock).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('read-back watch', () => {
+    afterEach(() => {
+      vi.mocked(Temporal.Now.instant).mockRestore()
+    })
+
+    it('should log one line when the cloud reads back another value after the grace, then forget', async () => {
+      const device = await writeAt(createFacade({ isOn: false }), {
+        onoff: true,
+      })
+      await syncAt(device, 2 * MINUTE)
+      await syncAt(device, 3 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([
+        'onoff written as true, read back as false after 2 min',
+      ])
+    })
+
+    // The facade merges the write echo into the model right after the
+    // write, so the equality is expected and proves nothing: the watch
+    // stays armed for a later listing that disagrees.
+    it('should log nothing on an equal read-back and keep watching', async () => {
+      const facade = createFacade({ isOn: true })
+      const device = await writeAt(facade, { onoff: true })
+      await syncAt(device, 2 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([])
+
+      facade.isOn = false
+      await syncAt(device, 5 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([
+        'onoff written as true, read back as false after 5 min',
+      ])
+    })
+
+    // The registry lists every 5 s and a radiator applies a command
+    // within a cycle or two: the old value read back inside the grace is
+    // latency, not a divergence.
+    it('should log nothing on a differing read-back inside the grace', async () => {
+      const device = await writeAt(createFacade({ isOn: false }), {
+        onoff: true,
+      })
+      await syncAt(device, MINUTE / 2)
+
+      expect(readBackLines()).toStrictEqual([])
+
+      await syncAt(device, MINUTE)
+
+      expect(readBackLines()).toStrictEqual([
+        'onoff written as true, read back as false after 1 min',
+      ])
+    })
+
+    it('should drop a write past the window without a line', async () => {
+      const device = await writeAt(createFacade({ isOn: false }), {
+        onoff: true,
+      })
+      await syncAt(device, 16 * MINUTE)
+      await syncAt(device, 17 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([])
+    })
+
+    it('should let a later write of the same capability replace the watch', async () => {
+      const device = await writeAt(createFacade({ isOn: false }), {
+        onoff: true,
+      })
+      setClock(WRITE_EPOCH + 5 * MINUTE)
+      await getCallback()({ onoff: true })
+      await syncAt(device, 6 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([
+        'onoff written as true, read back as false after 1 min',
+      ])
+    })
+
+    // An `always_on` off request is sent as the on mode, so that is the
+    // value the cloud is expected to read back.
+    it('should judge an always_on off request by the value it was sent as', async () => {
+      getSettingMock.mockImplementation((key: string) => key === 'always_on')
+      const device = await writeAt(createFacade({ isOn: true }), {
+        onoff: false,
+      })
+      await syncAt(device, 2 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([])
+    })
+
+    it('should log nothing for a device that never wrote', async () => {
+      configureFacade({ isOn: false })
+      const device = createDevice()
+      await device.onInit()
+      await settleDetached()
+      await syncAt(device, 2 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([])
     })
   })
 
