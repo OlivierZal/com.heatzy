@@ -671,22 +671,48 @@ describe(HeatzyDevice, () => {
     // seam: the library serialises only an `HttpError`, and `setWarning`
     // clears its own toast in the same call. The error line is the only
     // trace a diagnostic report can carry, so it is pinned beside the
-    // warning.
-    it('should warn when the update rejects', async () => {
+    // warning: a failure the SDK has a class for is ONE line naming its
+    // cause chain, with no stack and no payload — the `Requested data:`
+    // line before it already names what was asked.
+    it('should warn and log one line when the update is refused by the cloud', async () => {
       configureFacade({ product: Product.v2 })
-      setValuesMock.mockRejectedValueOnce(new Error('update failed'))
+      setValuesMock.mockRejectedValueOnce(
+        new AuthenticationError('Heatzy rejected the credentials'),
+      )
       const device = createDevice()
       await device.onInit()
       await settleDetached()
-      const error = vi.spyOn(device, 'error')
+      const callback = getCallback()
+      await callback({ onoff: true })
+
+      expect(superSetWarningMock).toHaveBeenCalledWith(
+        'Heatzy rejected the credentials',
+      )
+      expect(superErrorMock).toHaveBeenCalledWith(
+        'Test device',
+        '-',
+        'Write failed: AuthenticationError: Heatzy rejected the credentials',
+      )
+    })
+
+    // A programming error keeps the error object: its stack is the one
+    // thing that locates it.
+    it('should warn and keep the error object when the update fails on a bug', async () => {
+      configureFacade({ product: Product.v2 })
+      const failure = new Error('update failed')
+      setValuesMock.mockRejectedValueOnce(failure)
+      const device = createDevice()
+      await device.onInit()
+      await settleDetached()
       const callback = getCallback()
       await callback({ onoff: true })
 
       expect(superSetWarningMock).toHaveBeenCalledWith('update failed')
-      expect(error).toHaveBeenCalledWith(
+      expect(superErrorMock).toHaveBeenCalledWith(
+        'Test device',
+        '-',
         'Write failed:',
-        expect.any(Object),
-        expect.any(Error),
+        failure,
       )
     })
 

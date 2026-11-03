@@ -338,6 +338,30 @@ coverage.
   `heater_operation_mode` `off` by design: the line then states what
   the cloud listed, not a dropped write. Diagnostic log only: no
   setting, no route, no locale.
+- The device's one cloud-failure line, `Write failed:` after a rejected
+  `setValues`, goes through the SDK's `logFailure(this, label, error)`
+  (api-core's helper, re-exported by `@olivierzal/heatzy-api` since
+  21.2.0, so the core never becomes a direct dependency and the SDK stays
+  the one API boundary). A failure the SDK has a class for (an
+  `HttpError`, the `APIError` family, a transport failure, a wrapper
+  judged by what it wraps) prints as ONE line naming its cause chain, no
+  stack — a transient's ten transport frames read as a crash in a report:
+  `Write failed: HttpError: Request failed with status code 503`.
+  A programming error keeps the error object and its stack, the one
+  thing that locates it. The device instance is the logger (its
+  `log`/`error` are the SDK's `Logger`), and the label carries no
+  payload: the `Requested data:` line just before a write already names
+  what was asked, and nothing user-entered is ever logged. Only a site
+  that logs an error OBJECT from a cloud call takes this form, and
+  `#pushUpdate` is the device's only one. Sites that log a programming
+  error BY DESIGN keep the object: `Post-update sync failed:` (the sync
+  reads the registry, not the cloud — `syncFromDevice` resolves the
+  facade's in-memory model and writes Homey's capabilities and store,
+  the wire seams `values()`/`setValues()` are never on its path), the
+  `#reportFacadeFailure` line (its branch only ever receives what
+  `isAPIError` and `NotFoundError` already filtered out) and the kit's
+  own lines (`fireAndForget`, `settleAll`), which are API-agnostic. The
+  com.melcloud twin documents the same split for the same code.
 
 ## Naming & authored-content conventions
 

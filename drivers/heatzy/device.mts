@@ -7,6 +7,7 @@ import {
   DerogationMode,
   getTargetTemperature,
   isAPIError,
+  logFailure,
   Mode,
   Product,
   Switch,
@@ -443,12 +444,15 @@ export default class HeatzyDevice extends Device {
   // an `HttpError`, and `setWarning` is a toast that clears itself in
   // the same call. Without the error line such a write is invisible
   // everywhere at once — the flow reports success, the tile keeps the
-  // new value, and the unit never moved. The read-back watch is armed
-  // BEFORE the write goes out: the library awaits the sync observer
-  // inside `setValues`, after merging the echo, so the first read-back
-  // is judged before the write resolves — against this write, inside
-  // the grace, never against the one before it. A write that never
-  // reached the wire has nothing to read back.
+  // new value, and the unit never moved. The line takes the SDK's form:
+  // one line naming the cause chain for a failure it has a class for,
+  // the error object for a programming error — and no payload, which
+  // the `Requested data:` line just before it already names. The
+  // read-back watch is armed BEFORE the write goes out: the library
+  // awaits the sync observer inside `setValues`, after merging the
+  // echo, so the first read-back is judged before the write resolves —
+  // against this write, inside the grace, never against the one before
+  // it. A write that never reached the wire has nothing to read back.
   async #pushUpdate(
     device: DeviceFacadeAny,
     requested: ReadonlyMap<keyof SetCapabilities, unknown>,
@@ -459,7 +463,7 @@ export default class HeatzyDevice extends Device {
     try {
       isWritten = await write(device, requested, updateData)
     } catch (error) {
-      this.error('Write failed:', updateData, error)
+      logFailure(this, 'Write failed:', error)
       await this.setWarning(error)
     }
     if (!isWritten) {
