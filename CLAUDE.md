@@ -312,8 +312,8 @@ coverage.
   mechanically; the settable surface is the driver's `setCapabilities`
   list.
 - One read-back line in the device log,
-  `target_temperature written as 20 but read back as 19 after 6 min`
-  (com.melcloud's `but read back as` wording, so one grep reads both
+  `target_temperature written as 20, read back as 19 after 6 min`
+  (com.melcloud's wording, so one grep reads both
   apps; values as they are, never JSON): a write that reached the wire
   remembers each capability's Homey-domain value — `always_on` applied,
   the coerced value being the one the wire was asked for — for a

@@ -1069,7 +1069,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, 3 * MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as true but read back as false after 2 min',
+        'onoff written as true, read back as false after 2 min',
       ])
     })
 
@@ -1087,7 +1087,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, 5 * MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as true but read back as false after 5 min',
+        'onoff written as true, read back as false after 5 min',
       ])
     })
 
@@ -1105,7 +1105,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as true but read back as false after 1 min',
+        'onoff written as true, read back as false after 1 min',
       ])
     })
 
@@ -1139,7 +1139,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, 5 * MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as false but read back as true after 3 min',
+        'onoff written as false, read back as true after 3 min',
       ])
     })
 
@@ -1186,7 +1186,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, 3 * MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as true but read back as false after 3 min',
+        'onoff written as true, read back as false after 3 min',
       ])
     })
 

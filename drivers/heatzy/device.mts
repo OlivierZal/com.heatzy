@@ -407,7 +407,7 @@ export default class HeatzyDevice extends Device {
       }
       this.log(
         format(
-          '%s written as %s but read back as %s after %d min',
+          '%s written as %s, read back as %s after %d min',
           capability,
           written.value,
           value,
