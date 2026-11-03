@@ -7,6 +7,7 @@ import {
   DerogationMode,
   getTargetTemperature,
   isAPIError,
+  logFailure,
   Mode,
   Product,
   Switch,
@@ -443,7 +444,11 @@ export default class HeatzyDevice extends Device {
   // an `HttpError`, and `setWarning` is a toast that clears itself in
   // the same call. Without the error line such a write is invisible
   // everywhere at once — the flow reports success, the tile keeps the
-  // new value, and the unit never moved. The read-back watch is armed
+  // new value, and the unit never moved. The line takes the SDK's form:
+  // one line naming the cause chain for a failure it has a class for,
+  // the error object for a programming error — and no payload, which
+  // the `Requested data:` line just before it already names. The
+  // read-back watch is armed
   // BEFORE the write goes out: the library awaits the sync observer
   // inside `setValues`, after merging the echo, so the first read-back
   // is judged before the write resolves — against this write, inside
@@ -459,7 +464,7 @@ export default class HeatzyDevice extends Device {
     try {
       isWritten = await write(device, requested, updateData)
     } catch (error) {
-      this.error('Write failed:', updateData, error)
+      logFailure(this, 'Write failed:', error)
       await this.setWarning(error)
     }
     if (!isWritten) {
@@ -529,7 +534,9 @@ export default class HeatzyDevice extends Device {
 
   // Delay sync to let Homey's optimistic UI update and debounce settle.
   // The handle is kept so deletion cancels a pending sync, and failures
-  // are logged instead of becoming unhandled rejections.
+  // are logged instead of becoming unhandled rejections — a cloud
+  // failure as one line naming its cause, a programming error with its
+  // stack.
   #scheduleSyncFromDevice(): void {
     this.#clearSyncTimeout()
     this.#syncTimeout = this.homey.setTimeout(async () => {
@@ -537,7 +544,7 @@ export default class HeatzyDevice extends Device {
       try {
         await this.syncFromDevice()
       } catch (error) {
-        this.error('Post-update sync failed:', error)
+        logFailure(this, 'Post-update sync failed:', error)
       }
     }, DEBOUNCE_DELAY)
   }

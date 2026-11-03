@@ -671,22 +671,48 @@ describe(HeatzyDevice, () => {
     // seam: the library serialises only an `HttpError`, and `setWarning`
     // clears its own toast in the same call. The error line is the only
     // trace a diagnostic report can carry, so it is pinned beside the
-    // warning.
-    it('should warn when the update rejects', async () => {
+    // warning: a failure the SDK has a class for is ONE line naming its
+    // cause chain, with no stack and no payload — the `Requested data:`
+    // line before it already names what was asked.
+    it('should warn and log one line when the update is refused by the cloud', async () => {
       configureFacade({ product: Product.v2 })
-      setValuesMock.mockRejectedValueOnce(new Error('update failed'))
+      setValuesMock.mockRejectedValueOnce(
+        new AuthenticationError('Heatzy rejected the credentials'),
+      )
       const device = createDevice()
       await device.onInit()
       await settleDetached()
-      const error = vi.spyOn(device, 'error')
+      const callback = getCallback()
+      await callback({ onoff: true })
+
+      expect(superSetWarningMock).toHaveBeenCalledWith(
+        'Heatzy rejected the credentials',
+      )
+      expect(superErrorMock).toHaveBeenCalledWith(
+        'Test device',
+        '-',
+        'Write failed: AuthenticationError: Heatzy rejected the credentials',
+      )
+    })
+
+    // A programming error keeps the error object: its stack is the one
+    // thing that locates it.
+    it('should warn and keep the error object when the update fails on a bug', async () => {
+      configureFacade({ product: Product.v2 })
+      const failure = new Error('update failed')
+      setValuesMock.mockRejectedValueOnce(failure)
+      const device = createDevice()
+      await device.onInit()
+      await settleDetached()
       const callback = getCallback()
       await callback({ onoff: true })
 
       expect(superSetWarningMock).toHaveBeenCalledWith('update failed')
-      expect(error).toHaveBeenCalledWith(
+      expect(superErrorMock).toHaveBeenCalledWith(
+        'Test device',
+        '-',
         'Write failed:',
-        expect.any(Object),
-        expect.any(Error),
+        failure,
       )
     })
 
@@ -724,7 +750,39 @@ describe(HeatzyDevice, () => {
       expect(device.setCapabilityValue).toHaveBeenCalledWith('onoff', true)
     })
 
-    it('should log instead of rejecting when the delayed sync fails', async () => {
+    // A transport failure is one the SDK classifies — Node's fetch
+    // reports every network-level failure as `TypeError: fetch failed`
+    // with the detail on `cause` — so the line names the chain, outermost
+    // first, and carries no stack.
+    it('should log one line instead of rejecting when the delayed sync fails on the wire', async () => {
+      configureFacade({ product: Product.v2 })
+      const device = createDevice()
+      await device.onInit()
+      await settleDetached()
+      const callback = getCallback()
+      await callback({ onoff: true })
+      const scheduled = getMockCallArg<() => Promise<void>>(
+        setTimeoutMock,
+        -1,
+        0,
+      )
+      vi.spyOn(device, 'syncFromDevice').mockRejectedValue(
+        new TypeError('fetch failed', {
+          cause: Object.assign(new Error('getaddrinfo ENOTFOUND'), {
+            code: 'ENOTFOUND',
+          }),
+        }),
+      )
+
+      await expect(scheduled()).resolves.toBeUndefined()
+      expect(superErrorMock).toHaveBeenCalledWith(
+        'Test device',
+        '-',
+        'Post-update sync failed: TypeError: fetch failed — caused by Error: getaddrinfo ENOTFOUND (ENOTFOUND)',
+      )
+    })
+
+    it('should keep the error object when the delayed sync fails on a bug', async () => {
       configureFacade({ product: Product.v2 })
       const device = createDevice()
       await device.onInit()
