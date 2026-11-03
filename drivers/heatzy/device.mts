@@ -448,12 +448,11 @@ export default class HeatzyDevice extends Device {
   // one line naming the cause chain for a failure it has a class for,
   // the error object for a programming error — and no payload, which
   // the `Requested data:` line just before it already names. The
-  // read-back watch is armed
-  // BEFORE the write goes out: the library awaits the sync observer
-  // inside `setValues`, after merging the echo, so the first read-back
-  // is judged before the write resolves — against this write, inside
-  // the grace, never against the one before it. A write that never
-  // reached the wire has nothing to read back.
+  // read-back watch is armed BEFORE the write goes out: the library
+  // awaits the sync observer inside `setValues`, after merging the
+  // echo, so the first read-back is judged before the write resolves —
+  // against this write, inside the grace, never against the one before
+  // it. A write that never reached the wire has nothing to read back.
   async #pushUpdate(
     device: DeviceFacadeAny,
     requested: ReadonlyMap<keyof SetCapabilities, unknown>,
@@ -534,9 +533,7 @@ export default class HeatzyDevice extends Device {
 
   // Delay sync to let Homey's optimistic UI update and debounce settle.
   // The handle is kept so deletion cancels a pending sync, and failures
-  // are logged instead of becoming unhandled rejections — a cloud
-  // failure as one line naming its cause, a programming error with its
-  // stack.
+  // are logged instead of becoming unhandled rejections.
   #scheduleSyncFromDevice(): void {
     this.#clearSyncTimeout()
     this.#syncTimeout = this.homey.setTimeout(async () => {
@@ -544,7 +541,7 @@ export default class HeatzyDevice extends Device {
       try {
         await this.syncFromDevice()
       } catch (error) {
-        logFailure(this, 'Post-update sync failed:', error)
+        this.error('Post-update sync failed:', error)
       }
     }, DEBOUNCE_DELAY)
   }

@@ -750,39 +750,7 @@ describe(HeatzyDevice, () => {
       expect(device.setCapabilityValue).toHaveBeenCalledWith('onoff', true)
     })
 
-    // A transport failure is one the SDK classifies — Node's fetch
-    // reports every network-level failure as `TypeError: fetch failed`
-    // with the detail on `cause` — so the line names the chain, outermost
-    // first, and carries no stack.
-    it('should log one line instead of rejecting when the delayed sync fails on the wire', async () => {
-      configureFacade({ product: Product.v2 })
-      const device = createDevice()
-      await device.onInit()
-      await settleDetached()
-      const callback = getCallback()
-      await callback({ onoff: true })
-      const scheduled = getMockCallArg<() => Promise<void>>(
-        setTimeoutMock,
-        -1,
-        0,
-      )
-      vi.spyOn(device, 'syncFromDevice').mockRejectedValue(
-        new TypeError('fetch failed', {
-          cause: Object.assign(new Error('getaddrinfo ENOTFOUND'), {
-            code: 'ENOTFOUND',
-          }),
-        }),
-      )
-
-      await expect(scheduled()).resolves.toBeUndefined()
-      expect(superErrorMock).toHaveBeenCalledWith(
-        'Test device',
-        '-',
-        'Post-update sync failed: TypeError: fetch failed — caused by Error: getaddrinfo ENOTFOUND (ENOTFOUND)',
-      )
-    })
-
-    it('should keep the error object when the delayed sync fails on a bug', async () => {
+    it('should log instead of rejecting when the delayed sync fails', async () => {
       configureFacade({ product: Product.v2 })
       const device = createDevice()
       await device.onInit()
