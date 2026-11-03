@@ -411,7 +411,7 @@ export default class HeatzyDevice extends Device {
           capability,
           written.value,
           value,
-          Math.round(elapsedMinutes),
+          Math.floor(elapsedMinutes),
         ),
       )
     }
