@@ -191,17 +191,39 @@ const setClock = (epochMilliseconds: number): void => {
 const readBackLines = (): unknown[] =>
   superLogMock.mock.calls
     .map((call) => call.at(-1))
-    .filter((line) => typeof line === 'string' && line.includes('read back as'))
+    .filter(
+      (line) => typeof line === 'string' && line.includes('but read back as'),
+    )
 
-// Boots a device over `facade` and sends `values` at `WRITE_EPOCH`; the
+// The library's write seam merges the echo into the model, then awaits
+// the sync observer — the app's, which syncs this very device — before
+// `setValues` resolves. This facade does the same over the `mode`
+// register, the one both `onoff` and `thermostat_mode` write, deriving
+// `isOn` the way the SDK does.
+const createEchoingFacade = (
+  device: HeatzyDevice,
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> => {
+  const facade = createFacade(overrides)
+  facade.setValues = async (data: Record<string, unknown>): Promise<void> => {
+    if (typeof data.mode === 'string') {
+      facade.mode = data.mode
+      facade.isOn = data.mode !== Mode.stop
+    }
+    await device.syncFromDevice()
+  }
+  return facade
+}
+
+// Boots `device` over `facade` and sends `values` at `WRITE_EPOCH`; the
 // facade object stays the caller's by reference, so a test moves what
 // the cloud reads back by mutating it.
 const writeAt = async (
   facade: Record<string, unknown>,
   values: Record<string, unknown>,
+  device = createDevice(),
 ): Promise<HeatzyDevice> => {
   getFacadeMock.mockReturnValue(facade)
-  const device = createDevice()
   await device.onInit()
   await settleDetached()
   setClock(WRITE_EPOCH)
@@ -1047,7 +1069,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, 3 * MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as true, read back as false after 2 min',
+        'onoff written as true but read back as false after 2 min',
       ])
     })
 
@@ -1065,7 +1087,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, 5 * MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as true, read back as false after 5 min',
+        'onoff written as true but read back as false after 5 min',
       ])
     })
 
@@ -1083,7 +1105,7 @@ describe(HeatzyDevice, () => {
       await syncAt(device, MINUTE)
 
       expect(readBackLines()).toStrictEqual([
-        'onoff written as true, read back as false after 1 min',
+        'onoff written as true but read back as false after 1 min',
       ])
     })
 
@@ -1097,17 +1119,94 @@ describe(HeatzyDevice, () => {
       expect(readBackLines()).toStrictEqual([])
     })
 
-    it('should let a later write of the same capability replace the watch', async () => {
+    // The second write's echo is read back inside `setValues`, before the
+    // write resolves: it is the user's own value, judged against the
+    // write that just sent it, and the line comes only from a listing
+    // that later disagrees with that write.
+    it('should judge a later write of the same capability by itself, not by the write before', async () => {
+      const device = createDevice()
+      const facade = createEchoingFacade(device, {
+        isOn: false,
+        mode: Mode.stop,
+      })
+      await writeAt(facade, { onoff: true }, device)
+      setClock(WRITE_EPOCH + 2 * MINUTE)
+      await getCallback()({ onoff: false })
+
+      expect(readBackLines()).toStrictEqual([])
+
+      facade.isOn = true
+      await syncAt(device, 5 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([
+        'onoff written as false but read back as true after 3 min',
+      ])
+    })
+
+    // `onoff` and `thermostat_mode` are two views of the one `mode`
+    // register: a write through one is what the other reads back, so it
+    // ends the other's watch rather than being laid at the cloud's door.
+    it('should end the thermostat_mode watch when onoff rewrites the mode', async () => {
+      const device = createDevice()
+      const facade = createEchoingFacade(device, {
+        isOn: true,
+        mode: Mode.comfort,
+      })
+      await writeAt(facade, { thermostat_mode: Mode.comfort }, device)
+      setClock(WRITE_EPOCH + 2 * MINUTE)
+      await getCallback()({ onoff: false })
+      await syncAt(device, 3 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([])
+    })
+
+    it('should end the onoff watch when thermostat_mode rewrites the mode', async () => {
+      const device = createDevice()
+      const facade = createEchoingFacade(device, {
+        isOn: false,
+        mode: Mode.stop,
+      })
+      await writeAt(facade, { onoff: true }, device)
+      setClock(WRITE_EPOCH + 3 * MINUTE)
+      await getCallback()({ thermostat_mode: Mode.stop })
+      await syncAt(device, 4 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([])
+    })
+
+    // Glow switches through `on_off`, so a mode write there leaves the
+    // switch — and its watch — untouched.
+    it('should keep the onoff watch through a thermostat_mode write on a Glow', async () => {
+      const device = await writeAt(
+        createFacade({ isOn: false, product: Product.glow }),
+        { onoff: true },
+      )
+      setClock(WRITE_EPOCH + 2 * MINUTE)
+      await getCallback()({ thermostat_mode: Mode.comfort })
+      await syncAt(device, 3 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([
+        'onoff written as true but read back as false after 3 min',
+      ])
+    })
+
+    it('should not watch a write that rejected', async () => {
+      setValuesMock.mockRejectedValueOnce(new Error('update failed'))
       const device = await writeAt(createFacade({ isOn: false }), {
         onoff: true,
       })
-      setClock(WRITE_EPOCH + 5 * MINUTE)
-      await getCallback()({ onoff: true })
-      await syncAt(device, 6 * MINUTE)
+      await syncAt(device, 2 * MINUTE)
 
-      expect(readBackLines()).toStrictEqual([
-        'onoff written as true, read back as false after 1 min',
-      ])
+      expect(readBackLines()).toStrictEqual([])
+    })
+
+    it('should not watch a write that sent nothing', async () => {
+      const device = await writeAt(createFacade({ product: Product.v2 }), {
+        heater_operation_mode: 'presence',
+      })
+      await syncAt(device, 2 * MINUTE)
+
+      expect(readBackLines()).toStrictEqual([])
     })
 
     // An `always_on` off request is sent as the on mode, so that is the

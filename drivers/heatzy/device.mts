@@ -42,19 +42,20 @@ const MINUTE = 60_000
 // A read-back is judged only once the radiator had time to apply the
 // command: the registry lists every 5 s and a radiator takes a cycle or
 // two, so the first syncs after a write legitimately read the old value.
-const READ_BACK_GRACE = MINUTE
-
-// Past this, a divergence can no longer be laid at the write's door:
-// the watch expires in silence.
+// Past the window, a divergence can no longer be laid at the write's
+// door: the watch expires in silence.
+const READ_BACK_GRACE_MINUTES = 1
 const READ_BACK_WINDOW_MINUTES = 15
-const READ_BACK_WINDOW = READ_BACK_WINDOW_MINUTES * MINUTE
 
-// A write awaiting the cloud's read-back: the Homey-domain value sent and
-// the instant it was sent.
-interface WatchedWrite {
-  readonly at: number
-  readonly value: unknown
-}
+// `onoff` and `thermostat_mode` are two views of the one `mode` register
+// on every product but Glow, which switches through `on_off`: a write
+// through either view is what the other reads back next. Each entry
+// names the view a write through its key rewrites.
+const modeSiblings: ReadonlyMap<keyof SetCapabilities, keyof Capabilities> =
+  new Map([
+    ['onoff', 'thermostat_mode'],
+    ['thermostat_mode', 'onoff'],
+  ])
 
 // The as-const constants carry no reverse mapping; the capability
 // value is the key, spelled out per member so the compiler pins it.
@@ -203,8 +204,12 @@ export default class HeatzyDevice extends Device {
     thermostat_mode: (value) => (isMode(value) ? { mode: value } : {}),
   }
 
-  // The writes awaiting the cloud's read-back, the latest per capability.
-  readonly #watchedWrites = new Map<keyof Capabilities, WatchedWrite>()
+  // The writes awaiting the cloud's read-back, the latest per capability:
+  // the Homey-domain value sent and the instant it was sent.
+  readonly #watchedWrites = new Map<
+    keyof Capabilities,
+    { at: number; value: unknown }
+  >()
 
   get #onValue(): Mode {
     const onMode = this.getSetting('on_mode')
@@ -358,6 +363,12 @@ export default class HeatzyDevice extends Device {
     await this.syncFromDevice()
   }
 
+  #forgetWrites(requested: ReadonlyMap<keyof SetCapabilities, unknown>): void {
+    for (const capability of requested.keys()) {
+      this.#watchedWrites.delete(capability)
+    }
+  }
+
   // Reads mirror #setValue's guard: an absent capability reads as
   // `null` instead of throwing.
   #getValue<TKey extends keyof Capabilities>(
@@ -388,18 +399,19 @@ export default class HeatzyDevice extends Device {
     if (written === undefined) {
       return
     }
-    const elapsed = Temporal.Now.instant().epochMilliseconds - written.at
-    if (elapsed <= READ_BACK_WINDOW) {
-      if (elapsed < READ_BACK_GRACE || value === written.value) {
+    const elapsedMinutes =
+      (Temporal.Now.instant().epochMilliseconds - written.at) / MINUTE
+    if (elapsedMinutes <= READ_BACK_WINDOW_MINUTES) {
+      if (elapsedMinutes < READ_BACK_GRACE_MINUTES || value === written.value) {
         return
       }
       this.log(
         format(
-          '%s written as %s, read back as %s after %d min',
+          '%s written as %s but read back as %s after %d min',
           capability,
           written.value,
           value,
-          Math.round(elapsed / MINUTE),
+          Math.round(elapsedMinutes),
         ),
       )
     }
@@ -431,13 +443,18 @@ export default class HeatzyDevice extends Device {
   // an `HttpError`, and `setWarning` is a toast that clears itself in
   // the same call. Without the error line such a write is invisible
   // everywhere at once — the flow reports success, the tile keeps the
-  // new value, and the unit never moved. A write that happened is
-  // watched for its read-back.
+  // new value, and the unit never moved. The read-back watch is armed
+  // BEFORE the write goes out: the library awaits the sync observer
+  // inside `setValues`, after merging the echo, so the first read-back
+  // is judged before the write resolves — against this write, inside
+  // the grace, never against the one before it. A write that never
+  // reached the wire has nothing to read back.
   async #pushUpdate(
     device: DeviceFacadeAny,
     requested: ReadonlyMap<keyof SetCapabilities, unknown>,
   ): Promise<void> {
     const updateData = this.#buildUpdateData(device, requested)
+    this.#watchWrites(device.product, requested)
     let isWritten = false
     try {
       isWritten = await write(device, requested, updateData)
@@ -445,8 +462,8 @@ export default class HeatzyDevice extends Device {
       this.error('Write failed:', updateData, error)
       await this.setWarning(error)
     }
-    if (isWritten) {
-      this.#watchWrites(requested)
+    if (!isWritten) {
+      this.#forgetWrites(requested)
     }
   }
 
@@ -642,8 +659,18 @@ export default class HeatzyDevice extends Device {
   }
 
   // A later write of a capability replaces its watch: only the latest
-  // value sent can be the one the cloud reads back.
-  #watchWrites(requested: ReadonlyMap<keyof SetCapabilities, unknown>): void {
+  // value sent can be the one the cloud reads back. A write to the `mode`
+  // register through one view ends the other view's watch for the same
+  // reason — the capability written keeps the register covered.
+  #watchWrites(
+    product: Product,
+    requested: ReadonlyMap<keyof SetCapabilities, unknown>,
+  ): void {
+    for (const [view, sibling] of modeSiblings) {
+      if (product !== Product.glow && requested.has(view)) {
+        this.#watchedWrites.delete(sibling)
+      }
+    }
     const at = Temporal.Now.instant().epochMilliseconds
     for (const [capability, value] of requested) {
       this.#watchedWrites.set(capability, { at, value })
