@@ -192,7 +192,7 @@ const readBackLines = (): unknown[] =>
   superLogMock.mock.calls
     .map((call) => call.at(-1))
     .filter(
-      (line) => typeof line === 'string' && line.includes('but read back as'),
+      (line) => typeof line === 'string' && line.includes(', read back as'),
     )
 
 // The library's write seam merges the echo into the model, then awaits
