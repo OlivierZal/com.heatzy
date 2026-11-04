@@ -52,7 +52,9 @@ const {
   getFacadeMock: vi.fn<(id: string) => unknown>(),
   getSettingMock: vi.fn<(key: string) => unknown>(),
   getStoreValueMock: vi.fn<(key: string) => unknown>(),
-  realtimeMock: vi.fn<(event: string, data: unknown) => void>(),
+  realtimeMock: vi
+    .fn<(event: string, data: unknown) => Promise<void>>()
+    .mockResolvedValue(undefined),
   registerMultipleCapabilityListenerMock:
     vi.fn<
       (
@@ -62,8 +64,7 @@ const {
       ) => void
     >(),
   removeCapabilityMock: vi.fn<(capability: string) => Promise<void>>(),
-  setTimeoutMock:
-    vi.fn<(callback: () => Promise<void>, ms: number) => unknown>(),
+  setTimeoutMock: vi.fn<(callback: () => void, ms: number) => unknown>(),
   setValuesMock: vi.fn<(data: Record<string, unknown>) => Promise<unknown>>(),
   superErrorMock: vi.fn<(...args: readonly unknown[]) => unknown>(),
   superLogMock: vi.fn<(...args: readonly unknown[]) => unknown>(),
@@ -740,12 +741,9 @@ describe(HeatzyDevice, () => {
       vi.mocked(device.setCapabilityValue).mockClear()
       const callback = getCallback()
       await callback({ onoff: true })
-      const scheduled = getMockCallArg<() => Promise<void>>(
-        setTimeoutMock,
-        -1,
-        0,
-      )
-      await scheduled()
+      const scheduled = getMockCallArg<() => void>(setTimeoutMock, -1, 0)
+      scheduled()
+      await settleDetached()
 
       expect(device.setCapabilityValue).toHaveBeenCalledWith('onoff', true)
     })
@@ -757,15 +755,13 @@ describe(HeatzyDevice, () => {
       await settleDetached()
       const callback = getCallback()
       await callback({ onoff: true })
-      const scheduled = getMockCallArg<() => Promise<void>>(
-        setTimeoutMock,
-        -1,
-        0,
-      )
+      const scheduled = getMockCallArg<() => void>(setTimeoutMock, -1, 0)
       const failure = new Error('sync failed')
       vi.spyOn(device, 'syncFromDevice').mockRejectedValue(failure)
 
-      await expect(scheduled()).resolves.toBeUndefined()
+      scheduled()
+      await settleDetached()
+
       expect(superErrorMock).toHaveBeenCalledWith(
         'Test device',
         '-',

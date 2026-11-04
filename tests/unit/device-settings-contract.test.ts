@@ -1,4 +1,4 @@
-import type { ManifestDriverSetting } from '@olivierzal/homey-kit/manifest'
+import { getDriverSettings } from '@olivierzal/homey-kit/manifest'
 import { describe, expect, it } from 'vitest'
 
 import manifest from '../../app.json' with { type: 'json' }
@@ -11,14 +11,13 @@ import manifest from '../../app.json' with { type: 'json' }
 // declared, and read as divergent from its own stored value forever.
 // The kit's bounded-number strategy is not the hook for it — it fires
 // only for `type="number"` inputs, which this page never builds — so
-// the ids themselves carry the constraint. The walk follows the page's
-// reader (`getDriverSettings`): a manifest entry without children
-// yields no control there, so it yields no id here.
+// the ids themselves carry the constraint. The controls are read through
+// the page's own reader, `getDriverSettings`, so the ids judged here are
+// exactly the ones the page offers.
 describe('device settings contract', () => {
   it('should declare no dropdown id that reads as a number', () => {
     const numericIds = manifest.drivers
-      .flatMap(({ settings }) => settings)
-      .flatMap((setting: ManifestDriverSetting) => setting.children ?? [])
+      .flatMap((driver) => getDriverSettings(driver, 'en'))
       .filter(({ type }) => type === 'dropdown')
       .flatMap(({ values }) => values ?? [])
       .map(({ id }) => id)

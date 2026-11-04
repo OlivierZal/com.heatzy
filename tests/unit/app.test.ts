@@ -1,5 +1,8 @@
 import type * as HeatzyApiModule from '@olivierzal/heatzy-api'
-import type { LoginSetting } from '@olivierzal/homey-kit/manifest'
+import type {
+  LoginSetting,
+  ManifestDriver,
+} from '@olivierzal/homey-kit/manifest'
 import { NOTIFICATION_DELAY_MS } from '@olivierzal/homey-kit'
 import {
   assertDefined,
@@ -13,7 +16,6 @@ import type HeatzyDevice from '../../drivers/heatzy/device.mts'
 import type * as FilesModule from '../../files.mts'
 import type * as HomeyLib from '../../lib/homey.mts'
 import type { Settings } from '../../types/device-settings.mts'
-import type { ManifestDriver } from '../../types/manifest.mts'
 
 const { mockCreate, mockFacadeManagerConstructor } = vi.hoisted(() => ({
   mockCreate: vi.fn<(options: unknown) => Promise<unknown>>(),
@@ -59,7 +61,6 @@ const heatzyLoginPair: LoginSetting = {
 
 const mockManifestDrivers: ManifestDriver[] = [
   {
-    capabilities: [],
     id: 'heatzy',
     name: { en: 'Heatzy', fr: 'Heatzy' },
     pair: [heatzyLoginPair],
@@ -87,7 +88,6 @@ const mockManifestDrivers: ManifestDriver[] = [
     ],
   },
   {
-    capabilities: [],
     id: 'odd',
     name: { en: 'Odd' },
     settings: [
@@ -102,12 +102,10 @@ const mockManifestDrivers: ManifestDriver[] = [
         ],
         label: { en: 'No group id' },
       },
-      { id: 'group2', label: { en: 'Childless' } },
     ],
   },
-  { capabilities: [], id: 'no-settings', name: { en: 'No settings' } },
+  { id: 'no-settings', name: { en: 'No settings' } },
   {
-    capabilities: [],
     id: 'pair-no-login',
     name: { en: 'Pair no login' },
     pair: [{ id: 'other' }],
@@ -127,7 +125,9 @@ const mockApiInstance = {
 
 const mockCreateNotification = vi.fn<() => Promise<void>>()
 
-const mockRealtime = vi.fn<(event: string, data: unknown) => void>()
+const mockRealtime = vi
+  .fn<(event: string, data: unknown) => Promise<void>>()
+  .mockResolvedValue(undefined)
 const mockGetDrivers = vi.fn<() => Record<string, unknown>>()
 const mockGetLanguage = vi.fn<() => string>()
 const mockGetTimezone = vi.fn<() => string>()
@@ -205,8 +205,12 @@ interface CreateEvents {
 const getEvents = (): CreateEvents =>
   getMockCallArg<{ events: CreateEvents }>(mockCreate, 0, 0).events
 
+// Runs a scheduled callback and lets the work it detaches settle: the
+// app's callbacks hand their promise to `fireAndForget`, the kit's
+// changelog announcement keeps its own.
 const runScheduledTimeout = async (index: number): Promise<void> => {
-  await getMockCallArg<() => Promise<void>>(mockSetTimeout, index, 0)()
+  getMockCallArg<() => void>(mockSetTimeout, index, 0)()
+  await settleDetached()
 }
 
 const listDevices = (count: number): void => {
@@ -553,7 +557,7 @@ describe(HeatzyApp, () => {
       expect(mockCreateNotification).toHaveBeenCalledTimes(1)
     })
 
-    it('should swallow a failed signed-in-again notification', async () => {
+    it('should log a failed signed-in-again notification', async () => {
       setupDrivers([createDevice()])
       await app.onInit()
 
@@ -561,8 +565,27 @@ describe(HeatzyApp, () => {
       await runScheduledTimeout(-1)
       mockCreateNotification.mockRejectedValueOnce(new Error('fail'))
       getEvents().onAuthenticationRestored?.()
+      await runScheduledTimeout(-1)
 
-      await expect(runScheduledTimeout(-1)).resolves.toBeUndefined()
+      expect(app.error).toHaveBeenCalledWith(
+        'Session restore notification failed:',
+        expect.any(Error),
+      )
+    })
+
+    it('should log a loss announcement that fails before the notification', async () => {
+      setupDrivers([createDevice()])
+      await app.onInit()
+      mockHomeyReady.mockRejectedValueOnce(new Error('never ready'))
+
+      getEvents().onAuthenticationLost?.()
+      await runScheduledTimeout(-1)
+
+      expect(mockCreateNotification).not.toHaveBeenCalled()
+      expect(app.error).toHaveBeenCalledWith(
+        'Session loss announcement failed:',
+        expect.any(Error),
+      )
     })
   })
 
@@ -848,6 +871,16 @@ describe(HeatzyApp, () => {
       expect(driverSettings.login).toHaveLength(2)
       expect(driverSettings.odd?.[0]?.id).toBe('orphan')
       expect(driverSettings.odd?.[0]?.groupLabel).toBe('No group id')
+    })
+
+    // The SDK types the manifest's driver list as optional.
+    it('should read no control from a manifest without drivers', () => {
+      Object.defineProperty(app.homey, 'manifest', {
+        configurable: true,
+        value: { version: '1.0.0' },
+      })
+
+      expect(Object.keys(app.getDriverSettings())).toStrictEqual([])
     })
 
     it('should localize driver settings, falling back to english', async () => {

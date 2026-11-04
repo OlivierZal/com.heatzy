@@ -1,5 +1,5 @@
 import type { DriverSetting } from '@olivierzal/homey-kit/manifest'
-import type { Homey } from 'homey/lib/Homey'
+import type { Homey } from 'homey'
 import {
   type LoginCredentials,
   AuthenticationError,

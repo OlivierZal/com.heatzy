@@ -363,6 +363,19 @@ describe(HeatzyDriver, () => {
       },
     )
 
+    // The SDK types the manifest's `flow` and its card lists as optional.
+    it('should register no card when the manifest declares no flow', async () => {
+      Object.defineProperty(driver.homey, 'manifest', {
+        configurable: true,
+        value: {},
+      })
+
+      await driver.onInit()
+
+      expect(driver.homey.flow.getConditionCard).not.toHaveBeenCalled()
+      expect(driver.homey.flow.getActionCard).not.toHaveBeenCalled()
+    })
+
     it('should compare a string capability value against the dotted arg stem', async () => {
       const listeners = await registerConditionListeners(driver)
       const listener = listeners['onoff.timer_condition']
