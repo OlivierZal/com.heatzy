@@ -475,7 +475,17 @@ for TypeScript, the bare name is what satisfies
 real name) for the test files' `homey/lib/…` type imports — measured
 2026-09-07: dropping it fails lint on exactly three test files
 (`heatzy-device`, `heatzy-driver`, `homey`) while typecheck still
-passes, which is why it reads as dead to a grep. The
+passes, which is why it reads as dead to a grep. Both lines sit at
+`^1.8.3` (2026-11-04): the 1.x types are generated from the SDK itself,
+`homey` exports `Homey` as the SDK class by name (`import type { Homey }
+from 'homey'`), `homey.manifest` is the SDK's `AppManifest` (its
+`drivers` and `flow` optional, hence `?? []` at the two read sites),
+`api.realtime()` returns a promise and `setTimeout` takes a synchronous
+callback — both wrapped in the kit's `fireAndForget` — and `homey-lib`
+rides in the lock as the types' transitive, imported by nothing here.
+A types bump is checked ONCE with `tsc --noEmit --skipLibCheck false -p .`:
+the override file is a `.d.ts`, and that is the run that reports what
+an augmentation silently stopped doing (below). The
 CI/claude*/dependabot/dependency-review/pr-title/zizmor workflows are
 stubs calling the family reusables in OlivierZal/configs, pinned
 `@<sha> # vX.Y.Z`; dependency vulnerabilities are GitHub's own —
@@ -525,9 +535,12 @@ page's whole freshness handshake, `watchSettingsFreshness`
 builders the page composes its DOM with and the form-value reader
 `parseFormValue` (`/dom`); the driver-manifest
 readers `getDriverSettings`/`getDriverLoginSetting`/
-`mergeDeviceSettings` and the `DriverSetting`/`ManifestDriver`/
-`PairSetting`/`LocalizedStrings` leaf types the local manifest types extend
-(`/manifest`); the package-time stamp producer, `stampPackagedPages`
+`mergeDeviceSettings`, whose `ManifestDriver` input the SDK's own
+`DriverManifest` fits — `this.homey.manifest.drivers` passes straight
+through, this app declares no manifest type of its own — and the
+`DriverSetting`/`LocalizedStrings` leaf types (the latter reused by
+`types/bases.mts` for the capability option titles) (`/manifest`); the
+package-time stamp producer, `stampPackagedPages`
 with `stampHtml` and `stampReferences` underneath, and the hashes
 reader `getWebviewHashes` (`/node`); the app-side seams
 `fireAndForget`/`settleAll` (both on the kit's `Logger`),
@@ -589,15 +602,33 @@ What stays local, by measurement rather than omission:
   route-guard surface table — plus `tests/mock-device-class.ts`, the
   device-class double built around this app's `super` calls,
   re-exported by `tests/helpers.ts`.
-- `lib/homey.mts`. (`NotFoundError` moved to the kit: the class only
-  names the error, the localized message is passed at the throw site.)
-- `homey-override.d.ts` keeps its `declare module` block: module
-  augmentation cannot be packaged. It EXTENDS the SDK interfaces and
-  takes only the narrowed member signatures from the kit generics
-  (`TypedManagerDrivers['getDrivers']`, `TypedManagerSettings['get' |
-'set' | 'unset']`). Extending the SDK interface and the generic side by side
-  does not work — they both declare those members, and the conflict
-  silently resolves to the SDK's wider type.
+- `lib/homey.mts`, the three SDK class re-exports and nothing else.
+  (`NotFoundError` moved to the kit: the class only names the error,
+  the localized message is passed at the throw site.)
+- `homey-override.d.ts` is the SDK's one augmentation seam and nothing
+  more — `declare module 'homey' { interface HomeyTypes { app: HeatzyApp } }`
+  — kept local because module augmentation cannot be packaged. It types
+  `homey.app` only; the managers are narrowed
+  app-side in `types/homey.mts`: `ManagerDrivers`/`ManagerSettings`
+  EXTEND the SDK manager classes and take only the narrowed member
+  signatures from the kit generics
+  (`TypedManagerDrivers<HeatzyDriver>['getDrivers']`,
+  `TypedManagerSettings<HomeySettings>['get' | 'set' | 'unset']`),
+  gathered in `HeatzyHomey extends Homey`, which the App class alone
+  re-declares `homey` with — a driver or a device reaches the typed
+  managers through `this.homey.app`, so their former `declare … homey`
+  lines went, as did the driver's `declare … manifest` (the SDK's
+  `DriverManifest` fits the kit's reader). Extending the SDK class and
+  the generic side by side does not work — they both declare those
+  members, and the conflict silently resolves to the SDK's wider type.
+  The 0.3.x form,
+  `declare module 'homey' { interface Homey extends HomeyLib { … } }`,
+  is DEAD under the 1.x types: `homey` exports
+  `Homey` as the SDK class by name, so the block names the class as its
+  own base (TS2310) and collides on every member it re-types (TS2717) —
+  errors a `.d.ts` under `skipLibCheck` never reports, so the block
+  narrowed nothing, in silence (measured 2026-11-04 against 1.8.3, by
+  the kit, both ways). Never bring it back.
 
 `api.mts` passes the manifest URL to `getWebviewHashes`: only the caller
 knows where the bundler stamped it. The kit made that argument REQUIRED

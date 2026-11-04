@@ -23,8 +23,9 @@ import {
 import type HeatzyDevice from './drivers/heatzy/device.mts'
 import type { HomeySettings } from './types/app-settings.mts'
 import type { DeviceSettings, Settings } from './types/device-settings.mts'
+import type { HeatzyHomey } from './types/homey.mts'
 import { changelog } from './files.mts'
-import { type Homey, App } from './lib/homey.mts'
+import { App } from './lib/homey.mts'
 
 // The one boundary where a settings key arrives untyped: the library's
 // `SettingManager` is keyed by plain strings, and it derives each key
@@ -50,7 +51,7 @@ const formatUnitCounts = ({
   `Heatzy: ${String(listed)} unit${listed === 1 ? '' : 's'} listed, ${String(added)} added in Homey`
 
 export default class HeatzyApp extends App {
-  declare public readonly homey: Homey.Homey
+  declare public readonly homey: HeatzyHomey
 
   public get api(): HeatzyAPI {
     return this.#api
@@ -150,7 +151,7 @@ export default class HeatzyApp extends App {
   public getDriverSettings(): Partial<Record<string, DriverSetting[]>> {
     const language = this.homey.i18n.getLanguage()
     return Object.groupBy(
-      this.homey.manifest.drivers.flatMap((driver) => [
+      (this.homey.manifest.drivers ?? []).flatMap((driver) => [
         ...getDriverSettings(driver, language),
         ...getDriverLoginSetting(driver, language),
       ]),
@@ -273,13 +274,20 @@ export default class HeatzyApp extends App {
   // User-facing half of heatzy-api's onAuthenticationLost contract:
   // nothing else can surface a background session loss (no webview is
   // open when a sync loses the session). The library fires once per
-  // loss episode, so no dedup is needed here; the deferral mirrors
-  // #createNotification (off the event callstack, best-effort). The
-  // episode is recorded synchronously so a recovery event can never
-  // outrun it.
+  // loss episode, so no dedup is needed here; the announcement is
+  // deferred off the event callstack and detached through
+  // `fireAndForget`, so a failure is logged, never thrown into the
+  // library's callback. The episode is recorded synchronously so a
+  // recovery event can never outrun it.
   #notifySessionLost(): void {
     this.#sessionLossState = 'pending'
-    this.homey.setTimeout(async () => this.#announceSessionLost(), 0)
+    this.homey.setTimeout(() => {
+      fireAndForget(
+        this.#announceSessionLost(),
+        this,
+        'Session loss announcement failed:',
+      )
+    }, 0)
   }
 
   // Recovery counterpart of #notifySessionLost, fed by heatzy-api's
@@ -294,14 +302,14 @@ export default class HeatzyApp extends App {
     if (state !== 'shown') {
       return
     }
-    this.homey.setTimeout(async () => {
-      try {
-        await this.homey.notifications.createNotification({
+    this.homey.setTimeout(() => {
+      fireAndForget(
+        this.homey.notifications.createNotification({
           excerpt: this.homey.__('notifications.sessionRestored'),
-        })
-      } catch {
-        // Non-critical: notification display is best-effort
-      }
+        }),
+        this,
+        'Session restore notification failed:',
+      )
     }, 0)
   }
 
@@ -325,7 +333,11 @@ export default class HeatzyApp extends App {
     }
     this.#accountLine = line
     this.log(line)
-    this.homey.api.realtime('accountupdate', null)
+    fireAndForget(
+      this.homey.api.realtime('accountupdate', null),
+      this,
+      'Account update push failed:',
+    )
   }
 
   // Residual credentials without any paired device only get a log

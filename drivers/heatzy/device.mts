@@ -29,7 +29,7 @@ import type {
   SetCapabilities,
 } from '../../types/capabilities.mts'
 import type { Settings, Store } from '../../types/device-settings.mts'
-import { type Homey, Device } from '../../lib/homey.mts'
+import { Device } from '../../lib/homey.mts'
 import {
   getCapabilitiesOptions,
   getRequiredCapabilities,
@@ -137,8 +137,6 @@ export default class HeatzyDevice extends Device {
   declare public readonly getStoreValue: <TKey extends keyof Store>(
     key: TKey,
   ) => Store[TKey]
-
-  declare public readonly homey: Homey.Homey
 
   declare public readonly setCapabilityOptions: <
     TKey extends keyof CapabilitiesOptions,
@@ -296,7 +294,11 @@ export default class HeatzyDevice extends Device {
     if (device === null) {
       return
     }
-    this.homey.api.realtime('deviceupdate', null)
+    fireAndForget(
+      this.homey.api.realtime('deviceupdate', null),
+      this,
+      'Device update push failed:',
+    )
     // Value writes are non-structural, so they run concurrently (the
     // sequential helper is reserved for add/remove/options mutations).
     await Promise.all([
@@ -536,13 +538,9 @@ export default class HeatzyDevice extends Device {
   // are logged instead of becoming unhandled rejections.
   #scheduleSyncFromDevice(): void {
     this.#clearSyncTimeout()
-    this.#syncTimeout = this.homey.setTimeout(async () => {
+    this.#syncTimeout = this.homey.setTimeout(() => {
       this.#syncTimeout = null
-      try {
-        await this.syncFromDevice()
-      } catch (error) {
-        this.error('Post-update sync failed:', error)
-      }
+      fireAndForget(this.syncFromDevice(), this, 'Post-update sync failed:')
     }, DEBOUNCE_DELAY)
   }
 

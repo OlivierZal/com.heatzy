@@ -12,8 +12,7 @@ import type {
   CapabilitiesOptions,
   SetCapabilities,
 } from '../../types/capabilities.mts'
-import type { ManifestDriver } from '../../types/manifest.mts'
-import { type Homey, Driver } from '../../lib/homey.mts'
+import { Driver } from '../../lib/homey.mts'
 import type HeatzyDevice from './device.mts'
 
 // Capabilities Homey can write back to the wire — the
@@ -122,10 +121,6 @@ export const getRequiredCapabilities = (product: Product): string[] => [
 export default class HeatzyDriver extends Driver {
   declare public readonly getDevices: () => HeatzyDevice[]
 
-  declare public readonly homey: Homey.Homey
-
-  declare public readonly manifest: ManifestDriver
-
   public override async onInit(): Promise<void> {
     this.#registerFlowListeners()
     await Promise.resolve()
@@ -214,7 +209,7 @@ export default class HeatzyDriver extends Driver {
   // declares, so a missing card is a contract break, never a swallowed
   // throw.
   #registerFlowListeners(): void {
-    const { actions, conditions } = this.homey.manifest.flow
+    const { actions = [], conditions = [] } = this.homey.manifest.flow ?? {}
     const conditionIds = new Set(conditions.map(({ id }) => id))
     const actionIds = new Set(actions.map(({ id }) => id))
     for (const capability of this.manifest.capabilities) {
