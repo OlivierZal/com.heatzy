@@ -138,5 +138,9 @@
   "23.6.0": {
     "en": "When the cloud reads back a different value within minutes of a change made from Homey, the app now notes it in the diagnostic log. The app's own cloud failures are also logged on one line naming their cause.",
     "fr": "Quand le cloud relit une valeur différente dans les minutes qui suivent un changement fait depuis Homey, l'application le note désormais dans le journal de diagnostic. Les échecs cloud propres à l'application sont aussi journalisés sur une seule ligne avec leur cause."
+  },
+  "23.7.0": {
+    "en": "A momentary Heatzy server error no longer signs the app out or asks you to sign in again: the app retries by itself every minute until Heatzy answers. The sign-in request no longer carries the previous session, which Heatzy could refuse.",
+    "fr": "Une erreur passagère des serveurs Heatzy ne déconnecte plus l'application et ne vous demande plus de vous reconnecter : l'application réessaie d'elle-même chaque minute jusqu'à ce que Heatzy réponde. La demande de connexion n'emporte plus l'ancienne session, que Heatzy pouvait refuser."
   }
 }
