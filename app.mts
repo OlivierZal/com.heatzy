@@ -34,7 +34,8 @@ import { App } from './lib/homey.mts'
 // by membership would drop a write the day the library persists one
 // more field, so the assertion stays, alone, here.
 const settingKey = (key: string): keyof HomeySettings =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- the library's SettingManager contract types its keys as plain strings
+  /* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- the
+     library's SettingManager contract types its keys as plain strings */
   key as keyof HomeySettings
 
 // The one line a change of the account's unit counts leaves in the log:

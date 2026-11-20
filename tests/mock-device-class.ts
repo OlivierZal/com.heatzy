@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 
-// - `overrides`: instance-level props assigned in the constructor (shallow merge).
+// - `overrides`: instance-level props assigned in the constructor (shallow
+//   merge).
 // - `superMocks`: prototype-level methods that delegate to the provided vi.fn.
 //   Required for every method HeatzyDevice overrides with a super call
 //   (setWarning, error, log) — instance vi.fn properties cannot be
