@@ -369,7 +369,12 @@ coverage.
   thing that locates it. The device instance is the logger (its
   `log`/`error` are the SDK's `Logger`), and the label carries no
   payload: the `Requested data:` line just before a write already names
-  what was asked, and nothing user-entered is ever logged. Only a site
+  what was asked, and nothing user-entered is ever logged. That holds
+  for the line's PREFIX too since 2026-11-23: `HeatzyDevice.log` and
+  `.error` prefix every line with `this.id`, the Heatzy id the SDK's
+  own lines carry, where they used `getName()` until a com.melcloud
+  report showed what the twin prefix puts in a diagnostic report (the
+  name its owner gave the device, on every device line). Only a site
   that logs an error OBJECT from a cloud call takes this form, and
   `#pushUpdate` is the device's only one. Sites that log a programming
   error BY DESIGN keep the object: `Post-update sync failed:` (the sync

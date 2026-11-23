@@ -270,12 +270,15 @@ export default class HeatzyDevice extends Device {
     return null
   }
 
+  // A device line names the device by its Heatzy id, the one the SDK's
+  // own lines carry: the name is what its owner typed, and a diagnostic
+  // report pasted into a public issue reproduces every line.
   public override error(...args: unknown[]): void {
-    super.error(this.getName(), '-', ...args)
+    super.error(this.id, '-', ...args)
   }
 
   public override log(...args: unknown[]): void {
-    super.log(this.getName(), '-', ...args)
+    super.log(this.id, '-', ...args)
   }
 
   // Homey keeps a warning bubble on the device tile until it is cleared:

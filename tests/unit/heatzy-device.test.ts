@@ -501,7 +501,7 @@ describe(HeatzyDevice, () => {
       await settleDetached()
 
       expect(superErrorMock).toHaveBeenCalledWith(
-        'Test device',
+        'device-1',
         '-',
         'Deferred device init failed:',
         failure,
@@ -586,7 +586,7 @@ describe(HeatzyDevice, () => {
       expect(result).toBeNull()
       expect(superSetWarningMock).not.toHaveBeenCalled()
       expect(superErrorMock).toHaveBeenCalledWith(
-        'Test device',
+        'device-1',
         '-',
         'Unexpected error while ensuring device:',
         expect.any(TypeError),
@@ -690,7 +690,7 @@ describe(HeatzyDevice, () => {
         'Heatzy rejected the credentials',
       )
       expect(superErrorMock).toHaveBeenCalledWith(
-        'Test device',
+        'device-1',
         '-',
         'Write failed: AuthenticationError: Heatzy rejected the credentials',
       )
@@ -710,7 +710,7 @@ describe(HeatzyDevice, () => {
 
       expect(superSetWarningMock).toHaveBeenCalledWith('update failed')
       expect(superErrorMock).toHaveBeenCalledWith(
-        'Test device',
+        'device-1',
         '-',
         'Write failed:',
         failure,
@@ -763,7 +763,7 @@ describe(HeatzyDevice, () => {
       await settleDetached()
 
       expect(superErrorMock).toHaveBeenCalledWith(
-        'Test device',
+        'device-1',
         '-',
         'Post-update sync failed:',
         failure,
@@ -1334,22 +1334,24 @@ describe(HeatzyDevice, () => {
     })
   })
 
-  describe('name-prefixed logging', () => {
-    it('should prefix errors with the device name', () => {
+  // The name is what its owner typed, and a diagnostic report pasted
+  // into a public issue reproduces every device line: the device is
+  // named by its Heatzy id, the one the SDK's own lines carry.
+  describe('id-prefixed logging', () => {
+    it('should prefix errors with the device id, never with its name', () => {
       createDevice().error('boom', 42)
 
-      expect(superErrorMock).toHaveBeenCalledWith(
-        'Test device',
-        '-',
-        'boom',
-        42,
-      )
+      expect(superErrorMock.mock.calls).toStrictEqual([
+        ['device-1', '-', 'boom', 42],
+      ])
     })
 
-    it('should prefix logs with the device name', () => {
+    it('should prefix logs with the device id, never with its name', () => {
       createDevice().log('hello')
 
-      expect(superLogMock).toHaveBeenCalledWith('Test device', '-', 'hello')
+      expect(superLogMock.mock.calls).toStrictEqual([
+        ['device-1', '-', 'hello'],
+      ])
     })
   })
 })
