@@ -10,9 +10,10 @@ at `^22.23.0 || ^24.18.0 || >=26.4.0`, intersected with
 from a sibling;
 the DEVICE floor is the manifest's `compatibility` (see the floors
 below), and the CI coverage leg deliberately names the measured fleet
-floor (22.20). The API layer lives in `@olivierzal/heatzy-api` (GitHub
-Packages, sibling repo with its own CLAUDE.md) — API bugs are fixed there,
-not worked around here.
+floor (22.20). The API layer lives in
+[`@olivierzal/heatzy-api`](https://github.com/OlivierZal/heatzy-api)
+(GitHub Packages, sibling repo with its own CLAUDE.md) — API bugs are
+fixed there, not worked around here.
 
 ## Commands
 
@@ -24,11 +25,22 @@ caught real failures that the others miss:
 - `npm run lint` / `npm run lint:fix` — ESLint (needs its 8 GB heap; also
   lints CSS and HTML via the css/html plugins).
 - `npm run typecheck` — TypeScript 7 through its explicit path,
-  `node ./node_modules/@typescript/native/bin/tsc`. `@typescript/native`
-  ships no `.bin` shim, and `.bin/tsc`/`.bin/tsc6` both resolve to the
-  TypeScript 6 that the `typescript` alias pulls in as `@typescript/old`
-  — a bare `tsc` would silently typecheck with 6. The explicit path
-  must stay, here and in `build`.
+  `node ./node_modules/@typescript/native/bin/tsc`. The explicit path
+  must stay, here and in `build`. Not because a bare `tsc` runs the
+  wrong compiler today: re-measured 2026-11-22, in this tree and in
+  fresh installs under npm 10.9.8 and 11.20.0, `.bin/tsc` is the native
+  7.x compiler and `tsc6` the only shim of the TypeScript 6 compat
+  package (it was the other way round when the layout was adopted, in
+  August 2026). Two installed packages declare a `tsc` bin,
+  `@typescript/native` and `@typescript/old` (the TypeScript 6 the
+  compat package depends on), and npm gives the shim to one of them: the
+  explicit path names the package the script means, so a layout change
+  fails loudly instead of swapping the compiler behind the shim. Since
+  TypeScript 7.0, the npm `typescript` package at 7.x IS the native
+  compiler, aliased here as `@typescript/native` and used by both
+  scripts for its speed; the TypeScript 6 JS API continues as
+  `@typescript/typescript6`, aliased under the `typescript` name for
+  tools with a `typescript` peer (typescript-eslint).
 - `npm test` / `npm run test:coverage` — vitest; branches are at 100%,
   keep them there.
 - `npm run build` — esbuild bundle (`scripts/bundle.mts`) + `tsc`
@@ -688,6 +700,11 @@ an empty map, so the omission silently disabled the whole handshake.
   SECURITY.md, CLAUDE.md) — never a later sweep; the 2026-08 README
   audit caught exactly the drift this prevents (a shipped Home ATW
   driver absent from its README, a stale `Result` kind list).
+- README.md speaks to the app's USER, a Homey owner: what the app does,
+  in the words Homey shows, how to get started, and what the UI does
+  not say by itself. No technical detail there (build, compiler, tests,
+  modules, protocols): that is CONTRIBUTING.md's and this file's
+  (owner's rule, 2026-11-22).
 - A settling pass closes every substantive wave: before its work is
   released, re-read the wave's own diff for what the churn left behind
   — history-narrating comments, orphaned helpers or config entries,

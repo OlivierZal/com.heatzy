@@ -14,6 +14,8 @@ workflow expected before opening a pull request.
 - A GitHub personal access token with the `read:packages` scope, exported
   as `NODE_AUTH_TOKEN` — [`.npmrc`](.npmrc) reads that variable to fetch
   the `@olivierzal` packages from GitHub Packages
+- The [Homey CLI](https://apps.developer.homey.app/the-basics/getting-started),
+  which the `homey:*` scripts call through `npx homey`
 - A Homey Pro to install onto, for anything touching the settings page
 
 ## Setup
@@ -31,7 +33,7 @@ caught failures the others miss:
 
 ```sh title="checks"
 npm run format          # prettier --check (npm run format:fix to write)
-npm run lint            # ESLint, including CSS and HTML
+npm run lint            # ESLint: TS, HTML, CSS, JSON, YAML, Markdown
 npm run typecheck       # native tsc --noEmit
 npm test                # vitest run
 npm run test:coverage   # must remain at 100% on all four axes
